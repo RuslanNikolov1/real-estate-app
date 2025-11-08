@@ -1,0 +1,158 @@
+@import '@/styles/variables';
+
+.adminPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+}
+
+.section {
+  padding: $spacing-3xl 0;
+  background: $light-gray;
+  min-height: calc(100vh - 200px);
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+.header {
+  margin-bottom: $spacing-2xl;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-xl;
+  flex-wrap: wrap;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+  }
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $black;
+  margin-bottom: $spacing-sm;
+  font-family: $font-headline;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 2rem;
+  }
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: $dark-gray;
+}
+
+.stats {
+  display: flex;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.statCard {
+  background: $white;
+  padding: $spacing-md $spacing-lg;
+  border-radius: 16px; // Rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  min-width: 150px;
+}
+
+.statIcon {
+  color: $red;
+  flex-shrink: 0;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: $dark-gray;
+  font-weight: 500;
+  display: block;
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: $black;
+  font-family: $font-headline;
+  display: block;
+}
+
+.controls {
+  background: $white;
+  padding: $spacing-xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: $spacing-2xl;
+  display: flex;
+  gap: $spacing-md;
+  align-items: center;
+  flex-wrap: wrap;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-lg;
+    flex-direction: column;
+  }
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 300px;
+
+  .searchIcon {
+    position: absolute;
+    left: $spacing-md;
+    width: 20px;
+    height: 20px;
+    color: $dark-gray;
+    z-index: 1;
+  }
+
+  .searchInput {
+    padding-left: $spacing-2xl + $spacing-md;
+    width: 100%;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: $spacing-xl;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: $spacing-3xl;
+  background: $white;
+  border-radius: 24px; // Very rounded
+  color: $dark-gray;
+  font-size: 1.125rem;
+}
+
+
+
+
+
+
+
+

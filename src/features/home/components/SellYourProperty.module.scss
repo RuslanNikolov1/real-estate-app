@@ -1,0 +1,72 @@
+@import '@/styles/variables';
+
+.section {
+  padding: $spacing-3xl 0;
+  background: $white;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+.card {
+  background: linear-gradient(135deg, $red 0%, $dark-red 100%);
+  border-radius: 32px; // Very rounded with elliptical feel
+  padding: $spacing-2xl;
+  color: $white;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-lg;
+}
+
+.title {
+  font-size: 2rem;
+  color: $white;
+  margin: 0;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.5rem;
+  }
+}
+
+.toggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: $white;
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+  }
+}
+
+.content {
+  overflow: hidden;
+}
+
+.description {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  margin-bottom: $spacing-xl;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-md;
+}
+

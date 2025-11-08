@@ -1,0 +1,76 @@
+{
+  "common": {
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "apply": "Apply",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "nav": {
+    "home": "Home",
+    "properties": "Properties",
+    "forSale": "For Sale",
+    "forRent": "For Rent",
+    "neighborhoods": "Neighborhoods",
+    "reviews": "Reviews",
+    "certificates": "Certificates",
+    "valuation": "Valuation",
+    "favorites": "Favorites",
+    "login": "Login",
+    "logout": "Logout",
+    "admin": "Admin"
+  },
+  "home": {
+    "title": "Professional Real Estate in Burgas",
+    "searchPlaceholder": "Search properties...",
+    "featuredProperties": "Featured Properties",
+    "sellYourProperty": "Sell Your Property",
+    "addListing": "Add Listing",
+    "clientReviews": "Client Reviews",
+    "viewAllReviews": "View All Reviews",
+    "partnerServices": "Partner Services",
+    "certificatesMemberships": "Certificates & Memberships",
+    "contactBroker": "Contact Broker Online"
+  },
+  "search": {
+    "locationType": "Location Type",
+    "urban": "Urban",
+    "mountain": "Mountain",
+    "coastal": "Coastal",
+    "propertyType": "Property Type",
+    "priceRange": "Price Range",
+    "areaRange": "Area",
+    "rooms": "Rooms",
+    "bathrooms": "Bathrooms",
+    "saveSearch": "Save Search",
+    "notifications": "Notifications"
+  },
+  "property": {
+    "price": "Price",
+    "area": "Area",
+    "rooms": "Rooms",
+    "bathrooms": "Bathrooms",
+    "floor": "Floor",
+    "yearBuilt": "Year Built",
+    "viewDetails": "View Details",
+    "contactAgent": "Contact Agent",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites"
+  }
+}
+
+
+
+
+
+
+
+

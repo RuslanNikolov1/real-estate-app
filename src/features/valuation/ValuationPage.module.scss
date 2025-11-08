@@ -1,0 +1,352 @@
+@import '@/styles/variables';
+
+.valuationPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  background: $light-gray;
+  padding: $spacing-2xl 0;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: $spacing-2xl;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0 0 $spacing-md 0;
+  font-family: $font-headline;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 2rem;
+  }
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: $dark-gray;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.125rem;
+  }
+}
+
+.tabs {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-2xl;
+  background: $white;
+  padding: $spacing-md;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.tab {
+  flex: 1;
+  min-width: 200px;
+  padding: $spacing-lg $spacing-xl;
+  border: 2px solid $light-gray;
+  border-radius: 16px; // Rounded
+  background: $white;
+  color: $dark-gray;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all $transition-base;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+
+  &:hover {
+    border-color: $red;
+    color: $red;
+  }
+
+  &.active {
+    background: $red;
+    color: $white;
+    border-color: $red;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.content {
+  width: 100%;
+}
+
+.formCard {
+  background: $white;
+  padding: $spacing-2xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-xl;
+  }
+}
+
+.formTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0 0 $spacing-sm 0;
+  font-family: $font-headline;
+}
+
+.formDescription {
+  font-size: 1.125rem;
+  color: $dark-gray;
+  line-height: 1.6;
+  margin: 0 0 $spacing-2xl 0;
+}
+
+.successMessage {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  background: rgba(0, 200, 0, 0.1);
+  border: 2px solid rgba(0, 200, 0, 0.3);
+  border-radius: 16px; // Rounded
+  margin-bottom: $spacing-xl;
+
+  svg {
+    color: #00c800;
+    flex-shrink: 0;
+    margin-top: $spacing-xs;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #00c800;
+    margin: 0 0 $spacing-xs 0;
+    font-family: $font-headline;
+  }
+
+  p {
+    font-size: 0.9375rem;
+    color: $dark-gray;
+    margin: 0;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2xl;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0;
+  font-family: $font-headline;
+  padding-bottom: $spacing-md;
+  border-bottom: 2px solid $light-gray;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: $spacing-md;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.selectWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $dark-gray;
+}
+
+.select {
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $light-gray;
+  border-radius: 12px; // Rounded
+  font-size: 1rem;
+  font-family: $font-body;
+  color: $black;
+  background-color: $white;
+  transition: border-color $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: $red;
+  }
+}
+
+.textareaWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.textarea {
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $light-gray;
+  border-radius: 12px; // Rounded
+  font-size: 1rem;
+  font-family: $font-body;
+  color: $black;
+  background-color: $white;
+  resize: vertical;
+  transition: border-color $transition-base;
+  min-height: 100px;
+
+  &:focus {
+    outline: none;
+    border-color: $red;
+  }
+}
+
+.submitButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  margin-top: $spacing-lg;
+}
+
+.previewCard,
+.resultCard {
+  padding: $spacing-xl;
+  background: $light-gray;
+  border-radius: 16px; // Rounded
+  border: 2px solid rgba(225, 6, 0, 0.2);
+  margin-top: $spacing-lg;
+}
+
+.previewHeader,
+.resultHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+
+  svg {
+    color: $red;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $black;
+    margin: 0;
+    font-family: $font-headline;
+  }
+}
+
+.previewContent,
+.resultContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $white;
+  border-radius: 12px; // Rounded
+}
+
+.priceLabel {
+  font-size: 1rem;
+  color: $dark-gray;
+  font-weight: 500;
+}
+
+.priceValue {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: $black;
+  font-family: $font-headline;
+}
+
+.futurePriceValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $red;
+  font-family: $font-headline;
+}
+
+.growthInfo {
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-md;
+  padding: $spacing-sm;
+  font-size: 0.875rem;
+  color: $dark-gray;
+  flex-wrap: wrap;
+}
+
+.resultText {
+  font-size: 1.125rem;
+  color: $dark-gray;
+  margin: 0;
+  text-align: center;
+}
+
+.resultPrice {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $red;
+  text-align: center;
+  margin: $spacing-md 0 0 0;
+  font-family: $font-headline;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 2rem;
+  }
+}
+
+
+
+
+
+
+
+

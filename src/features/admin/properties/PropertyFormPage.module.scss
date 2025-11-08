@@ -1,0 +1,209 @@
+@import '@/styles/variables';
+
+.propertyFormPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  background: $light-gray;
+  padding: $spacing-2xl 0;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xl;
+  background: $white;
+  padding: $spacing-xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    gap: $spacing-md;
+    align-items: stretch;
+  }
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0;
+  font-family: $font-headline;
+}
+
+.form {
+  background: $white;
+  padding: $spacing-2xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: $spacing-2xl;
+
+  @media (max-width: $breakpoint-lg) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formMain {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2xl;
+}
+
+.formSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0;
+  font-family: $font-headline;
+  padding-bottom: $spacing-md;
+  border-bottom: 2px solid $light-gray;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-md;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $dark-gray;
+  margin-bottom: $spacing-xs;
+}
+
+.editorSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.editorWrapper {
+  min-height: 300px;
+  border: 1px solid $light-gray;
+  border-radius: 12px; // Rounded
+  padding: $spacing-md;
+  background: $white;
+
+  &:focus-within {
+    border-color: $red;
+  }
+}
+
+.selectWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.select {
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $light-gray;
+  border-radius: 12px; // Rounded
+  font-size: 1rem;
+  font-family: $font-body;
+  color: $black;
+  background-color: $white;
+  transition: border-color $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: $red;
+  }
+}
+
+.errorMessage {
+  font-size: 0.875rem;
+  color: $red;
+  margin: 0;
+}
+
+.translateButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.translation {
+  padding: $spacing-md;
+  background: $light-gray;
+  border-radius: 12px; // Rounded
+  margin-top: $spacing-md;
+}
+
+.translationTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $black;
+  margin: 0 0 $spacing-sm 0;
+  font-family: $font-headline;
+}
+
+.translationText {
+  font-size: 0.9375rem;
+  color: $dark-gray;
+  line-height: 1.6;
+  margin: $spacing-xs 0;
+}
+
+.formActions {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-2xl;
+  padding-top: $spacing-xl;
+  border-top: 2px solid $light-gray;
+  flex-wrap: wrap;
+}
+
+
+
+
+
+
+
+

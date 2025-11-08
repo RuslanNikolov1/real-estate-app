@@ -1,0 +1,76 @@
+{
+  "common": {
+    "search": "Suchen",
+    "filter": "Filter",
+    "clear": "Löschen",
+    "apply": "Anwenden",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "add": "Hinzufügen",
+    "close": "Schließen",
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolg"
+  },
+  "nav": {
+    "home": "Startseite",
+    "properties": "Immobilien",
+    "forSale": "Zu verkaufen",
+    "forRent": "Zu vermieten",
+    "neighborhoods": "Stadtteile",
+    "reviews": "Bewertungen",
+    "certificates": "Zertifikate",
+    "valuation": "Bewertung",
+    "favorites": "Favoriten",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "admin": "Admin"
+  },
+  "home": {
+    "title": "Professionelle Immobilien in Burgas",
+    "searchPlaceholder": "Immobilien suchen...",
+    "featuredProperties": "Empfohlene Immobilien",
+    "sellYourProperty": "Verkaufen Sie Ihre Immobilie",
+    "addListing": "Anzeige hinzufügen",
+    "clientReviews": "Kundenbewertungen",
+    "viewAllReviews": "Alle Bewertungen anzeigen",
+    "partnerServices": "Partnerdienste",
+    "certificatesMemberships": "Zertifikate & Mitgliedschaften",
+    "contactBroker": "Online-Anfrage an Makler"
+  },
+  "search": {
+    "locationType": "Standorttyp",
+    "urban": "Städtisch",
+    "mountain": "Berg",
+    "coastal": "Küste",
+    "propertyType": "Immobilientyp",
+    "priceRange": "Preisspanne",
+    "areaRange": "Fläche",
+    "rooms": "Zimmer",
+    "bathrooms": "Badezimmer",
+    "saveSearch": "Suche speichern",
+    "notifications": "Benachrichtigungen"
+  },
+  "property": {
+    "price": "Preis",
+    "area": "Fläche",
+    "rooms": "Zimmer",
+    "bathrooms": "Badezimmer",
+    "floor": "Etage",
+    "yearBuilt": "Baujahr",
+    "viewDetails": "Details anzeigen",
+    "contactAgent": "Kontaktieren Sie den Agenten",
+    "addToFavorites": "Zu Favoriten hinzufügen",
+    "removeFromFavorites": "Aus Favoriten entfernen"
+  }
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,140 @@
+@import '@/styles/variables';
+
+.footer {
+  background: $dark-gray;
+  color: $white;
+  padding: $spacing-3xl 0 $spacing-xl;
+  margin-top: $spacing-3xl;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: $spacing-2xl;
+  margin-bottom: $spacing-2xl;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $white;
+  margin: 0;
+}
+
+.description {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.social {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-sm;
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: $white;
+  transition: all $transition-base;
+
+  &:hover {
+    background: $red;
+    transform: translateY(-2px);
+  }
+}
+
+.columnTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: $white;
+  margin: 0 0 $spacing-md 0;
+}
+
+.links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+
+  li {
+    a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color $transition-base;
+
+      &:hover {
+        color: $red;
+      }
+    }
+  }
+}
+
+.contact {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.875rem;
+
+    svg {
+      flex-shrink: 0;
+      color: $red;
+    }
+
+    a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color $transition-base;
+
+      &:hover {
+        color: $red;
+      }
+    }
+  }
+}
+
+.bottom {
+  padding-top: $spacing-xl;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.copyright {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+
+
+
+
+
+
+

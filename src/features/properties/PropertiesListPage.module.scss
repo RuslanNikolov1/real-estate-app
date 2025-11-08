@@ -1,0 +1,122 @@
+@import '@/styles/variables';
+
+.propertiesPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+}
+
+.section {
+  padding: $spacing-3xl 0;
+  background: $light-gray;
+  min-height: calc(100vh - 200px);
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+.searchSection {
+  margin-bottom: $spacing-2xl;
+  background: $white;
+  padding: $spacing-xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.resultsHeader {
+  margin-bottom: $spacing-xl;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0;
+  font-family: $font-headline;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.5rem;
+  }
+}
+
+.propertiesList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-2xl;
+}
+
+.emptyState {
+  text-align: center;
+  padding: $spacing-3xl;
+  background: $white;
+  border-radius: 24px; // Very rounded
+  color: $dark-gray;
+  font-size: 1.125rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: $spacing-md;
+  margin-top: $spacing-2xl;
+  padding: $spacing-lg;
+  background: $white;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.pageNumbers {
+  display: flex;
+  gap: $spacing-xs;
+  align-items: center;
+}
+
+.pageButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: $spacing-xs $spacing-sm;
+  border: 2px solid $light-gray;
+  border-radius: 12px; // Rounded
+  background: $white;
+  color: $dark-gray;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &:hover:not(.active) {
+    border-color: $red;
+    color: $red;
+  }
+
+  &.active {
+    background: $red;
+    color: $white;
+    border-color: $red;
+  }
+}
+
+.ellipsis {
+  padding: $spacing-xs $spacing-sm;
+  color: $dark-gray;
+}
+
+
+
+
+
+
+
+

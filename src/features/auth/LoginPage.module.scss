@@ -1,0 +1,202 @@
+@import '@/styles/variables';
+
+.loginPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  background: $light-gray;
+  padding: $spacing-3xl 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+.card {
+  background: $white;
+  padding: $spacing-2xl;
+  border-radius: 32px; // Very rounded, elliptical feel
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-xl;
+  }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: $spacing-2xl;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0 0 $spacing-sm 0;
+  font-family: $font-headline;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 2rem;
+  }
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: $dark-gray;
+  margin: 0;
+}
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: rgba(225, 6, 0, 0.1);
+  border: 2px solid rgba(225, 6, 0, 0.3);
+  border-radius: 16px; // Rounded
+  color: $red;
+  font-size: 0.9375rem;
+  margin-bottom: $spacing-lg;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.successMessage {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: rgba(0, 200, 0, 0.1);
+  border: 2px solid rgba(0, 200, 0, 0.3);
+  border-radius: 16px; // Rounded
+  color: #00c800;
+  font-size: 0.9375rem;
+  margin-bottom: $spacing-lg;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.inputGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: $spacing-md;
+  color: $dark-gray;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.input {
+  padding-left: 3rem;
+  width: 100%;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: $spacing-md;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%; // Circular
+  background: transparent;
+  color: $dark-gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all $transition-base;
+  border: none;
+  z-index: 1;
+
+  &:hover {
+    background: $light-gray;
+    color: $red;
+  }
+}
+
+.forgotPassword {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  color: $red;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color $transition-base;
+  padding: $spacing-xs;
+  margin-top: -$spacing-md;
+
+  &:hover {
+    color: $dark-red;
+    text-decoration: underline;
+  }
+}
+
+.submitButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  margin: $spacing-md 0;
+  color: $dark-gray;
+  font-size: 0.875rem;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: $light-gray;
+  }
+}
+
+.switchButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+}
+
+.resetDescription {
+  font-size: 1rem;
+  color: $dark-gray;
+  line-height: 1.6;
+  margin: 0 0 $spacing-lg 0;
+  text-align: center;
+}
+
+
+
+
+
+
+
+

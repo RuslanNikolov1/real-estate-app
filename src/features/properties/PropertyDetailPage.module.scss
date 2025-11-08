@@ -1,0 +1,619 @@
+@import '@/styles/variables';
+
+.propertyPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  background: $light-gray;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: $spacing-xl $spacing-lg;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-xl;
+  background: $white;
+  padding: $spacing-xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+  }
+}
+
+.headerLeft {
+  flex: 1;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $black;
+  margin-bottom: $spacing-md;
+  font-family: $font-headline;
+  line-height: 1.3;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 2rem;
+  }
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  color: $dark-gray;
+  font-size: 1.125rem;
+
+  svg {
+    color: $red;
+    flex-shrink: 0;
+  }
+}
+
+.headerRight {
+  flex-shrink: 0;
+}
+
+.price {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $red;
+  font-family: $font-headline;
+  white-space: nowrap;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 2rem;
+  }
+}
+
+.perMonth {
+  font-size: 1rem;
+  font-weight: 400;
+  color: $dark-gray;
+}
+
+.quickDetails {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+  background: $white;
+  padding: $spacing-xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.quickDetail {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $light-gray;
+  border-radius: 16px; // Rounded
+  transition: all $transition-base;
+
+  &:hover {
+    background: rgba(225, 6, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  svg {
+    color: $red;
+    flex-shrink: 0;
+  }
+}
+
+.quickDetailLabel {
+  display: block;
+  font-size: 0.875rem;
+  color: $dark-gray;
+  margin-bottom: $spacing-xs;
+}
+
+.quickDetailValue {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: $black;
+}
+
+.actions {
+  margin-bottom: $spacing-xl;
+}
+
+.actionCard {
+  background: $white;
+  padding: $spacing-xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.actionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: $spacing-md;
+  border-bottom: 1px solid $light-gray;
+}
+
+.actionLabel {
+  font-size: 0.9375rem;
+  color: $dark-gray;
+}
+
+.actionValue {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: $black;
+}
+
+.actionButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+}
+
+.gallery {
+  margin-bottom: $spacing-xl;
+  background: $white;
+  padding: $spacing-xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mainImage {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  border-radius: 16px; // Rounded
+  overflow: hidden;
+  background: $light-gray;
+  margin-bottom: $spacing-md;
+
+  @media (max-width: $breakpoint-md) {
+    height: 400px;
+  }
+}
+
+.image {
+  object-fit: cover;
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: $dark-gray;
+  font-size: 1.125rem;
+}
+
+.fullscreenButton {
+  position: absolute;
+  top: $spacing-md;
+  right: $spacing-md;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%; // Circular
+  background: rgba(0, 0, 0, 0.7);
+  color: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all $transition-base;
+  z-index: 1;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+}
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%; // Circular
+  background: rgba(255, 255, 255, 0.9);
+  color: $dark-gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all $transition-base;
+  z-index: 1;
+
+  &:hover {
+    background: $white;
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  &.next {
+    right: $spacing-md;
+  }
+
+  &:not(.next) {
+    left: $spacing-md;
+  }
+}
+
+.imageCounter {
+  position: absolute;
+  bottom: $spacing-md;
+  right: $spacing-md;
+  padding: $spacing-xs $spacing-md;
+  background: rgba(0, 0, 0, 0.7);
+  color: $white;
+  border-radius: 9999px; // Pill shape
+  font-size: 0.875rem;
+  z-index: 1;
+}
+
+.thumbnailGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.thumbnail {
+  position: relative;
+  width: 100%;
+  height: 100px;
+  border-radius: 12px; // Rounded
+  overflow: hidden;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all $transition-base;
+  background: $light-gray;
+
+  &:hover {
+    border-color: $red;
+    transform: scale(1.05);
+  }
+
+  &.active {
+    border-color: $red;
+  }
+}
+
+.thumbnailImage {
+  object-fit: cover;
+}
+
+.floorPlanButton,
+.videoButton {
+  padding: $spacing-sm $spacing-lg;
+  border-radius: 9999px; // Pill shape
+  background: $red;
+  color: $white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-base;
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-right: $spacing-md;
+
+  &:hover {
+    background: $dark-red;
+    transform: translateY(-2px);
+  }
+}
+
+.descriptionSection,
+.additionalDetails,
+.nearbySection,
+.contactSection,
+.priceHistorySection,
+.recommendedSection {
+  background: $white;
+  padding: $spacing-xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: $spacing-xl;
+}
+
+.sectionTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: $black;
+  margin-bottom: $spacing-lg;
+  font-family: $font-headline;
+}
+
+.description {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: $dark-gray;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: $spacing-lg;
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $light-gray;
+  border-radius: 12px; // Rounded
+}
+
+.detailLabel {
+  font-weight: 600;
+  color: $dark-gray;
+}
+
+.detailValue {
+  font-weight: 600;
+  color: $black;
+}
+
+.amenitiesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+}
+
+.amenity {
+  padding: $spacing-sm $spacing-lg;
+  background: $light-gray;
+  border-radius: 9999px; // Pill shape
+  color: $dark-gray;
+  font-weight: 500;
+}
+
+.contactContent {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: $spacing-2xl;
+
+  @media (max-width: $breakpoint-lg) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.brokerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.brokerAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%; // Circular
+  background: linear-gradient(135deg, $red 0%, $dark-red 100%);
+  color: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: $font-headline;
+}
+
+.brokerName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $black;
+  margin-bottom: $spacing-xs;
+  font-family: $font-headline;
+}
+
+.brokerTitle {
+  font-size: 1rem;
+  color: $dark-gray;
+  margin-bottom: $spacing-md;
+}
+
+.brokerContact {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.contactLink {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  color: $red;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color $transition-base;
+
+  &:hover {
+    color: $dark-red;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.contactForm {
+  background: $light-gray;
+  padding: $spacing-xl;
+  border-radius: 20px; // Rounded
+}
+
+.formTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $black;
+  margin-bottom: $spacing-lg;
+  font-family: $font-headline;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.textareaWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $dark-gray;
+}
+
+.textarea {
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $light-gray;
+  border-radius: 12px; // More rounded
+  font-size: 1rem;
+  font-family: $font-body;
+  color: $black;
+  background-color: $white;
+  resize: vertical;
+  transition: border-color $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: $red;
+  }
+}
+
+.formActions {
+  display: flex;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.priceHistory {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.priceEntry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $light-gray;
+  border-radius: 12px; // Rounded
+}
+
+.priceDate {
+  font-size: 0.9375rem;
+  color: $dark-gray;
+}
+
+.priceAmount {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $red;
+  font-family: $font-headline;
+}
+
+.recommendedGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: $spacing-xl;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fullscreenModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: $z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.closeFullscreen {
+  position: absolute;
+  top: $spacing-xl;
+  right: $spacing-xl;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%; // Circular
+  background: rgba(255, 255, 255, 0.2);
+  color: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all $transition-base;
+  z-index: 1;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.fullscreenImage {
+  object-fit: contain;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.fullscreenNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%; // Circular
+  background: rgba(255, 255, 255, 0.2);
+  color: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all $transition-base;
+  z-index: 1;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  &.next {
+    right: $spacing-xl;
+  }
+
+  &:not(.next) {
+    left: $spacing-xl;
+  }
+}

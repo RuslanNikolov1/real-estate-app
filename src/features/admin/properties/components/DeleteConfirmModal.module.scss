@@ -1,0 +1,160 @@
+@import '@/styles/variables';
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: $z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-lg;
+}
+
+.modalContent {
+  background: $white;
+  border-radius: 24px; // Very rounded
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-xl;
+  border-bottom: 1px solid $light-gray;
+  position: relative;
+}
+
+.iconContainer {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%; // Circular
+  background: rgba(225, 6, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.warningIcon {
+  color: $red;
+}
+
+.modalHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0;
+  font-family: $font-headline;
+  flex: 1;
+}
+
+.closeButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; // Circular
+  background: $light-gray;
+  color: $dark-gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all $transition-base;
+  border: none;
+  flex-shrink: 0;
+
+  &:hover {
+    background: $red;
+    color: $white;
+  }
+}
+
+.modalBody {
+  padding: $spacing-xl;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.warningText {
+  font-size: 1rem;
+  color: $dark-gray;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.propertyInfo {
+  padding: $spacing-lg;
+  background: $light-gray;
+  border-radius: 16px; // Rounded
+  border: 2px solid rgba(225, 6, 0, 0.2);
+}
+
+.propertyTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: $black;
+  margin: 0 0 $spacing-xs 0;
+  font-family: $font-headline;
+}
+
+.propertyLocation {
+  font-size: 0.9375rem;
+  color: $dark-gray;
+  margin: 0 0 $spacing-md 0;
+}
+
+.propertyDetails {
+  display: flex;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+  padding-top: $spacing-md;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 0.875rem;
+  color: $dark-gray;
+}
+
+.price {
+  font-weight: 600;
+  color: $red;
+  font-family: $font-headline;
+}
+
+.modalActions {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-xl;
+  border-top: 1px solid $light-gray;
+  justify-content: flex-end;
+}
+
+.deleteButton {
+  background: $red;
+  color: $white;
+  border-color: $red;
+
+  &:hover:not(:disabled) {
+    background: $dark-red;
+    border-color: $dark-red;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+
+
+
+
+
+
+

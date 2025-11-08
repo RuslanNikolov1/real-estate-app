@@ -1,0 +1,76 @@
+{
+  "common": {
+    "search": "Поиск",
+    "filter": "Фильтр",
+    "clear": "Очистить",
+    "apply": "Применить",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "add": "Добавить",
+    "close": "Закрыть",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успех"
+  },
+  "nav": {
+    "home": "Главная",
+    "properties": "Недвижимость",
+    "forSale": "Продажа",
+    "forRent": "Аренда",
+    "neighborhoods": "Районы",
+    "reviews": "Отзывы",
+    "certificates": "Сертификаты",
+    "valuation": "Оценка",
+    "favorites": "Избранное",
+    "login": "Вход",
+    "logout": "Выход",
+    "admin": "Админ"
+  },
+  "home": {
+    "title": "Профессиональная недвижимость в Бургасе",
+    "searchPlaceholder": "Поиск недвижимости...",
+    "featuredProperties": "Рекомендуемые объекты",
+    "sellYourProperty": "Продайте свою недвижимость",
+    "addListing": "Добавить объявление",
+    "clientReviews": "Отзывы клиентов",
+    "viewAllReviews": "Посмотреть все отзывы",
+    "partnerServices": "Партнерские услуги",
+    "certificatesMemberships": "Сертификаты и членство",
+    "contactBroker": "Онлайн запрос к брокеру"
+  },
+  "search": {
+    "locationType": "Тип местоположения",
+    "urban": "Городской",
+    "mountain": "Горный",
+    "coastal": "Прибрежный",
+    "propertyType": "Тип недвижимости",
+    "priceRange": "Диапазон цен",
+    "areaRange": "Площадь",
+    "rooms": "Комнаты",
+    "bathrooms": "Ванные",
+    "saveSearch": "Сохранить поиск",
+    "notifications": "Уведомления"
+  },
+  "property": {
+    "price": "Цена",
+    "area": "Площадь",
+    "rooms": "Комнаты",
+    "bathrooms": "Ванные",
+    "floor": "Этаж",
+    "yearBuilt": "Год постройки",
+    "viewDetails": "Подробнее",
+    "contactAgent": "Связаться с агентом",
+    "addToFavorites": "Добавить в избранное",
+    "removeFromFavorites": "Удалить из избранного"
+  }
+}
+
+
+
+
+
+
+
+

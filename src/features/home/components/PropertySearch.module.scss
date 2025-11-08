@@ -1,0 +1,220 @@
+@import '@/styles/variables';
+
+.searchContainer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.compactSearch {
+  display: flex;
+  gap: $spacing-md;
+  align-items: center;
+  background: $white;
+  border-radius: 24px; // Very rounded
+  padding: $spacing-sm;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 3px solid $dark-red;
+
+  .searchInputWrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: transparent;
+    border-radius: 9999px; // Fully rounded (pill shape)
+
+    .searchIcon {
+      width: 20px;
+      height: 20px;
+      color: $dark-red;
+    }
+
+    .searchInput {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 1rem;
+      font-family: $font-body;
+      color: $dark-red;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        color: $dark-red;
+      }
+    }
+  }
+
+  .expandButton {
+    white-space: nowrap;
+    background-color: $white !important;
+    border-color: $dark-red !important;
+    color: $dark-red !important;
+
+    &:hover {
+      background-color: $light-gray !important;
+    }
+  }
+}
+
+.expandedSearch {
+  background: $white;
+  border-radius: 24px; // Very rounded
+  padding: $spacing-xl;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+  .searchHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xl;
+
+    h2 {
+      font-size: 1.5rem;
+      color: $black;
+    }
+
+    .closeButton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%; // Already circular
+      background: $light-gray;
+      color: $dark-gray;
+      cursor: pointer;
+      transition: all $transition-base;
+
+      &:hover {
+        background: $dark-gray;
+        color: $white;
+      }
+    }
+  }
+
+  .searchContent {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xl;
+  }
+
+  .locationTypeSection,
+  .propertyTypeSection,
+  .statusSection {
+    .label {
+      display: block;
+      margin-bottom: $spacing-md;
+      font-weight: 600;
+      color: $dark-gray;
+    }
+
+    .locationTypeButtons {
+      display: flex;
+      gap: $spacing-md;
+      flex-wrap: wrap;
+    }
+
+    .locationTypeButton {
+      padding: $spacing-sm $spacing-lg;
+      border: 2px solid $light-gray;
+      border-radius: 9999px; // Pill shape
+      background: $white;
+      color: $dark-gray;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all $transition-base;
+
+      &:hover {
+        border-color: $red;
+        color: $red;
+      }
+
+      &.active {
+        background: $red;
+        color: $white;
+        border-color: $red;
+      }
+    }
+  }
+
+  .advancedSection {
+    .advancedToggle {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      padding: $spacing-md;
+      width: 100%;
+      background: $light-gray;
+      border-radius: 16px; // Rounded
+      font-weight: 600;
+      color: $dark-gray;
+      cursor: pointer;
+      transition: all $transition-base;
+
+      &:hover {
+        background: $dark-gray;
+        color: $white;
+      }
+
+      .chevron {
+        margin-left: auto;
+        transition: transform $transition-base;
+
+        &.rotated {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    .advancedFilters {
+      overflow: hidden;
+      margin-top: $spacing-md;
+      padding-top: $spacing-md;
+      border-top: 1px solid $light-gray;
+
+      .filterRow {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: $spacing-md;
+        margin-bottom: $spacing-md;
+      }
+    }
+  }
+
+  .searchActions {
+    display: flex;
+    gap: $spacing-md;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .compactSearch {
+    flex-direction: column;
+
+    .searchInputWrapper {
+      width: 100%;
+    }
+
+    .expandButton {
+      width: 100%;
+    }
+  }
+
+  .expandedSearch {
+    padding: $spacing-lg;
+
+    .locationTypeButtons {
+      flex-direction: column;
+
+      .locationTypeButton {
+        width: 100%;
+      }
+    }
+  }
+}

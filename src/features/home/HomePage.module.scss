@@ -1,0 +1,133 @@
+@import '@/styles/variables';
+
+.homePage {
+  min-height: 100vh;
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.heroBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $white;
+  z-index: 0;
+}
+
+.heroOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 0;
+}
+
+.logoBottomLeft {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  z-index: 1;
+
+  img {
+    display: block;
+    height: 470px;
+    width: 370px;
+  }
+}
+
+.logoBottomRight {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  z-index: 1;
+
+  img {
+    display: block;
+    height: 470px;
+    width: 370px;
+  }
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  width: 60vw;
+  margin: 0 auto;
+  padding: $spacing-sm $spacing-xl;
+  text-align: center;
+  color: $white;
+}
+
+.heroTitle {
+  position: relative;
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: $spacing-lg;
+  color: $dark-red;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -163px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    background-image: url('/Black Logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.3;
+    filter: blur(1px);
+    z-index: -1;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 2.5rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 2rem;
+
+    &::before {
+      display: none;
+    }
+  }
+}
+
+.heroSubtitle {
+  font-size: 1.5rem;
+  margin-bottom: $spacing-2xl;
+  color: $dark-red;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.25rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 1rem;
+  }
+}
+
+.searchWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.slideshowSection {
+  padding: $spacing-3xl $spacing-lg;
+  background: $white;
+}

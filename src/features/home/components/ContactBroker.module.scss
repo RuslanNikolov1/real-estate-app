@@ -1,0 +1,140 @@
+@import '@/styles/variables';
+
+.section {
+  padding: $spacing-3xl 0;
+  background: $white;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+.title {
+  font-size: 2.5rem;
+  margin-bottom: $spacing-2xl;
+  text-align: center;
+  color: $black;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 2rem;
+  }
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: $spacing-2xl;
+
+  @media (max-width: $breakpoint-lg) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.infoItem {
+  display: flex;
+  gap: $spacing-md;
+  align-items: flex-start;
+
+  svg {
+    color: $red;
+    flex-shrink: 0;
+    margin-top: $spacing-xs;
+    padding: $spacing-sm;
+    background: rgba(225, 6, 0, 0.1);
+    border-radius: 50%; // Circular icon background
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    margin-bottom: $spacing-xs;
+    color: $black;
+  }
+
+  a {
+    color: $red;
+    text-decoration: none;
+    transition: color $transition-base;
+
+    &:hover {
+      color: $dark-red;
+      text-decoration: underline;
+    }
+  }
+
+  p {
+    color: $dark-gray;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+  background: $light-gray;
+  padding: $spacing-xl;
+  border-radius: 24px; // Very rounded
+}
+
+.textareaWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $dark-gray;
+}
+
+.textarea {
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $light-gray;
+  border-radius: 12px; // More rounded
+  font-size: 1rem;
+  font-family: $font-body;
+  color: $black;
+  background-color: $white;
+  resize: vertical;
+  transition: border-color $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: $red;
+  }
+
+  &.error {
+    border-color: $red;
+  }
+}
+
+.errorMessage {
+  font-size: 0.875rem;
+  color: $red;
+}
+
+.successMessage {
+  padding: $spacing-md;
+  background: #d4edda;
+  color: #155724;
+  border-radius: 12px; // More rounded
+  text-align: center;
+}
+
+.submitButton {
+  width: 100%;
+}
+

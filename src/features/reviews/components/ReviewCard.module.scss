@@ -1,0 +1,101 @@
+@import '@/styles/variables';
+
+.card {
+  background: $white;
+  padding: $spacing-xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+  transition: all $transition-base;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  flex: 1;
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%; // Circular
+  background: linear-gradient(135deg, $red 0%, $dark-red 100%);
+  color: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: $font-headline;
+  flex-shrink: 0;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.userName {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: $black;
+  margin: 0;
+  font-family: $font-headline;
+}
+
+.date {
+  font-size: 0.875rem;
+  color: $dark-gray;
+}
+
+.rating {
+  display: flex;
+  gap: $spacing-xs;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.star {
+  transition: all $transition-base;
+
+  &.filled {
+    color: #ffd700;
+  }
+
+  &.empty {
+    color: #ddd;
+  }
+}
+
+.comment {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: $dark-gray;
+  margin: 0;
+  flex: 1;
+}
+
+
+
+
+
+
+
+

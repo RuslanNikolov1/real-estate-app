@@ -1,0 +1,220 @@
+@import '@/styles/variables';
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+  background: $dark-red;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+  margin: 0 auto;
+  padding: $spacing-xs $spacing-sm;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-xl;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $white;
+  text-decoration: none;
+  font-family: $font-headline;
+  padding: $spacing-xs $spacing-md;
+  border-radius: 12px; // Rounded logo background
+  transition: all $transition-base;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.logoImage {
+  height: 60px;
+  width: auto;
+}
+
+.nav {
+  display: flex;
+  gap: $spacing-xl;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+
+  @media (max-width: $breakpoint-lg) {
+    display: none;
+  }
+}
+
+.navLink {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: $white;
+  text-decoration: none;
+  transition: color $transition-base;
+  position: relative;
+  padding: $spacing-xs 0;
+
+  &:hover {
+    color: $light-gray;
+  }
+
+  &.active {
+    color: $white;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: $white;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.languageSelector {
+  position: relative;
+
+  @media (max-width: $breakpoint-md) {
+    display: none;
+  }
+}
+
+.languageButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px; // More rounded
+  cursor: pointer;
+  transition: all $transition-base;
+  color: $white;
+
+  &:hover {
+    border-color: $white;
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.languageMenu {
+  position: absolute;
+  top: calc(100% + $spacing-xs);
+  right: 0;
+  background: $white;
+  border: 1px solid $light-gray;
+  border-radius: 12px; // More rounded
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  min-width: 100px;
+}
+
+.languageOption {
+  display: block;
+  width: 100%;
+  padding: $spacing-sm $spacing-md;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background $transition-base;
+  color: $dark-gray;
+
+  &:hover {
+    background: $light-gray;
+  }
+
+  &.active {
+    background: $red;
+    color: $white;
+  }
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; // Already circular
+  color: $white;
+  transition: all $transition-base;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: $white;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    display: none;
+  }
+}
+
+.mobileMenuButton {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px; // More rounded
+  background: transparent;
+  color: $white;
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  @media (max-width: $breakpoint-lg) {
+    display: flex;
+  }
+}
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+  background: $white;
+  border-top: 1px solid $light-gray;
+  overflow: hidden;
+
+  @media (min-width: $breakpoint-lg) {
+    display: none;
+  }
+}
+
+.mobileNavLink {
+  padding: $spacing-md $spacing-lg;
+  font-size: 1rem;
+  font-weight: 500;
+  color: $dark-gray;
+  text-decoration: none;
+  transition: all $transition-base;
+  border-bottom: 1px solid $light-gray;
+
+  &:hover {
+    background: $light-gray;
+    color: $red;
+  }
+
+  &.active {
+    background: $light-gray;
+    color: $red;
+    font-weight: 600;
+  }
+}

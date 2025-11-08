@@ -1,0 +1,76 @@
+{
+  "common": {
+    "search": "Търсене",
+    "filter": "Филтър",
+    "clear": "Изчисти",
+    "apply": "Приложи",
+    "cancel": "Отказ",
+    "save": "Запази",
+    "delete": "Изтрий",
+    "edit": "Редактирай",
+    "add": "Добави",
+    "close": "Затвори",
+    "loading": "Зареждане...",
+    "error": "Грешка",
+    "success": "Успех"
+  },
+  "nav": {
+    "home": "Начало",
+    "properties": "Имоти",
+    "forSale": "За продажба",
+    "forRent": "Под наем",
+    "neighborhoods": "Квартали",
+    "reviews": "Отзиви",
+    "certificates": "Сертификати",
+    "valuation": "Оценка",
+    "favorites": "Любими",
+    "login": "Вход",
+    "logout": "Изход",
+    "admin": "Админ"
+  },
+  "home": {
+    "title": "Професионални недвижими имоти в Бургас",
+    "searchPlaceholder": "Търсене на имоти...",
+    "featuredProperties": "Подбрани имоти",
+    "sellYourProperty": "Продай имота си",
+    "addListing": "Добави обява",
+    "clientReviews": "Отзиви от клиенти",
+    "viewAllReviews": "Виж всички отзиви",
+    "partnerServices": "Партньорски услуги",
+    "certificatesMemberships": "Сертификати и членства",
+    "contactBroker": "Онлайн запитване към брокер"
+  },
+  "search": {
+    "locationType": "Тип местоположение",
+    "urban": "Градски",
+    "mountain": "Планински",
+    "coastal": "Морски",
+    "propertyType": "Тип имот",
+    "priceRange": "Ценови диапазон",
+    "areaRange": "Площ",
+    "rooms": "Стаи",
+    "bathrooms": "Бани",
+    "saveSearch": "Запази търсене",
+    "notifications": "Нотификации"
+  },
+  "property": {
+    "price": "Цена",
+    "area": "Площ",
+    "rooms": "Стаи",
+    "bathrooms": "Бани",
+    "floor": "Етаж",
+    "yearBuilt": "Година на строеж",
+    "viewDetails": "Виж детайли",
+    "contactAgent": "Свържи се с брокер",
+    "addToFavorites": "Добави в любими",
+    "removeFromFavorites": "Премахни от любими"
+  }
+}
+
+
+
+
+
+
+
+

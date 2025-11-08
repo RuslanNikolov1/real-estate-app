@@ -1,0 +1,96 @@
+@import '@/styles/variables';
+
+.section {
+  padding: $spacing-3xl 0;
+  background: $light-gray;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-2xl;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    gap: $spacing-lg;
+    align-items: flex-start;
+  }
+}
+
+.title {
+  font-size: 2.5rem;
+  color: $black;
+  margin: 0;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 2rem;
+  }
+}
+
+.viewAllButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: $spacing-xl;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+}
+
+.card {
+  background: $white;
+  padding: $spacing-xl;
+  border-radius: 24px; // Very rounded
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.rating {
+  display: flex;
+  gap: $spacing-xs;
+}
+
+.filled {
+  color: #ffd700;
+}
+
+.empty {
+  color: #ddd;
+}
+
+.comment {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: $dark-gray;
+  flex: 1;
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding-top: $spacing-md;
+  border-top: 1px solid $light-gray;
+}
+
+.name {
+  font-weight: 600;
+  color: $black;
+}
+

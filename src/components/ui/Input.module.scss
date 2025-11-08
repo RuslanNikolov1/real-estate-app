@@ -1,0 +1,43 @@
+@import '@/styles/variables';
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $dark-gray;
+}
+
+.input {
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $light-gray;
+  border-radius: 12px; // More rounded
+  font-size: 1rem;
+  font-family: $font-body;
+  color: $black;
+  background-color: $white;
+  transition: border-color $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: $red;
+  }
+
+  &.error {
+    border-color: $red;
+  }
+
+  &::placeholder {
+    color: #999;
+  }
+}
+
+.errorMessage {
+  font-size: 0.875rem;
+  color: $red;
+}
+
