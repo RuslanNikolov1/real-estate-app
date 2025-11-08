@@ -39,9 +39,7 @@ export function SellYourProperty() {
                 className={styles.content}
               >
                 <p className={styles.description}>
-                  Продайте своя имот бързо и лесно с нашата професионална помощ.
-                  Нашите опитни брокери ще ви помогнат да намерите най-добрата
-                  цена за вашия имот.
+                  {t('home.sellPropertyDescription')}
                 </p>
                 <div className={styles.actions}>
                   <Button variant="primary" size="lg">
@@ -56,6 +54,7 @@ export function SellYourProperty() {
     </section>
   );
 }
+
 
 
 

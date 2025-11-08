@@ -30,15 +30,23 @@
   },
   "home": {
     "title": "Professionelle Immobilien in Burgas",
+    "subtitle": "Finden Sie Ihre ideale Immobilie - Wohnungen, Häuser, Villen und Gewerbeimmobilien",
+    "tagline": "Eine Leidenschaft, Ihr Zuhause!",
     "searchPlaceholder": "Immobilien suchen...",
     "featuredProperties": "Empfohlene Immobilien",
     "sellYourProperty": "Verkaufen Sie Ihre Immobilie",
+    "sellPropertyDescription": "Verkaufen Sie Ihre Immobilie schnell und einfach mit unserer professionellen Hilfe. Unsere erfahrenen Makler helfen Ihnen, den besten Preis für Ihre Immobilie zu finden.",
     "addListing": "Anzeige hinzufügen",
     "clientReviews": "Kundenbewertungen",
     "viewAllReviews": "Alle Bewertungen anzeigen",
     "partnerServices": "Partnerdienste",
     "certificatesMemberships": "Zertifikate & Mitgliedschaften",
-    "contactBroker": "Online-Anfrage an Makler"
+    "contactBroker": "Online-Anfrage an Makler",
+    "burgasTitle": "Burgas",
+    "burgasDescription1": "Die maritime Hauptstadt Bulgariens",
+    "burgasTitle2": "Schöne Stadt",
+    "burgasDescription2": "Moderne Architektur und historisches Erbe",
+    "burgasAbout": "Burgas ist eine der sich am dynamischsten entwickelnden Städte Bulgariens, mit reicher Geschichte, wunderschöner Natur und hervorragenden Möglichkeiten für Immobilieninvestitionen."
   },
   "search": {
     "locationType": "Standorttyp",
@@ -66,11 +74,3 @@
     "removeFromFavorites": "Aus Favoriten entfernen"
   }
 }
-
-
-
-
-
-
-
-

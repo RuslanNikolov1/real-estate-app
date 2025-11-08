@@ -11,7 +11,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 100%;
+    height: 35px;
+    background: $dark-red;
+    z-index: 3;
+  }
 }
 
 .heroBackground {
@@ -69,6 +79,30 @@
   padding: $spacing-sm $spacing-xl;
   text-align: center;
   color: $white;
+  margin-top: -6vh;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: 700px;
+    background-image: url('/Black Logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.10;
+    filter: blur(3px);
+    z-index: -5;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    &::before {
+      display: none;
+    }
+  }
 }
 
 .heroTitle {
@@ -77,23 +111,8 @@
   font-weight: 700;
   margin-bottom: $spacing-lg;
   color: $dark-red;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -163px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 200px;
-    height: 200px;
-    background-image: url('/Black Logo.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    opacity: 0.3;
-    filter: blur(1px);
-    z-index: -1;
-  }
+  padding-bottom: 5vh;
+  border-bottom: 2px solid $dark-red;
 
   @media (max-width: $breakpoint-md) {
     font-size: 2.5rem;
@@ -101,10 +120,6 @@
 
   @media (max-width: $breakpoint-sm) {
     font-size: 2rem;
-
-    &::before {
-      display: none;
-    }
   }
 }
 
@@ -130,4 +145,34 @@
 .slideshowSection {
   padding: $spacing-3xl $spacing-lg;
   background: $white;
+}
+
+.tagline {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: $white;
+  font-family: var(--font-great-vibes);
+  font-size: 1.6rem;
+  letter-spacing: 0.15rem;
+  font-style: italic;
+  z-index: 5;
+  padding: $spacing-md $spacing-xl $spacing-xs $spacing-xl;
+  display: inline-block;
+
+  // curved element behind the text
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 5px;
+    width: 20vw;
+    height: 50px;
+    background: $black;
+    border-top-left-radius: 100px;
+    border-top-right-radius: 100px;
+    z-index: -1;
+  }
 }

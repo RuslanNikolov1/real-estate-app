@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { poppins, inter } from '@/lib/fonts';
+import { poppins, inter, greatVibes, allura, dancingScript, pacifico } from '@/lib/fonts';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { I18nProvider } from '@/components/providers/I18nProvider';
 import '@/styles/globals.scss';
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="bg" className={`${poppins.variable} ${inter.variable}`}>
+    <html lang="bg" className={`${poppins.variable} ${inter.variable} ${greatVibes.variable} ${allura.variable} ${dancingScript.variable} ${pacifico.variable}`}>
       <body>
         <I18nProvider>
           <QueryProvider>{children}</QueryProvider>

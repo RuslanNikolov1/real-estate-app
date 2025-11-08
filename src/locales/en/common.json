@@ -30,15 +30,23 @@
   },
   "home": {
     "title": "Professional Real Estate in Burgas",
+    "subtitle": "Find your ideal property - apartments, houses, villas and commercial properties",
+    "tagline": "One passion, your home!",
     "searchPlaceholder": "Search properties...",
     "featuredProperties": "Featured Properties",
     "sellYourProperty": "Sell Your Property",
+    "sellPropertyDescription": "Sell your property quickly and easily with our professional help. Our experienced brokers will help you find the best price for your property.",
     "addListing": "Add Listing",
     "clientReviews": "Client Reviews",
     "viewAllReviews": "View All Reviews",
     "partnerServices": "Partner Services",
     "certificatesMemberships": "Certificates & Memberships",
-    "contactBroker": "Contact Broker Online"
+    "contactBroker": "Contact Broker Online",
+    "burgasTitle": "Burgas",
+    "burgasDescription1": "The maritime capital of Bulgaria",
+    "burgasTitle2": "Beautiful City",
+    "burgasDescription2": "Modern architecture and historical heritage",
+    "burgasAbout": "Burgas is one of the most dynamically developing cities in Bulgaria, with rich history, beautiful nature and excellent opportunities for real estate investments."
   },
   "search": {
     "locationType": "Location Type",
@@ -66,11 +74,3 @@
     "removeFromFavorites": "Remove from Favorites"
   }
 }
-
-
-
-
-
-
-
-
