@@ -111,3 +111,4 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
 
 
 
+

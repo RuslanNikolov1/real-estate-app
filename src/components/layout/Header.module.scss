@@ -5,7 +5,8 @@
   top: 0;
   z-index: $z-sticky;
   background: $dark-red;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+  border-top: 2px dotted gray;
 }
 
 .container {
@@ -53,6 +54,9 @@
 }
 
 .navLink {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
   font-size: 0.9375rem;
   font-weight: 500;
   color: $white;
@@ -199,6 +203,9 @@
 }
 
 .mobileNavLink {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
   padding: $spacing-md $spacing-lg;
   font-size: 1rem;
   font-weight: 500;

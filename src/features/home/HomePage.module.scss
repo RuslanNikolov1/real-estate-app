@@ -174,5 +174,7 @@
     border-top-left-radius: 100px;
     border-top-right-radius: 100px;
     z-index: -1;
+    border: 2px solid $light-gray;
+    border-bottom: none;
   }
 }

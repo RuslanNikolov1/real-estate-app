@@ -62,8 +62,8 @@ export function PropertySearch({
   };
 
   return (
-    <div className={`${styles.searchContainer} ${isExpanded ? styles.expanded : ''}`}>
-      {!isExpanded ? (
+    <>
+      <div className={styles.searchContainer}>
         <div className={styles.compactSearch}>
           <div className={styles.searchInputWrapper}>
             <Search className={styles.searchIcon} />
@@ -78,188 +78,199 @@ export function PropertySearch({
             {t('common.filter')}
           </Button>
         </div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={styles.expandedSearch}
-        >
-          <div className={styles.searchHeader}>
-            <h2>{t('common.search')}</h2>
-            <button onClick={() => onExpand?.()} className={styles.closeButton}>
-              <X />
-            </button>
-          </div>
+      </div>
 
-          <div className={styles.searchContent}>
-            <div className={styles.locationTypeSection}>
-              <label className={styles.label}>{t('search.locationType')}</label>
-              <div className={styles.locationTypeButtons}>
-                {(['urban', 'mountain', 'coastal'] as const).map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => handleLocationTypeToggle(type)}
-                    className={`${styles.locationTypeButton} ${
-                      filters.location_type?.includes(type) ? styles.active : ''
-                    }`}
-                  >
-                    {t(`search.${type}`)}
-                  </button>
-                ))}
+      <AnimatePresence>
+        {isExpanded && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className={styles.modalBackdrop}
+              onClick={onExpand}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, x: '-50%', y: '-50%' }}
+              animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
+              exit={{ opacity: 0, scale: 0.95, x: '-50%', y: '-50%' }}
+              className={styles.modalContent}
+            >
+              <div className={styles.searchHeader}>
+                <h2>{t('common.search')}</h2>
+                <button onClick={() => onExpand?.()} className={styles.closeButton}>
+                  <X />
+                </button>
               </div>
-            </div>
 
-            <div className={styles.propertyTypeSection}>
-              <label className={styles.label}>Тип имот</label>
-              <div className={styles.locationTypeButtons}>
-                {(['apartment', 'house', 'villa', 'office', 'shop', 'warehouse', 'land', 'hotel'] as PropertyType[]).map((type) => (
+              <div className={styles.searchContent}>
+                <div className={styles.locationTypeSection}>
+                  <label className={styles.label}>{t('search.locationType')}</label>
+                  <div className={styles.locationTypeButtons}>
+                    {(['urban', 'mountain', 'coastal'] as const).map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => handleLocationTypeToggle(type)}
+                        className={`${styles.locationTypeButton} ${filters.location_type?.includes(type) ? styles.active : ''
+                          }`}
+                      >
+                        {t(`search.${type}`)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.propertyTypeSection}>
+                  <label className={styles.label}>Тип имот</label>
+                  <div className={styles.locationTypeButtons}>
+                    {(['apartment', 'house', 'villa', 'office', 'shop', 'warehouse', 'land', 'hotel'] as PropertyType[]).map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => handlePropertyTypeToggle(type)}
+                        className={`${styles.locationTypeButton} ${filters.type?.includes(type) ? styles.active : ''
+                          }`}
+                      >
+                        {type === 'apartment' && 'Апартамент'}
+                        {type === 'house' && 'Къща'}
+                        {type === 'villa' && 'Вила'}
+                        {type === 'office' && 'Офис'}
+                        {type === 'shop' && 'Магазин'}
+                        {type === 'warehouse' && 'Склад'}
+                        {type === 'land' && 'Земя'}
+                        {type === 'hotel' && 'Хотел'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.statusSection}>
+                  <label className={styles.label}>Статус</label>
+                  <div className={styles.locationTypeButtons}>
+                    {(['for-sale', 'for-rent'] as PropertyStatus[]).map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => handleStatusToggle(status)}
+                        className={`${styles.locationTypeButton} ${filters.status?.includes(status) ? styles.active : ''
+                          }`}
+                      >
+                        {status === 'for-sale' ? t('nav.forSale') : t('nav.forRent')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.advancedSection}>
                   <button
-                    key={type}
-                    onClick={() => handlePropertyTypeToggle(type)}
-                    className={`${styles.locationTypeButton} ${
-                      filters.type?.includes(type) ? styles.active : ''
-                    }`}
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className={styles.advancedToggle}
                   >
-                    {type === 'apartment' && 'Апартамент'}
-                    {type === 'house' && 'Къща'}
-                    {type === 'villa' && 'Вила'}
-                    {type === 'office' && 'Офис'}
-                    {type === 'shop' && 'Магазин'}
-                    {type === 'warehouse' && 'Склад'}
-                    {type === 'land' && 'Земя'}
-                    {type === 'hotel' && 'Хотел'}
+                    {t('common.filter')}
+                    <ChevronDown
+                      className={`${styles.chevron} ${showAdvanced ? styles.rotated : ''}`}
+                    />
                   </button>
-                ))}
+
+                  <AnimatePresence>
+                    {showAdvanced && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className={styles.advancedFilters}
+                      >
+                        <div className={styles.filterRow}>
+                          <Input
+                            type="number"
+                            label={t('search.priceRange') + ' (мин)'}
+                            placeholder="0"
+                            onChange={(e) =>
+                              setFilters({
+                                ...filters,
+                                min_price: e.target.value ? Number(e.target.value) : undefined,
+                              })
+                            }
+                          />
+                          <Input
+                            type="number"
+                            label={t('search.priceRange') + ' (макс)'}
+                            placeholder="∞"
+                            onChange={(e) =>
+                              setFilters({
+                                ...filters,
+                                max_price: e.target.value ? Number(e.target.value) : undefined,
+                              })
+                            }
+                          />
+                        </div>
+
+                        <div className={styles.filterRow}>
+                          <Input
+                            type="number"
+                            label={t('search.areaRange') + ' (мин)'}
+                            placeholder="0"
+                            onChange={(e) =>
+                              setFilters({
+                                ...filters,
+                                min_area: e.target.value ? Number(e.target.value) : undefined,
+                              })
+                            }
+                          />
+                          <Input
+                            type="number"
+                            label={t('search.areaRange') + ' (макс)'}
+                            placeholder="∞"
+                            onChange={(e) =>
+                              setFilters({
+                                ...filters,
+                                max_area: e.target.value ? Number(e.target.value) : undefined,
+                              })
+                            }
+                          />
+                        </div>
+
+                        <div className={styles.filterRow}>
+                          <Input
+                            type="number"
+                            label={t('search.rooms')}
+                            placeholder="0"
+                            onChange={(e) =>
+                              setFilters({
+                                ...filters,
+                                rooms: e.target.value ? Number(e.target.value) : undefined,
+                              })
+                            }
+                          />
+                          <Input
+                            type="number"
+                            label={t('search.bathrooms')}
+                            placeholder="0"
+                            onChange={(e) =>
+                              setFilters({
+                                ...filters,
+                                bathrooms: e.target.value ? Number(e.target.value) : undefined,
+                              })
+                            }
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div className={styles.searchActions}>
+                  <Button variant="outline" onClick={() => setFilters({})}>
+                    {t('common.clear')}
+                  </Button>
+                  <Button variant="primary" onClick={handleSearch}>
+                    {t('common.search')}
+                  </Button>
+                </div>
               </div>
-            </div>
-
-            <div className={styles.statusSection}>
-              <label className={styles.label}>Статус</label>
-              <div className={styles.locationTypeButtons}>
-                {(['for-sale', 'for-rent'] as PropertyStatus[]).map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => handleStatusToggle(status)}
-                    className={`${styles.locationTypeButton} ${
-                      filters.status?.includes(status) ? styles.active : ''
-                    }`}
-                  >
-                    {status === 'for-sale' ? t('nav.forSale') : t('nav.forRent')}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.advancedSection}>
-              <button
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                className={styles.advancedToggle}
-              >
-                {t('common.filter')}
-                <ChevronDown
-                  className={`${styles.chevron} ${showAdvanced ? styles.rotated : ''}`}
-                />
-              </button>
-
-              <AnimatePresence>
-                {showAdvanced && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className={styles.advancedFilters}
-                  >
-                    <div className={styles.filterRow}>
-                      <Input
-                        type="number"
-                        label={t('search.priceRange') + ' (мин)'}
-                        placeholder="0"
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            min_price: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                      />
-                      <Input
-                        type="number"
-                        label={t('search.priceRange') + ' (макс)'}
-                        placeholder="∞"
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            max_price: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                      />
-                    </div>
-
-                    <div className={styles.filterRow}>
-                      <Input
-                        type="number"
-                        label={t('search.areaRange') + ' (мин)'}
-                        placeholder="0"
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            min_area: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                      />
-                      <Input
-                        type="number"
-                        label={t('search.areaRange') + ' (макс)'}
-                        placeholder="∞"
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            max_area: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                      />
-                    </div>
-
-                    <div className={styles.filterRow}>
-                      <Input
-                        type="number"
-                        label={t('search.rooms')}
-                        placeholder="0"
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            rooms: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                      />
-                      <Input
-                        type="number"
-                        label={t('search.bathrooms')}
-                        placeholder="0"
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            bathrooms: e.target.value ? Number(e.target.value) : undefined,
-                          })
-                        }
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <div className={styles.searchActions}>
-              <Button variant="outline" onClick={() => setFilters({})}>
-                {t('common.clear')}
-              </Button>
-              <Button variant="primary" onClick={handleSearch}>
-                {t('common.search')}
-              </Button>
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 

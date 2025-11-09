@@ -5,11 +5,24 @@ import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Globe, Heart, User } from 'lucide-react';
+import {
+  Menu,
+  X,
+  Globe,
+  Heart,
+  User,
+  Home,
+  DollarSign,
+  Key,
+  Building2,
+  Star,
+  Award,
+  BarChart3
+} from 'lucide-react';
 import styles from './Header.module.scss';
 
 const languages = [
-  { code: 'bg', label: 'БГ' },
+  { code: 'bg', label: 'BG' },
   { code: 'en', label: 'EN' },
   { code: 'ru', label: 'RU' },
   { code: 'de', label: 'DE' },
@@ -22,13 +35,13 @@ export function Header() {
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
 
   const navItems = [
-    { href: '/', label: t('nav.home') },
-    { href: '/properties/for-sale', label: t('nav.forSale') },
-    { href: '/properties/for-rent', label: t('nav.forRent') },
-    { href: '/neighborhoods', label: t('nav.neighborhoods') },
-    { href: '/reviews', label: t('nav.reviews') },
-    { href: '/certificates', label: t('nav.certificates') },
-    { href: '/valuation', label: t('nav.valuation') },
+    { href: '/', label: t('nav.home'), icon: Home },
+    { href: '/properties/for-sale', label: t('nav.forSale'), icon: DollarSign },
+    { href: '/properties/for-rent', label: t('nav.forRent'), icon: Key },
+    { href: '/neighborhoods', label: t('nav.neighborhoods'), icon: Building2 },
+    { href: '/reviews', label: t('nav.reviews'), icon: Star },
+    { href: '/certificates', label: t('nav.certificates'), icon: Award },
+    { href: '/valuation', label: t('nav.valuation'), icon: BarChart3 },
   ];
 
   const changeLanguage = (lang: string) => {
@@ -49,16 +62,20 @@ export function Header() {
         </Link>
 
         <nav className={styles.nav}>
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`${styles.navLink} ${pathname === item.href ? styles.active : ''
-                }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${styles.navLink} ${pathname === item.href ? styles.active : ''
+                  }`}
+              >
+                <Icon size={18} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         <div className={styles.actions}>
@@ -68,7 +85,7 @@ export function Header() {
               className={styles.languageButton}
               aria-label="Change language"
             >
-              <Globe size={20} />
+              <Globe size={20} color="white" />
               <span>{currentLanguageLabel}</span>
             </button>
             <AnimatePresence>
@@ -95,11 +112,11 @@ export function Header() {
           </div>
 
           <Link href="/favorites" className={styles.iconButton} aria-label="Favorites">
-            <Heart size={20} />
+            <Heart size={20} color="white" />
           </Link>
 
           <Link href="/login" className={styles.iconButton} aria-label="Login">
-            <User size={20} />
+            <User size={20} color="white" />
           </Link>
 
           <button
@@ -107,7 +124,7 @@ export function Header() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMobileMenuOpen ? <X size={24} color="white" /> : <Menu size={24} color="white" />}
           </button>
         </div>
       </div>
@@ -120,17 +137,21 @@ export function Header() {
             exit={{ height: 0, opacity: 0 }}
             className={styles.mobileNav}
           >
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`${styles.mobileNavLink} ${pathname === item.href ? styles.active : ''
-                  }`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`${styles.mobileNavLink} ${pathname === item.href ? styles.active : ''
+                    }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Icon size={20} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </motion.nav>
         )}
       </AnimatePresence>
