@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description:
     'Намерете своя идеален имот в Бургас. Апартаменти, къщи, вили и бизнес имоти за продажба и наем.',
   keywords: 'недвижими имоти, Бургас, апартаменти, къщи, вили, продажба, наем',
+  icons: {
+    icon: '/Red Logo.jpg',
+  },
 };
 
 export default function RootLayout({
