@@ -29,8 +29,8 @@
     "admin": "Admin"
   },
   "home": {
-    "title": "Professionelle Immobilien in Burgas",
-    "subtitle": "Finden Sie Ihre ideale Immobilie - Wohnungen, Häuser, Villen und Gewerbeimmobilien",
+    "title": "VERMIETUNG | VERKAUF | IMMOBILIENBEWERTUNG | KREDITBERATUNG",
+    "subtitle": "Professionelle Dienstleistungen für Vermietung, Verkauf und Bewertung von Immobilien in Burgas. Kreditberatung und volle Unterstützung bei jeder Transaktion.",
     "tagline": "Eine Leidenschaft, Ihr Zuhause!",
     "searchPlaceholder": "Immobilien suchen...",
     "featuredProperties": "Empfohlene Immobilien",
@@ -74,3 +74,4 @@
     "removeFromFavorites": "Aus Favoriten entfernen"
   }
 }
+

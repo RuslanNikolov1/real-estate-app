@@ -72,6 +72,10 @@
 
 .heroContent {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
   z-index: 2;
   width: 100%;
   width: 60vw;
@@ -79,7 +83,7 @@
   padding: $spacing-sm $spacing-xl;
   text-align: center;
   color: $white;
-  margin-top: -6vh;
+  margin-top: -7vh;
 
   &::before {
     content: '';
@@ -107,24 +111,36 @@
 
 .heroTitle {
   position: relative;
-  font-size: 3.5rem;
+  font-size: 3rem;
   font-weight: 700;
   margin-bottom: $spacing-lg;
   color: $dark-red;
-  padding-bottom: 5vh;
-  border-bottom: 2px solid $dark-red;
+  width: 70vw;
+  padding-bottom: $spacing-xl;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85%;
+    height: 2px;
+    background: $dark-red;
+  }
 
   @media (max-width: $breakpoint-md) {
-    font-size: 2.5rem;
+    font-size: 1.8rem;
   }
 
   @media (max-width: $breakpoint-sm) {
-    font-size: 2rem;
+    font-size: 1.4rem;
   }
 }
 
 .heroSubtitle {
   font-size: 1.5rem;
+  width: 60vw;
   margin-bottom: $spacing-2xl;
   color: $dark-red;
 
@@ -138,7 +154,6 @@
 }
 
 .searchWrapper {
-  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -167,8 +182,8 @@
     content: '';
     position: absolute;
     bottom: -3px;
-    left: 5px;
-    width: 20vw;
+    left: 0;
+    width: 21vw;
     height: 50px;
     background: $black;
     border-top-left-radius: 100px;

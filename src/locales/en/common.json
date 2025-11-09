@@ -29,8 +29,8 @@
     "admin": "Admin"
   },
   "home": {
-    "title": "Professional Real Estate in Burgas",
-    "subtitle": "Find your ideal property - apartments, houses, villas and commercial properties",
+    "title": "RENTALS | SALES | PROPERTY VALUATIONS | CREDIT CONSULTING",
+    "subtitle": "Professional services for rental, sale and valuation of properties in Burgas. Credit consulting and full support for every transaction.",
     "tagline": "One passion, your home!",
     "searchPlaceholder": "Search properties...",
     "featuredProperties": "Featured Properties",
@@ -74,3 +74,4 @@
     "removeFromFavorites": "Remove from Favorites"
   }
 }
+
