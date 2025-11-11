@@ -83,7 +83,7 @@
   padding: $spacing-sm $spacing-xl;
   text-align: center;
   color: $white;
-  margin-top: -7vh;
+  margin-top: -9vh;
 
   &::before {
     content: '';
@@ -116,18 +116,7 @@
   margin-bottom: $spacing-lg;
   color: $dark-red;
   width: 70vw;
-  padding-bottom: $spacing-xl;
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 85%;
-    height: 2px;
-    background: $dark-red;
-  }
+  padding-bottom: $spacing-md;
 
   @media (max-width: $breakpoint-md) {
     font-size: 1.8rem;
