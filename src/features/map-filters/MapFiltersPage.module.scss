@@ -1,0 +1,416 @@
+@use '@/styles/variables' as *;
+@use 'sass:color';
+
+.mapFiltersPage {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: $light-gray;
+}
+
+.main {
+    flex: 1;
+    padding: $spacing-xl 0;
+
+    @media (max-width: $breakpoint-md) {
+        padding: $spacing-lg 0;
+    }
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 $spacing-lg;
+
+    @media (max-width: $breakpoint-md) {
+        padding: 0 $spacing-md;
+    }
+}
+
+.header {
+    margin-bottom: $spacing-xl;
+
+    .backButton {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        margin-bottom: $spacing-lg;
+        background-color: $white !important;
+        border-color: $red !important;
+        color: $red !important;
+
+        &:hover {
+            background-color: $red !important;
+            color: $white !important;
+        }
+    }
+
+    .title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: $black;
+        margin-bottom: $spacing-md;
+        font-family: $font-heading;
+
+        @media (max-width: $breakpoint-md) {
+            font-size: 2rem;
+        }
+    }
+
+    .subtitle {
+        font-size: 1.125rem;
+        color: $dark-gray;
+        max-width: 600px;
+
+        @media (max-width: $breakpoint-md) {
+            font-size: 1rem;
+        }
+    }
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: $spacing-xl;
+
+    @media (max-width: $breakpoint-lg) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mapSection {
+    background: $white;
+    border-radius: 24px;
+    padding: $spacing-xl;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    @media (max-width: $breakpoint-md) {
+        padding: $spacing-lg;
+    }
+}
+
+.mapContainer {
+    width: 100%;
+    height: 600px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 3px solid $dark-red;
+    position: relative;
+
+    @media (max-width: $breakpoint-md) {
+        height: 400px;
+    }
+
+    // Leaflet map styles
+    :global(.leaflet-container) {
+        font-family: $font-body;
+    }
+
+    :global(.leaflet-popup-content-wrapper) {
+        border-radius: 8px;
+    }
+
+    :global(.leaflet-tooltip) {
+        font-family: $font-body;
+        font-weight: 600;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: $white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    :global(.leaflet-div-icon.custom-neighborhood-label) {
+        background: none !important;
+        border: none !important;
+    }
+
+    :global(.custom-neighborhood-label) {
+        div:hover {
+            background-color: rgba(222, 21, 16, 0.85) !important;
+            backdrop-filter: blur(12px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+            color: white !important;
+            transform: scale(1.08);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(222, 21, 16, 0.5);
+            border-color: rgba(222, 21, 16, 1) !important;
+        }
+    }
+
+    :global(.leaflet-pane.leaflet-overlay-pane) {
+        svg {
+            filter: none;
+        }
+    }
+}
+
+.mapBackButton {
+    position: absolute;
+    top: 16px;
+    left: 70px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background-color: $dark-red;
+    color: $white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all $transition-base;
+
+    &:hover {
+        background-color: color.adjust($dark-red, $lightness: -10%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    span {
+        white-space: nowrap;
+    }
+
+    @media (max-width: $breakpoint-md) {
+        padding: $spacing-xs $spacing-sm;
+        font-size: 0.8rem;
+
+        span {
+            display: none;
+        }
+    }
+}
+
+.leafletTooltip {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    color: $white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+}
+
+.neighborhoodLabel {
+    background: none !important;
+    border: none !important;
+    text-align: center;
+    pointer-events: all !important;
+    cursor: pointer;
+
+    .labelText {
+        background-color: rgba(0, 0, 0, 0.75);
+        color: $white;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: center;
+        white-space: normal;
+        word-wrap: break-word;
+        line-height: 1.2;
+        max-width: 100px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        pointer-events: all;
+
+        &:hover {
+            background-color: $red;
+            transform: scale(1.05);
+        }
+    }
+}
+
+
+.infoSection {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+}
+
+.selectionInfo {
+    background: $white;
+    border-radius: 16px;
+    padding: $spacing-lg;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: $black;
+        margin-bottom: $spacing-md;
+    }
+
+    .selectedCity {
+        h4 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: $red;
+            margin-bottom: $spacing-md;
+        }
+
+        .municipalityDetails {
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-sm;
+
+            p {
+                font-size: 0.9rem;
+                color: $dark-gray;
+                margin: 0;
+
+                strong {
+                    color: $black;
+                    font-weight: 600;
+                }
+            }
+
+            .description {
+                margin-top: $spacing-sm;
+                padding: $spacing-sm;
+                background: $light-gray;
+                border-radius: 8px;
+                font-style: italic;
+                font-size: 0.875rem;
+            }
+        }
+    }
+
+    .hint {
+        color: $dark-gray;
+        font-size: 0.875rem;
+        font-style: italic;
+    }
+
+    .selectedNeighborhoodsList {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+        margin-bottom: $spacing-md;
+    }
+
+    .selectedNeighborhoodItem {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: $spacing-sm $spacing-md;
+        background: color.adjust($red, $lightness: 45%);
+        border-radius: 8px;
+        border-left: 4px solid $red;
+
+        span:first-child {
+            font-weight: 600;
+            color: $black;
+        }
+
+        .population {
+            font-size: 0.875rem;
+            color: $dark-gray;
+            font-weight: 400;
+        }
+    }
+
+    .totalPopulation {
+        padding: $spacing-md;
+        background: $light-gray;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 1rem;
+        color: $black;
+
+        strong {
+            color: $red;
+        }
+    }
+}
+
+.neighborhoodsSection {
+    background: $white;
+    border-radius: 16px;
+    padding: $spacing-lg;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    h4 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: $black;
+        margin-bottom: $spacing-md;
+    }
+
+    .neighborhoodsList {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+    }
+
+    .neighborhoodButton {
+        padding: $spacing-md;
+        border: 2px solid $light-gray;
+        border-radius: 12px;
+        background: $white;
+        color: $dark-gray;
+        font-size: 1rem;
+        font-weight: 500;
+        text-align: left;
+        cursor: pointer;
+        transition: all $transition-base;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &:hover {
+            border-color: $red;
+            color: $red;
+            background: color.adjust($red, $lightness: 45%);
+        }
+
+        &.active {
+            background: $red;
+            color: $white;
+            border-color: $red;
+
+            .checkmark {
+                display: inline;
+            }
+        }
+
+        .checkmark {
+            display: none;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-left: $spacing-sm;
+        }
+    }
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+    margin-top: auto;
+
+    .backButton {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-sm;
+    }
+
+    button {
+        flex: 1;
+        min-width: 120px;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}

@@ -1,0 +1,279 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "burgas",
+        "name": "Бургас",
+        "nameEn": "Burgas",
+        "area": 559.6,
+        "population": 229250,
+        "description": "Административен център на областта"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [27.42, 42.56],
+          [27.54, 42.56],
+          [27.54, 42.45],
+          [27.42, 42.45],
+          [27.42, 42.56]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "nesebar",
+        "name": "Несебър",
+        "nameEn": "Nesebar",
+        "area": 282.0,
+        "population": 28400,
+        "description": "Древен град на брега на Черно море"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [27.64, 42.70],
+          [27.78, 42.70],
+          [27.78, 42.60],
+          [27.64, 42.60],
+          [27.64, 42.70]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "pomorie",
+        "name": "Поморие",
+        "nameEn": "Pomorie",
+        "area": 333.0,
+        "population": 27750,
+        "description": "Известен курортен и балнеоложки център"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [27.54, 42.66],
+          [27.68, 42.66],
+          [27.68, 42.54],
+          [27.54, 42.54],
+          [27.54, 42.66]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sozopol",
+        "name": "Созопол",
+        "nameEn": "Sozopol",
+        "area": 523.0,
+        "population": 13000,
+        "description": "Древен приморски град с богата история"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [27.62, 42.45],
+          [27.76, 42.45],
+          [27.76, 42.32],
+          [27.62, 42.32],
+          [27.62, 42.45]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "primorsko",
+        "name": "Приморско",
+        "nameEn": "Primorsko",
+        "area": 109.0,
+        "population": 3200,
+        "description": "Морски курорт на Черноморието"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [27.68, 42.32],
+          [27.78, 42.32],
+          [27.78, 42.22],
+          [27.68, 42.22],
+          [27.68, 42.32]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "tsarevo",
+        "name": "Царево",
+        "nameEn": "Tsarevo",
+        "area": 448.0,
+        "population": 6050,
+        "description": "Рибарски град и морски курорт"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [27.78, 42.26],
+          [27.92, 42.26],
+          [27.92, 42.12],
+          [27.78, 42.12],
+          [27.78, 42.26]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "malko-tarnovo",
+        "name": "Малко Търново",
+        "nameEn": "Malko Tarnovo",
+        "area": 701.0,
+        "population": 3800,
+        "description": "Най-южната община в България"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [27.38, 42.12],
+          [27.68, 42.12],
+          [27.68, 41.94],
+          [27.38, 41.94],
+          [27.38, 42.12]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sredets",
+        "name": "Средец",
+        "nameEn": "Sredets",
+        "area": 648.0,
+        "population": 11600,
+        "description": "Земеделски и промишлен център"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [27.10, 42.42],
+          [27.34, 42.42],
+          [27.34, 42.22],
+          [27.10, 42.22],
+          [27.10, 42.42]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "aytos",
+        "name": "Айтос",
+        "nameEn": "Aytos",
+        "area": 343.0,
+        "population": 23600,
+        "description": "Важен транспортен и икономически център"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [27.18, 42.72],
+          [27.36, 42.72],
+          [27.36, 42.58],
+          [27.18, 42.58],
+          [27.18, 42.72]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "karnobat",
+        "name": "Карнобат",
+        "nameEn": "Karnobat",
+        "area": 644.0,
+        "population": 19600,
+        "description": "Исторически и стопански център"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [26.86, 42.74],
+          [27.10, 42.74],
+          [27.10, 42.56],
+          [26.86, 42.56],
+          [26.86, 42.74]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sungurlare",
+        "name": "Сунгурларе",
+        "nameEn": "Sungurlare",
+        "area": 706.0,
+        "population": 11000,
+        "description": "Аграрна община в северната част"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [26.70, 42.92],
+          [26.98, 42.92],
+          [26.98, 42.72],
+          [26.70, 42.72],
+          [26.70, 42.92]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "ruen",
+        "name": "Руен",
+        "nameEn": "Ruen",
+        "area": 574.0,
+        "population": 5800,
+        "description": "Планинска община с природни богатства"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [27.10, 42.74],
+          [27.34, 42.74],
+          [27.34, 42.58],
+          [27.10, 42.58],
+          [27.10, 42.74]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "kameno",
+        "name": "Камено",
+        "nameEn": "Kameno",
+        "area": 299.0,
+        "population": 5800,
+        "description": "Селска община близо до Бургас"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [27.34, 42.58],
+          [27.48, 42.58],
+          [27.48, 42.46],
+          [27.34, 42.46],
+          [27.34, 42.58]
+        ]]
+      }
+    }
+  ]
+}
+

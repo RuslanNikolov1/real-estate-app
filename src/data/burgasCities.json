@@ -1,0 +1,340 @@
+{
+    "cities": [
+        {
+            "id": "burgas",
+            "name": "Бургас",
+            "nameEn": "Burgas",
+            "coordinates": [
+                42.5048,
+                27.4626
+            ],
+            "population": 229250,
+            "description": "Административен и икономически център на област Бургас",
+            "type": "major"
+        },
+        {
+            "id": "aytos",
+            "name": "Айтос",
+            "nameEn": "Aytos",
+            "coordinates": [
+                42.7000,
+                27.2500
+            ],
+            "population": 23562,
+            "description": "Важен транспортен и икономически център",
+            "type": "major"
+        },
+        {
+            "id": "karnobat",
+            "name": "Карнобат",
+            "nameEn": "Karnobat",
+            "coordinates": [
+                42.6500,
+                26.9833
+            ],
+            "population": 18239,
+            "description": "Исторически и стопански център",
+            "type": "major"
+        },
+        {
+            "id": "pomorie",
+            "name": "Поморие",
+            "nameEn": "Pomorie",
+            "coordinates": [
+                42.5586,
+                27.6394
+            ],
+            "population": 13569,
+            "description": "Известен балнеологичен и винарски център",
+            "type": "major"
+        },
+        {
+            "id": "nesebar",
+            "name": "Несебър",
+            "nameEn": "Nesebar",
+            "coordinates": [
+                42.6583,
+                27.7361
+            ],
+            "population": 11626,
+            "description": "Древен град, включен в списъка на ЮНЕСКО",
+            "type": "major"
+        },
+        {
+            "id": "sungurlare",
+            "name": "Сунгурларе",
+            "nameEn": "Sungurlare",
+            "coordinates": [
+                42.7667,
+                26.7833
+            ],
+            "population": 10259,
+            "description": "Аграрна община в северната част",
+            "type": "major"
+        },
+        {
+            "id": "sredets",
+            "name": "Средец",
+            "nameEn": "Sredets",
+            "coordinates": [
+                42.3500,
+                27.1833
+            ],
+            "population": 8992,
+            "description": "Земеделски и промишлен център",
+            "type": "medium"
+        },
+        {
+            "id": "tsarevo",
+            "name": "Царево",
+            "nameEn": "Tsarevo",
+            "coordinates": [
+                42.1706,
+                27.8461
+            ],
+            "population": 5884,
+            "description": "Рибарски град и морски курорт",
+            "type": "medium"
+        },
+        {
+            "id": "sozopol",
+            "name": "Созопол",
+            "nameEn": "Sozopol",
+            "coordinates": [
+                42.4186,
+                27.6956
+            ],
+            "population": 5410,
+            "description": "Древен приморски град с богата история",
+            "type": "medium"
+        },
+        {
+            "id": "ruen",
+            "name": "Руен",
+            "nameEn": "Ruen",
+            "coordinates": [
+                42.8333,
+                27.2667
+            ],
+            "population": 4500,
+            "description": "Планинска община с природни богатства",
+            "type": "small"
+        },
+        {
+            "id": "kameno",
+            "name": "Камено",
+            "nameEn": "Kameno",
+            "coordinates": [
+                42.5167,
+                27.2500
+            ],
+            "population": 4200,
+            "description": "Селска община близо до Бургас",
+            "type": "small"
+        },
+        {
+            "id": "primorsko",
+            "name": "Приморско",
+            "nameEn": "Primorsko",
+            "coordinates": [
+                42.2689,
+                27.7578
+            ],
+            "population": 2828,
+            "description": "Морски курорт на Черноморието",
+            "type": "small"
+        },
+        {
+            "id": "malko-tarnovo",
+            "name": "Малко Търново",
+            "nameEn": "Malko Tarnovo",
+            "coordinates": [
+                42.0167,
+                27.5333
+            ],
+            "population": 2117,
+            "description": "Най-южният град в България",
+            "type": "small"
+        },
+        {
+            "id": "obzor",
+            "name": "Обзор",
+            "nameEn": "Obzor",
+            "coordinates": [
+                42.8167,
+                27.8833
+            ],
+            "population": 2300,
+            "description": "Морски курорт между Варна и Бургас",
+            "type": "small"
+        },
+        {
+            "id": "aheloy",
+            "name": "Ахелой",
+            "nameEn": "Aheloy",
+            "coordinates": [
+                42.6500,
+                27.6500
+            ],
+            "population": 2100,
+            "description": "Курортно селище",
+            "type": "small"
+        },
+        {
+            "id": "chernomorets",
+            "name": "Черноморец",
+            "nameEn": "Chernomorets",
+            "coordinates": [
+                42.4500,
+                27.6333
+            ],
+            "population": 2300,
+            "description": "Рибарско селище и морски курорт",
+            "type": "small"
+        },
+        {
+            "id": "kiten",
+            "name": "Китен",
+            "nameEn": "Kiten",
+            "coordinates": [
+                42.2333,
+                27.7667
+            ],
+            "population": 1200,
+            "description": "Малък морски курорт",
+            "type": "small"
+        },
+        {
+            "id": "ahtopol",
+            "name": "Ахтопол",
+            "nameEn": "Ahtopol",
+            "coordinates": [
+                42.0997,
+                27.9436
+            ],
+            "population": 1200,
+            "description": "Най-южното селище на Черноморието",
+            "type": "small"
+        },
+        {
+            "id": "sveti-vlas",
+            "name": "Свети Влас",
+            "nameEn": "Sveti Vlas",
+            "coordinates": [
+                42.7167,
+                27.7667
+            ],
+            "population": 3500,
+            "description": "Планинско-морски курорт",
+            "type": "small"
+        },
+        {
+            "id": "sunny-beach",
+            "name": "Слънчев бряг",
+            "nameEn": "Sunny Beach",
+            "coordinates": [
+                42.6944,
+                27.7139
+            ],
+            "population": 800,
+            "description": "Най-големият морски курорт в България",
+            "type": "small"
+        },
+        {
+            "id": "ravda",
+            "name": "Равда",
+            "nameEn": "Ravda",
+            "coordinates": [
+                42.6500,
+                27.6667
+            ],
+            "population": 2500,
+            "description": "Морски курорт и рибарско селище",
+            "type": "small"
+        },
+        {
+            "id": "tankovo",
+            "name": "Tanково",
+            "nameEn": "Tankovo",
+            "coordinates": [
+                42.4833,
+                27.1167
+            ],
+            "population": 1800,
+            "description": "Село в община Средец",
+            "type": "small"
+        },
+        {
+            "id": "bratovo",
+            "name": "Братово",
+            "nameEn": "Bratovo",
+            "coordinates": [
+                42.6333,
+                27.3167
+            ],
+            "population": 1500,
+            "description": "Село в община Айтос",
+            "type": "small"
+        },
+        {
+            "id": "kosharitsa",
+            "name": "Кошарица",
+            "nameEn": "Kosharitsa",
+            "coordinates": [
+                42.7167,
+                27.7333
+            ],
+            "population": 2000,
+            "description": "Село близо до морските курорти",
+            "type": "small"
+        },
+        {
+            "id": "emona",
+            "name": "Емона",
+            "nameEn": "Emona",
+            "coordinates": [
+                42.6167,
+                27.0000
+            ],
+            "population": 1400,
+            "description": "Село в община Карнобат",
+            "type": "small"
+        },
+        {
+            "id": "lozenets",
+            "name": "Лозенец",
+            "nameEn": "Lozenets",
+            "coordinates": [
+                42.2167,
+                27.7833
+            ],
+            "population": 500,
+            "description": "Малък морски курорт",
+            "type": "small"
+        },
+        {
+            "id": "dyuni",
+            "name": "Дюни",
+            "nameEn": "Dyuni",
+            "coordinates": [
+                42.3833,
+                27.7000
+            ],
+            "population": 200,
+            "description": "Луксозен курортен комплекс",
+            "type": "small"
+        },
+        {
+            "id": "rossenovo",
+            "name": "Росеново",
+            "nameEn": "Rossenovo",
+            "coordinates": [
+                42.6833,
+                27.1500
+            ],
+            "population": 1100,
+            "description": "Село в община Айтос",
+            "type": "small"
+        }
+    ]
+}

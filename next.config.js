@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   images: {
     domains: [
       'res.cloudinary.com',
@@ -15,6 +15,11 @@ const nextConfig = {
   },
   sassOptions: {
     includePaths: ['./src/styles'],
+  },
+  experimental: {
+    turbo: {
+      root: __dirname,
+    },
   },
 };
 

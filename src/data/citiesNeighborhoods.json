@@ -1,0 +1,377 @@
+{
+    "burgas": {
+        "cityName": "Бургас",
+        "neighborhoods": [
+            {
+                "id": "central-burgas",
+                "name": "Централна градска част",
+                "nameEn": "Central Burgas",
+                "coordinates": [
+                    42.4972256,
+                    27.4762273
+                ],
+                "population": 20000
+            },
+            {
+                "id": "sarafovo",
+                "name": "кв. Сарафово",
+                "nameEn": "Sarafovo",
+                "coordinates": [
+                    42.5608286,
+                    27.5229259
+                ],
+                "population": 10000
+            },
+            {
+                "id": "kraymorie",
+                "name": "кв. Крайморие",
+                "nameEn": "Kraymorie",
+                "coordinates": [
+                    42.4459375,
+                    27.4870547
+                ],
+                "population": 4000
+            },
+            {
+                "id": "dolno-ezerovo",
+                "name": "кв. Долно Езерово",
+                "nameEn": "Dolno Ezerovo",
+                "coordinates": [
+                    42.5170228,
+                    27.3721845
+                ],
+                "population": 14000
+            },
+            {
+                "id": "gorno-ezerovo",
+                "name": "кв. Горно Езерово",
+                "nameEn": "Gorno Ezerovo",
+                "coordinates": [
+                    42.4841476,
+                    27.3787553
+                ],
+                "population": 16000
+            },
+            {
+                "id": "pobeda",
+                "name": "кв. Победа",
+                "nameEn": "Pobeda",
+                "coordinates": [
+                    42.4783798,
+                    27.4432717
+                ],
+                "population": 8000
+            },
+            {
+                "id": "akaciite",
+                "name": "кв. Акациите",
+                "nameEn": "Akaciite",
+                "coordinates": [
+                    42.4877789,
+                    27.4481562
+                ],
+                "population": 7000
+            },
+            {
+                "id": "meden-rudnik",
+                "name": "ж.к. Меден рудник",
+                "nameEn": "Meden Rudnik",
+                "coordinates": [
+                    42.4566495,
+                    27.4160902
+                ],
+                "population": 22000
+            },
+            {
+                "id": "vazrazhdane",
+                "name": "ж.к. Възраждане",
+                "nameEn": "Vazrazhdane",
+                "coordinates": [
+                    42.4963279,
+                    27.4649192
+                ],
+                "population": 13000
+            },
+            {
+                "id": "bratya-miladinovi",
+                "name": "ж.к. Братя Миладинови",
+                "nameEn": "Bratya Miladinovi",
+                "coordinates": [
+                    42.5053595,
+                    27.4658866
+                ],
+                "population": 11000
+            },
+            {
+                "id": "lazur",
+                "name": "ж.к. Лазур",
+                "nameEn": "Lazur",
+                "coordinates": [
+                    42.5067369,
+                    27.4778636
+                ],
+                "population": 9000
+            },
+            {
+                "id": "zornitsa",
+                "name": "ж.к. Зорница",
+                "nameEn": "Zornitsa",
+                "coordinates": [
+                    42.5176014,
+                    27.4659768
+                ],
+                "population": 7000
+            },
+            {
+                "id": "slaveykov",
+                "name": "ж.к. П. Р. Славейков",
+                "nameEn": "P.R. Slaveykov",
+                "coordinates": [
+                    42.5199543,
+                    27.4524303
+                ],
+                "population": 18000
+            },
+            {
+                "id": "izgrev",
+                "name": "ж.к. Изгрев",
+                "nameEn": "Izgrev",
+                "coordinates": [
+                    42.5254472,
+                    27.4623755
+                ],
+                "population": 12000
+            },
+            {
+                "id": "lozovo",
+                "name": "кв. Лозово",
+                "nameEn": "Lozovo",
+                "coordinates": [
+                    42.5330445,
+                    27.4093630
+                ],
+                "population": 15000
+            },
+            {
+                "id": "horizont",
+                "name": "кв. Хоризонт",
+                "nameEn": "Horizont",
+                "coordinates": [
+                    42.5324188,
+                    27.4531544
+                ],
+                "population": 5000
+            },
+            {
+                "id": "madika",
+                "name": "кв. Мадика",
+                "nameEn": "Madika",
+                "coordinates": [
+                    42.5274180,
+                    27.4426406
+                ],
+                "population": 6000
+            }
+        ]
+    },
+    "nesebar": {
+        "cityName": "Несебър",
+        "neighborhoods": [
+            {
+                "id": "old-nesebar",
+                "name": "Старият Несебър",
+                "nameEn": "Old Nessebur",
+                "coordinates": [
+                    42.6587634,
+                    27.7347488
+                ],
+                "population": 2000
+            },
+            {
+                "id": "perla",
+                "name": "ж.к. Перла",
+                "nameEn": "Perla",
+                "coordinates": [
+                    42.6571621,
+                    27.7167827
+                ],
+                "population": 3000
+            },
+            {
+                "id": "mladost",
+                "name": "ж.к. Младост",
+                "nameEn": "Mladost",
+                "coordinates": [
+                    42.6595888,
+                    27.7144359
+                ],
+                "population": 4000
+            },
+            {
+                "id": "cherno-more",
+                "name": "кв. Черно море",
+                "nameEn": "Cherno more",
+                "coordinates": [
+                    42.6564690,
+                    27.7040342
+                ],
+                "population": 2500
+            },
+            {
+                "id": "hristo-kudev",
+                "name": "кв. Христо Кудев",
+                "nameEn": "Hristo Kudev",
+                "coordinates": [
+                    42.6603398,
+                    27.7221928
+                ],
+                "population": 3500
+            },
+            {
+                "id": "aurelia",
+                "name": "кв. Аурелия",
+                "nameEn": "Aurelia",
+                "coordinates": [
+                    42.6534115,
+                    27.6948950
+                ],
+                "population": 2000
+            },
+            {
+                "id": "stadiona",
+                "name": "кв. Стадиона",
+                "nameEn": "Stadiona",
+                "coordinates": [
+                    42.6689026,
+                    27.7052850
+                ],
+                "population": 1500
+            },
+            {
+                "id": "piasatsite",
+                "name": "кв. Пясъците",
+                "nameEn": "Piasatsite",
+                "coordinates": [
+                    42.6768171,
+                    27.7042881
+                ],
+                "population": 1000
+            },
+            {
+                "id": "fregata",
+                "name": "кв. Фрегата",
+                "nameEn": "Fregata",
+                "coordinates": [
+                    42.6725411,
+                    27.7054851
+                ],
+                "population": 1200
+            },
+            {
+                "id": "kamelia",
+                "name": "кв. Камелия",
+                "nameEn": "Kamelia",
+                "coordinates": [
+                    42.6935719,
+                    27.7070965
+                ],
+                "population": 800
+            },
+            {
+                "id": "cherno-more-1",
+                "name": "кв. Черно море 1",
+                "nameEn": "Cherno more 1",
+                "coordinates": [
+                    42.6621370,
+                    27.7030301
+                ],
+                "population": 1800
+            }
+        ]
+    },
+    "pomorie": {
+        "cityName": "Поморие",
+        "neighborhoods": [
+            {
+                "id": "sveti-georgi",
+                "name": "кв. Свети Георги",
+                "nameEn": "Sveti Georgi",
+                "coordinates": [
+                    42.5699050,
+                    27.6135098
+                ],
+                "population": 3000
+            },
+            {
+                "id": "stariya-grad",
+                "name": "кв. Стария град",
+                "nameEn": "Stariya grad",
+                "coordinates": [
+                    42.5563552,
+                    27.6449962
+                ],
+                "population": 5000
+            },
+            {
+                "id": "svoboda",
+                "name": "кв. Свобода",
+                "nameEn": "Svoboda",
+                "coordinates": [
+                    42.5635178,
+                    27.6297643
+                ],
+                "population": 4000
+            }
+        ]
+    },
+    "sozopol": {
+        "cityName": "Созопол",
+        "neighborhoods": [
+            {
+                "id": "budzhaka",
+                "name": "Буджака",
+                "nameEn": "Budzhaka",
+                "coordinates": [
+                    42.4046708,
+                    27.7174119
+                ],
+                "population": 2000
+            }
+        ]
+    },
+    "aytos": {
+        "cityName": "Айтос",
+        "neighborhoods": [
+            {
+                "id": "novia-kvartal",
+                "name": "Новия квартал",
+                "nameEn": "Novia kvartal",
+                "coordinates": [
+                    42.6987205,
+                    27.2461282
+                ],
+                "population": 5000
+            },
+            {
+                "id": "strandzha",
+                "name": "кв. Странджа",
+                "nameEn": "Strandzha",
+                "coordinates": [
+                    42.6971864,
+                    27.2709559
+                ],
+                "population": 4000
+            },
+            {
+                "id": "emirovski",
+                "name": "Емировски кв.",
+                "nameEn": "Emirovski",
+                "coordinates": [
+                    42.7113093,
+                    27.2528178
+                ],
+                "population": 3500
+            }
+        ]
+    }
+}

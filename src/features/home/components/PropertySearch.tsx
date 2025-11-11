@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { Search, X, ChevronDown } from 'lucide-react';
+import { Search, X, ChevronDown, Map } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -21,6 +22,7 @@ export function PropertySearch({
   onExpand,
 }: PropertySearchProps) {
   const { t } = useTranslation();
+  const router = useRouter();
   const [filters, setFilters] = useState<PropertySearchFilters>({
     location_type: [],
     type: [],
@@ -258,12 +260,22 @@ export function PropertySearch({
                 </div>
 
                 <div className={styles.searchActions}>
-                  <Button variant="outline" onClick={() => setFilters({})}>
-                    {t('common.clear')}
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push('/map-filters')}
+                    className={styles.extendedFiltersButton}
+                  >
+                    <Map size={18} />
+                    Разширени филтри
                   </Button>
-                  <Button variant="primary" onClick={handleSearch}>
-                    {t('common.search')}
-                  </Button>
+                  <div className={styles.rightActions}>
+                    <Button variant="outline" onClick={() => setFilters({})}>
+                      {t('common.clear')}
+                    </Button>
+                    <Button variant="primary" onClick={handleSearch}>
+                      {t('common.search')}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </motion.div>
