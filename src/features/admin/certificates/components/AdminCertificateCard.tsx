@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { Edit, Trash2, ChevronUp, ChevronDown, Award } from 'lucide-react';
+import { PencilSimple, Trash, CaretUp, CaretDown, Medal } from '@phosphor-icons/react';
 import { Certificate } from '@/types';
 import { Button } from '@/components/ui/Button';
 import styles from './AdminCertificateCard.module.scss';
@@ -42,7 +42,7 @@ export function AdminCertificateCard({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <div className={styles.orderBadge}>
-          <Award size={16} />
+          <Medal size={16} />
           <span>#{certificate.order}</span>
         </div>
       </div>
@@ -62,7 +62,7 @@ export function AdminCertificateCard({
             className={styles.orderButton}
             aria-label="Move up"
           >
-            <ChevronUp size={16} />
+            <CaretUp size={16} />
           </button>
           <button
             onClick={onMoveDown}
@@ -70,16 +70,16 @@ export function AdminCertificateCard({
             className={styles.orderButton}
             aria-label="Move down"
           >
-            <ChevronDown size={16} />
+            <CaretDown size={16} />
           </button>
         </div>
         <div className={styles.actionButtons}>
           <Button variant="outline" size="sm" onClick={onEdit}>
-            <Edit size={16} />
+            <PencilSimple size={16} />
             Редактирай
           </Button>
           <Button variant="ghost" size="sm" onClick={onDelete}>
-            <Trash2 size={16} />
+            <Trash size={16} />
             Изтрий
           </Button>
         </div>
@@ -87,6 +87,7 @@ export function AdminCertificateCard({
     </motion.div>
   );
 }
+
 
 
 

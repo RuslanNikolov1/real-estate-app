@@ -11,10 +11,10 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import {
   Calculator,
-  TrendingUp,
-  Send,
+  TrendUp,
+  PaperPlaneTilt,
   CheckCircle,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import styles from './ValuationPage.module.scss';
 
 const valuationRequestSchema = z.object({
@@ -138,7 +138,7 @@ export function ValuationPage() {
               onClick={() => setActiveTab('future')}
               className={`${styles.tab} ${activeTab === 'future' ? styles.active : ''}`}
             >
-              <TrendingUp size={20} />
+              <TrendUp size={20} />
               Прогноза за бъдеща цена
             </button>
           </div>
@@ -277,7 +277,7 @@ export function ValuationPage() {
                     disabled={isSubmittingRequest}
                     className={styles.submitButton}
                   >
-                    <Send size={20} />
+                    <PaperPlaneTilt size={20} />
                     {isSubmittingRequest ? 'Изпращане...' : 'Изпрати заявка'}
                   </Button>
                 </form>
@@ -331,7 +331,7 @@ export function ValuationPage() {
                         className={styles.previewCard}
                       >
                         <div className={styles.previewHeader}>
-                          <TrendingUp size={24} />
+                          <TrendUp size={24} />
                           <h3>Прогнозна цена</h3>
                         </div>
                         <div className={styles.previewContent}>

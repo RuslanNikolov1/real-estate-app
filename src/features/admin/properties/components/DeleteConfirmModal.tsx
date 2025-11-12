@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, AlertTriangle } from 'lucide-react';
+import { X, Trash, Warning } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { Property } from '@/types';
 import styles from './DeleteConfirmModal.module.scss';
@@ -42,7 +42,7 @@ export function DeleteConfirmModal({
           >
             <div className={styles.modalHeader}>
               <div className={styles.iconContainer}>
-                <AlertTriangle size={32} className={styles.warningIcon} />
+                <Warning size={32} className={styles.warningIcon} />
               </div>
               <h2>Потвърждение за изтриване</h2>
               <button onClick={onClose} className={styles.closeButton}>
@@ -85,7 +85,7 @@ export function DeleteConfirmModal({
                 disabled={isDeleting}
                 className={styles.deleteButton}
               >
-                <Trash2 size={20} />
+                <Trash size={20} />
                 {isDeleting ? 'Изтриване...' : 'Изтрий имота'}
               </Button>
             </div>
@@ -95,6 +95,7 @@ export function DeleteConfirmModal({
     </AnimatePresence>
   );
 }
+
 
 
 

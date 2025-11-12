@@ -13,7 +13,6 @@ import { CertificatesMemberships } from './components/CertificatesMemberships';
 import { ContactBroker } from './components/ContactBroker';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { PropertySearchFilters } from '@/types';
 import styles from './HomePage.module.scss';
 
 export function HomePage() {
@@ -72,10 +71,6 @@ export function HomePage() {
     },
   });
 
-  const handleSearch = (filters: PropertySearchFilters) => {
-    // TODO: Navigate to properties page with filters
-    console.log('Search filters:', filters);
-  };
 
   return (
     <div className={styles.homePage}>
@@ -100,7 +95,6 @@ export function HomePage() {
             </p>
             <div className={styles.searchWrapper}>
               <PropertySearch
-                onSearch={handleSearch}
                 isExpanded={isSearchExpanded}
                 onExpand={() => setIsSearchExpanded(!isSearchExpanded)}
               />

@@ -26,7 +26,7 @@ A modern, professional real estate website built with Next.js 14, TypeScript, an
 - **Forms**: React Hook Form + Zod
 - **Rich Text Editor**: Plate
 - **Animations**: Framer Motion
-- **Icons**: Lucide React
+- **Icons**: Phosphore Icons
 - **Maps**: Mapbox
 - **i18n**: react-i18next
 

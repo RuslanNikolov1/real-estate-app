@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { Award } from 'lucide-react';
+import { Medal } from '@phosphor-icons/react';
 import { Certificate } from '@/types';
 import styles from './CertificateCard.module.scss';
 
@@ -28,7 +28,7 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <div className={styles.overlay}>
-          <Award className={styles.icon} size={32} />
+          <Medal className={styles.icon} size={32} />
         </div>
       </div>
       <div className={styles.content}>
@@ -40,6 +40,7 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
     </motion.div>
   );
 }
+
 
 
 

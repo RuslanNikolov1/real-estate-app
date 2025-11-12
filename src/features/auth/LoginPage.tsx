@@ -11,7 +11,15 @@ import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { supabase } from '@/lib/supabase';
-import { Mail, Lock, LogIn, UserPlus, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import {
+  EnvelopeSimple,
+  Lock,
+  SignIn,
+  UserPlus,
+  Eye,
+  EyeSlash,
+  WarningCircle
+} from '@phosphor-icons/react';
 import styles from './LoginPage.module.scss';
 
 const loginSchema = z.object({
@@ -187,7 +195,7 @@ export function LoginPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className={styles.errorMessage}
               >
-                <AlertCircle size={20} />
+                <WarningCircle size={20} />
                 <span>{error}</span>
               </motion.div>
             )}
@@ -205,7 +213,7 @@ export function LoginPage() {
             {mode === 'login' && (
               <form onSubmit={handleSubmitLogin(onLogin)} className={styles.form}>
                 <div className={styles.inputGroup}>
-                  <Mail size={20} className={styles.inputIcon} />
+                  <EnvelopeSimple size={20} className={styles.inputIcon} />
                   <Input
                     type="email"
                     placeholder="Имейл"
@@ -228,7 +236,7 @@ export function LoginPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     className={styles.passwordToggle}
                   >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showPassword ? <EyeSlash size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
                 <button
@@ -245,7 +253,7 @@ export function LoginPage() {
                   disabled={isLoading}
                   className={styles.submitButton}
                 >
-                  <LogIn size={20} />
+                  <SignIn size={20} />
                   {isLoading ? 'Влизане...' : 'Влез'}
                 </Button>
                 <div className={styles.divider}>
@@ -276,7 +284,7 @@ export function LoginPage() {
                   />
                 </div>
                 <div className={styles.inputGroup}>
-                  <Mail size={20} className={styles.inputIcon} />
+                  <EnvelopeSimple size={20} className={styles.inputIcon} />
                   <Input
                     type="email"
                     placeholder="Имейл"
@@ -299,7 +307,7 @@ export function LoginPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     className={styles.passwordToggle}
                   >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showPassword ? <EyeSlash size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
                 <div className={styles.inputGroup}>
@@ -316,7 +324,7 @@ export function LoginPage() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className={styles.passwordToggle}
                   >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showConfirmPassword ? <EyeSlash size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
                 <Button
@@ -339,7 +347,7 @@ export function LoginPage() {
                   onClick={() => setMode('login')}
                   className={styles.switchButton}
                 >
-                  <LogIn size={20} />
+                  <SignIn size={20} />
                   Влез в профил
                 </Button>
               </form>
@@ -351,7 +359,7 @@ export function LoginPage() {
                   Въведете имейл адреса си и ние ще изпратим линк за възстановяване на паролата.
                 </p>
                 <div className={styles.inputGroup}>
-                  <Mail size={20} className={styles.inputIcon} />
+                  <EnvelopeSimple size={20} className={styles.inputIcon} />
                   <Input
                     type="email"
                     placeholder="Имейл"
@@ -367,7 +375,7 @@ export function LoginPage() {
                   disabled={isLoading}
                   className={styles.submitButton}
                 >
-                  <Mail size={20} />
+                  <EnvelopeSimple size={20} />
                   {isLoading ? 'Изпращане...' : 'Изпрати имейл'}
                 </Button>
                 <div className={styles.divider}>
@@ -380,7 +388,7 @@ export function LoginPage() {
                   onClick={() => setMode('login')}
                   className={styles.switchButton}
                 >
-                  <LogIn size={20} />
+                  <SignIn size={20} />
                   Назад към вход
                 </Button>
               </form>
@@ -392,6 +400,7 @@ export function LoginPage() {
     </div>
   );
 }
+
 
 
 

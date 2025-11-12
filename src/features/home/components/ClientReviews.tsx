@@ -3,7 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Star, ChevronRight } from 'lucide-react';
+import { Star, CaretRight } from '@phosphor-icons/react';
 import { Review } from '@/types';
 import { Button } from '@/components/ui/Button';
 import styles from './ClientReviews.module.scss';
@@ -29,7 +29,7 @@ export function ClientReviews({ reviews }: ClientReviewsProps) {
           <Link href="/reviews">
             <Button variant="outline" className={styles.viewAllButton}>
               {t('home.viewAllReviews')}
-              <ChevronRight size={16} />
+              <CaretRight size={16} />
             </Button>
           </Link>
         </div>
@@ -64,6 +64,7 @@ export function ClientReviews({ reviews }: ClientReviewsProps) {
     </section>
   );
 }
+
 
 
 

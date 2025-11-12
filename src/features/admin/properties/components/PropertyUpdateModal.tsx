@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, DollarSign, Tag } from 'lucide-react';
+import { X, FloppyDisk, CurrencyDollar, Tag } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Property } from '@/types';
@@ -115,7 +115,7 @@ export function PropertyUpdateModal({
             <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
               <div className={styles.formSection}>
                 <h3 className={styles.sectionTitle}>
-                  <DollarSign size={20} />
+                  <CurrencyDollar size={20} />
                   Цена
                 </h3>
                 <div className={styles.formRow}>
@@ -154,7 +154,7 @@ export function PropertyUpdateModal({
 
               <div className={styles.formActions}>
                 <Button type="submit" variant="primary" disabled={isSubmitting}>
-                  <Save size={20} /> Запази промените
+                  <FloppyDisk size={20} /> Запази промените
                 </Button>
                 <Button type="button" variant="outline" onClick={onClose}>
                   Отказ

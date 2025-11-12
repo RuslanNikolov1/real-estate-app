@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 import styles from './BurgasSlideshow.module.scss';
 
 interface Slide {
@@ -99,14 +99,14 @@ export function BurgasSlideshow({ slides, description }: BurgasSlideshowProps) {
               onClick={prevSlide}
               aria-label="Previous slide"
             >
-              <ChevronLeft />
+              <CaretLeft size={32} />
             </button>
             <button
               className={`${styles.navButton} ${styles.next}`}
               onClick={nextSlide}
               aria-label="Next slide"
             >
-              <ChevronRight />
+              <CaretRight size={32} />
             </button>
           </>
         )}
@@ -133,6 +133,7 @@ export function BurgasSlideshow({ slides, description }: BurgasSlideshowProps) {
     </div>
   );
 }
+
 
 
 

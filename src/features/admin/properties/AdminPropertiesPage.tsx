@@ -10,7 +10,7 @@ import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Property } from '@/types';
-import { PlusCircle, Search } from 'lucide-react';
+import { PlusCircle, MagnifyingGlass } from '@phosphor-icons/react';
 import { mockProperties } from '@/features/properties/PropertiesListPage';
 import styles from './AdminPropertiesPage.module.scss';
 
@@ -131,7 +131,7 @@ export function AdminPropertiesPage() {
 
           <div className={styles.controls}>
             <div className={styles.searchWrapper}>
-              <Search size={20} className={styles.searchIcon} />
+              <MagnifyingGlass size={20} className={styles.searchIcon} />
               <Input
                 type="text"
                 placeholder="Търсене по заглавие, описание, град или квартал..."

@@ -6,7 +6,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { PropertyCard } from '@/features/properties/components/PropertyCard';
 import { Property } from '@/types';
-import { Heart, Trash2 } from 'lucide-react';
+import { Heart, Trash } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
 import styles from './FavoritesPage.module.scss';
@@ -167,7 +167,7 @@ export function FavoritesPage() {
                     className={styles.removeButton}
                     aria-label="Премахни от любими"
                   >
-                    <Trash2 size={20} />
+                    <Trash size={20} />
                     Премахни
                   </button>
                 </motion.div>
@@ -199,6 +199,7 @@ export function FavoritesPage() {
     </div>
   );
 }
+
 
 
 

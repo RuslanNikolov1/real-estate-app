@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { Edit, Trash2, Eye, RefreshCw } from 'lucide-react';
+import { PencilSimple, Trash, Eye, ArrowsClockwise } from '@phosphor-icons/react';
 import { Property } from '@/types';
 import { Button } from '@/components/ui/Button';
 import styles from './AdminPropertyCard.module.scss';
@@ -61,10 +61,10 @@ export function AdminPropertyCard({
         </div>
         <div className={styles.actions}>
           <Button variant="outline" size="sm" onClick={onEdit}>
-            <Edit size={16} /> Редактирай
+            <PencilSimple size={16} /> Редактирай
           </Button>
           <Button variant="outline" size="sm" onClick={onUpdate}>
-            <RefreshCw size={16} /> Обнови
+            <ArrowsClockwise size={16} /> Обнови
           </Button>
           <Button
             variant="ghost"
@@ -74,7 +74,7 @@ export function AdminPropertyCard({
             <Eye size={16} /> Преглед
           </Button>
           <Button variant="ghost" size="sm" onClick={onDelete}>
-            <Trash2 size={16} /> Изтрий
+            <Trash size={16} /> Изтрий
           </Button>
         </div>
       </div>

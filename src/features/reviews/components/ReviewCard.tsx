@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
+import { Star } from '@phosphor-icons/react';
 import { Review } from '@/types';
 import styles from './ReviewCard.module.scss';
 
@@ -54,6 +54,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
     </motion.div>
   );
 }
+
 
 
 

@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MessageSquare } from 'lucide-react';
+import { EnvelopeSimple, Phone, ChatCircleText } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import styles from './ContactBroker.module.scss';
@@ -56,7 +56,7 @@ export function ContactBroker() {
         <div className={styles.content}>
           <div className={styles.info}>
             <div className={styles.infoItem}>
-              <Mail size={24} />
+              <EnvelopeSimple size={24} />
               <div>
                 <h3>Имейл</h3>
                 <a href="mailto:info@example.com">info@example.com</a>
@@ -70,7 +70,7 @@ export function ContactBroker() {
               </div>
             </div>
             <div className={styles.infoItem}>
-              <MessageSquare size={24} />
+              <ChatCircleText size={24} />
               <div>
                 <h3>Съобщение</h3>
                 <p>Попълнете формата отдясно</p>

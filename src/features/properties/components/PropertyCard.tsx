@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Bed, Bath, Square, Eye } from 'lucide-react';
+import { MapPin, Bed, Bathtub, Square, Eye } from '@phosphor-icons/react';
 import { Property } from '@/types';
 import { useTranslation } from 'react-i18next';
 import styles from './PropertyCard.module.scss';
@@ -77,7 +77,7 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
             )}
             {property.bathrooms && (
               <div className={styles.detail}>
-                <Bath size={18} />
+                <Bathtub size={18} />
                 <span>{property.bathrooms} бани</span>
               </div>
             )}
@@ -102,6 +102,7 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
     </motion.div>
   );
 }
+
 
 
 

@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { MapPin, TrendingUp, Building } from 'lucide-react';
+import { MapPin, TrendUp, Building } from '@phosphor-icons/react';
 import { Neighborhood } from '../NeighborhoodsPage';
 import styles from './NeighborhoodCard.module.scss';
 
@@ -45,7 +45,7 @@ export function NeighborhoodCard({ neighborhood, index, onSelect }: Neighborhood
             <span>{neighborhood.distanceFromCenter} от центъра</span>
           </div>
           <div className={styles.detailItem}>
-            <TrendingUp size={18} />
+            <TrendUp size={18} />
             <span>От {neighborhood.averagePrice.sale.toLocaleString()} лв/м²</span>
           </div>
         </div>

@@ -8,22 +8,22 @@ import { Property } from '@/types';
 import {
   MapPin,
   Bed,
-  Bath,
+  Bathtub,
   Square,
   Calendar,
-  Share2,
+  ShareNetwork,
   Heart,
   Bell,
   Phone,
-  Mail,
-  ChevronLeft,
-  ChevronRight,
+  EnvelopeSimple,
+  CaretLeft,
+  CaretRight,
   X,
-  Maximize2,
+  ArrowsOutSimple,
   Play,
-  Home,
+  House,
   Building,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { PropertyCard } from './components/PropertyCard';
@@ -253,7 +253,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
             )}
             {property.bathrooms && (
               <div className={styles.quickDetail}>
-                <Bath size={20} />
+                <Bathtub size={20} />
                 <div>
                   <span className={styles.quickDetailLabel}>Бани</span>
                   <span className={styles.quickDetailValue}>{property.bathrooms}</span>
@@ -271,7 +271,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
             )}
             {property.furnishing_level && (
               <div className={styles.quickDetail}>
-                <Home size={20} />
+                <House size={20} />
                 <div>
                   <span className={styles.quickDetailLabel}>Обзавеждане</span>
                   <span className={styles.quickDetailValue}>
@@ -329,7 +329,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                 onClick={handleShare}
                 className={styles.actionButton}
               >
-                <Share2 size={16} />
+                <ShareNetwork size={16} />
                 Сподели
               </Button>
               <Button
@@ -361,7 +361,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     className={styles.fullscreenButton}
                     onClick={() => setIsFullscreen(true)}
                   >
-                    <Maximize2 size={24} />
+                    <ArrowsOutSimple size={24} />
                   </button>
                   {property.images.length > 1 && (
                     <>
@@ -370,14 +370,14 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                         onClick={prevImage}
                         aria-label="Previous image"
                       >
-                        <ChevronLeft size={24} />
+                        <CaretLeft size={24} />
                       </button>
                       <button
                         className={`${styles.navButton} ${styles.next}`}
                         onClick={nextImage}
                         aria-label="Next image"
                       >
-                        <ChevronRight size={24} />
+                        <CaretRight size={24} />
                       </button>
                     </>
                   )}
@@ -542,7 +542,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       +359 888 888 888
                     </a>
                     <a href="mailto:broker@example.com" className={styles.contactLink}>
-                      <Mail size={18} />
+                      <EnvelopeSimple size={18} />
                       broker@example.com
                     </a>
                   </div>
@@ -643,7 +643,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     prevImage();
                   }}
                 >
-                  <ChevronLeft size={32} />
+                  <CaretLeft size={32} />
                 </button>
                 <button
                   className={`${styles.fullscreenNav} ${styles.next}`}
@@ -652,7 +652,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     nextImage();
                   }}
                 >
-                  <ChevronRight size={32} />
+                  <CaretRight size={32} />
                 </button>
               </>
             )}

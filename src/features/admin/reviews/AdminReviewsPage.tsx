@@ -6,7 +6,7 @@ import { Footer } from '@/components/layout/Footer';
 import { AdminReviewCard } from './components/AdminReviewCard';
 import { Input } from '@/components/ui/Input';
 import { Review } from '@/types';
-import { Search, Filter, CheckCircle, XCircle } from 'lucide-react';
+import { MagnifyingGlass, Funnel, CheckCircle, XCircle } from '@phosphor-icons/react';
 import styles from './AdminReviewsPage.module.scss';
 
 // Mock data - всички отзиви (одобрени и неодобрени)
@@ -198,7 +198,7 @@ export function AdminReviewsPage() {
 
             <div className={styles.controls}>
               <div className={styles.searchWrapper}>
-                <Search className={styles.searchIcon} />
+                <MagnifyingGlass size={20} className={styles.searchIcon} />
                 <Input
                   type="text"
                   placeholder="Търсене по име, имейл или коментар..."
@@ -215,7 +215,7 @@ export function AdminReviewsPage() {
                     filterStatus === 'all' ? styles.active : ''
                   }`}
                 >
-                  <Filter size={16} />
+                  <Funnel size={16} />
                   Всички
                 </button>
                 <button

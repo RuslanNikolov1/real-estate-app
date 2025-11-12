@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Star, CheckCircle, XCircle, Trash2, Mail } from 'lucide-react';
+import { Star, CheckCircle, XCircle, Trash, EnvelopeSimple } from '@phosphor-icons/react';
 import { Review } from '@/types';
 import { Button } from '@/components/ui/Button';
 import styles from './AdminReviewCard.module.scss';
@@ -48,7 +48,7 @@ export function AdminReviewCard({
             <h3 className={styles.userName}>{review.user_name}</h3>
             {review.user_email && (
               <div className={styles.email}>
-                <Mail size={14} />
+                <EnvelopeSimple size={14} />
                 <span>{review.user_email}</span>
               </div>
             )}
@@ -99,13 +99,14 @@ export function AdminReviewCard({
           </Button>
         )}
         <Button variant="ghost" size="sm" onClick={onDelete}>
-          <Trash2 size={16} />
+          <Trash size={16} />
           Изтрий
         </Button>
       </div>
     </motion.div>
   );
 }
+
 
 
 

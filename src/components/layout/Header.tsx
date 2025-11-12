@@ -6,19 +6,19 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Menu,
+  List,
   X,
   Globe,
   Heart,
   User,
-  Home,
-  DollarSign,
+  House,
+  CurrencyDollar,
   Key,
-  Building2,
+  Buildings,
   Star,
-  Award,
-  BarChart3
-} from 'lucide-react';
+  Medal,
+  ChartBar
+} from '@phosphor-icons/react';
 import styles from './Header.module.scss';
 
 const languages = [
@@ -35,13 +35,13 @@ export function Header() {
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
 
   const navItems = [
-    { href: '/', label: t('nav.home'), icon: Home },
-    { href: '/properties/for-sale', label: t('nav.forSale'), icon: DollarSign },
+    { href: '/', label: t('nav.home'), icon: House },
+    { href: '/properties/for-sale', label: t('nav.forSale'), icon: CurrencyDollar },
     { href: '/properties/for-rent', label: t('nav.forRent'), icon: Key },
-    { href: '/neighborhoods', label: t('nav.neighborhoods'), icon: Building2 },
+    { href: '/neighborhoods', label: t('nav.neighborhoods'), icon: Buildings },
     { href: '/reviews', label: t('nav.reviews'), icon: Star },
-    { href: '/certificates', label: t('nav.certificates'), icon: Award },
-    { href: '/valuation', label: t('nav.valuation'), icon: BarChart3 },
+    { href: '/certificates', label: t('nav.certificates'), icon: Medal },
+    { href: '/valuation', label: t('nav.valuation'), icon: ChartBar },
   ];
 
   const changeLanguage = (lang: string) => {
@@ -124,7 +124,7 @@ export function Header() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? <X size={24} color="white" /> : <Menu size={24} color="white" />}
+            {isMobileMenuOpen ? <X size={24} color="white" /> : <List size={24} color="white" />}
           </button>
         </div>
       </div>

@@ -8,7 +8,7 @@ import { CertificateModal } from './components/CertificateModal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Certificate } from '@/types';
-import { Plus, Search, Award } from 'lucide-react';
+import { Plus, MagnifyingGlass, Medal } from '@phosphor-icons/react';
 import styles from './AdminCertificatesPage.module.scss';
 
 // Mock data - всички сертификати
@@ -161,7 +161,7 @@ export function AdminCertificatesPage() {
               </div>
               <div className={styles.stats}>
                 <div className={styles.statCard}>
-                  <Award className={styles.statIcon} size={24} />
+                  <Medal size={18} />
                   <div>
                     <span className={styles.statLabel}>Общо</span>
                     <span className={styles.statValue}>
@@ -174,7 +174,7 @@ export function AdminCertificatesPage() {
 
             <div className={styles.controls}>
               <div className={styles.searchWrapper}>
-                <Search className={styles.searchIcon} />
+                <MagnifyingGlass size={18} />
                 <Input
                   type="text"
                   placeholder="Търсене по заглавие или описание..."
@@ -233,6 +233,7 @@ export function AdminCertificatesPage() {
     </div>
   );
 }
+
 
 
 

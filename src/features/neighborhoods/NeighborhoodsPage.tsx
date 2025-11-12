@@ -6,7 +6,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { NeighborhoodCard } from './components/NeighborhoodCard';
 import { Input } from '@/components/ui/Input';
-import { Search, MapPin } from 'lucide-react';
+import { MagnifyingGlass, MapPin } from '@phosphor-icons/react';
 import styles from './NeighborhoodsPage.module.scss';
 
 export interface Neighborhood {
@@ -329,7 +329,7 @@ export function NeighborhoodsPage() {
             className={styles.searchSection}
           >
             <div className={styles.searchWrapper}>
-              <Search size={20} className={styles.searchIcon} />
+              <MagnifyingGlass size={18} className={styles.searchIcon} />
               <Input
                 type="text"
                 placeholder="Търсене по име или описание на квартал..."

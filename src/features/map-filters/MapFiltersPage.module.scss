@@ -70,7 +70,7 @@
 
 .content {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: $spacing-xl;
 
     @media (max-width: $breakpoint-lg) {
@@ -122,6 +122,15 @@
     }
 
     :global(.leaflet-div-icon.custom-neighborhood-label) {
+        background: none !important;
+        border: none !important;
+    }
+
+    :global(.district-label) {
+        color: #222;
+        font-weight: bold;
+        font-size: 14px;
+        text-shadow: 1px 1px 2px #fff;
         background: none !important;
         border: none !important;
     }
@@ -235,6 +244,645 @@
     gap: $spacing-lg;
 }
 
+.propertyTypeFiltersSection {
+    width: 100%;
+    background: $white;
+    border-radius: 16px;
+    padding: $spacing-lg;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    margin-bottom: $spacing-xl;
+
+    h4 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: $black;
+        margin-bottom: $spacing-md;
+    }
+}
+
+.propertyTypeFilters {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: $spacing-sm;
+    width: 100%;
+
+    @media (max-width: $breakpoint-lg) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @media (max-width: $breakpoint-md) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: $breakpoint-sm) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.propertyTypeFilterButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-xs;
+    padding: $spacing-md;
+    border: 2px dotted $dark-red;
+    border-radius: 12px;
+    background: $white;
+    color: $dark-gray;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all $transition-base;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    min-height: 120px;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+
+    &:hover {
+        border-color: $dark-red;
+        background: $dark-red;
+        color: $white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+        .propertyTypeFilterContent svg {
+            color: $white;
+        }
+    }
+
+    &.active {
+        background: $dark-red;
+        color: $white;
+        border-color: $dark-red;
+
+        .propertyTypeFilterContent svg {
+            color: $white;
+            fill: currentColor;
+        }
+    }
+}
+
+.propertyTypeFilterContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-xs;
+    width: 100%;
+
+    svg {
+        width: 32px;
+        height: 32px;
+        color: $dark-red;
+        transition: color $transition-base;
+        flex-shrink: 0;
+    }
+
+    span {
+        display: block;
+        line-height: 1.2;
+        font-size: 0.95rem;
+        text-align: center;
+    }
+}
+
+.filtersMapLayout {
+    margin-top: $spacing-xl;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: $spacing-xl;
+    align-items: start;
+
+    @media (max-width: $breakpoint-lg) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.leftFiltersColumn {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+}
+
+.leftFilters {
+    background: $white;
+    border-radius: 16px;
+    padding: $spacing-lg;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+
+    @media (max-width: $breakpoint-md) {
+        padding: $spacing-md;
+    }
+}
+
+.areaLeftFilters {
+    transition: min-height 0.3s ease;
+}
+
+.inputsGrid {
+    display: grid;
+    grid-template-rows: repeat(3, minmax(0, auto));
+    gap: $spacing-md;
+}
+
+.filterInput {
+    border: 2px solid $dark-red;
+    border-radius: 14px;
+    box-shadow: none;
+
+    &:focus {
+        border-color: $dark-red;
+        outline: none;
+    }
+}
+
+.cityInputWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+}
+
+.distanceFilter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: $spacing-sm;
+    background: $white;
+    border: 2px solid $dark-red;
+    border-radius: 14px;
+}
+
+.distanceLabel {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $dark-red;
+    margin: 0;
+}
+
+.distanceControls {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+}
+
+.distanceSlider {
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+    background: transparent;
+
+    &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 100%);
+    }
+
+    &::-moz-range-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 100%);
+        border: none;
+    }
+
+    &::-webkit-slider-thumb {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: $dark-red;
+        cursor: pointer;
+        border: 2px solid $white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all $transition-base;
+
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+    }
+
+    &::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: $dark-red;
+        cursor: pointer;
+        border: 2px solid $white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all $transition-base;
+
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+    }
+}
+
+.distanceInput {
+    width: 70px;
+    padding: $spacing-xs $spacing-sm;
+    border: 2px solid $dark-red;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $black;
+    text-align: center;
+    background: $white;
+    outline: none;
+    transition: all $transition-base;
+
+    &:focus {
+        border-color: $dark-red;
+        box-shadow: 0 0 0 3px rgba(140, 28, 28, 0.1);
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+        opacity: 1;
+        height: 20px;
+    }
+}
+
+.areaFilter {
+    padding: 0;
+}
+
+.areaTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $dark-red;
+    margin: 0 0 $spacing-md 0;
+}
+
+.areaControls {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+}
+
+.dualRangeSlider {
+    position: relative;
+    width: 100%;
+    height: 6px;
+}
+
+.areaSlider {
+    position: absolute;
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    outline: none;
+    appearance: none;
+    cursor: grab;
+    background: transparent;
+    pointer-events: none;
+
+    &:active {
+        cursor: grabbing;
+    }
+
+    &::-webkit-slider-runnable-track {
+        cursor: grab;
+    }
+
+    &::-moz-range-track {
+        cursor: grab;
+    }
+
+    &::-webkit-slider-thumb {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: $dark-red;
+        cursor: grab;
+        border: 2px solid $white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all $transition-base;
+        margin-top: -7px;
+        pointer-events: all;
+
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        &:active {
+            cursor: grabbing;
+        }
+    }
+
+    &::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: $dark-red;
+        cursor: grab;
+        border: 2px solid $white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all $transition-base;
+        pointer-events: all;
+
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        &:active {
+            cursor: grabbing;
+        }
+    }
+}
+
+.areaSliderFrom {
+    z-index: 2;
+
+    &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                #e0e0e0 0%,
+                #e0e0e0 var(--slider-value, 0%),
+                $dark-red var(--slider-value, 0%),
+                $dark-red var(--slider-to-value, 100%),
+                #e0e0e0 var(--slider-to-value, 100%),
+                #e0e0e0 100%);
+    }
+
+    &::-moz-range-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                #e0e0e0 0%,
+                #e0e0e0 var(--slider-value, 0%),
+                $dark-red var(--slider-value, 0%),
+                $dark-red var(--slider-to-value, 100%),
+                #e0e0e0 var(--slider-to-value, 100%),
+                #e0e0e0 100%);
+        border: none;
+    }
+}
+
+.areaSliderTo {
+    z-index: 1;
+
+    &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 100%);
+    }
+
+    &::-moz-range-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 100%);
+        border: none;
+    }
+}
+
+.areaInputs {
+    display: flex;
+    gap: $spacing-md;
+    align-items: flex-end;
+}
+
+.areaInputWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    flex: 1;
+}
+
+.areaInputLabel {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $dark-gray;
+}
+
+.areaInput {
+    width: 100%;
+    padding: $spacing-xs $spacing-sm;
+    border: 2px solid $dark-red;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $black;
+    text-align: center;
+    background: $white;
+    outline: none;
+    transition: all $transition-base;
+
+    &:focus {
+        border-color: $dark-red;
+        box-shadow: 0 0 0 3px rgba(140, 28, 28, 0.1);
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+        opacity: 1;
+        height: 20px;
+    }
+}
+
+.bedTopViewWrapper {
+    margin-top: 8vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+}
+
+.bedTopViewImage {
+    width: auto;
+    height: 80px;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.12));
+    position: relative;
+    z-index: 1;
+}
+
+.bedTopViewSquare {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 8px;
+    pointer-events: none;
+    will-change: width, height;
+}
+
+.bedTopViewSquareGreen {
+    background: rgba(105, 105, 105, 0.35);
+    border: 2px solid rgba(105, 105, 105, 0.6);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
+.bedTopViewSquareRed {
+    background: rgba(105, 105, 105, 0.35);
+    border: 2px solid rgba(105, 105, 105, 0.6);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
+.apartmentSubtypeFilter {
+    padding: 0;
+}
+
+.apartmentSubtypeTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $dark-red;
+    margin: 0 0 $spacing-md 0;
+}
+
+.apartmentSubtypeOptions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-sm;
+
+    @media (max-width: $breakpoint-md) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.apartmentSubtypeOption.allOption {
+    grid-column: 1 / -1;
+}
+
+.apartmentSubtypeOption {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color $transition-base;
+
+    &:hover {
+        background-color: color.adjust($dark-red, $lightness: 95%);
+    }
+}
+
+.apartmentSubtypeLabel {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: $dark-gray;
+    user-select: none;
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.apartmentSubtypeIcon {
+    color: $dark-red;
+    flex-shrink: 0;
+}
+
+.apartmentSubtypeIconGroup {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: $dark-red;
+
+    svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+}
+
+.apartmentSubtypeCheckbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: $dark-red;
+    border: 2px solid $dark-red;
+    border-radius: 4px;
+    flex-shrink: 0;
+
+    &:checked {
+        background-color: $dark-red;
+        border-color: $dark-red;
+    }
+
+    &:focus {
+        outline: 2px solid rgba(140, 28, 28, 0.2);
+        outline-offset: 2px;
+    }
+}
+
+.mapWrapper {
+    background: $white;
+    border-radius: 16px;
+    padding: $spacing-lg;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+
+    @media (max-width: $breakpoint-md) {
+        padding: $spacing-md;
+    }
+}
+
+.mapContainer {
+    width: 100%;
+    height: 800px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid $dark-red;
+
+    @media (max-width: $breakpoint-md) {
+        height: 600px;
+    }
+}
+
+.selectedPropertyType {
+    display: inline-flex;
+    align-items: baseline;
+    gap: $spacing-xs;
+    padding: $spacing-xs $spacing-sm;
+    background: color.adjust($dark-red, $lightness: 45%);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: $dark-red;
+
+    strong {
+        color: $dark-red;
+        font-weight: 700;
+    }
+}
+
 .selectionInfo {
     background: $white;
     border-radius: 16px;
@@ -329,6 +977,176 @@
             color: $red;
         }
     }
+
+    .areaFilterCard {
+        margin-top: $spacing-lg;
+        padding: $spacing-lg;
+        border-radius: 18px;
+        background: linear-gradient(135deg, color.adjust($light-gray, $lightness: 5%) 0%, $white 100%);
+        border: 2px solid color.adjust($dark-red, $lightness: 35%);
+        box-shadow: 0 8px 20px rgba(140, 28, 28, 0.12);
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-md;
+
+        @media (max-width: $breakpoint-sm) {
+            padding: $spacing-md;
+        }
+    }
+
+    .areaFilterHeader {
+        display: flex;
+        justify-content: space-between;
+        gap: $spacing-md;
+        align-items: flex-start;
+        flex-wrap: wrap;
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: $dark-red;
+            margin: 0 0 $spacing-xs;
+        }
+
+        p {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: $black;
+        }
+
+        .areaHint {
+            font-size: 0.85rem;
+            color: $dark-gray;
+            background: rgba(140, 28, 28, 0.08);
+            border-radius: 999px;
+            padding: $spacing-xs $spacing-sm;
+            white-space: nowrap;
+
+            @media (max-width: $breakpoint-sm) {
+                display: none;
+            }
+        }
+    }
+
+    .areaSliderWrapper {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+    }
+
+    .areaSlider {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, $dark-red 0%, color.adjust($dark-red, $lightness: 20%) 100%);
+        outline: none;
+        appearance: none;
+
+        &::-webkit-slider-thumb {
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: $white;
+            border: 3px solid $dark-red;
+            box-shadow: 0 4px 12px rgba(140, 28, 28, 0.4);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+            &:hover {
+                transform: scale(1.05);
+                box-shadow: 0 6px 16px rgba(140, 28, 28, 0.4);
+            }
+        }
+
+        &:active::-webkit-slider-thumb {
+            transform: scale(1.1);
+        }
+
+        &::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: $white;
+            border: 3px solid $dark-red;
+            box-shadow: 0 4px 12px rgba(140, 28, 28, 0.4);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        &::-moz-range-track {
+            background: transparent;
+        }
+    }
+
+    .areaSliderLabels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: $dark-gray;
+        font-weight: 600;
+    }
+
+    .areaInputsRow {
+        display: flex;
+        gap: $spacing-md;
+        flex-wrap: wrap;
+
+        @media (max-width: $breakpoint-sm) {
+            gap: $spacing-sm;
+        }
+    }
+
+    .areaInput {
+        flex: 1;
+        min-width: 140px;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-xs;
+        position: relative;
+
+        >span:first-of-type {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: $dark-gray;
+        }
+
+        input {
+            width: 100%;
+            padding: $spacing-sm $spacing-xl $spacing-sm $spacing-md;
+            border-radius: 12px;
+            border: 2px solid color.adjust($dark-red, $lightness: 40%);
+            background: $white;
+            font-size: 1rem;
+            font-weight: 600;
+            color: $black;
+            outline: none;
+            transition: border-color $transition-base, box-shadow $transition-base;
+
+            &:focus {
+                border-color: $dark-red;
+                box-shadow: 0 0 0 4px rgba(140, 28, 28, 0.15);
+            }
+        }
+
+        .areaUnit {
+            position: absolute;
+            right: $spacing-sm;
+            bottom: calc(#{$spacing-sm} + 2px);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: $dark-red;
+            pointer-events: none;
+        }
+    }
+
+    .areaNote {
+        margin: 0;
+        font-size: 0.8rem;
+        color: $dark-gray;
+        font-style: italic;
+    }
 }
 
 .neighborhoodsSection {
@@ -345,36 +1163,42 @@
     }
 
     .neighborhoodsList {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: $spacing-sm;
     }
 
     .neighborhoodButton {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $spacing-sm;
         padding: $spacing-md;
-        border: 2px solid $light-gray;
+        border: 2px dotted $dark-red;
         border-radius: 12px;
         background: $white;
         color: $dark-gray;
-        font-size: 1rem;
-        font-weight: 500;
+        font-size: 0.95rem;
+        font-weight: 600;
         text-align: left;
         cursor: pointer;
         transition: all $transition-base;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        min-height: 90px;
+        position: relative;
 
         &:hover {
-            border-color: $red;
-            color: $red;
-            background: color.adjust($red, $lightness: 45%);
+            border-color: $dark-red;
+            background: $dark-red;
+            color: $white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
         }
 
         &.active {
-            background: $red;
+            background: $dark-red;
             color: $white;
-            border-color: $red;
+            border-color: $dark-red;
 
             .checkmark {
                 display: inline;
@@ -383,7 +1207,7 @@
 
         .checkmark {
             display: none;
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 700;
             margin-left: $spacing-sm;
         }
@@ -394,18 +1218,10 @@
     display: flex;
     flex-wrap: wrap;
     gap: $spacing-md;
-    margin-top: auto;
-
-    .backButton {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: $spacing-sm;
-    }
+    margin-top: $spacing-xl;
+    justify-content: flex-end;
 
     button {
-        flex: 1;
         min-width: 120px;
 
         &:disabled {

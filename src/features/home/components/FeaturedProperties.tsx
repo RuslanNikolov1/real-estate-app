@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { MapPin, Bed, Bath, Square } from 'lucide-react';
+import { MapPin, Bed, Bathtub, Square } from '@phosphor-icons/react';
 import { Property } from '@/types';
 import styles from './FeaturedProperties.module.scss';
 
@@ -67,7 +67,7 @@ export function FeaturedProperties({ properties }: FeaturedPropertiesProps) {
                     )}
                     {property.bathrooms && (
                       <div className={styles.detail}>
-                        <Bath size={16} />
+                        <Bathtub size={16} />
                         <span>{property.bathrooms}</span>
                       </div>
                     )}
@@ -88,6 +88,7 @@ export function FeaturedProperties({ properties }: FeaturedPropertiesProps) {
     </section>
   );
 }
+
 
 
 

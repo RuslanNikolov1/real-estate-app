@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/Input';
 import { PlateEditor } from '@/lib/plate-editor';
 import { translateProperty } from '@/lib/translator';
 // import { Property, PropertyType, PropertyStatus, LocationType } from '@/types';
-import { Save, X, Globe, Loader2 } from 'lucide-react';
+import { FloppyDisk, X, Globe, SpinnerGap } from '@phosphor-icons/react';
 import { mockProperties } from '@/features/properties/PropertiesListPage';
 import styles from './PropertyFormPage.module.scss';
 import { Value } from '@udecode/plate-common';
@@ -343,7 +343,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                   >
                     {isTranslating ? (
                       <>
-                        <Loader2 size={16} className={styles.spinner} />
+                        <SpinnerGap size={16} className={styles.spinner} />
                         Превеждане...
                       </>
                     ) : (
@@ -389,7 +389,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
 
             <div className={styles.formActions}>
               <Button type="submit" variant="primary" disabled={isSubmitting}>
-                <Save size={20} /> {propertyId ? 'Запази промените' : 'Добави имот'}
+                <FloppyDisk size={20} /> {propertyId ? 'Запази промените' : 'Добави имот'}
               </Button>
               <Button type="button" variant="outline" onClick={() => router.back()}>
                 Отказ

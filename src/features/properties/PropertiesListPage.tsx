@@ -7,7 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import { PropertySearch } from '@/features/home/components/PropertySearch';
 import { PropertyCard } from './components/PropertyCard';
 import { Property, PropertySearchFilters } from '@/types';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import styles from './PropertiesListPage.module.scss';
 
@@ -451,7 +451,7 @@ function PropertiesListContent() {
                   onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
                 >
-                  <ChevronLeft size={16} />
+                  <CaretLeft size={20} />
                   Предишна
                 </Button>
                 <div className={styles.pageNumbers}>
@@ -495,7 +495,7 @@ function PropertiesListContent() {
                   disabled={currentPage === totalPages}
                 >
                   Следваща
-                  <ChevronRight size={16} />
+                  <CaretRight size={20} />
                 </Button>
               </div>
             )}

@@ -1,83 +1,102 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { Search, X, ChevronDown, Map } from 'lucide-react';
+import {
+  X,
+  MapTrifold,
+  CheckCircle,
+  Calendar
+} from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import styles from './PropertySearch.module.scss';
-import { PropertySearchFilters, PropertyType, PropertyStatus } from '@/types';
+import { propertyTypes } from '@/data/propertyTypes';
 
 interface PropertySearchProps {
-  onSearch: (filters: PropertySearchFilters) => void;
   isExpanded?: boolean;
   onExpand?: () => void;
 }
 
 export function PropertySearch({
-  onSearch,
   isExpanded = false,
   onExpand,
 }: PropertySearchProps) {
   const { t } = useTranslation();
-  const router = useRouter();
-  const [filters, setFilters] = useState<PropertySearchFilters>({
-    location_type: [],
-    type: [],
-  });
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [selectedButton, setSelectedButton] = useState<'sales' | 'rent' | null>(null);
+  const [city, setCity] = useState('');
+  const [cityError, setCityError] = useState('');
+  const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>([]);
 
-  const handleLocationTypeToggle = (type: 'urban' | 'mountain' | 'coastal') => {
-    setFilters((prev) => {
-      const current = prev.location_type || [];
-      const updated = current.includes(type)
-        ? current.filter((t) => t !== type)
-        : [...current, type];
-      return { ...prev, location_type: updated };
-    });
+  const handleSalesClick = () => {
+    setSelectedButton('sales');
+    onExpand?.();
   };
 
-  const handlePropertyTypeToggle = (type: PropertyType) => {
-    setFilters((prev) => {
-      const current = prev.type || [];
-      const updated = current.includes(type)
-        ? current.filter((t) => t !== type)
-        : [...current, type];
-      return { ...prev, type: updated };
-    });
+  const handleRentClick = () => {
+    setSelectedButton('rent');
+    onExpand?.();
   };
 
-  const handleStatusToggle = (status: PropertyStatus) => {
-    setFilters((prev) => {
-      const current = prev.status || [];
-      const updated = current.includes(status)
-        ? current.filter((s) => s !== status)
-        : [...current, status];
-      return { ...prev, status: updated };
-    });
+  const handleClose = () => {
+    setSelectedButton(null);
+    setSelectedPropertyTypes([]);
+    setCity('');
+    setCityError('');
+    onExpand?.();
   };
 
-  const handleSearch = () => {
-    onSearch(filters);
+  const handlePropertyTypeToggle = (typeId: string) => {
+    setSelectedPropertyTypes((prev) =>
+      prev.includes(typeId)
+        ? prev.filter((id) => id !== typeId)
+        : [...prev, typeId]
+    );
   };
+
+  const handleExtendedFiltersClick = () => {
+    window.location.href = '/map-filters';
+    handleClose();
+  };
+
+  const handleSearchSubmit = () => {
+    if (!selectedButton) return;
+
+    // Validate city
+    if (!city.trim()) {
+      setCityError('Моля, въведете град');
+      return;
+    }
+
+    setCityError('');
+
+    const params = new URLSearchParams();
+
+    params.set('mode', selectedButton);
+    params.set('city', city.trim());
+
+    if (selectedPropertyTypes.length > 0) {
+      params.set('types', selectedPropertyTypes.join(','));
+    }
+
+    window.location.href = `/properties?${params.toString()}`;
+  };
+
+  const canSearch =
+    city.trim() !== '' && (selectedButton === 'rent' ? true : selectedPropertyTypes.length > 0);
 
   return (
     <>
       <div className={styles.searchContainer}>
-        <div className={styles.compactSearch}>
-          <div className={styles.searchInputWrapper}>
-            <Search className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder={t('home.searchPlaceholder')}
-              className={styles.searchInput}
-              onClick={onExpand}
-            />
-          </div>
-          <Button variant="outline" onClick={onExpand} className={styles.expandButton}>
-            {t('common.filter')}
+        <div className={styles.buttonGroup}>
+          <Button variant="outline" onClick={handleSalesClick} className={styles.actionButton} size="lg">
+            <CheckCircle size={28} />
+            Продажби
+          </Button>
+          <Button variant="outline" onClick={handleRentClick} className={styles.actionButton} size="lg">
+            <Calendar size={28} />
+            Наеми
           </Button>
         </div>
       </div>
@@ -90,7 +109,7 @@ export function PropertySearch({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className={styles.modalBackdrop}
-              onClick={onExpand}
+              onClick={handleClose}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, x: '-50%', y: '-50%' }}
@@ -99,184 +118,89 @@ export function PropertySearch({
               className={styles.modalContent}
             >
               <div className={styles.searchHeader}>
-                <h2>{t('common.search')}</h2>
-                <button onClick={() => onExpand?.()} className={styles.closeButton}>
-                  <X />
+                <button onClick={handleClose} className={styles.closeButton}>
+                  <X weight="bold" size={24} />
                 </button>
               </div>
 
+              <div className={styles.topFilters}>
+                <Input
+                  id="modal-city"
+                  placeholder="Въведете град"
+                  value={city}
+                  onChange={(event) => {
+                    setCity(event.target.value);
+                    if (cityError) {
+                      setCityError('');
+                    }
+                  }}
+                  error={cityError}
+                  className={styles.cityInput}
+                />
+              </div>
+
               <div className={styles.searchContent}>
-                <div className={styles.locationTypeSection}>
-                  <label className={styles.label}>{t('search.locationType')}</label>
-                  <div className={styles.locationTypeButtons}>
-                    {(['urban', 'mountain', 'coastal'] as const).map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => handleLocationTypeToggle(type)}
-                        className={`${styles.locationTypeButton} ${filters.location_type?.includes(type) ? styles.active : ''
-                          }`}
-                      >
-                        {t(`search.${type}`)}
-                      </button>
-                    ))}
+                {selectedButton === 'sales' ? (
+                  <>
+                    <div className={styles.propertyTypesGrid}>
+                      {propertyTypes.map((type) => {
+                        const IconComponent = type.icon;
+                        const isSelected = selectedPropertyTypes.includes(type.id);
+                        return (
+                          <button
+                            key={type.id}
+                            type="button"
+                            className={`${styles.propertyTypeButton} ${isSelected ? styles.selected : ''}`}
+                            onClick={() => handlePropertyTypeToggle(type.id)}
+                            aria-pressed={isSelected}
+                          >
+                            <div className={styles.propertyTypeContent}>
+                              <IconComponent size={28} weight="fill" />
+                              <span>{type.label}</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <div className={styles.searchActions}>
+                    <Button
+                      variant="outline"
+                      onClick={handleExtendedFiltersClick}
+                      className={styles.extendedFiltersButton}
+                    >
+                      <MapTrifold size={18} />
+                      Разширени филтри
+                    </Button>
+                    <div className={styles.rightActions}>
+                      <Button variant="primary" onClick={handleSearchSubmit} disabled={!selectedButton || !city.trim()}>
+                        {t('common.search')}
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
+              </div>
 
-                <div className={styles.propertyTypeSection}>
-                  <label className={styles.label}>Тип имот</label>
-                  <div className={styles.locationTypeButtons}>
-                    {(['apartment', 'house', 'villa', 'office', 'shop', 'warehouse', 'land', 'hotel'] as PropertyType[]).map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => handlePropertyTypeToggle(type)}
-                        className={`${styles.locationTypeButton} ${filters.type?.includes(type) ? styles.active : ''
-                          }`}
-                      >
-                        {type === 'apartment' && 'Апартамент'}
-                        {type === 'house' && 'Къща'}
-                        {type === 'villa' && 'Вила'}
-                        {type === 'office' && 'Офис'}
-                        {type === 'shop' && 'Магазин'}
-                        {type === 'warehouse' && 'Склад'}
-                        {type === 'land' && 'Земя'}
-                        {type === 'hotel' && 'Хотел'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={styles.statusSection}>
-                  <label className={styles.label}>Статус</label>
-                  <div className={styles.locationTypeButtons}>
-                    {(['for-sale', 'for-rent'] as PropertyStatus[]).map((status) => (
-                      <button
-                        key={status}
-                        onClick={() => handleStatusToggle(status)}
-                        className={`${styles.locationTypeButton} ${filters.status?.includes(status) ? styles.active : ''
-                          }`}
-                      >
-                        {status === 'for-sale' ? t('nav.forSale') : t('nav.forRent')}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={styles.advancedSection}>
-                  <button
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                    className={styles.advancedToggle}
-                  >
-                    {t('common.filter')}
-                    <ChevronDown
-                      className={`${styles.chevron} ${showAdvanced ? styles.rotated : ''}`}
-                    />
-                  </button>
-
-                  <AnimatePresence>
-                    {showAdvanced && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className={styles.advancedFilters}
-                      >
-                        <div className={styles.filterRow}>
-                          <Input
-                            type="number"
-                            label={t('search.priceRange') + ' (мин)'}
-                            placeholder="0"
-                            onChange={(e) =>
-                              setFilters({
-                                ...filters,
-                                min_price: e.target.value ? Number(e.target.value) : undefined,
-                              })
-                            }
-                          />
-                          <Input
-                            type="number"
-                            label={t('search.priceRange') + ' (макс)'}
-                            placeholder="∞"
-                            onChange={(e) =>
-                              setFilters({
-                                ...filters,
-                                max_price: e.target.value ? Number(e.target.value) : undefined,
-                              })
-                            }
-                          />
-                        </div>
-
-                        <div className={styles.filterRow}>
-                          <Input
-                            type="number"
-                            label={t('search.areaRange') + ' (мин)'}
-                            placeholder="0"
-                            onChange={(e) =>
-                              setFilters({
-                                ...filters,
-                                min_area: e.target.value ? Number(e.target.value) : undefined,
-                              })
-                            }
-                          />
-                          <Input
-                            type="number"
-                            label={t('search.areaRange') + ' (макс)'}
-                            placeholder="∞"
-                            onChange={(e) =>
-                              setFilters({
-                                ...filters,
-                                max_area: e.target.value ? Number(e.target.value) : undefined,
-                              })
-                            }
-                          />
-                        </div>
-
-                        <div className={styles.filterRow}>
-                          <Input
-                            type="number"
-                            label={t('search.rooms')}
-                            placeholder="0"
-                            onChange={(e) =>
-                              setFilters({
-                                ...filters,
-                                rooms: e.target.value ? Number(e.target.value) : undefined,
-                              })
-                            }
-                          />
-                          <Input
-                            type="number"
-                            label={t('search.bathrooms')}
-                            placeholder="0"
-                            onChange={(e) =>
-                              setFilters({
-                                ...filters,
-                                bathrooms: e.target.value ? Number(e.target.value) : undefined,
-                              })
-                            }
-                          />
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                <div className={styles.searchActions}>
+              <div className={styles.modalActions}>
+                <div className={styles.leftActions}>
                   <Button
                     variant="outline"
-                    onClick={() => router.push('/map-filters')}
+                    onClick={handleExtendedFiltersClick}
                     className={styles.extendedFiltersButton}
                   >
-                    <Map size={18} />
+                    <MapTrifold size={18} />
                     Разширени филтри
                   </Button>
-                  <div className={styles.rightActions}>
-                    <Button variant="outline" onClick={() => setFilters({})}>
-                      {t('common.clear')}
-                    </Button>
-                    <Button variant="primary" onClick={handleSearch}>
-                      {t('common.search')}
-                    </Button>
-                  </div>
                 </div>
+                <Button
+                  variant="primary"
+                  onClick={handleSearchSubmit}
+                  disabled={!selectedButton || !canSearch}
+                  className={styles.modalSearchButton}
+                >
+                  {t('common.search')}
+                </Button>
               </div>
             </motion.div>
           </>

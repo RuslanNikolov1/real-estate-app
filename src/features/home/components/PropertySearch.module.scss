@@ -1,9 +1,55 @@
 @use '@/styles/variables' as *;
+@use 'sass:color';
 
 .searchContainer {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: $spacing-md;
+  align-items: center;
+  justify-content: flex-start;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+.actionButton {
+  min-width: 250px;
+  padding: $spacing-2xl $spacing-2xl;
+  font-size: 1.25rem;
+  font-weight: 600;
+  background-color: $white !important;
+  border-color: $dark-red !important;
+  color: $dark-red !important;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  justify-content: center;
+
+  svg {
+    color: $dark-red;
+  }
+
+  &:hover {
+    background-color: $dark-red !important;
+    border-color: $dark-red !important;
+    color: $white !important;
+
+    svg {
+      color: $white;
+    }
+  }
+
+  @media (max-width: $breakpoint-md) {
+    width: 100%;
+    min-width: unset;
+  }
 }
 
 .compactSearch {
@@ -85,51 +131,61 @@
 
 .modalContent {
   position: fixed;
-  top: 50%;
+  top: 53%;
   left: 50%;
   width: 90%;
-  max-width: 900px;
-  max-height: 70vh;
+  max-width: 1000px;
+  max-height: 80vh;
   overflow-y: auto;
   background: $white;
   border-radius: 24px;
-  padding: $spacing-xl;
+  padding: $spacing-lg $spacing-xl;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
     0 10px 30px rgba(0, 0, 0, 0.2);
   z-index: $z-modal;
 
   @media (max-width: $breakpoint-md) {
     width: 95%;
-    max-height: 75vh;
+    max-height: 85vh;
     padding: $spacing-lg;
   }
 
   .searchHeader {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: $spacing-xl;
+    position: relative;
 
     h2 {
       font-size: 1.5rem;
-      color: $black;
+      color: $dark-red;
     }
 
     .closeButton {
+      position: absolute;
+      right: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%; // Already circular
-      background: $light-gray;
-      color: $dark-gray;
+      background: $dark-red;
+      color: $white;
+      border: 2px solid $dark-red;
       cursor: pointer;
       transition: all $transition-base;
 
+      svg {
+        color: currentColor;
+        fill: currentColor;
+        transition: inherit;
+      }
+
       &:hover {
-        background: $dark-gray;
-        color: $white;
+        background: $white;
+        color: $dark-red;
       }
     }
   }
@@ -138,6 +194,142 @@
     display: flex;
     flex-direction: column;
     gap: $spacing-xl;
+  }
+
+  .topFilters {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
+    margin-bottom: $spacing-xl;
+    width: 100%;
+
+    :global(div) {
+      width: 100%;
+    }
+
+    :global(input.cityInput) {
+      width: 100% !important;
+      border: 2px solid $dark-red !important;
+      box-sizing: border-box;
+
+      &::placeholder {
+        color: $dark-gray !important;
+        opacity: 1;
+      }
+
+      &:focus {
+        border-color: $dark-red !important;
+        outline: none;
+      }
+    }
+  }
+
+  .propertyTypesGrid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: $spacing-sm;
+    align-items: stretch;
+    justify-items: stretch;
+    width: 100%;
+    grid-auto-flow: row;
+
+    @media (max-width: $breakpoint-lg) {
+      grid-template-columns: repeat(6, 1fr);
+      overflow-x: auto;
+      padding-bottom: $spacing-sm;
+    }
+
+    @media (max-width: $breakpoint-md) {
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+
+  .propertyTypeButton {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: $spacing-xs;
+    padding: $spacing-lg;
+    border: 2px dotted $dark-red;
+    border-radius: 12px;
+    background: $white;
+    color: $dark-gray;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all $transition-base;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    min-height: 150px;
+    box-sizing: border-box;
+    min-width: 0;
+
+    .propertyTypeContent {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: $spacing-sm;
+      width: 100%;
+
+      svg {
+        width: 36px;
+        height: 36px;
+        color: $dark-red !important;
+        fill: $dark-red !important;
+        transition: color $transition-base, fill $transition-base;
+        flex-shrink: 0;
+      }
+
+      span {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        width: 100%;
+        line-height: 1.3;
+        text-align: center;
+        transition: color $transition-base;
+        color: $dark-gray;
+      }
+    }
+
+    &:hover {
+      border-color: $dark-red;
+      background: $dark-red;
+      color: $white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+      .propertyTypeContent svg {
+        color: $white;
+        fill: currentColor;
+      }
+
+      .propertyTypeContent span {
+        color: $white;
+      }
+    }
+
+    &.selected {
+      border-color: $dark-red;
+      background: $dark-red;
+      color: $white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+      .propertyTypeContent svg {
+        color: $white;
+      }
+
+      .propertyTypeContent span {
+        color: $white;
+      }
+    }
   }
 
   .locationTypeSection,
@@ -223,6 +415,12 @@
     }
   }
 
+  .extendedFiltersWrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: $spacing-md;
+  }
+
   .searchActions {
     display: flex;
     gap: $spacing-md;
@@ -246,6 +444,23 @@
     .rightActions {
       display: flex;
       gap: $spacing-md;
+    }
+  }
+
+  .modalActions {
+    margin-top: $spacing-lg;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .leftActions {
+      display: flex;
+      align-items: center;
+      gap: $spacing-md;
+    }
+
+    .modalSearchButton {
+      min-width: 200px;
     }
   }
 }

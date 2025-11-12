@@ -3,7 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { CaretRight } from '@phosphor-icons/react';
 import Image from 'next/image';
 import { Certificate } from '@/types';
 import { Button } from '@/components/ui/Button';
@@ -32,7 +32,7 @@ export function CertificatesMemberships({
           <Link href="/certificates">
             <Button variant="outline" className={styles.viewAllButton}>
               Виж всички
-              <ChevronRight size={16} />
+              <CaretRight size={16} />
             </Button>
           </Link>
         </div>
@@ -68,6 +68,7 @@ export function CertificatesMemberships({
     </section>
   );
 }
+
 
 
 

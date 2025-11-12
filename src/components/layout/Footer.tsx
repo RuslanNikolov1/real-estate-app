@@ -2,7 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
-import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { EnvelopeSimple, Phone, MapPin, FacebookLogo, InstagramLogo, LinkedinLogo } from '@phosphor-icons/react';
 import styles from './Footer.module.scss';
 
 export function Footer() {
@@ -24,21 +24,21 @@ export function Footer() {
                 aria-label="Facebook"
                 className={styles.socialLink}
               >
-                <Facebook size={20} />
+                <FacebookLogo size={20} />
               </a>
               <a
                 href="#"
                 aria-label="Instagram"
                 className={styles.socialLink}
               >
-                <Instagram size={20} />
+                <InstagramLogo size={20} />
               </a>
               <a
                 href="#"
                 aria-label="LinkedIn"
                 className={styles.socialLink}
               >
-                <Linkedin size={20} />
+                <LinkedinLogo size={20} />
               </a>
             </div>
           </div>
@@ -91,7 +91,7 @@ export function Footer() {
                 <a href="tel:+359888888888">+359 888 888 888</a>
               </li>
               <li>
-                <Mail size={18} />
+                <EnvelopeSimple size={18} />
                 <a href="mailto:info@example.com">info@example.com</a>
               </li>
             </ul>
