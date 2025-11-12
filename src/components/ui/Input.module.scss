@@ -24,11 +24,11 @@
 
   &:focus {
     outline: none;
-    border-color: $red;
+    border-color: $dark-red;
   }
 
   &.error {
-    border-color: $red;
+    border-color: $dark-red;
   }
 
   &::placeholder {
@@ -38,6 +38,5 @@
 
 .errorMessage {
   font-size: 0.875rem;
-  color: $red;
+  color: $dark-red;
 }
-

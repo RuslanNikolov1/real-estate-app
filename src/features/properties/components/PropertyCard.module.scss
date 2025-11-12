@@ -64,7 +64,7 @@
   top: $spacing-md;
   left: $spacing-md;
   padding: $spacing-xs $spacing-md;
-  background: $red;
+  background: $dark-red;
   color: $white;
   border-radius: 9999px; // Pill shape
   font-size: 0.875rem;
@@ -116,7 +116,7 @@
 .price {
   font-size: 1.75rem;
   font-weight: 700;
-  color: $red;
+  color: $dark-red;
   white-space: nowrap;
   font-family: $font-headline;
 }
@@ -136,7 +136,7 @@
 
   svg {
     flex-shrink: 0;
-    color: $red;
+    color: $dark-red;
   }
 }
 
@@ -158,7 +158,7 @@
 
   svg {
     flex-shrink: 0;
-    color: $red;
+    color: $dark-red;
   }
 }
 
@@ -172,6 +172,8 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+
 
 
 

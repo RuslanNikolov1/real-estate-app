@@ -78,14 +78,14 @@
   gap: $spacing-sm;
 
   &:hover {
-    border-color: $red;
-    color: $red;
+    border-color: $dark-red;
+    color: $dark-red;
   }
 
   &.active {
-    background: $red;
+    background: $dark-red;
     color: $white;
-    border-color: $red;
+    border-color: $dark-red;
   }
 
   svg {
@@ -210,7 +210,7 @@
 
   &:focus {
     outline: none;
-    border-color: $red;
+    border-color: $dark-red;
   }
 }
 
@@ -234,7 +234,7 @@
 
   &:focus {
     outline: none;
-    border-color: $red;
+    border-color: $dark-red;
   }
 }
 
@@ -264,7 +264,7 @@
   margin-bottom: $spacing-lg;
 
   svg {
-    color: $red;
+    color: $dark-red;
     flex-shrink: 0;
   }
 
@@ -309,7 +309,7 @@
 .futurePriceValue {
   font-size: 1.5rem;
   font-weight: 700;
-  color: $red;
+  color: $dark-red;
   font-family: $font-headline;
 }
 
@@ -333,7 +333,7 @@
 .resultPrice {
   font-size: 2.5rem;
   font-weight: 700;
-  color: $red;
+  color: $dark-red;
   text-align: center;
   margin: $spacing-md 0 0 0;
   font-family: $font-headline;
@@ -342,6 +342,8 @@
     font-size: 2rem;
   }
 }
+
+
 
 
 

@@ -54,7 +54,7 @@
   border: none;
 
   &:hover {
-    background: $red;
+    background: $dark-red;
     color: $white;
   }
 }
@@ -103,7 +103,7 @@
   font-family: $font-headline;
 
   svg {
-    color: $red;
+    color: $dark-red;
   }
 }
 
@@ -141,7 +141,7 @@
 
   &:focus {
     outline: none;
-    border-color: $red;
+    border-color: $dark-red;
   }
 }
 
@@ -152,6 +152,8 @@
   border-top: 1px solid $light-gray;
   flex-wrap: wrap;
 }
+
+
 
 
 

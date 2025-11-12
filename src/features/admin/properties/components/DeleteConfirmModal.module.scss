@@ -44,7 +44,7 @@
 }
 
 .warningIcon {
-  color: $red;
+  color: $dark-red;
 }
 
 .modalHeader h2 {
@@ -71,7 +71,7 @@
   flex-shrink: 0;
 
   &:hover {
-    background: $red;
+    background: $dark-red;
     color: $white;
   }
 }
@@ -123,7 +123,7 @@
 
 .price {
   font-weight: 600;
-  color: $red;
+  color: $dark-red;
   font-family: $font-headline;
 }
 
@@ -136,9 +136,9 @@
 }
 
 .deleteButton {
-  background: $red;
+  background: $dark-red;
   color: $white;
-  border-color: $red;
+  border-color: $dark-red;
 
   &:hover:not(:disabled) {
     background: $dark-red;
@@ -150,6 +150,8 @@
     cursor: not-allowed;
   }
 }
+
+
 
 
 

@@ -6,11 +6,13 @@
     display: flex;
     flex-direction: column;
     background: $light-gray;
+    pointer-events: auto; // Ensure page doesn't block pointer events
 }
 
 .main {
     flex: 1;
     padding: $spacing-xl 0;
+    pointer-events: auto; // Ensure main container doesn't block pointer events
 
     @media (max-width: $breakpoint-md) {
         padding: $spacing-lg 0;
@@ -21,6 +23,7 @@
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 $spacing-lg;
+    pointer-events: auto; // Ensure container doesn't block pointer events
 
     @media (max-width: $breakpoint-md) {
         padding: 0 $spacing-md;
@@ -36,11 +39,11 @@
         gap: $spacing-sm;
         margin-bottom: $spacing-lg;
         background-color: $white !important;
-        border-color: $red !important;
-        color: $red !important;
+        border-color: $dark-red !important;
+        color: $dark-red !important;
 
         &:hover {
-            background-color: $red !important;
+            background-color: $dark-red !important;
             color: $white !important;
         }
     }
@@ -100,59 +103,6 @@
     @media (max-width: $breakpoint-md) {
         height: 400px;
     }
-
-    // Leaflet map styles
-    :global(.leaflet-container) {
-        font-family: $font-body;
-    }
-
-    :global(.leaflet-popup-content-wrapper) {
-        border-radius: 8px;
-    }
-
-    :global(.leaflet-tooltip) {
-        font-family: $font-body;
-        font-weight: 600;
-        background-color: rgba(0, 0, 0, 0.8);
-        color: $white;
-        border: none;
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 14px;
-    }
-
-    :global(.leaflet-div-icon.custom-neighborhood-label) {
-        background: none !important;
-        border: none !important;
-    }
-
-    :global(.district-label) {
-        color: #222;
-        font-weight: bold;
-        font-size: 14px;
-        text-shadow: 1px 1px 2px #fff;
-        background: none !important;
-        border: none !important;
-    }
-
-    :global(.custom-neighborhood-label) {
-        div:hover {
-            background-color: rgba(222, 21, 16, 0.85) !important;
-            backdrop-filter: blur(12px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
-            color: white !important;
-            transform: scale(1.08);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(222, 21, 16, 0.5);
-            border-color: rgba(222, 21, 16, 1) !important;
-        }
-    }
-
-    :global(.leaflet-pane.leaflet-overlay-pane) {
-        svg {
-            filter: none;
-        }
-    }
 }
 
 .mapBackButton {
@@ -198,16 +148,6 @@
     }
 }
 
-.leafletTooltip {
-    background-color: rgba(0, 0, 0, 0.8) !important;
-    color: $white !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-}
-
 .neighborhoodLabel {
     background: none !important;
     border: none !important;
@@ -231,7 +171,7 @@
         pointer-events: all;
 
         &:hover {
-            background-color: $red;
+            background-color: $dark-red;
             transform: scale(1.05);
         }
     }
@@ -350,11 +290,14 @@
 }
 
 .filtersMapLayout {
+    position: relative;
     margin-top: $spacing-xl;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
     gap: $spacing-xl;
     align-items: start;
+    overflow: visible; // Don't block map interactions
+    pointer-events: auto; // Ensure layout doesn't block pointer events
 
     @media (max-width: $breakpoint-lg) {
         grid-template-columns: 1fr;
@@ -402,6 +345,72 @@
     }
 }
 
+.neighborhoodFilter {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+}
+
+.filterLabel {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $dark-gray;
+    margin-bottom: 0;
+}
+
+.selectedNeighborhoods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-xs;
+}
+
+.neighborhoodChip {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-xs $spacing-sm;
+    background-color: $dark-red;
+    color: $white;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.neighborhoodChipRemove {
+    background: none;
+    border: none;
+    color: $white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color $transition-base;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    &:active {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+}
+
+.neighborhoodHint {
+    font-size: 0.8rem;
+    color: $dark-gray;
+    margin: 0;
+    font-style: italic;
+}
+
 .cityInputWrapper {
     display: flex;
     flex-direction: column;
@@ -416,6 +425,21 @@
     background: $white;
     border: 2px solid $dark-red;
     border-radius: 14px;
+    position: relative;
+}
+
+.distanceHint {
+    position: absolute;
+    top: $spacing-xs;
+    right: $spacing-sm;
+    font-size: 0.75rem;
+    color: $dark-gray;
+    font-style: italic;
+    white-space: nowrap;
+
+    @media (max-width: $breakpoint-md) {
+        font-size: 0.7rem;
+    }
 }
 
 .distanceLabel {
@@ -728,7 +752,7 @@
     height: 80px;
     filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.12));
     position: relative;
-    z-index: 1;
+    z-index: 10;
 }
 
 .bedTopViewSquare {
@@ -741,16 +765,17 @@
     will-change: width, height;
 }
 
-.bedTopViewSquareGreen {
-    background: rgba(105, 105, 105, 0.35);
-    border: 2px solid rgba(105, 105, 105, 0.6);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+.bedTopViewSquareYellow {
+    background: rgb(250, 239, 140);
+    border: 3px solid rgb(246, 250, 38);
+    z-index: 2;
 }
 
 .bedTopViewSquareRed {
-    background: rgba(105, 105, 105, 0.35);
-    border: 2px solid rgba(105, 105, 105, 0.6);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+    background: rgba(220, 53, 69, 0.4);
+    border: 3px solid rgba(220, 53, 69, 0.8);
+    box-shadow: 0 6px 14px rgba(220, 53, 69, 0.3);
+    z-index: 1;
 }
 
 .apartmentSubtypeFilter {
@@ -842,12 +867,15 @@
 }
 
 .mapWrapper {
+    position: relative;
+    overflow: visible; // Don't block map interactions
     background: $white;
     border-radius: 16px;
     padding: $spacing-lg;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
+    pointer-events: auto; // Ensure wrapper doesn't block events
 
     @media (max-width: $breakpoint-md) {
         padding: $spacing-md;
@@ -855,11 +883,14 @@
 }
 
 .mapContainer {
+    position: relative;
+    z-index: 1;
     width: 100%;
     height: 800px;
     border-radius: 12px;
-    overflow: hidden;
+    overflow: hidden; // Keep hidden for border-radius, but map canvas handles its own scrolling
     border: 3px solid $dark-red;
+    pointer-events: auto !important; // Ensure pointer events are enabled
 
     @media (max-width: $breakpoint-md) {
         height: 600px;
@@ -900,7 +931,7 @@
         h4 {
             font-size: 1.25rem;
             font-weight: 700;
-            color: $red;
+            color: $dark-red;
             margin-bottom: $spacing-md;
         }
 
@@ -949,9 +980,9 @@
         justify-content: space-between;
         align-items: center;
         padding: $spacing-sm $spacing-md;
-        background: color.adjust($red, $lightness: 45%);
+        background: color.adjust($dark-red, $lightness: 45%);
         border-radius: 8px;
-        border-left: 4px solid $red;
+        border-left: 4px solid $dark-red;
 
         span:first-child {
             font-weight: 600;
@@ -974,7 +1005,7 @@
         color: $black;
 
         strong {
-            color: $red;
+            color: $dark-red;
         }
     }
 

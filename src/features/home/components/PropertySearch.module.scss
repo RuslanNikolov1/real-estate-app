@@ -207,7 +207,8 @@
       width: 100%;
     }
 
-    :global(input.cityInput) {
+    // Target the input element inside the Input component
+    :global(input) {
       width: 100% !important;
       border: 2px solid $dark-red !important;
       box-sizing: border-box;
@@ -220,6 +221,11 @@
       &:focus {
         border-color: $dark-red !important;
         outline: none;
+        box-shadow: 0 0 0 3px rgba(140, 28, 28, 0.1) !important;
+      }
+
+      &:hover {
+        border-color: $dark-red !important;
       }
     }
   }
@@ -359,14 +365,14 @@
       transition: all $transition-base;
 
       &:hover {
-        border-color: $red;
-        color: $red;
+        border-color: $dark-red;
+        color: $dark-red;
       }
 
       &.active {
-        background: $red;
+        background: $dark-red;
         color: $white;
-        border-color: $red;
+        border-color: $dark-red;
       }
     }
   }
@@ -432,11 +438,11 @@
       align-items: center;
       gap: $spacing-sm;
       background-color: $white !important;
-      border-color: $red !important;
-      color: $red !important;
+      border-color: $dark-red !important;
+      color: $dark-red !important;
 
       &:hover {
-        background-color: $red !important;
+        background-color: $dark-red !important;
         color: $white !important;
       }
     }

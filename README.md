@@ -1,6 +1,6 @@
 # Professional Real Estate Website
 
-A modern, professional real estate website built with Next.js 14, TypeScript, and Supabase.
+A modern, professional real estate website built with Next.js 16, TypeScript, and Supabase.
 
 ## 🚀 Features
 
@@ -17,7 +17,7 @@ A modern, professional real estate website built with Next.js 14, TypeScript, an
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 14+ (App Router)
+- **Framework**: Next.js 16+ (App Router)
 - **Language**: TypeScript
 - **Styling**: SASS Modules
 - **Database**: Supabase
@@ -56,9 +56,6 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
 # API
 NEXT_PUBLIC_API_URL=http://localhost:3000/api
-
-# Mapbox
-NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_access_token
 ```
 
 4. Run the development server:

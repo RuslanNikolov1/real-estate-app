@@ -39,7 +39,7 @@
 }
 
 .heartIcon {
-  color: $red;
+  color: $dark-red;
   flex-shrink: 0;
 }
 
@@ -87,8 +87,8 @@
   right: $spacing-md;
   padding: $spacing-sm $spacing-md;
   background: rgba(255, 255, 255, 0.95);
-  color: $red;
-  border: 2px solid $red;
+  color: $dark-red;
+  border: 2px solid $dark-red;
   border-radius: 9999px; // Pill shape
   font-weight: 600;
   font-size: 0.875rem;
@@ -101,7 +101,7 @@
   backdrop-filter: blur(10px);
 
   &:hover {
-    background: $red;
+    background: $dark-red;
     color: $white;
     transform: scale(1.05);
   }
@@ -142,6 +142,8 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+
 
 
 

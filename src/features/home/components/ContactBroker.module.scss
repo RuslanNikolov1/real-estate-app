@@ -44,7 +44,7 @@
   align-items: flex-start;
 
   svg {
-    color: $red;
+    color: $dark-red;
     flex-shrink: 0;
     margin-top: $spacing-xs;
     padding: $spacing-sm;
@@ -64,7 +64,7 @@
   }
 
   a {
-    color: $red;
+    color: $dark-red;
     text-decoration: none;
     transition: color $transition-base;
 
@@ -113,17 +113,17 @@
 
   &:focus {
     outline: none;
-    border-color: $red;
+    border-color: $dark-red;
   }
 
   &.error {
-    border-color: $red;
+    border-color: $dark-red;
   }
 }
 
 .errorMessage {
   font-size: 0.875rem;
-  color: $red;
+  color: $dark-red;
 }
 
 .successMessage {

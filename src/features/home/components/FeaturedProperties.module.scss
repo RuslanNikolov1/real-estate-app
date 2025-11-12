@@ -79,7 +79,7 @@
   top: $spacing-md;
   right: $spacing-md;
   padding: $spacing-xs $spacing-md;
-  background: $red;
+  background: $dark-red;
   color: $white;
   border-radius: 16px; // Rounded badge
   font-size: 0.875rem;
@@ -127,7 +127,7 @@
 .price {
   font-size: 1.5rem;
   font-weight: 700;
-  color: $red;
+  color: $dark-red;
   margin-top: auto;
 }
 

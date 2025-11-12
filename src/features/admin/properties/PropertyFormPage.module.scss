@@ -116,7 +116,7 @@
   background: $white;
 
   &:focus-within {
-    border-color: $red;
+    border-color: $dark-red;
   }
 }
 
@@ -138,13 +138,13 @@
 
   &:focus {
     outline: none;
-    border-color: $red;
+    border-color: $dark-red;
   }
 }
 
 .errorMessage {
   font-size: 0.875rem;
-  color: $red;
+  color: $dark-red;
   margin: 0;
 }
 
@@ -199,6 +199,8 @@
   border-top: 2px solid $light-gray;
   flex-wrap: wrap;
 }
+
+
 
 
 

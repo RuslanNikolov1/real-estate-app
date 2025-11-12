@@ -2,24 +2,19 @@
 const nextConfig = {
   reactStrictMode: false,
   images: {
-    domains: [
-      'res.cloudinary.com',
-      'images.unsplash.com',
-    ],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**.cloudinary.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
     ],
   },
   sassOptions: {
     includePaths: ['./src/styles'],
-  },
-  experimental: {
-    turbo: {
-      root: __dirname,
-    },
   },
 };
 

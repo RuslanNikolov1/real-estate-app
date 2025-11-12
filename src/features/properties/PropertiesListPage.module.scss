@@ -97,14 +97,14 @@
   transition: all $transition-base;
 
   &:hover:not(.active) {
-    border-color: $red;
-    color: $red;
+    border-color: $dark-red;
+    color: $dark-red;
   }
 
   &.active {
-    background: $red;
+    background: $dark-red;
     color: $white;
-    border-color: $red;
+    border-color: $dark-red;
   }
 }
 
@@ -112,6 +112,8 @@
   padding: $spacing-xs $spacing-sm;
   color: $dark-gray;
 }
+
+
 
 
 

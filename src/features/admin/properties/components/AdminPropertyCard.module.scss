@@ -39,7 +39,7 @@
   top: $spacing-md;
   left: $spacing-md;
   padding: $spacing-xs $spacing-md;
-  background: $red;
+  background: $dark-red;
   color: $white;
   border-radius: 9999px; // Pill shape
   font-size: 0.875rem;
@@ -76,7 +76,7 @@
 .price {
   font-size: 1.25rem;
   font-weight: 700;
-  color: $red;
+  color: $dark-red;
   font-family: $font-headline;
 
   span {
@@ -103,6 +103,8 @@
   flex-wrap: wrap;
   margin-top: $spacing-sm;
 }
+
+
 
 
 

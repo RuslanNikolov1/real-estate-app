@@ -57,7 +57,7 @@
   transition: all $transition-base;
 
   &:hover {
-    background: $red;
+    background: $dark-red;
     transform: translateY(-2px);
   }
 }
@@ -83,7 +83,7 @@
       transition: color $transition-base;
 
       &:hover {
-        color: $red;
+        color: $dark-red;
       }
     }
   }
@@ -104,7 +104,7 @@
 
     svg {
       flex-shrink: 0;
-      color: $red;
+      color: $dark-red;
     }
 
     a {
@@ -113,7 +113,7 @@
       transition: color $transition-base;
 
       &:hover {
-        color: $red;
+        color: $dark-red;
       }
     }
   }

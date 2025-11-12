@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, type ReactNode, type CSSProperties } from 'react';
+import { useState, useRef, useEffect, type ReactNode, type CSSProperties, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
@@ -13,80 +13,34 @@ import { Input } from '@/components/ui/Input';
 import { propertyTypes } from '@/data/propertyTypes';
 import burgasCities from '@/data/burgasCities.json';
 import burgasNeighborhoods from '@/data/burgasNeighborhoods.json';
+import citiesNeighborhoods from '@/data/citiesNeighborhoods.json';
 import styles from './MapFiltersPage.module.scss';
-import 'leaflet/dist/leaflet.css';
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 
 const AREA_SLIDER_MAX = 500;
 const SQUARE_AREA_CAP = 225;
 
-const MapContainer = dynamic(
-    () => import('react-leaflet').then((mod) => mod.MapContainer),
-    { ssr: false }
-);
-const TileLayer = dynamic(
-    () => import('react-leaflet').then((mod) => mod.TileLayer),
-    { ssr: false }
-);
-const Circle = dynamic(
-    () => import('react-leaflet').then((mod) => mod.Circle),
-    { ssr: false }
-);
-const GeoJSON = dynamic(
-    () => import('react-leaflet').then((mod) => mod.GeoJSON),
-    { ssr: false }
-);
-// Component to update map center
-const MapUpdater = dynamic(
-    () => import('react-leaflet').then((mod) => {
-        const Component = ({ center }: { center: [number, number] }) => {
-            const map = mod.useMap();
+// Google Maps container style
+const mapContainerStyle = {
+    width: '100%',
+    height: '100%',
+    borderRadius: '12px'
+};
 
-            useEffect(() => {
-                map.setView(center, map.getZoom());
-            }, [center, map]);
+// Default map center (Burgas)
+const defaultCenter = {
+    lat: 42.5048,
+    lng: 27.4626
+};
 
-            return null;
-        };
-        return Component;
-    }),
-    { ssr: false }
-);
 
-// Component to handle map clicks and fetch neighborhoods
-const MapClickHandler = dynamic(
-    () => import('react-leaflet').then((mod) => {
-        const Component = ({
-            onCityClick
-        }: {
-            onCityClick: (lat: number, lng: number) => void
-        }) => {
-            const map = mod.useMap();
-
-            useEffect(() => {
-                const handleClick = (e: any) => {
-                    onCityClick(e.latlng.lat, e.latlng.lng);
-                };
-
-                map.on('click', handleClick);
-
-                return () => {
-                    map.off('click', handleClick);
-                };
-            }, [map, onCityClick]);
-
-            return null;
-        };
-        return Component;
-    }),
-    { ssr: false }
-);
 
 export function MapFiltersPage() {
     const router = useRouter();
     const [selectedPropertyType, setSelectedPropertyType] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [city, setCity] = useState('');
-    const [neighborhood, setNeighborhood] = useState('');
+    const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
     const [distance, setDistance] = useState(0);
     const [areaFrom, setAreaFrom] = useState(20);
     const [areaTo, setAreaTo] = useState(100);
@@ -97,6 +51,8 @@ export function MapFiltersPage() {
     const [selectedCityName, setSelectedCityName] = useState<string>('');
     const [loadingNeighborhoods, setLoadingNeighborhoods] = useState(false);
     const cityInputRef = useRef<HTMLDivElement>(null);
+    const mapContainer = useRef<HTMLDivElement>(null);
+    const [map, setMap] = useState<google.maps.Map | null>(null);
 
     const isApartmentsSelected = selectedPropertyType === 'apartments';
     const trimmedCity = city.trim();
@@ -151,6 +107,17 @@ export function MapFiltersPage() {
                 const coords: [number, number] = [foundCity.coordinates[0], foundCity.coordinates[1]];
                 setCityCoordinates(coords);
                 setMapCenter(coords);
+
+                // Only load neighborhoods for Burgas
+                const cityNameLower = foundCity.name.toLowerCase();
+                if (cityNameLower.includes('burgas') || cityNameLower.includes('бургас')) {
+                    setOsmNeighborhoods(null);
+                    setSelectedCityName(foundCity.name);
+                } else {
+                    // For other cities, don't show neighborhoods
+                    setOsmNeighborhoods(null);
+                    setSelectedCityName('');
+                }
             } else {
                 setCityCoordinates(null);
             }
@@ -160,52 +127,83 @@ export function MapFiltersPage() {
         }
     }, [trimmedCity, osmNeighborhoods, selectedCityName]);
 
+    // Update map center when mapCenter state changes
+    useEffect(() => {
+        if (map && mapCenter) {
+            map.panTo({
+                lat: mapCenter[0],
+                lng: mapCenter[1]
+            });
+        }
+    }, [map, mapCenter]);
+
+
     // Fetch neighborhoods from OpenStreetMap
-    const fetchNeighborhoodsFromOSM = async (lat: number, lng: number) => {
+    const fetchNeighborhoodsFromOSM = async (lat: number, lng: number, cityName?: string, updateCityName: boolean = true) => {
         setLoadingNeighborhoods(true);
         try {
-            // First, reverse geocode to get city name
-            const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`;
-            const nominatimResponse = await fetch(nominatimUrl);
-            const nominatimData = await nominatimResponse.json();
+            let finalCityName = cityName;
 
-            const cityName = nominatimData.address?.city ||
-                nominatimData.address?.town ||
-                nominatimData.address?.municipality ||
-                nominatimData.address?.county ||
-                '';
+            // If city name not provided, reverse geocode to get city name
+            if (!finalCityName) {
+                const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`;
+                const nominatimResponse = await fetch(nominatimUrl, {
+                    referrerPolicy: 'strict-origin-when-cross-origin',
+                    headers: {
+                        'User-Agent': 'RealEstateApp/1.0'
+                    }
+                });
+                const nominatimData = await nominatimResponse.json();
 
-            if (!cityName) {
-                setLoadingNeighborhoods(false);
-                return;
+                finalCityName = nominatimData.address?.city ||
+                    nominatimData.address?.town ||
+                    nominatimData.address?.municipality ||
+                    nominatimData.address?.county ||
+                    '';
+
+                if (!finalCityName) {
+                    setLoadingNeighborhoods(false);
+                    return;
+                }
             }
 
-            setSelectedCityName(cityName);
-            setCity(cityName);
-            setCityCoordinates([lat, lng]);
-            setMapCenter([lat, lng]);
+            if (updateCityName) {
+                setSelectedCityName(finalCityName);
+                setCity(finalCityName);
+                setCityCoordinates([lat, lng]);
+                setMapCenter([lat, lng]);
+
+            }
 
             // Fetch neighborhoods using Overpass API
+            // Use a larger bounding box for better neighborhood coverage
             // Bbox format: (south,west,north,east)
-            const south = lat - 0.1;
-            const west = lng - 0.1;
-            const north = lat + 0.1;
-            const east = lng + 0.1;
+            const south = lat - 0.15;
+            const west = lng - 0.15;
+            const north = lat + 0.15;
+            const east = lng + 0.15;
             const overpassQuery = `
                 [out:json][timeout:25];
                 (
                     relation["place"="suburb"](bbox:${south},${west},${north},${east});
                     relation["place"="neighbourhood"](bbox:${south},${west},${north},${east});
                     relation["place"="quarter"](bbox:${south},${west},${north},${east});
+                    relation["place"="city_block"](bbox:${south},${west},${north},${east});
                     way["place"="suburb"](bbox:${south},${west},${north},${east});
                     way["place"="neighbourhood"](bbox:${south},${west},${north},${east});
                     way["place"="quarter"](bbox:${south},${west},${north},${east});
+                    way["place"="city_block"](bbox:${south},${west},${north},${east});
                 );
                 out geom;
             `;
 
             const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
-            const overpassResponse = await fetch(overpassUrl);
+            const overpassResponse = await fetch(overpassUrl, {
+                referrerPolicy: 'strict-origin-when-cross-origin',
+                headers: {
+                    'User-Agent': 'RealEstateApp/1.0'
+                }
+            });
             const overpassData = await overpassResponse.json();
 
             if (overpassData.elements && overpassData.elements.length > 0) {
@@ -213,20 +211,37 @@ export function MapFiltersPage() {
                 const features = overpassData.elements.map((element: any) => {
                     if (element.type === 'relation' || element.type === 'way') {
                         const coordinates = element.geometry?.map((point: any) => [point.lon, point.lat]) || [];
+
+                        // Only include features with coordinates
+                        if (coordinates.length === 0) {
+                            return null;
+                        }
+
+                        // Determine geometry type
+                        let geometryType = 'LineString';
+                        if (element.type === 'relation') {
+                            geometryType = 'Polygon';
+                        } else if (element.type === 'way' && coordinates.length > 2 &&
+                            coordinates[0][0] === coordinates[coordinates.length - 1][0] &&
+                            coordinates[0][1] === coordinates[coordinates.length - 1][1]) {
+                            geometryType = 'Polygon';
+                        }
+
                         return {
                             type: 'Feature',
                             properties: {
                                 name: element.tags?.name || '',
-                                id: element.id
+                                id: element.id,
+                                type: element.tags?.place || ''
                             },
                             geometry: {
-                                type: element.type === 'relation' ? 'Polygon' : 'LineString',
-                                coordinates: element.type === 'relation' ? [coordinates] : coordinates
+                                type: geometryType,
+                                coordinates: geometryType === 'Polygon' ? [coordinates] : coordinates
                             }
                         };
                     }
                     return null;
-                }).filter((f: any) => f !== null);
+                }).filter((f: any) => f !== null && f.geometry.coordinates.length > 0);
 
                 const geoJsonData = {
                     type: 'FeatureCollection',
@@ -234,8 +249,14 @@ export function MapFiltersPage() {
                 };
 
                 setOsmNeighborhoods(geoJsonData);
+                setSelectedCityName(finalCityName);
             } else {
-                setOsmNeighborhoods(null);
+                // If no neighborhoods found, check if it's Burgas and use local data
+                if (finalCityName && (finalCityName.toLowerCase().includes('burgas') || finalCityName.toLowerCase().includes('бургас'))) {
+                    setOsmNeighborhoods(null); // Use burgasNeighborhoods instead
+                } else {
+                    setOsmNeighborhoods(null);
+                }
             }
         } catch (error) {
             console.error('Error fetching neighborhoods:', error);
@@ -245,9 +266,59 @@ export function MapFiltersPage() {
         }
     };
 
-    const handleMapCityClick = (lat: number, lng: number) => {
-        fetchNeighborhoodsFromOSM(lat, lng);
-    };
+    const handleMapCityClick = useCallback(async (lat: number, lng: number) => {
+        // First try to get city name from coordinates
+        const foundCity = burgasCities.cities.find(
+            (c) => Math.abs(c.coordinates[0] - lat) < 0.1 && Math.abs(c.coordinates[1] - lng) < 0.1
+        );
+
+        if (foundCity) {
+            const foundCityNameLower = foundCity.name.toLowerCase();
+
+
+            // Only load neighborhoods for Burgas
+            if (foundCityNameLower.includes('burgas') || foundCityNameLower.includes('бургас')) {
+                setOsmNeighborhoods(null); // Will use burgasNeighborhoods in neighborhoodsGeoJSON
+                setSelectedCityName(foundCity.name);
+                // City input is not populated on click - removed functionality
+                setCityCoordinates([foundCity.coordinates[0], foundCity.coordinates[1]]);
+                setMapCenter([foundCity.coordinates[0], foundCity.coordinates[1]]);
+                return;
+            }
+
+            // For other cities, don't populate city input
+            setSelectedCityName('');
+            setOsmNeighborhoods(null);
+            setCityCoordinates([foundCity.coordinates[0], foundCity.coordinates[1]]);
+            setMapCenter([foundCity.coordinates[0], foundCity.coordinates[1]]);
+            return;
+        }
+    }, []);
+
+    const handleCityClick = useCallback(async (cityName: string, coordinates: [number, number]) => {
+        // City input is not populated on click - removed functionality
+        setCityCoordinates(coordinates);
+        setMapCenter(coordinates);
+        setNeighborhoods([]);
+
+
+        // Only load neighborhoods for Burgas
+        const cityNameLower = cityName.toLowerCase();
+        if (cityNameLower.includes('burgas') || cityNameLower.includes('бургас')) {
+            // Use local Burgas neighborhoods data
+            setOsmNeighborhoods(null);
+            setSelectedCityName(cityName);
+        } else {
+            // For other cities, don't show neighborhoods
+            setOsmNeighborhoods(null);
+            setSelectedCityName('');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+
+
+
 
     type ApartmentSubtype = {
         id: string;
@@ -371,8 +442,8 @@ export function MapFiltersPage() {
         if (city.trim()) {
             params.set('city', city.trim());
         }
-        if (neighborhood.trim()) {
-            params.set('neighborhood', neighborhood.trim());
+        if (neighborhoods.length > 0) {
+            params.set('neighborhood', neighborhoods.join(','));
         }
         if (distance > 0) {
             params.set('distance', distance.toString());
@@ -393,12 +464,16 @@ export function MapFiltersPage() {
         setSelectedPropertyType(null);
         setSearchTerm('');
         setCity('');
-        setNeighborhood('');
+        setNeighborhoods([]);
         setDistance(0);
         setAreaFrom(20);
         setAreaTo(100);
         setSelectedApartmentSubtypes([]);
     };
+
+    const handleRemoveNeighborhood = useCallback((neighborhoodName: string) => {
+        setNeighborhoods((prev) => prev.filter(n => n !== neighborhoodName));
+    }, []);
 
     return (
         <div className={styles.mapFiltersPage}>
@@ -454,6 +529,7 @@ export function MapFiltersPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.4 }}
                             className={styles.filtersMapLayout}
+                            style={{ pointerEvents: 'auto' }}
                         >
                             <div className={styles.leftFiltersColumn}>
                                 <div className={styles.leftFilters}>
@@ -477,6 +553,9 @@ export function MapFiltersPage() {
                                             />
                                             {showDistanceFilter && (
                                                 <div className={styles.distanceFilter}>
+                                                    <span className={styles.distanceHint}>
+                                                        Провери картата на увеличаване
+                                                    </span>
                                                     <label htmlFor="distance-slider" className={styles.distanceLabel}>
                                                         Радиус: {distance} km
                                                     </label>
@@ -512,14 +591,48 @@ export function MapFiltersPage() {
                                                 </div>
                                             )}
                                         </div>
-                                        <Input
-                                            id="filters-neighborhood"
-                                            label="Квартал"
-                                            placeholder="Пр. Център"
-                                            value={neighborhood}
-                                            onChange={(event) => setNeighborhood(event.target.value)}
-                                            className={styles.filterInput}
-                                        />
+                                        <div className={styles.neighborhoodFilter}>
+                                            <Input
+                                                id="filters-neighborhood"
+                                                label="Квартал"
+                                                placeholder={neighborhoods.length > 0 ? "Кликнете на картата за да добавите още квартали" : "Кликнете на картата за да изберете квартали"}
+                                                value={neighborhoods.join(', ')}
+                                                readOnly
+                                                className={styles.filterInput}
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    // Scroll to map or focus on map
+                                                    if (mapContainer.current) {
+                                                        mapContainer.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                    }
+                                                }}
+                                            />
+                                            {neighborhoods.length > 0 && (
+                                                <>
+                                                    <div className={styles.selectedNeighborhoods}>
+                                                        {neighborhoods.map((neighborhoodName) => (
+                                                            <span
+                                                                key={neighborhoodName}
+                                                                className={styles.neighborhoodChip}
+                                                            >
+                                                                {neighborhoodName}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleRemoveNeighborhood(neighborhoodName)}
+                                                                    className={styles.neighborhoodChipRemove}
+                                                                    aria-label={`Remove ${neighborhoodName}`}
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                    <p className={styles.neighborhoodHint}>
+                                                        {neighborhoods.length} квартал{neighborhoods.length > 1 ? 'а' : ''} избран{neighborhoods.length > 1 ? 'и' : ''}. Кликнете отново на квартал за да го премахнете.
+                                                    </p>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -654,17 +767,9 @@ export function MapFiltersPage() {
                                             className={styles.bedTopViewWrapper}
                                             style={bedWrapperStyle}
                                         >
-                                            <Image
-                                                src="/bed-top-view.svg"
-                                                alt="Bed top view illustration"
-                                                width={200}
-                                                height={60}
-                                                className={styles.bedTopViewImage}
-                                                priority
-                                            />
                                             <motion.div
                                                 className={`${styles.bedTopViewSquare} ${isFromSmaller
-                                                    ? styles.bedTopViewSquareGreen
+                                                    ? styles.bedTopViewSquareYellow
                                                     : styles.bedTopViewSquareRed
                                                     }`}
                                                 initial={{ width: 0, height: 0 }}
@@ -676,7 +781,7 @@ export function MapFiltersPage() {
                                             />
                                             <motion.div
                                                 className={`${styles.bedTopViewSquare} ${isToSmaller
-                                                    ? styles.bedTopViewSquareGreen
+                                                    ? styles.bedTopViewSquareYellow
                                                     : styles.bedTopViewSquareRed
                                                     }`}
                                                 initial={{ width: 0, height: 0 }}
@@ -686,113 +791,95 @@ export function MapFiltersPage() {
                                                 }}
                                                 transition={{ type: 'spring', stiffness: 200, damping: 25 }}
                                             />
+                                            <Image
+                                                src="/bed-top-view.svg"
+                                                alt="Bed top view illustration"
+                                                width={200}
+                                                height={60}
+                                                className={styles.bedTopViewImage}
+                                                priority
+                                            />
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className={styles.mapWrapper}>
-                                <div className={styles.mapContainer}>
-                                    <MapContainer
-                                        center={mapCenter}
-                                        zoom={11}
-                                        style={{ height: '100%', width: '100%' }}
-                                        scrollWheelZoom
-                                    >
-                                        <MapUpdater center={mapCenter} />
-                                        <MapClickHandler onCityClick={handleMapCityClick} />
-                                        <TileLayer
-                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                        />
-                                        {!osmNeighborhoods && (
-                                            <GeoJSON
-                                                data={burgasNeighborhoods as any}
-                                                style={(feature) => ({
-                                                    color: '#8c1c1c',
-                                                    weight: 2,
-                                                    opacity: 0.6,
-                                                    fillColor: '#8c1c1c',
-                                                    fillOpacity: 0.1
+                                <div
+                                    className={styles.mapContainer}
+                                    ref={mapContainer}
+                                    style={{ width: '100%', height: '70vh', minHeight: '600px' }}
+                                >
+                                    {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
+                                        <LoadScript
+                                            googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+                                            loadingElement={<div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading map...</div>}
+                                        >
+                                            <GoogleMap
+                                                mapContainerStyle={mapContainerStyle}
+                                                center={mapCenter ? { lat: mapCenter[0], lng: mapCenter[1] } : defaultCenter}
+                                                zoom={11}
+                                                onLoad={(mapInstance) => setMap(mapInstance)}
+                                                options={{
+                                                    disableDefaultUI: false,
+                                                    zoomControl: true,
+                                                    streetViewControl: false,
+                                                    mapTypeControl: false,
+                                                    fullscreenControl: true,
+                                                }}
+                                            >
+                                                {/* City markers - only show Burgas municipality cities */}
+                                                {map && burgasCities.cities.map((city) => {
+                                                    const cityNameLower = city.name.toLowerCase();
+                                                    const isBurgasCity = cityNameLower.includes('burgas') || cityNameLower.includes('бургас');
+
+                                                    if (!isBurgasCity) return null;
+
+                                                    // Create custom icon using SVG
+                                                    const iconSize = city.type === 'major' ? 14 : city.type === 'medium' ? 12 : 10;
+                                                    const svgIcon = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+                                                        <svg width="${iconSize * 2}" height="${iconSize * 2}" xmlns="http://www.w3.org/2000/svg">
+                                                            <circle cx="${iconSize}" cy="${iconSize}" r="${iconSize - 3}" fill="#8c1c1c" stroke="#ffffff" stroke-width="3"/>
+                                                        </svg>
+                                                    `)}`;
+
+                                                    // Use proper Google Maps types - google is available after map loads
+                                                    const iconConfig: google.maps.Icon = {
+                                                        url: svgIcon,
+                                                        scaledSize: new google.maps.Size(iconSize * 2, iconSize * 2),
+                                                        anchor: new google.maps.Point(iconSize, iconSize),
+                                                    };
+
+                                                    return (
+                                                        <Marker
+                                                            key={city.id}
+                                                            position={{
+                                                                lat: city.coordinates[0],
+                                                                lng: city.coordinates[1]
+                                                            }}
+                                                            title={city.name}
+                                                            onClick={() => {
+                                                                handleCityClick(city.name, [city.coordinates[0], city.coordinates[1]]);
+                                                            }}
+                                                            icon={iconConfig}
+                                                        />
+                                                    );
                                                 })}
-                                                onEachFeature={(feature, layer) => {
-                                                    if (feature.properties) {
-                                                        layer.on({
-                                                            click: () => {
-                                                                if (feature.properties?.name) {
-                                                                    setNeighborhood(feature.properties.name);
-                                                                }
-                                                            },
-                                                            mouseover: (e) => {
-                                                                const layer = e.target;
-                                                                layer.setStyle({
-                                                                    weight: 3,
-                                                                    fillOpacity: 0.2
-                                                                });
-                                                            },
-                                                            mouseout: (e) => {
-                                                                const layer = e.target;
-                                                                layer.setStyle({
-                                                                    weight: 2,
-                                                                    fillOpacity: 0.1
-                                                                });
-                                                            }
-                                                        });
-                                                    }
-                                                }}
-                                            />
-                                        )}
-                                        {osmNeighborhoods && (
-                                            <GeoJSON
-                                                data={osmNeighborhoods}
-                                                style={(feature) => ({
-                                                    color: '#8c1c1c',
-                                                    weight: 2,
-                                                    opacity: 0.6,
-                                                    fillColor: '#8c1c1c',
-                                                    fillOpacity: 0.1
-                                                })}
-                                                onEachFeature={(feature, layer) => {
-                                                    if (feature.properties) {
-                                                        layer.on({
-                                                            click: () => {
-                                                                if (feature.properties?.name) {
-                                                                    setNeighborhood(feature.properties.name);
-                                                                }
-                                                            },
-                                                            mouseover: (e) => {
-                                                                const layer = e.target;
-                                                                layer.setStyle({
-                                                                    weight: 3,
-                                                                    fillOpacity: 0.2
-                                                                });
-                                                            },
-                                                            mouseout: (e) => {
-                                                                const layer = e.target;
-                                                                layer.setStyle({
-                                                                    weight: 2,
-                                                                    fillOpacity: 0.1
-                                                                });
-                                                            }
-                                                        });
-                                                    }
-                                                }}
-                                            />
-                                        )}
-                                        {cityCoordinates && distance > 0 && (
-                                            <Circle
-                                                center={cityCoordinates}
-                                                radius={distance * 1000}
-                                                pathOptions={{
-                                                    color: '#8c1c1c',
-                                                    fillColor: '#8c1c1c',
-                                                    fillOpacity: 0.2,
-                                                    weight: 2,
-                                                    interactive: false
-                                                }}
-                                            />
-                                        )}
-                                    </MapContainer>
+                                            </GoogleMap>
+                                        </LoadScript>
+                                    )}
+                                    {!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
+                                        <div style={{
+                                            height: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#666',
+                                            fontSize: '1.1rem'
+                                        }}>
+                                            Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env file
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </motion.div>
@@ -807,7 +894,7 @@ export function MapFiltersPage() {
                                     !selectedPropertyType &&
                                     !searchTerm.trim() &&
                                     !city.trim() &&
-                                    !neighborhood.trim()
+                                    neighborhoods.length === 0
                                 }
                             >
                                 Изчисти
@@ -819,7 +906,7 @@ export function MapFiltersPage() {
                                     !selectedPropertyType &&
                                     !searchTerm.trim() &&
                                     !city.trim() &&
-                                    !neighborhood.trim()
+                                    neighborhoods.length === 0
                                 }
                             >
                                 Търси имоти

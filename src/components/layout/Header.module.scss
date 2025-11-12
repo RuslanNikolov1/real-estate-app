@@ -144,7 +144,7 @@
   }
 
   &.active {
-    background: $red;
+    background: $dark-red;
     color: $white;
   }
 }
@@ -216,12 +216,12 @@
 
   &:hover {
     background: $light-gray;
-    color: $red;
+    color: $dark-red;
   }
 
   &.active {
     background: $light-gray;
-    color: $red;
+    color: $dark-red;
     font-weight: 600;
   }
 }

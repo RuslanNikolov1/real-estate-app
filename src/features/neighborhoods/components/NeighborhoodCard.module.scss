@@ -51,7 +51,7 @@
 
 .badge {
   padding: $spacing-xs $spacing-md;
-  background: $red;
+  background: $dark-red;
   color: $white;
   border-radius: 9999px; // Pill shape
   font-size: 0.875rem;
@@ -103,7 +103,7 @@
   color: $dark-gray;
 
   svg {
-    color: $red;
+    color: $dark-red;
     flex-shrink: 0;
   }
 }
@@ -148,10 +148,12 @@
   border-top: 1px solid $light-gray;
 
   svg {
-    color: $red;
+    color: $dark-red;
     flex-shrink: 0;
   }
 }
+
+
 
 
 

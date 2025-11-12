@@ -64,7 +64,7 @@
   background: rgba(225, 6, 0, 0.1);
   border: 2px solid rgba(225, 6, 0, 0.3);
   border-radius: 16px; // Rounded
-  color: $red;
+  color: $dark-red;
   font-size: 0.9375rem;
   margin-bottom: $spacing-lg;
 
@@ -129,7 +129,7 @@
 
   &:hover {
     background: $light-gray;
-    color: $red;
+    color: $dark-red;
   }
 }
 
@@ -137,7 +137,7 @@
   align-self: flex-end;
   background: none;
   border: none;
-  color: $red;
+  color: $dark-red;
   font-size: 0.9375rem;
   font-weight: 500;
   cursor: pointer;
@@ -192,6 +192,8 @@
   margin: 0 0 $spacing-lg 0;
   text-align: center;
 }
+
+
 
 
 

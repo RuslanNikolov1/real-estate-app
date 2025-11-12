@@ -145,14 +145,14 @@
   transition: all $transition-base;
 
   &:hover {
-    border-color: $red;
-    color: $red;
+    border-color: $dark-red;
+    color: $dark-red;
   }
 
   &.active {
-    background: $red;
+    background: $dark-red;
     color: $white;
-    border-color: $red;
+    border-color: $dark-red;
   }
 }
 
@@ -176,6 +176,8 @@
   color: $dark-gray;
   font-size: 1.125rem;
 }
+
+
 
 
 

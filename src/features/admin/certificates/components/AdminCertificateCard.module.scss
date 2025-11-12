@@ -97,8 +97,8 @@
   transition: all $transition-base;
 
   &:hover:not(:disabled) {
-    border-color: $red;
-    color: $red;
+    border-color: $dark-red;
+    color: $dark-red;
     background: rgba(225, 6, 0, 0.05);
   }
 
@@ -119,6 +119,8 @@
     gap: $spacing-xs;
   }
 }
+
+
 
 
 

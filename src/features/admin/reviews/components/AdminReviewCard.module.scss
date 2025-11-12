@@ -41,7 +41,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%; // Circular
-  background: linear-gradient(135deg, $red 0%, $dark-red 100%);
+  background: linear-gradient(135deg, $dark-red 0%, $dark-red 100%);
   color: $white;
   display: flex;
   align-items: center;
@@ -153,6 +153,8 @@
     gap: $spacing-xs;
   }
 }
+
+
 
 
 
