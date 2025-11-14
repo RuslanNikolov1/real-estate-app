@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 const propertyTypeLabels: Record<string, string> = {
@@ -19,7 +19,7 @@ const propertyTypeLabels: Record<string, string> = {
   'other-real-estates': 'Други недвижими имоти',
 };
 
-export default function MockSearchPage() {
+function MockSearchContent() {
   const searchParams = useSearchParams();
   const [selectedType, setSelectedType] = useState<string>('all');
 
@@ -118,6 +118,29 @@ export default function MockSearchPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function MockSearchPage() {
+  return (
+    <Suspense fallback={
+      <main
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#f4f4f4',
+          padding: '2rem',
+          textAlign: 'center',
+          fontFamily: 'inherit',
+        }}
+      >
+        <div>Зареждане...</div>
+      </main>
+    }>
+      <MockSearchContent />
+    </Suspense>
   );
 }
 

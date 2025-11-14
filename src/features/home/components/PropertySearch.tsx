@@ -13,15 +13,18 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import styles from './PropertySearch.module.scss';
 import { propertyTypes } from '@/data/propertyTypes';
+import { PropertySearchFilters, PropertyType } from '@/types';
 
 interface PropertySearchProps {
   isExpanded?: boolean;
   onExpand?: () => void;
+  onSearch?: (searchFilters: PropertySearchFilters) => void;
 }
 
 export function PropertySearch({
   isExpanded = false,
   onExpand,
+  onSearch,
 }: PropertySearchProps) {
   const { t } = useTranslation();
   const [selectedButton, setSelectedButton] = useState<'sales' | 'rent' | null>(null);
@@ -71,6 +74,20 @@ export function PropertySearch({
 
     setCityError('');
 
+    // If onSearch callback is provided, call it with filters
+    if (onSearch) {
+      const searchFilters: PropertySearchFilters = {
+        city: city.trim(),
+        status: selectedButton === 'sales' ? ['for-sale'] : ['for-rent'],
+        type: selectedPropertyTypes.length > 0 
+          ? (selectedPropertyTypes as PropertyType[])
+          : undefined,
+      };
+      onSearch(searchFilters);
+      return;
+    }
+
+    // Otherwise, use the default navigation behavior
     const params = new URLSearchParams();
 
     params.set('mode', selectedButton);
