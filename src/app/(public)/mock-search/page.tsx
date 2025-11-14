@@ -132,8 +132,6 @@ export default function MockSearchPage() {
           justifyContent: 'center',
           background: '#f4f4f4',
           padding: '2rem',
-          textAlign: 'center',
-          fontFamily: 'inherit',
         }}
       >
         <div>Зареждане...</div>

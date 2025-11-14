@@ -13,12 +13,11 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import styles from './PropertySearch.module.scss';
 import { propertyTypes } from '@/data/propertyTypes';
-import { PropertySearchFilters, PropertyType } from '@/types';
 
 interface PropertySearchProps {
   isExpanded?: boolean;
   onExpand?: () => void;
-  onSearch?: (searchFilters: PropertySearchFilters) => void;
+  onSearch?: (searchFilters: { mode: 'sales' | 'rent'; city: string; types?: string[] }) => void;
 }
 
 export function PropertySearch({
@@ -74,30 +73,25 @@ export function PropertySearch({
 
     setCityError('');
 
-    // If onSearch callback is provided, call it with filters
+    const searchFilters = {
+      mode: selectedButton,
+      city: city.trim(),
+      types: selectedPropertyTypes.length > 0 ? selectedPropertyTypes : undefined,
+    };
+
+    // Call onSearch callback if provided
     if (onSearch) {
-      const searchFilters: PropertySearchFilters = {
-        city: city.trim(),
-        status: selectedButton === 'sales' ? ['for-sale'] : ['for-rent'],
-        type: selectedPropertyTypes.length > 0 
-          ? (selectedPropertyTypes as PropertyType[])
-          : undefined,
-      };
       onSearch(searchFilters);
-      return;
+    } else {
+      // Fallback to URL redirect if no callback
+      const params = new URLSearchParams();
+      params.set('mode', selectedButton);
+      params.set('city', city.trim());
+      if (selectedPropertyTypes.length > 0) {
+        params.set('types', selectedPropertyTypes.join(','));
+      }
+      window.location.href = `/properties?${params.toString()}`;
     }
-
-    // Otherwise, use the default navigation behavior
-    const params = new URLSearchParams();
-
-    params.set('mode', selectedButton);
-    params.set('city', city.trim());
-
-    if (selectedPropertyTypes.length > 0) {
-      params.set('types', selectedPropertyTypes.join(','));
-    }
-
-    window.location.href = `/properties?${params.toString()}`;
   };
 
   const canSearch =

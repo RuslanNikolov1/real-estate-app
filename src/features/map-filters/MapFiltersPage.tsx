@@ -26,7 +26,7 @@ import { OtherRealEstatesFiltersPage, OtherRealEstatesFiltersState } from './fil
 import { MapComponent } from './MapComponent';
 import { PropertyCard } from '@/features/properties/components/PropertyCard';
 import { mockProperties } from '@/features/properties/PropertiesListPage';
-import { MapPin } from '@phosphor-icons/react';
+import { MapPin, Funnel, X } from '@phosphor-icons/react';
 
 interface MapFiltersPageProps {
     initialPropertyType?: string | null;
@@ -188,6 +188,9 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         return false;
     });
 
+    // State to track if filters column is expanded (when listings are shown)
+    const [filtersExpanded, setFiltersExpanded] = useState(false);
+
     // Serialize filters to URL query params
     const serializeFiltersToURL = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState | null) => {
         if (!filters) return '';
@@ -216,6 +219,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
             router.push(`${currentPath}?${queryString}`);
         }
         setShowListings(true);
+        setFiltersExpanded(false); // Collapse filters when search is clicked
     }, [selectedPropertyType, router, serializeFiltersToURL]);
 
     const handleBackToMap = useCallback(() => {
@@ -225,7 +229,12 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
             : '/map-filters';
         router.push(currentPath);
         setShowListings(false);
+        setFiltersExpanded(false); // Reset filters expansion
     }, [selectedPropertyType, router]);
+
+    const toggleFilters = useCallback(() => {
+        setFiltersExpanded(prev => !prev);
+    }, []);
 
     return (
         <div className={styles.mapFiltersPage}>
@@ -293,8 +302,8 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                     )}
 
                     {selectedPropertyType && (
-                        <div className={`${styles.filtersMapLayout} ${showListings ? styles.showingListings : ''}`}>
-                            {/* Map or Listings shown in the right column */}
+                        <div className={`${styles.filtersMapLayout} ${showListings ? styles.showingListings : ''} ${showListings && filtersExpanded ? styles.filtersExpanded : ''}`}>
+                            {/* Map or Listings shown in the left column */}
                             <div className={styles.leftFiltersColumn}>
                                 {showListings ? (
                                     <div className={styles.propertyListings}>
@@ -334,129 +343,127 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                             </div>
 
                             {/* Filters on the right */}
-                            {isApartmentsSelected ? (
-                            <div className={styles.rightFiltersColumn}>
-                                    <ApartmentsFiltersPage
+                            <div className={`${styles.rightFiltersColumn} ${showListings && !filtersExpanded ? styles.collapsed : ''}`}>
+                                {showListings && !filtersExpanded ? (
+                                    <Button
+                                        variant="primary"
+                                        onClick={toggleFilters}
+                                        className={styles.filtersToggleButton}
+                                    >
+                                        <Funnel size={20} />
+                                        Филтри
+                                    </Button>
+                                ) : (
+                                    <>
+                                        {showListings && (
+                                            <Button
+                                                variant="outline"
+                                                onClick={toggleFilters}
+                                                className={styles.filtersCloseButton}
+                                            >
+                                                <X size={18} />
+                                            </Button>
+                                        )}
+                                        {isApartmentsSelected ? (
+                                            <ApartmentsFiltersPage
+                                                locationState={locationState}
+                                                onLocationChange={handleLocationChange}
+                                                onFiltersChange={handleFiltersChange}
+                                                onActionButtonsReady={handleActionButtonsReady}
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : isHousesVillasSelected ? (
+                                            <HousesVillasFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                                </div>
-                            ) : isHousesVillasSelected ? (
-                                <div className={styles.rightFiltersColumn}>
-                                    <HousesVillasFiltersPage
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : isStoresOfficesSelected ? (
+                                            <StoresOfficesFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                </div>
-                            ) : isStoresOfficesSelected ? (
-                                <div className={styles.rightFiltersColumn}>
-                                    <StoresOfficesFiltersPage
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : isBuildingPlotsSelected ? (
+                                            <BuildingPlotsFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                </div>
-                            ) : isBuildingPlotsSelected ? (
-                                <div className={styles.rightFiltersColumn}>
-                                    <BuildingPlotsFiltersPage
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : isAgriculturalLandSelected ? (
+                                            <AgriculturalLandFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                </div>
-                            ) : isAgriculturalLandSelected ? (
-                                <div className={styles.rightFiltersColumn}>
-                                    <AgriculturalLandFiltersPage
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : isWarehousesIndustrialSelected ? (
+                                            <WarehousesIndustrialFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                </div>
-                            ) : isWarehousesIndustrialSelected ? (
-                                <div className={styles.rightFiltersColumn}>
-                                    <WarehousesIndustrialFiltersPage
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : isGaragesParkingSelected ? (
+                                            <GaragesParkingFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                </div>
-                            ) : isGaragesParkingSelected ? (
-                                <div className={styles.rightFiltersColumn}>
-                                    <GaragesParkingFiltersPage
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : isHotelsMotelsSelected ? (
+                                            <HotelsMotelsFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                </div>
-                            ) : isHotelsMotelsSelected ? (
-                                <div className={styles.rightFiltersColumn}>
-                                    <HotelsMotelsFiltersPage
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : isEstablishmentsSelected ? (
+                                            <EstablishmentsFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                </div>
-                            ) : isEstablishmentsSelected ? (
-                                <div className={styles.rightFiltersColumn}>
-                                    <EstablishmentsFiltersPage
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : isReplaceRealEstatesSelected ? (
+                                            <ReplaceRealEstatesFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                </div>
-                            ) : isReplaceRealEstatesSelected ? (
-                                <div className={styles.rightFiltersColumn}>
-                                    <ReplaceRealEstatesFiltersPage
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : isBuyRealEstatesSelected ? (
+                                            <BuyRealEstatesFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                </div>
-                            ) : isBuyRealEstatesSelected ? (
-                                <div className={styles.rightFiltersColumn}>
-                                    <BuyRealEstatesFiltersPage
-                                        locationState={locationState}
-                                        onLocationChange={handleLocationChange}
-                                        onFiltersChange={handleFiltersChange}
-                                        onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                </div>
-                            ) : isOtherRealEstatesSelected ? (
-                                <div className={styles.rightFiltersColumn}>
-                                    <OtherRealEstatesFiltersPage
-                                        locationState={locationState}
-                                        onLocationChange={handleLocationChange}
-                                        onFiltersChange={handleFiltersChange}
-                                        onActionButtonsReady={handleActionButtonsReady}
-                                        onSearch={handleSearch}
-                                    />
-                                </div>
-                            ) : (
-                                <div className={styles.rightFiltersColumn} />
-                            )}
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : isOtherRealEstatesSelected ? (
+                                            <OtherRealEstatesFiltersPage
+                                                locationState={locationState}
+                                                onLocationChange={handleLocationChange}
+                                                onFiltersChange={handleFiltersChange}
+                                                onActionButtonsReady={handleActionButtonsReady}
+                                                onSearch={handleSearch}
+                                            />
+                                        ) : null}
+                                    </>
+                                )}
+                            </div>
                         </div>
                     )}
                     
