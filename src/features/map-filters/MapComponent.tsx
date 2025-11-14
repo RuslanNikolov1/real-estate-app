@@ -19,7 +19,7 @@ const defaultCenter = {
 
 const mapContainerStyle = {
     width: '100%',
-    height: '100%'
+    height: '100%',
 };
 
 type CityData = {
@@ -83,14 +83,14 @@ export function MapComponent({
     const handleMapLoad = useCallback((mapInstance: google.maps.Map) => {
         setMap(mapInstance);
         mapRef.current = mapInstance;
-        
+
         // Trigger resize after a short delay to ensure container is fully rendered
         setTimeout(() => {
             if (mapInstance && typeof window !== 'undefined' && window.google) {
                 window.google.maps.event.trigger(mapInstance, 'resize');
             }
         }, 100);
-        
+
         if (onMapLoad) {
             onMapLoad(mapInstance);
         }
@@ -116,7 +116,7 @@ export function MapComponent({
             map.setCenter(defaultCenter);
             map.setZoom(10);
         }
-        
+
         // Trigger resize to ensure map renders correctly
         setTimeout(() => {
             if (typeof window !== 'undefined' && window.google) {
@@ -136,7 +136,7 @@ export function MapComponent({
         };
 
         window.addEventListener('resize', handleResize);
-        
+
         // Also trigger resize after a short delay to handle layout changes
         const timeoutId = setTimeout(handleResize, 200);
 
@@ -229,7 +229,7 @@ export function MapComponent({
         };
 
         map.addListener('zoom_changed', handleZoomChanged);
-        
+
         return () => {
             if (typeof window !== 'undefined' && window.google && window.google.maps && window.google.maps.event) {
                 window.google.maps.event.clearListeners(map, 'zoom_changed');
@@ -263,7 +263,7 @@ export function MapComponent({
         let totalLat = 0;
         let totalLng = 0;
         let count = 0;
-        
+
         Object.values(citiesNeighborhoods).forEach((cityData) => {
             cityData.neighborhoods.forEach((n) => {
                 if (n.coordinates && n.coordinates.length === 2) {
@@ -283,7 +283,7 @@ export function MapComponent({
         const cosLat = Math.cos(latRadians);
         const LAT_KM_PER_DEG = 110.574;
         const LON_KM_PER_DEG = 111.320 * (cosLat === 0 ? 1 : cosLat);
-        
+
         // Average area estimation (assume ~1 km²)
         const avgAreaKm2 = 1;
         const halfSideKm = Math.sqrt(avgAreaKm2) / 2;
@@ -374,7 +374,7 @@ export function MapComponent({
     const createCityIconElement = useCallback((city: CityData): HTMLElement => {
         const iconSize = city.type === 'major' ? 20 : 16;
         const fillColor = '#8c1c1c'; // Dark red for all cities
-        
+
         const pinElement = document.createElement('div');
         pinElement.style.width = `${iconSize}px`;
         pinElement.style.height = `${iconSize}px`;
@@ -384,7 +384,7 @@ export function MapComponent({
         pinElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
         pinElement.style.opacity = '0.9';
         pinElement.style.cursor = 'pointer';
-        
+
         return pinElement;
     }, []);
 
@@ -419,120 +419,123 @@ export function MapComponent({
     return (
         <div className={styles.mapWrapper}>
             {/* Back to cities button */}
-                    {trimmedCity && onBackToCities && (
-                        <button
-                            className={styles.backToCitiesButton}
-                            onClick={onBackToCities}
-                            type="button"
-                            aria-label="Back to city selection"
-                        >
-                            <ArrowLeft size={16} weight="bold" />
-                            <span>Назад към градовете</span>
-                        </button>
-                    )}
-            <LoadScript 
+            {trimmedCity && onBackToCities && (
+                <button
+                    className={styles.backToCitiesButton}
+                    onClick={onBackToCities}
+                    type="button"
+                    aria-label="Back to city selection"
+                >
+                    <ArrowLeft size={16} weight="bold" />
+                    <span>Назад към градовете</span>
+                </button>
+            )}
+            <LoadScript
                 googleMapsApiKey={GOOGLE_MAPS_API_KEY}
                 libraries={['marker']}
             >
-                <div ref={mapContainerRef} className={styles.mapContainer}>
-                    <GoogleMap
-                        mapContainerStyle={mapContainerStyle}
-                        center={cityCoordinates ? {
-                            lat: cityCoordinates[0],
-                            lng: cityCoordinates[1]
-                        } : defaultCenter}
-                        zoom={cityCoordinates ? 13 : 10}
-                        onLoad={handleMapLoad}
-                        options={mapOptions}
-                    >
-                        {/* Render city markers when no city is selected (city selection mode) */}
-                        {map && !trimmedCity && burgasCities.cities.map((city) => {
-                            const iconElement = cityIconElements.get(city.id);
-                            return (
-                                <AdvancedMarker
-                                    key={city.id}
-                                    map={map}
-                                    position={{
-                                        lat: city.coordinates[0],
-                                        lng: city.coordinates[1]
-                                    }}
-                                    title={city.name}
-                                    content={iconElement || null}
-                                    onClick={() => {
-                                        if (onCityClick) {
-                                            onCityClick(city.name, [city.coordinates[0], city.coordinates[1]]);
-                                        }
-                                    }}
-                                />
-                            );
-                        })}
-
-                        {/* Render distance circle when city is selected and distance > 0 */}
-                        {map && cityCoordinates && distance > 0 && (
-                            <Circle
-                                center={{
-                                    lat: cityCoordinates[0],
-                                    lng: cityCoordinates[1]
-                                }}
-                                radius={distance * 1000} // Convert km to meters
-                                options={{
-                                    strokeColor: '#8c1c1c',
-                                    strokeOpacity: 0.8,
-                                    strokeWeight: 2,
-                                    fillColor: '#8c1c1c',
-                                    fillOpacity: 0.15,
-                                    clickable: false,
-                                    zIndex: 900
-                                }}
-                            />
-                        )}
-
-                        {/* Render neighborhood polygons when city is selected */}
-                        {map && typeof window !== 'undefined' && window.google && trimmedCity && neighborhoodPolygons.map((feature) => {
-                            const neighborhoodName = feature.properties.name;
-                            const isSelected = neighborhoods.includes(neighborhoodName);
-                            const paths = feature.geometry.coordinates[0].map((coord) => ({
-                                lat: coord[1],
-                                lng: coord[0]
-                            }));
-                            const centroid = getPolygonCentroid(feature.geometry.coordinates[0]);
-
-                            return (
-                                <div key={feature.properties.id}>
-                                    <Polygon
-                                        paths={paths}
-                                        options={{
-                                            fillColor: isSelected ? '#8c1c1c' : 'transparent',
-                                            fillOpacity: isSelected ? 0.3 : 0,
-                                            strokeColor: isSelected ? '#8c1c1c' : '#666666',
-                                            strokeOpacity: isSelected ? 0.8 : 0.5,
-                                            strokeWeight: isSelected ? 3 : 2,
-                                            clickable: true,
-                                            zIndex: isSelected ? 1000 : 500
+                <div className={styles.mapInner}>
+                    <div ref={mapContainerRef} className={styles.mapContainer}>
+                        <GoogleMap
+                            mapContainerStyle={mapContainerStyle}
+                            center={cityCoordinates ? {
+                                lat: cityCoordinates[0],
+                                lng: cityCoordinates[1]
+                            } : defaultCenter}
+                            zoom={cityCoordinates ? 13 : 10}
+                            onLoad={handleMapLoad}
+                            options={mapOptions}
+                        >
+                            {/* Render city markers when no city is selected (city selection mode) */}
+                            {map && !trimmedCity && burgasCities.cities.map((city) => {
+                                const iconElement = cityIconElements.get(city.id);
+                                return (
+                                    <AdvancedMarker
+                                        key={city.id}
+                                        map={map}
+                                        position={{
+                                            lat: city.coordinates[0],
+                                            lng: city.coordinates[1]
                                         }}
+                                        title={city.name}
+                                        content={iconElement || null}
                                         onClick={() => {
-                                            if (onNeighborhoodClick) {
-                                                // Find the neighborhood data to get coordinates
-                                                const neighborhood = cityNeighborhoods.find(
-                                                    (n) => n.name === neighborhoodName
-                                                );
-                                                if (neighborhood) {
-                                                    onNeighborhoodClick(neighborhoodName, [
-                                                        neighborhood.coordinates[0],
-                                                        neighborhood.coordinates[1]
-                                                    ]);
-                                                }
+                                            if (onCityClick) {
+                                                onCityClick(city.name, [city.coordinates[0], city.coordinates[1]]);
                                             }
                                         }}
                                     />
-                                    {/* Dark label for neighborhood - always visible with word wrap, no background */}
-                                    <WrappingLabel position={centroid} text={neighborhoodName} />
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
 
-                    </GoogleMap>
+                            {/* Render distance circle when city is selected and distance > 0 */}
+                            {map && cityCoordinates && distance > 0 && (
+                                <Circle
+                                    center={{
+                                        lat: cityCoordinates[0],
+                                        lng: cityCoordinates[1]
+                                    }}
+                                    radius={distance * 1000} // Convert km to meters
+                                    options={{
+                                        strokeColor: '#8c1c1c',
+                                        strokeOpacity: 0.8,
+                                        strokeWeight: 2,
+                                        fillColor: '#8c1c1c',
+                                        fillOpacity: 0.15,
+                                        clickable: false,
+                                        zIndex: 900
+                                    }}
+                                />
+                            )}
+
+                            {/* Render neighborhood polygons when city is selected */}
+                            {map && typeof window !== 'undefined' && window.google && trimmedCity && neighborhoodPolygons.map((feature) => {
+                                const neighborhoodName = feature.properties.name;
+                                const isSelected = neighborhoods.includes(neighborhoodName);
+                                const paths = feature.geometry.coordinates[0].map((coord) => ({
+                                    lat: coord[1],
+                                    lng: coord[0]
+                                }));
+                                const centroid = getPolygonCentroid(feature.geometry.coordinates[0]);
+
+                                return (
+                                    <div key={feature.properties.id}>
+                                        <Polygon
+                                            paths={paths}
+                                            options={{
+                                                fillColor: isSelected ? '#8c1c1c' : 'transparent',
+                                                fillOpacity: isSelected ? 0.3 : 0,
+                                                strokeColor: isSelected ? '#8c1c1c' : '#666666',
+                                                strokeOpacity: isSelected ? 0.8 : 0.5,
+                                                strokeWeight: isSelected ? 3 : 2,
+                                                clickable: true,
+                                                zIndex: isSelected ? 1000 : 500
+                                            }}
+                                            onClick={() => {
+                                                if (onNeighborhoodClick) {
+                                                    // Find the neighborhood data to get coordinates
+                                                    const neighborhood = cityNeighborhoods.find(
+                                                        (n) => n.name === neighborhoodName
+                                                    );
+                                                    if (neighborhood) {
+                                                        onNeighborhoodClick(neighborhoodName, [
+                                                            neighborhood.coordinates[0],
+                                                            neighborhood.coordinates[1]
+                                                        ]);
+                                                    }
+                                                }
+                                            }}
+                                        />
+                                        {/* Dark label for neighborhood - always visible with word wrap, no background */}
+                                        <WrappingLabel position={centroid} text={neighborhoodName} />
+                                    </div>
+                                );
+                            })}
+
+                        </GoogleMap>
+                    </div>
                 </div>
+
             </LoadScript>
         </div>
     );

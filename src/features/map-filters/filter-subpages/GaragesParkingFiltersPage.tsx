@@ -31,6 +31,7 @@ interface GaragesParkingFiltersPageProps {
     onFiltersChange?: (filters: GaragesParkingFiltersState) => void;
     onRightColumnFiltersReady?: (filters: React.ReactNode) => void;
     onActionButtonsReady?: (buttons: React.ReactNode) => void;
+    onSearch?: () => void;
 }
 
 export interface GaragesParkingFiltersState {
@@ -53,7 +54,8 @@ export function GaragesParkingFiltersPage({
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
-    onActionButtonsReady
+    onActionButtonsReady,
+    onSearch
 }: GaragesParkingFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
     
@@ -227,8 +229,10 @@ export function GaragesParkingFiltersPage({
                     <Button
                         variant="primary"
                         onClick={() => {
-                            // Dummy callback for now - will query database later
                             console.log('Search with filters:', filterValuesRef.current);
+                            if (onSearch) {
+                                onSearch();
+                            }
                         }}
                         className={styles.searchButton}
                     >
@@ -238,7 +242,7 @@ export function GaragesParkingFiltersPage({
             );
             onActionButtonsReadyRef.current(actionButtons);
         }
-    }, [filterKey]);
+    }, [filterKey, onSearch]);
 
     return (
         <div key={filterKey} className={styles.leftFiltersWrapper}>

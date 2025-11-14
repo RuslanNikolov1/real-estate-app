@@ -30,6 +30,7 @@ interface WarehousesIndustrialFiltersPageProps {
     onFiltersChange?: (filters: WarehousesIndustrialFiltersState) => void;
     onRightColumnFiltersReady?: (filters: React.ReactNode) => void;
     onActionButtonsReady?: (buttons: React.ReactNode) => void;
+    onSearch?: () => void;
 }
 
 export interface WarehousesIndustrialFiltersState {
@@ -51,7 +52,8 @@ export function WarehousesIndustrialFiltersPage({
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
-    onActionButtonsReady
+    onActionButtonsReady,
+    onSearch
 }: WarehousesIndustrialFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
     
@@ -218,8 +220,10 @@ export function WarehousesIndustrialFiltersPage({
                     <Button
                         variant="primary"
                         onClick={() => {
-                            // Dummy callback for now - will query database later
                             console.log('Search with filters:', filterValuesRef.current);
+                            if (onSearch) {
+                                onSearch();
+                            }
                         }}
                         className={styles.searchButton}
                     >
@@ -229,7 +233,7 @@ export function WarehousesIndustrialFiltersPage({
             );
             onActionButtonsReadyRef.current(actionButtons);
         }
-    }, [filterKey]);
+    }, [filterKey, onSearch]);
 
     return (
         <div key={filterKey} className={styles.leftFiltersWrapper}>

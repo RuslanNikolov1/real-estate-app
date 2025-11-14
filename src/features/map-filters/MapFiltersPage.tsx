@@ -24,6 +24,9 @@ import { ReplaceRealEstatesFiltersPage, ReplaceRealEstatesFiltersState } from '.
 import { BuyRealEstatesFiltersPage, BuyRealEstatesFiltersState } from './filter-subpages/BuyRealEstatesFiltersPage';
 import { OtherRealEstatesFiltersPage, OtherRealEstatesFiltersState } from './filter-subpages/OtherRealEstatesFiltersPage';
 import { MapComponent } from './MapComponent';
+import { PropertyCard } from '@/features/properties/components/PropertyCard';
+import { mockProperties } from '@/features/properties/PropertiesListPage';
+import { MapPin } from '@phosphor-icons/react';
 
 interface MapFiltersPageProps {
     initialPropertyType?: string | null;
@@ -31,6 +34,7 @@ interface MapFiltersPageProps {
 
 export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPageProps) {
     const router = useRouter();
+    
     const [selectedPropertyType, setSelectedPropertyType] = useState<string | null>(() => {
         if (!initialPropertyType) {
             return null;
@@ -49,6 +53,9 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
 
     // Store map instance reference to keep it persistent
     const mapInstanceRef = useRef<google.maps.Map | null>(null);
+    
+    // Store current filter state to serialize to URL
+    const currentFiltersRef = useRef<ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState | null>(null);
 
     useEffect(() => {
         if (!initialPropertyType) {
@@ -64,6 +71,26 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
 
         setSelectedPropertyType((prev) => (prev === initialPropertyType ? prev : initialPropertyType));
     }, [initialPropertyType]);
+
+    // Restore filters from URL on mount and sync showListings with URL params
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        
+        const params = new URLSearchParams(window.location.search);
+        const hasSearchParams = params.has('search') || params.has('filters');
+        setShowListings(hasSearchParams || false);
+        
+        // Restore filters from URL if present
+        if (params.has('filters')) {
+            try {
+                const filtersJson = decodeURIComponent(params.get('filters') || '');
+                const restoredFilters = JSON.parse(filtersJson);
+                currentFiltersRef.current = restoredFilters;
+            } catch (error) {
+                console.error('Error restoring filters from URL:', error);
+            }
+        }
+    }, []);
 
     const isApartmentsSelected = selectedPropertyType === 'apartments';
     const isHousesVillasSelected = selectedPropertyType === 'houses-villas';
@@ -139,7 +166,8 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
     }, []);
 
     const handleFiltersChange = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState) => {
-        // Dummy callback for now - will query database later
+        // Store filters in ref for URL serialization
+        currentFiltersRef.current = filters;
         console.log('Filters changed:', filters);
     }, []);
 
@@ -149,6 +177,55 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
     const handleActionButtonsReady = useCallback((buttons: React.ReactNode) => {
         setActionButtons(buttons);
     }, []);
+
+    // State to track whether to show map or listings
+    const [showListings, setShowListings] = useState(() => {
+        // Check if URL has search params on initial load
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            return params.has('search') || params.has('filters');
+        }
+        return false;
+    });
+
+    // Serialize filters to URL query params
+    const serializeFiltersToURL = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState | null) => {
+        if (!filters) return '';
+        
+        const params = new URLSearchParams();
+        params.set('search', '1');
+        
+        // Serialize filter state to JSON and encode it
+        try {
+            const filtersJson = JSON.stringify(filters);
+            params.set('filters', encodeURIComponent(filtersJson));
+        } catch (error) {
+            console.error('Error serializing filters:', error);
+        }
+        
+        return params.toString();
+    }, []);
+
+    const handleSearch = useCallback(() => {
+        const filters = currentFiltersRef.current;
+        if (filters) {
+            const queryString = serializeFiltersToURL(filters);
+            const currentPath = selectedPropertyType 
+                ? `/map-filters/${selectedPropertyType}` 
+                : '/map-filters';
+            router.push(`${currentPath}?${queryString}`);
+        }
+        setShowListings(true);
+    }, [selectedPropertyType, router, serializeFiltersToURL]);
+
+    const handleBackToMap = useCallback(() => {
+        // Remove search params from URL
+        const currentPath = selectedPropertyType 
+            ? `/map-filters/${selectedPropertyType}` 
+            : '/map-filters';
+        router.push(currentPath);
+        setShowListings(false);
+    }, [selectedPropertyType, router]);
 
     return (
         <div className={styles.mapFiltersPage}>
@@ -216,132 +293,169 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                     )}
 
                     {selectedPropertyType && (
-                        <div className={styles.filtersMapLayout}>
-                            {/* Map shown first on the left */}
-                            <div className={styles.rightFiltersColumn}>
-                                <MapComponent
-                                    city={locationState.city}
-                                    cityCoordinates={locationState.cityCoordinates}
-                                    distance={locationState.distance}
-                                    neighborhoods={locationState.neighborhoods}
-                                    onCityClick={handleCityClick}
-                                    onNeighborhoodClick={handleNeighborhoodClick}
-                                    onBackToCities={handleBackToCities}
-                                    onMapLoad={handleMapLoad}
-                                />
+                        <div className={`${styles.filtersMapLayout} ${showListings ? styles.showingListings : ''}`}>
+                            {/* Map or Listings shown in the right column */}
+                            <div className={styles.leftFiltersColumn}>
+                                {showListings ? (
+                                    <div className={styles.propertyListings}>
+                                        <div className={styles.listingsHeader}>
+                                            <h2 className={styles.listingsTitle}>Намерени имоти: {mockProperties.length}</h2>
+                                            <Button
+                                                variant="outline"
+                                                onClick={handleBackToMap}
+                                                className={styles.backToMapButton}
+                                            >
+                                                <MapPin size={18} />
+                                                Обратно към картата
+                                            </Button>
+                                        </div>
+                                        <div className={styles.listingsGrid}>
+                                            {mockProperties.map((property) => (
+                                                <PropertyCard
+                                                    key={property.id}
+                                                    property={property}
+                                                    onClick={() => router.push(`/properties/${property.id}`)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <MapComponent
+                                        city={locationState.city}
+                                        cityCoordinates={locationState.cityCoordinates}
+                                        distance={locationState.distance}
+                                        neighborhoods={locationState.neighborhoods}
+                                        onCityClick={handleCityClick}
+                                        onNeighborhoodClick={handleNeighborhoodClick}
+                                        onBackToCities={handleBackToCities}
+                                        onMapLoad={handleMapLoad}
+                                    />
+                                )}
                             </div>
 
                             {/* Filters on the right */}
                             {isApartmentsSelected ? (
-                            <div className={styles.leftFiltersColumn}>
+                            <div className={styles.rightFiltersColumn}>
                                     <ApartmentsFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                                 </div>
                             ) : isHousesVillasSelected ? (
-                                <div className={styles.leftFiltersColumn}>
+                                <div className={styles.rightFiltersColumn}>
                                     <HousesVillasFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                 </div>
                             ) : isStoresOfficesSelected ? (
-                                <div className={styles.leftFiltersColumn}>
+                                <div className={styles.rightFiltersColumn}>
                                     <StoresOfficesFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                 </div>
                             ) : isBuildingPlotsSelected ? (
-                                <div className={styles.leftFiltersColumn}>
+                                <div className={styles.rightFiltersColumn}>
                                     <BuildingPlotsFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                 </div>
                             ) : isAgriculturalLandSelected ? (
-                                <div className={styles.leftFiltersColumn}>
+                                <div className={styles.rightFiltersColumn}>
                                     <AgriculturalLandFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                 </div>
                             ) : isWarehousesIndustrialSelected ? (
-                                <div className={styles.leftFiltersColumn}>
+                                <div className={styles.rightFiltersColumn}>
                                     <WarehousesIndustrialFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                 </div>
                             ) : isGaragesParkingSelected ? (
-                                <div className={styles.leftFiltersColumn}>
+                                <div className={styles.rightFiltersColumn}>
                                     <GaragesParkingFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                 </div>
                             ) : isHotelsMotelsSelected ? (
-                                <div className={styles.leftFiltersColumn}>
+                                <div className={styles.rightFiltersColumn}>
                                     <HotelsMotelsFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                 </div>
                             ) : isEstablishmentsSelected ? (
-                                <div className={styles.leftFiltersColumn}>
+                                <div className={styles.rightFiltersColumn}>
                                     <EstablishmentsFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                 </div>
                             ) : isReplaceRealEstatesSelected ? (
-                                <div className={styles.leftFiltersColumn}>
+                                <div className={styles.rightFiltersColumn}>
                                     <ReplaceRealEstatesFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                 </div>
                             ) : isBuyRealEstatesSelected ? (
-                                <div className={styles.leftFiltersColumn}>
+                                <div className={styles.rightFiltersColumn}>
                                     <BuyRealEstatesFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                 </div>
                             ) : isOtherRealEstatesSelected ? (
-                                <div className={styles.leftFiltersColumn}>
+                                <div className={styles.rightFiltersColumn}>
                                     <OtherRealEstatesFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
                                     />
                                 </div>
                             ) : (
-                                <div className={styles.leftFiltersColumn} />
+                                <div className={styles.rightFiltersColumn} />
                             )}
                         </div>
                     )}

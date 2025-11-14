@@ -30,6 +30,7 @@ interface BuildingPlotsFiltersPageProps {
     onFiltersChange?: (filters: BuildingPlotsFiltersState) => void;
     onRightColumnFiltersReady?: (filters: React.ReactNode) => void;
     onActionButtonsReady?: (buttons: React.ReactNode) => void;
+    onSearch?: () => void;
 }
 
 export interface BuildingPlotsFiltersState {
@@ -52,7 +53,8 @@ export function BuildingPlotsFiltersPage({
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
-    onActionButtonsReady
+    onActionButtonsReady,
+    onSearch
 }: BuildingPlotsFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
     
@@ -226,8 +228,10 @@ export function BuildingPlotsFiltersPage({
                     <Button
                         variant="primary"
                         onClick={() => {
-                            // Dummy callback for now - will query database later
                             console.log('Search with filters:', filterValuesRef.current);
+                            if (onSearch) {
+                                onSearch();
+                            }
                         }}
                         className={styles.searchButton}
                     >
@@ -237,7 +241,7 @@ export function BuildingPlotsFiltersPage({
             );
             onActionButtonsReadyRef.current(actionButtons);
         }
-    }, [filterKey]);
+    }, [filterKey, onSearch]);
 
     return (
         <div key={filterKey} className={styles.leftFiltersWrapper}>

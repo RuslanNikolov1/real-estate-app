@@ -30,6 +30,7 @@ interface HousesVillasFiltersPageProps {
     onFiltersChange?: (filters: HouseFiltersState) => void;
     onRightColumnFiltersReady?: (filters: React.ReactNode) => void;
     onActionButtonsReady?: (buttons: React.ReactNode) => void;
+    onSearch?: () => void;
 }
 
 export interface HouseFiltersState {
@@ -51,7 +52,8 @@ export function HousesVillasFiltersPage({
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
-    onActionButtonsReady
+    onActionButtonsReady,
+    onSearch
 }: HousesVillasFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
     
@@ -224,8 +226,10 @@ export function HousesVillasFiltersPage({
                     <Button
                         variant="primary"
                         onClick={() => {
-                            // Dummy callback for now - will query database later
                             console.log('Search with filters:', filterValuesRef.current);
+                            if (onSearch) {
+                                onSearch();
+                            }
                         }}
                         className={styles.searchButton}
                     >
@@ -235,7 +239,7 @@ export function HousesVillasFiltersPage({
             );
             onActionButtonsReadyRef.current(actionButtons);
         }
-    }, [filterKey]);
+    }, [filterKey, onSearch]);
 
     return (
         <div key={filterKey} className={styles.leftFiltersWrapper}>

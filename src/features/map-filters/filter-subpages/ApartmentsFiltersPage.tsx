@@ -36,6 +36,7 @@ interface ApartmentsFiltersPageProps {
     onFiltersChange?: (filters: ApartmentFiltersState) => void;
     onRightColumnFiltersReady?: (filters: React.ReactNode) => void;
     onActionButtonsReady?: (buttons: React.ReactNode) => void;
+    onSearch?: () => void;
 }
 
 export interface ApartmentFiltersState {
@@ -66,7 +67,8 @@ export function ApartmentsFiltersPage({
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
-    onActionButtonsReady
+    onActionButtonsReady,
+    onSearch
 }: ApartmentsFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
     
@@ -292,8 +294,10 @@ export function ApartmentsFiltersPage({
                     <Button
                         variant="primary"
                         onClick={() => {
-                            // Dummy callback for now - will query database later
                             console.log('Search with filters:', filterValuesRef.current);
+                            if (onSearch) {
+                                onSearch();
+                            }
                         }}
                         className={styles.searchButton}
                     >
@@ -303,7 +307,7 @@ export function ApartmentsFiltersPage({
             );
             onActionButtonsReady(actionButtons);
         }
-    }, [filterKey, handleClear, onActionButtonsReady]);
+    }, [filterKey, handleClear, onActionButtonsReady, onSearch]);
 
     return (
         <div key={filterKey} className={styles.leftFiltersWrapper}>

@@ -1,457 +1,533 @@
-@use '@/styles/variables' as *;
-@use 'sass:color';
+    @use '@/styles/variables' as *;
+    @use 'sass:color';
 
-.mapFiltersPage {
-    display: flex;
-    flex-direction: column;
-    background: $light-gray;
-    pointer-events: auto;
-}
-
-.main {
-    padding: $spacing-xl 0;
-    pointer-events: auto;
-
-    @media (max-width: $breakpoint-md) {
-        padding: $spacing-lg 0;
+    .mapFiltersPage {
+        display: flex;
+        flex-direction: column;
+        background: $light-gray;
+        pointer-events: auto;
     }
-}
 
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 $spacing-lg;
-    pointer-events: auto;
+    .main {
+        padding: $spacing-xl 0;
+        pointer-events: auto;
 
-    @media (max-width: $breakpoint-md) {
-        padding: 0 $spacing-md;
+        @media (max-width: $breakpoint-md) {
+            padding: $spacing-lg 0;
+        }
     }
-}
 
-.header {
-    margin-bottom: $spacing-xl;
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 $spacing-lg;
+        pointer-events: auto;
 
-    .headerContent {
+        @media (max-width: $breakpoint-md) {
+            padding: 0 $spacing-md;
+        }
+    }
+
+    .header {
+        margin-bottom: $spacing-xl;
+
+        .headerContent {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: $spacing-xl;
+
+            @media (max-width: $breakpoint-md) {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: $spacing-lg;
+            }
+        }
+
+        .headerText {
+            flex: 1;
+        }
+
+        .headerIcon {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: $dark-red;
+            flex-shrink: 0;
+            align-self: flex-end;
+
+            @media (max-width: $breakpoint-md) {
+                margin-bottom: 0;
+
+                svg {
+                    width: 80px;
+                    height: 80px;
+                }
+            }
+
+            @media (max-width: $breakpoint-sm) {
+                svg {
+                    width: 60px;
+                    height: 60px;
+                }
+            }
+        }
+
+        .backButton {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            margin-bottom: $spacing-lg;
+            background-color: $white !important;
+            border-color: $dark-red !important;
+            color: $dark-red !important;
+
+            &:hover {
+                background-color: $dark-red !important;
+                color: $white !important;
+            }
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: $black;
+            margin-bottom: $spacing-md;
+            font-family: $font-heading;
+
+            @media (max-width: $breakpoint-md) {
+                font-size: 2rem;
+            }
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: $dark-gray;
+            max-width: 600px;
+
+            @media (max-width: $breakpoint-md) {
+                font-size: 1rem;
+            }
+        }
+    }
+
+    .propertyTypeFiltersSection {
+        width: 100%;
+        background: $white;
+        border-radius: 16px;
+        padding: $spacing-lg;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        margin-bottom: $spacing-xl;
+
+        h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: $black;
+            margin-bottom: $spacing-md;
+        }
+    }
+
+    .propertyTypeFilters {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: $spacing-sm;
+        width: 100%;
+
+        @media (max-width: $breakpoint-lg) {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        @media (max-width: $breakpoint-md) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        @media (max-width: $breakpoint-sm) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .propertyTypeFilterButton {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-xs;
+        padding: $spacing-md;
+        border: 2px dotted $dark-red;
+        border-radius: 12px;
+        background: $white;
+        color: $dark-gray;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all $transition-base;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        min-height: 120px;
+        text-align: center;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+
+        &:hover {
+            border-color: $dark-red;
+            background: $dark-red;
+            color: $white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+            .propertyTypeFilterContent svg {
+                color: $white;
+            }
+        }
+
+        &.active {
+            background: $dark-red;
+            color: $white;
+            border-color: $dark-red;
+
+            .propertyTypeFilterContent svg {
+                color: $white;
+                fill: currentColor;
+            }
+        }
+    }
+
+    .propertyTypeFilterContent {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-xs;
+        width: 100%;
+
+        svg {
+            width: 32px;
+            height: 32px;
+            color: $dark-red;
+            transition: color $transition-base;
+            flex-shrink: 0;
+        }
+
+        span {
+            display: block;
+            line-height: 1.2;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+    }
+
+    .filtersMapLayout {
+        position: relative;
+        margin-top: $spacing-xl;
+        display: flex;
+        gap: $spacing-xl;
+        align-items: flex-start;
+        overflow: visible;
+        pointer-events: auto;
+
+        @media (max-width: $breakpoint-lg) {
+            flex-direction: column;
+        }
+
+        // When showing listings, make left column 1/3 width and right column 2/3 width
+        &.showingListings {
+            .rightFiltersColumn {
+                flex: 1;
+            }
+
+            .leftFiltersColumn {
+                flex: 2;
+            }
+        }
+    }
+
+    .rightFiltersColumn {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-xl;
+        flex: 1;
+        min-width: 0;
+        align-self: flex-start;
+        height: auto;
+    }
+
+    .leftFiltersWrapper {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-xl;
+    }
+
+    .leftFiltersColumn {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-xl;
+        align-self: stretch;     // or simply remove align-self entirely
+        height: auto;   
+        flex: 1;
+        min-width: 0;
+        overflow: visible !important; // important!!!
+    }
+
+    .mapOnlyContainer {
+        margin-top: $spacing-xl;
+    }
+
+    .leftFilters {
+        background: $white;
+        border-radius: 16px;
+        padding: $spacing-lg;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-lg;
+
+        @media (max-width: $breakpoint-md) {
+            padding: $spacing-md;
+        }
+    }
+
+    .mapWrapper {
+        position: sticky;
+        top: 80px;
+        z-index: 5;
+        height: fit-content;
+        overflow: visible;
+        background: $white;
+        border-radius: 16px;
+        padding: $spacing-lg;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        display: block;
+        pointer-events: auto;
+
+        @media (max-width: $breakpoint-md) {
+            padding: $spacing-md;
+        }
+    }
+
+    .mapInner {
+        height: auto;
+    }
+
+    .backToCitiesButton {
+        position: absolute;
+        top: $spacing-xl;
+        left: $spacing-xl;
+        z-index: 1000;
         display: flex;
         align-items: center;
+        gap: $spacing-xs;
+        padding: $spacing-sm $spacing-md;
+        background: $dark-red;
+        border: 2px solid $dark-red;
+        border-radius: 6px;
+        color: $white;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all $transition-base;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        margin: $spacing-sm;
+
+        &:hover {
+            background: color.adjust($dark-red, $lightness: -5%);
+            border-color: color.adjust($dark-red, $lightness: -5%);
+            color: $white;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: $breakpoint-md) {
+            top: $spacing-md;
+            left: $spacing-md;
+            padding: $spacing-xs $spacing-sm;
+            font-size: 0.6875rem;
+            margin: $spacing-xs;
+        }
+    }
+
+    .mapContainer {
+        z-index: 1;
+        width: 100%;
+        height: 600px;
+        min-height: 400px;
+        border-radius: 12px;
+        border: 3px solid $dark-red;
+        pointer-events: auto !important;
+
+        // Force scroll events to pass through to page
+        :global(.gm-style),
+        :global(.gm-style > div) {
+            // Allow vertical scrolling
+            touch-action: pan-y !important;
+        }
+
+        @media (max-width: $breakpoint-md) {
+            height: 500px;
+            min-height: 350px;
+        }
+    }
+
+    .propertyListings {
+        background: $white;
+        border-radius: 16px;
+        padding: $spacing-lg;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-lg;
+        height: 100%;
+        overflow-y: auto;
+
+        @media (max-width: $breakpoint-md) {
+            padding: $spacing-md;
+        }
+    }
+
+    .listingsHeader {
+        display: flex;
         justify-content: space-between;
-        gap: $spacing-xl;
+        align-items: center;
+        margin-bottom: $spacing-md;
 
         @media (max-width: $breakpoint-md) {
             flex-direction: column;
             align-items: flex-start;
-            gap: $spacing-lg;
+            gap: $spacing-sm;
         }
     }
 
-    .headerText {
-        flex: 1;
-    }
-
-    .headerIcon {
-        display: flex;
-        align-items: flex-end;
-        justify-content: center;
-        color: $dark-red;
-        flex-shrink: 0;
-        align-self: flex-end;
-
-        @media (max-width: $breakpoint-md) {
-            margin-bottom: 0;
-            
-            svg {
-                width: 80px;
-                height: 80px;
-            }
-        }
-
-        @media (max-width: $breakpoint-sm) {
-            svg {
-                width: 60px;
-                height: 60px;
-            }
-        }
-    }
-
-    .backButton {
-        display: flex;
-        align-items: center;
-        gap: $spacing-sm;
-        margin-bottom: $spacing-lg;
-        background-color: $white !important;
-        border-color: $dark-red !important;
-        color: $dark-red !important;
-
-        &:hover {
-            background-color: $dark-red !important;
-            color: $white !important;
-        }
-    }
-
-    .title {
-        font-size: 2.5rem;
+    .listingsTitle {
+        font-size: 1.5rem;
         font-weight: 700;
         color: $black;
-        margin-bottom: $spacing-md;
-        font-family: $font-heading;
+        margin: 0;
 
         @media (max-width: $breakpoint-md) {
-            font-size: 2rem;
+            font-size: 1.25rem;
         }
     }
 
-    .subtitle {
-        font-size: 1.125rem;
-        color: $dark-gray;
-        max-width: 600px;
-
-        @media (max-width: $breakpoint-md) {
-            font-size: 1rem;
-        }
-    }
-}
-
-.propertyTypeFiltersSection {
-    width: 100%;
-    background: $white;
-    border-radius: 16px;
-    padding: $spacing-lg;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-    margin-bottom: $spacing-xl;
-
-    h4 {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: $black;
-        margin-bottom: $spacing-md;
-    }
-}
-
-.propertyTypeFilters {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: $spacing-sm;
-    width: 100%;
-
-    @media (max-width: $breakpoint-lg) {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    .backToMapButton {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
     }
 
-    @media (max-width: $breakpoint-md) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    @media (max-width: $breakpoint-sm) {
-        grid-template-columns: 1fr;
-    }
-}
-
-.propertyTypeFilterButton {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: $spacing-xs;
-    padding: $spacing-md;
-    border: 2px dotted $dark-red;
-    border-radius: 12px;
-    background: $white;
-    color: $dark-gray;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all $transition-base;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    min-height: 120px;
-    text-align: center;
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-
-    &:hover {
-        border-color: $dark-red;
-        background: $dark-red;
-        color: $white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
-        .propertyTypeFilterContent svg {
-            color: $white;
-        }
-    }
-
-    &.active {
-        background: $dark-red;
-        color: $white;
-        border-color: $dark-red;
-
-        .propertyTypeFilterContent svg {
-            color: $white;
-            fill: currentColor;
-        }
-    }
-}
-
-.propertyTypeFilterContent {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: $spacing-xs;
-    width: 100%;
-
-    svg {
-        width: 32px;
-        height: 32px;
-        color: $dark-red;
-        transition: color $transition-base;
-        flex-shrink: 0;
-    }
-
-    span {
-        display: block;
-        line-height: 1.2;
-        font-size: 0.95rem;
-        text-align: center;
-    }
-}
-
-.filtersMapLayout {
-    position: relative;
-    margin-top: $spacing-xl;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: $spacing-xl;
-    align-items: start;
-    overflow: visible;
-    pointer-events: auto;
-
-    @media (max-width: $breakpoint-lg) {
-        grid-template-columns: 1fr;
-    }
-}
-
-.leftFiltersColumn {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-xl;
-}
-
-.leftFiltersWrapper {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-xl;
-}
-
-.rightFiltersColumn {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-xl;
-}
-
-.mapOnlyContainer {
-    margin-top: $spacing-xl;
-}
-
-.leftFilters {
-    background: $white;
-    border-radius: 16px;
-    padding: $spacing-lg;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-lg;
-
-    @media (max-width: $breakpoint-md) {
-        padding: $spacing-md;
-    }
-}
-
-.mapWrapper {
-    position: relative;
-    overflow: visible;
-    background: $white;
-    border-radius: 16px;
-    padding: $spacing-lg;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    display: block;
-    pointer-events: auto;
-
-    @media (max-width: $breakpoint-md) {
-        padding: $spacing-md;
-    }
-}
-
-.backToCitiesButton {
-    position: absolute;
-    top: $spacing-xl;
-    left: $spacing-xl;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-    padding: $spacing-sm $spacing-md;
-    background: $dark-red;
-    border: 2px solid $dark-red;
-    border-radius: 6px;
-    color: $white;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all $transition-base;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    margin: $spacing-sm;
-
-    &:hover {
-        background: color.adjust($dark-red, $lightness: -5%);
-        border-color: color.adjust($dark-red, $lightness: -5%);
-        color: $white;
-        transform: translateY(-1px);
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    @media (max-width: $breakpoint-md) {
-        top: $spacing-md;
-        left: $spacing-md;
-        padding: $spacing-xs $spacing-sm;
-        font-size: 0.6875rem;
-        margin: $spacing-xs;
-    }
-}
-
-.mapContainer {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    height: 600px;
-    min-height: 400px;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 3px solid $dark-red;
-    pointer-events: auto !important;
-
-    // Force scroll events to pass through to page
-    :global(.gm-style),
-    :global(.gm-style > div) {
-        // Allow vertical scrolling
-        touch-action: pan-y !important;
-    }
-
-    @media (max-width: $breakpoint-md) {
-        height: 500px;
-        min-height: 350px;
-    }
-}
-
-.actionButtonsWrapper {
-    position: fixed;
-    bottom: 24px;
-    right: 1%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    display: flex;
-    gap: 12px;
-    pointer-events: auto;
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
-    
-    @media (max-width: 768px) {
-        bottom: 16px;
-        gap: 8px;
-    }
-}
-
-.actionButtons {
-    display: flex;
-    gap: $spacing-md;
-    align-items: center;
-
-    @media (max-width: $breakpoint-md) {
+    .listingsGrid {
+        display: flex;
         flex-direction: column;
-        width: auto;
+        gap: $spacing-lg;
     }
-}
 
-.clearButton {
-    min-width: 120px;
-    background-color: $white !important;
-    color: $dark-red !important;
-    border-color: $dark-red !important;
+    .actionButtonsWrapper {
+        position: fixed;
+        bottom: 24px;
+        right: 1%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        display: flex;
+        gap: 12px;
+        pointer-events: auto;
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
 
-    &:hover:not(:disabled) {
-        background-color: $light-gray !important;
+        @media (max-width: 768px) {
+            bottom: 16px;
+            gap: 8px;
+        }
+    }
+
+    .actionButtons {
+        display: flex;
+        gap: $spacing-md;
+        align-items: center;
+
+        @media (max-width: $breakpoint-md) {
+            flex-direction: column;
+            width: auto;
+        }
+    }
+
+    .clearButton {
+        min-width: 120px;
+        background-color: $white !important;
         color: $dark-red !important;
         border-color: $dark-red !important;
+
+        &:hover:not(:disabled) {
+            background-color: $light-gray !important;
+            color: $dark-red !important;
+            border-color: $dark-red !important;
+        }
+
+        @media (max-width: $breakpoint-md) {
+            min-width: auto;
+        }
     }
 
-    @media (max-width: $breakpoint-md) {
-        min-width: auto;
+    .searchButton {
+        min-width: 120px;
+
+        @media (max-width: $breakpoint-md) {
+            min-width: auto;
+        }
     }
-}
 
-.searchButton {
-    min-width: 120px;
-
-    @media (max-width: $breakpoint-md) {
-        min-width: auto;
-    }
-}
-
-// Remove background from InfoWindow labels for neighborhoods
-:global(.gm-style-iw) {
+    // Remove background from InfoWindow labels for neighborhoods
     :global(.gm-style-iw) {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        display: block !important;
-        pointer-events: auto !important; // FIX
-        visibility: visible !important;
-        opacity: 1 !important;
+        :global(.gm-style-iw) {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            display: block !important;
+            pointer-events: auto !important; // FIX
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        :global(.gm-style-iw-d) {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            overflow: visible !important;
+            text-align: center !important;
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        // Hide close button and any arrows
+        :global(button.gm-ui-hover-effect),
+        :global(.gm-ui-hover-effect),
+        :global(button[aria-label]),
+        :global(.gm-style-iw-tc::after),
+        :global(.gm-style-iw-t::after) {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+        }
+
+        >div {
+            color: #000000 !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            text-align: center !important;
+            line-height: 1.4 !important;
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            white-space: normal !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important;
+            max-width: 150px !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
     }
-    
-    :global(.gm-style-iw-d) {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        overflow: visible !important;
-        text-align: center !important;
-        display: block !important;
-        width: auto !important;
-        height: auto !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-    
-    // Hide close button and any arrows
-    :global(button.gm-ui-hover-effect),
-    :global(.gm-ui-hover-effect),
-    :global(button[aria-label]),
-    :global(.gm-style-iw-tc::after),
-    :global(.gm-style-iw-t::after) {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-    }
-    
-    > div {
-        color: #000000 !important;
-        font-weight: 600 !important;
-        font-size: 12px !important;
-        text-align: center !important;
-        line-height: 1.4 !important;
-        word-wrap: break-word !important;
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
-        white-space: normal !important;
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        display: block !important;
-        max-width: 150px !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-}

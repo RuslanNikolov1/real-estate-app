@@ -19,6 +19,7 @@ interface OtherRealEstatesFiltersPageProps {
     onFiltersChange?: (filters: OtherRealEstatesFiltersState) => void;
     onRightColumnFiltersReady?: (filters: React.ReactNode) => void;
     onActionButtonsReady?: (buttons: React.ReactNode) => void;
+    onSearch?: () => void;
 }
 
 export interface OtherRealEstatesFiltersState {
@@ -36,7 +37,8 @@ export function OtherRealEstatesFiltersPage({
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
-    onActionButtonsReady
+    onActionButtonsReady,
+    onSearch
 }: OtherRealEstatesFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
     
@@ -179,8 +181,10 @@ export function OtherRealEstatesFiltersPage({
                     <Button
                         variant="primary"
                         onClick={() => {
-                            // Dummy callback for now - will query database later
                             console.log('Search with filters:', filterValuesRef.current);
+                            if (onSearch) {
+                                onSearch();
+                            }
                         }}
                         className={styles.searchButton}
                     >
@@ -190,7 +194,7 @@ export function OtherRealEstatesFiltersPage({
             );
             onActionButtonsReadyRef.current(actionButtons);
         }
-    }, [filterKey]);
+    }, [filterKey, onSearch]);
 
     return (
         <div key={filterKey} className={styles.leftFiltersWrapper}>
