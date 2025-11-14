@@ -1,0 +1,404 @@
+@use '@/styles/variables' as *;
+
+.container {
+    background: $white;
+    border-radius: 16px;
+    padding: $spacing-lg;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+
+    @media (max-width: $breakpoint-md) {
+        padding: $spacing-md;
+    }
+}
+
+.priceFilter {
+    padding: 0;
+}
+
+.priceTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding-bottom: 3vh;
+    color: $dark-red;
+}
+
+.priceControls {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+}
+
+.dualRangeSlider {
+    position: relative;
+    width: 100%;
+    height: 6px;
+}
+
+.priceSlider {
+    position: absolute;
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    outline: none;
+    appearance: none;
+    cursor: grab;
+    background: transparent;
+    pointer-events: none;
+
+    &:active {
+        cursor: grabbing;
+    }
+
+    &::-webkit-slider-runnable-track {
+        cursor: grab;
+    }
+
+    &::-moz-range-track {
+        cursor: grab;
+    }
+
+    &::-webkit-slider-thumb {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: $dark-red;
+        cursor: grab;
+        border: 2px solid $white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all $transition-base;
+        margin-top: -7px;
+        pointer-events: all;
+
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        &:active {
+            cursor: grabbing;
+        }
+    }
+
+    &::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: $dark-red;
+        cursor: grab;
+        border: 2px solid $white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all $transition-base;
+        pointer-events: all;
+
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        &:active {
+            cursor: grabbing;
+        }
+    }
+}
+
+.priceSliderFrom {
+    z-index: 2;
+
+    &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 var(--slider-to-value, 0%),
+                #e0e0e0 100%);
+    }
+
+    &::-moz-range-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 var(--slider-to-value, 0%),
+                #e0e0e0 100%);
+        border: none;
+    }
+}
+
+.priceSliderTo {
+    z-index: 1;
+
+    &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 100%);
+    }
+
+    &::-moz-range-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 100%);
+        border: none;
+    }
+}
+
+.priceInputs {
+    display: flex;
+    gap: $spacing-md;
+    align-items: flex-start;
+}
+
+.priceInputWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    flex: 1;
+}
+
+.priceInputLabel {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $dark-gray;
+}
+
+.priceInput {
+    width: 100%;
+    padding: $spacing-xs $spacing-sm;
+    border: 2px solid $dark-red;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $black;
+    text-align: center;
+    background: $white;
+    outline: none;
+    transition: all $transition-base;
+
+    &:focus {
+        border-color: $dark-red;
+        box-shadow: 0 0 0 3px rgba(140, 28, 28, 0.1);
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+        opacity: 1;
+        height: 20px;
+    }
+}
+
+.pricePiggyBankWrapper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pricePiggyBankIcon {
+    color: inherit;
+}
+
+.pricePerSqmContainer {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+}
+
+.pricePerSqmTitle {
+    margin-top: 2vh;
+    padding-bottom: 2vh;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $dark-red;
+}
+
+.pricePerSqmSlider {
+    position: absolute;
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    outline: none;
+    appearance: none;
+    cursor: grab;
+    background: transparent;
+    pointer-events: none;
+
+    &:active {
+        cursor: grabbing;
+    }
+
+    &::-webkit-slider-runnable-track {
+        cursor: grab;
+    }
+
+    &::-moz-range-track {
+        cursor: grab;
+    }
+
+    &::-webkit-slider-thumb {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: $dark-red;
+        cursor: grab;
+        border: 2px solid $white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all $transition-base;
+        margin-top: -7px;
+        pointer-events: all;
+
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        &:active {
+            cursor: grabbing;
+        }
+    }
+
+    &::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: $dark-red;
+        cursor: grab;
+        border: 2px solid $white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all $transition-base;
+        pointer-events: all;
+
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        &:active {
+            cursor: grabbing;
+        }
+    }
+}
+
+.pricePerSqmSliderFrom {
+    z-index: 2;
+
+    &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 var(--slider-to-value, 0%),
+                #e0e0e0 100%);
+    }
+
+    &::-moz-range-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 var(--slider-to-value, 0%),
+                #e0e0e0 100%);
+        border: none;
+    }
+}
+
+.pricePerSqmSliderTo {
+    z-index: 1;
+
+    &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 100%);
+    }
+
+    &::-moz-range-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(to right,
+                $dark-red 0%,
+                $dark-red var(--slider-value, 0%),
+                #e0e0e0 var(--slider-value, 0%),
+                #e0e0e0 100%);
+        border: none;
+    }
+}
+
+.pricePresets {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    padding-top: $spacing-md;
+}
+
+.pricePresetsTitle {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: $dark-gray;
+    margin: 0;
+}
+
+.pricePresetsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: $spacing-sm;
+}
+
+.pricePresetButton {
+    padding: $spacing-sm $spacing-md;
+    border: 2px solid $dark-red;
+    border-radius: 8px;
+    background: $white;
+    color: $dark-red;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all $transition-base;
+    text-align: center;
+
+    &:hover {
+        background: rgba(140, 28, 28, 0.05);
+        transform: translateY(-1px);
+    }
+
+    &.pricePresetButtonActive {
+        background: $dark-red;
+        color: $white;
+        border-color: $dark-red;
+    }
+
+    @media (max-width: $breakpoint-md) {
+        font-size: 0.85rem;
+        padding: $spacing-xs $spacing-sm;
+    }
+}

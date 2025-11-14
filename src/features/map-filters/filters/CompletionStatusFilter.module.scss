@@ -1,0 +1,74 @@
+@use '@/styles/variables' as *;
+@use 'sass:color';
+
+.completionFilter {
+    background: $white;
+    border-radius: 16px;
+    padding: $spacing-lg;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+
+    @media (max-width: $breakpoint-md) {
+        padding: $spacing-md;
+    }
+}
+
+.featuresTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $dark-red;
+    margin: 0;
+}
+
+.completionGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: $spacing-sm;
+
+    @media (max-width: $breakpoint-md) {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+.featureButton {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    border-radius: 12px;
+    border: 2px solid $dark-red;
+    background: $white;
+    color: $dark-red;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all $transition-base;
+
+    &:hover {
+        background: rgba($dark-red, 0.08);
+    }
+}
+
+.featureButtonActive {
+    background: $dark-red;
+    color: $white;
+    border-color: $dark-red;
+
+    &:hover {
+        background: color.adjust($dark-red, $lightness: -5%);
+    }
+}
+
+.featureIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.featureLabel {
+    flex: 1;
+    text-align: left;
+}
+
