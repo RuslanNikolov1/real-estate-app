@@ -9,13 +9,12 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { PlateEditor } from '@/lib/plate-editor';
+import { PlateEditor, Value } from '@/lib/plate-editor';
 import { translateProperty } from '@/lib/translator';
 // import { Property, PropertyType, PropertyStatus, LocationType } from '@/types';
 import { FloppyDisk, X, Globe, SpinnerGap } from '@phosphor-icons/react';
 import { mockProperties } from '@/features/properties/PropertiesListPage';
 import styles from './PropertyFormPage.module.scss';
-import { Value } from '@udecode/plate-common';
 
 const propertySchema = z.object({
   title: z.string().min(1, 'Заглавието е задължително'),

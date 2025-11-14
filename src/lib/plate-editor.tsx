@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useRef, useEffect } from 'react';
-import { Value } from '@udecode/plate-common';
+
+// Define Value type locally for Plate editor
+export type Value = Array<{
+  type?: string;
+  children?: Array<{ text?: string }>;
+}>;
 
 export interface PlateEditorProps {
   value: Value;
