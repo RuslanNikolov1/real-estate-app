@@ -26,7 +26,7 @@ import { OtherRealEstatesFiltersPage, OtherRealEstatesFiltersState } from './fil
 import { MapComponent } from './MapComponent';
 import { PropertyCard } from '@/features/properties/components/PropertyCard';
 import { mockProperties } from '@/features/properties/PropertiesListPage';
-import { MapPin, Funnel, X } from '@phosphor-icons/react';
+import { MapPin } from '@phosphor-icons/react';
 
 interface MapFiltersPageProps {
     initialPropertyType?: string | null;
@@ -79,6 +79,9 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         const params = new URLSearchParams(window.location.search);
         const hasSearchParams = params.has('search') || params.has('filters');
         setShowListings(hasSearchParams || false);
+        if (hasSearchParams) {
+            setFiltersExpanded(true);
+        }
         
         // Restore filters from URL if present
         if (params.has('filters')) {
@@ -188,9 +191,6 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         return false;
     });
 
-    // State to track if filters column is expanded (when listings are shown)
-    const [filtersExpanded, setFiltersExpanded] = useState(false);
-
     // Serialize filters to URL query params
     const serializeFiltersToURL = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState | null) => {
         if (!filters) return '';
@@ -219,7 +219,6 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
             router.push(`${currentPath}?${queryString}`);
         }
         setShowListings(true);
-        setFiltersExpanded(false); // Collapse filters when search is clicked
     }, [selectedPropertyType, router, serializeFiltersToURL]);
 
     const handleBackToMap = useCallback(() => {
@@ -229,12 +228,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
             : '/map-filters';
         router.push(currentPath);
         setShowListings(false);
-        setFiltersExpanded(false); // Reset filters expansion
     }, [selectedPropertyType, router]);
-
-    const toggleFilters = useCallback(() => {
-        setFiltersExpanded(prev => !prev);
-    }, []);
 
     return (
         <div className={styles.mapFiltersPage}>
@@ -302,7 +296,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                     )}
 
                     {selectedPropertyType && (
-                        <div className={`${styles.filtersMapLayout} ${showListings ? styles.showingListings : ''} ${showListings && filtersExpanded ? styles.filtersExpanded : ''}`}>
+                        <div className={`${styles.filtersMapLayout} ${showListings ? styles.showingListings : ''}`}>
                             {/* Map or Listings shown in the left column */}
                             <div className={styles.leftFiltersColumn}>
                                 {showListings ? (
@@ -343,126 +337,104 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                             </div>
 
                             {/* Filters on the right */}
-                            <div className={`${styles.rightFiltersColumn} ${showListings && !filtersExpanded ? styles.collapsed : ''}`}>
-                                {showListings && !filtersExpanded ? (
-                                    <Button
-                                        variant="primary"
-                                        onClick={toggleFilters}
-                                        className={styles.filtersToggleButton}
-                                    >
-                                        <Funnel size={20} />
-                                        Филтри
-                                    </Button>
-                                ) : (
-                                    <>
-                                        {showListings && (
-                                            <Button
-                                                variant="outline"
-                                                onClick={toggleFilters}
-                                                className={styles.filtersCloseButton}
-                                            >
-                                                <X size={18} />
-                                            </Button>
-                                        )}
-                                        {isApartmentsSelected ? (
-                                            <ApartmentsFiltersPage
-                                                locationState={locationState}
-                                                onLocationChange={handleLocationChange}
-                                                onFiltersChange={handleFiltersChange}
-                                                onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : isHousesVillasSelected ? (
-                                            <HousesVillasFiltersPage
+                            <div className={styles.rightFiltersColumn}>
+                                {isApartmentsSelected ? (
+                                    <ApartmentsFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : isStoresOfficesSelected ? (
-                                            <StoresOfficesFiltersPage
+                                        onSearch={handleSearch}
+                                    />
+                                ) : isHousesVillasSelected ? (
+                                    <HousesVillasFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : isBuildingPlotsSelected ? (
-                                            <BuildingPlotsFiltersPage
+                                        onSearch={handleSearch}
+                                    />
+                                ) : isStoresOfficesSelected ? (
+                                    <StoresOfficesFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : isAgriculturalLandSelected ? (
-                                            <AgriculturalLandFiltersPage
+                                        onSearch={handleSearch}
+                                    />
+                                ) : isBuildingPlotsSelected ? (
+                                    <BuildingPlotsFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : isWarehousesIndustrialSelected ? (
-                                            <WarehousesIndustrialFiltersPage
+                                        onSearch={handleSearch}
+                                    />
+                                ) : isAgriculturalLandSelected ? (
+                                    <AgriculturalLandFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : isGaragesParkingSelected ? (
-                                            <GaragesParkingFiltersPage
+                                        onSearch={handleSearch}
+                                    />
+                                ) : isWarehousesIndustrialSelected ? (
+                                    <WarehousesIndustrialFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : isHotelsMotelsSelected ? (
-                                            <HotelsMotelsFiltersPage
+                                        onSearch={handleSearch}
+                                    />
+                                ) : isGaragesParkingSelected ? (
+                                    <GaragesParkingFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : isEstablishmentsSelected ? (
-                                            <EstablishmentsFiltersPage
+                                        onSearch={handleSearch}
+                                    />
+                                ) : isHotelsMotelsSelected ? (
+                                    <HotelsMotelsFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : isReplaceRealEstatesSelected ? (
-                                            <ReplaceRealEstatesFiltersPage
+                                        onSearch={handleSearch}
+                                    />
+                                ) : isEstablishmentsSelected ? (
+                                    <EstablishmentsFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : isBuyRealEstatesSelected ? (
-                                            <BuyRealEstatesFiltersPage
+                                        onSearch={handleSearch}
+                                    />
+                                ) : isReplaceRealEstatesSelected ? (
+                                    <ReplaceRealEstatesFiltersPage
                                         locationState={locationState}
                                         onLocationChange={handleLocationChange}
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : isOtherRealEstatesSelected ? (
-                                            <OtherRealEstatesFiltersPage
-                                                locationState={locationState}
-                                                onLocationChange={handleLocationChange}
-                                                onFiltersChange={handleFiltersChange}
-                                                onActionButtonsReady={handleActionButtonsReady}
-                                                onSearch={handleSearch}
-                                            />
-                                        ) : null}
-                                    </>
-                                )}
+                                        onSearch={handleSearch}
+                                    />
+                                ) : isBuyRealEstatesSelected ? (
+                                    <BuyRealEstatesFiltersPage
+                                        locationState={locationState}
+                                        onLocationChange={handleLocationChange}
+                                        onFiltersChange={handleFiltersChange}
+                                        onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
+                                    />
+                                ) : isOtherRealEstatesSelected ? (
+                                    <OtherRealEstatesFiltersPage
+                                        locationState={locationState}
+                                        onLocationChange={handleLocationChange}
+                                        onFiltersChange={handleFiltersChange}
+                                        onActionButtonsReady={handleActionButtonsReady}
+                                        onSearch={handleSearch}
+                                    />
+                                ) : null}
                             </div>
                         </div>
                     )}

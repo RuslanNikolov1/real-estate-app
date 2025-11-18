@@ -146,66 +146,14 @@ export function MapComponent({
         };
     }, [map]);
 
-    // Force page scrolling by intercepting wheel events on map container wrapper
-    useEffect(() => {
-        const container = mapContainerRef.current;
-        if (!container) return;
-
-        let isDragging = false;
-        let dragStartTime = 0;
-
-        const handleMouseDown = (e: MouseEvent) => {
-            isDragging = false;
-            dragStartTime = Date.now();
-        };
-
-        const handleMouseMove = () => {
-            if (Date.now() - dragStartTime > 50) {
-                isDragging = true;
-            }
-        };
-
-        const handleMouseUp = () => {
-            setTimeout(() => {
-                isDragging = false;
-            }, 200);
-        };
-
-        const handleWheel = (e: WheelEvent) => {
-            // Only allow page scroll if user is not dragging the map
-            if (!isDragging) {
-                // Scroll the page instead of zooming the map
-                window.scrollBy({
-                    top: e.deltaY,
-                    left: e.deltaX,
-                    behavior: 'auto'
-                });
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        };
-
-        container.addEventListener('mousedown', handleMouseDown);
-        container.addEventListener('mousemove', handleMouseMove);
-        container.addEventListener('mouseup', handleMouseUp);
-        container.addEventListener('wheel', handleWheel, { passive: false });
-
-        return () => {
-            container.removeEventListener('mousedown', handleMouseDown);
-            container.removeEventListener('mousemove', handleMouseMove);
-            container.removeEventListener('mouseup', handleMouseUp);
-            container.removeEventListener('wheel', handleWheel);
-        };
-    }, []);
-
     const mapOptions = useMemo(() => ({
         disableDefaultUI: false,
         zoomControl: true,
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: true,
-        scrollwheel: false, // Disable scroll wheel zoom to allow page scrolling
-        gestureHandling: 'auto' as const, // Auto - allows normal page scrolling
+        scrollwheel: true,
+        gestureHandling: 'greedy' as const,
         mapId: GOOGLE_MAPS_MAP_ID, // Required for AdvancedMarkerElement
         styles: [
             {
