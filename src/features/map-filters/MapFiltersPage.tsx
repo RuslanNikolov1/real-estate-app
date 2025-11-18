@@ -79,9 +79,6 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         const params = new URLSearchParams(window.location.search);
         const hasSearchParams = params.has('search') || params.has('filters');
         setShowListings(hasSearchParams || false);
-        if (hasSearchParams) {
-            setFiltersExpanded(true);
-        }
         
         // Restore filters from URL if present
         if (params.has('filters')) {
