@@ -427,16 +427,13 @@
   }
 
   .searchActions {
-    display: flex;
-    gap: $spacing-md;
-    justify-content: space-between;
-    align-items: center;
 
     .extendedFiltersButton {
       display: flex;
-      align-items: center;
+      align-items: stretch;
       gap: $spacing-sm;
-      background-color: $white !important;
+      width: 100%;
+      background-color: transparent !important;
       border-color: $dark-red !important;
       color: $dark-red !important;
 
@@ -455,13 +452,23 @@
   .modalActions {
     margin-top: $spacing-lg;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: $spacing-md;
 
-    .leftActions {
-      display: flex;
-      align-items: center;
-      gap: $spacing-md;
+    .extendedFiltersButton {
+      width: 100%;
+      justify-content: center;
+      background-color: $dark-red !important;
+      border-color: $dark-red !important;
+      color: $white !important;
+      border-radius: 24px;
+      padding: $spacing-md;
+
+      &:hover {
+        background-color: color.adjust($dark-red, $lightness: -5%) !important;
+        border-color: color.adjust($dark-red, $lightness: -5%) !important;
+        color: $white !important;
+      }
     }
 
     .modalSearchButton {

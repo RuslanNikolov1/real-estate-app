@@ -1,5 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/Soft Piano/(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   reactStrictMode: false,
   images: {
     remotePatterns: [
@@ -19,4 +32,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-

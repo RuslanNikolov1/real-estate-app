@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   X,
-  MapTrifold,
+  FunnelIcon,
   CheckCircle,
   Calendar
 } from '@phosphor-icons/react';
@@ -26,6 +26,7 @@ export function PropertySearch({
   onSearch,
 }: PropertySearchProps) {
   const { t } = useTranslation();
+  const isLandingExperience = !onSearch;
   const [selectedButton, setSelectedButton] = useState<'sales' | 'rent' | null>(null);
   const [city, setCity] = useState('');
   const [cityError, setCityError] = useState('');
@@ -49,7 +50,13 @@ export function PropertySearch({
     onExpand?.();
   };
 
-  const handlePropertyTypeToggle = (typeId: string) => {
+  const handlePropertyTypeSelect = (typeId: string) => {
+    if (isLandingExperience) {
+      window.location.href = `/mock-search?type=${typeId}`;
+      handleClose();
+      return;
+    }
+
     setSelectedPropertyTypes((prev) =>
       prev.includes(typeId)
         ? prev.filter((id) => id !== typeId)
@@ -57,15 +64,9 @@ export function PropertySearch({
     );
   };
 
-  const handleExtendedFiltersClick = () => {
-    window.location.href = '/map-filters';
-    handleClose();
-  };
-
   const handleSearchSubmit = () => {
-    if (!selectedButton) return;
+    if (isLandingExperience || !selectedButton) return;
 
-    // Validate city
     if (!city.trim()) {
       setCityError('Моля, въведете град');
       return;
@@ -79,11 +80,9 @@ export function PropertySearch({
       types: selectedPropertyTypes.length > 0 ? selectedPropertyTypes : undefined,
     };
 
-    // Call onSearch callback if provided
     if (onSearch) {
       onSearch(searchFilters);
     } else {
-      // Fallback to URL redirect if no callback
       const params = new URLSearchParams();
       params.set('mode', selectedButton);
       params.set('city', city.trim());
@@ -92,6 +91,11 @@ export function PropertySearch({
       }
       window.location.href = `/properties?${params.toString()}`;
     }
+  };
+
+  const handleExtendedFiltersClick = () => {
+    window.location.href = '/map-filters';
+    handleClose();
   };
 
   const canSearch =
@@ -141,11 +145,11 @@ export function PropertySearch({
                   value={city}
                   onChange={(event) => {
                     setCity(event.target.value);
-                    if (cityError) {
+                    if (!isLandingExperience && cityError) {
                       setCityError('');
                     }
                   }}
-                  error={cityError}
+                  error={isLandingExperience ? undefined : cityError}
                   className={styles.cityInput}
                 />
               </div>
@@ -161,9 +165,11 @@ export function PropertySearch({
                           <button
                             key={type.id}
                             type="button"
-                            className={`${styles.propertyTypeButton} ${isSelected ? styles.selected : ''}`}
-                            onClick={() => handlePropertyTypeToggle(type.id)}
-                            aria-pressed={isSelected}
+                            className={`${styles.propertyTypeButton} ${
+                              !isLandingExperience && isSelected ? styles.selected : ''
+                            }`}
+                            onClick={() => handlePropertyTypeSelect(type.id)}
+                            aria-pressed={!isLandingExperience ? isSelected : undefined}
                           >
                             <div className={styles.propertyTypeContent}>
                               <IconComponent size={28} weight="fill" />
@@ -181,14 +187,9 @@ export function PropertySearch({
                       onClick={handleExtendedFiltersClick}
                       className={styles.extendedFiltersButton}
                     >
-                      <MapTrifold size={18} />
+                      <FunnelIcon />
                       Разширени филтри
                     </Button>
-                    <div className={styles.rightActions}>
-                      <Button variant="primary" onClick={handleSearchSubmit} disabled={!selectedButton || !city.trim()}>
-                        {t('common.search')}
-                      </Button>
-                    </div>
                   </div>
                 )}
               </div>
@@ -200,18 +201,20 @@ export function PropertySearch({
                     onClick={handleExtendedFiltersClick}
                     className={styles.extendedFiltersButton}
                   >
-                    <MapTrifold size={18} />
+                    <FunnelIcon size={18} />
                     Разширени филтри
                   </Button>
                 </div>
-                <Button
-                  variant="primary"
-                  onClick={handleSearchSubmit}
-                  disabled={!selectedButton || !canSearch}
-                  className={styles.modalSearchButton}
-                >
-                  {t('common.search')}
-                </Button>
+                {!isLandingExperience && (
+                  <Button
+                    variant="primary"
+                    onClick={handleSearchSubmit}
+                    disabled={!selectedButton || !canSearch}
+                    className={styles.modalSearchButton}
+                  >
+                    {t('common.search')}
+                  </Button>
+                )}
               </div>
             </motion.div>
           </>

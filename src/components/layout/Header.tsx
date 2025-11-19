@@ -19,6 +19,7 @@ import {
   Medal,
   ChartBar
 } from '@phosphor-icons/react';
+import { AudioPlayer } from '@/components/ui/AudioPlayer';
 import styles from './Header.module.scss';
 
 const languages = [
@@ -79,6 +80,8 @@ export function Header() {
         </nav>
 
         <div className={styles.actions}>
+          <AudioPlayer src="/Soft Piano.mp3" label="Ambience" />
+
           <div className={styles.languageSelector}>
             <button
               onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}
