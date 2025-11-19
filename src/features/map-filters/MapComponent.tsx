@@ -2,11 +2,10 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { GoogleMap, Circle, Polygon, useJsApiLoader } from '@react-google-maps/api';
-import { ArrowLeft, MapPinLine } from '@phosphor-icons/react';
+import { ArrowLeft } from '@phosphor-icons/react';
 import burgasCities from '@/data/burgasCities.json';
 import citiesNeighborhoods from '@/data/citiesNeighborhoods.json';
 import styles from './MapFiltersPage.module.scss';
-import { WrappingLabel } from './WrappingLabel';
 import { AdvancedMarker } from './AdvancedMarker';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyByEvHlvBQonQ4WeztrqXqLTeKYfCjXQxM';
@@ -77,7 +76,6 @@ export function MapComponent({
     onMapLoad
 }: MapComponentProps) {
     const [map, setMap] = useState<google.maps.Map | null>(null);
-    const [mapZoom, setMapZoom] = useState<number>(13);
     const mapRef = useRef<google.maps.Map | null>(null);
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const { isLoaded, loadError } = useJsApiLoader({
@@ -91,11 +89,6 @@ export function MapComponent({
     const handleMapLoad = useCallback((mapInstance: google.maps.Map) => {
         setMap(mapInstance);
         mapRef.current = mapInstance;
-        const initialZoom = mapInstance.getZoom();
-        if (typeof initialZoom === 'number') {
-            setMapZoom(initialZoom);
-        }
-
         // Trigger resize after a short delay to ensure container is fully rendered
         setTimeout(() => {
             if (mapInstance && typeof window !== 'undefined' && window.google) {
@@ -166,7 +159,7 @@ export function MapComponent({
         fullscreenControl: true,
         scrollwheel: true,
         gestureHandling: 'greedy' as const,
-        mapId: GOOGLE_MAPS_MAP_ID, // Required for AdvancedMarkerElement
+        mapId: 'Demo_Key', // Required for AdvancedMarkerElement
         styles: [
             {
                 featureType: "administrative.neighborhood",
@@ -192,9 +185,6 @@ export function MapComponent({
 
         const handleZoomChanged = () => {
             const currentZoom = map.getZoom();
-            if (typeof currentZoom === 'number') {
-                setMapZoom(currentZoom);
-            }
             // Trigger back to cities mode earlier (at zoom level 11.5 or lower)
             if (currentZoom && currentZoom < 11.5 && trimmedCity && onBackToCities) {
                 onBackToCities();
@@ -372,23 +362,6 @@ export function MapComponent({
     }, [createCityIconElement]);
 
 
-    // Calculate centroid of polygon for label placement
-    const getPolygonCentroid = useCallback((coordinates: number[][]): { lat: number; lng: number } => {
-        let latSum = 0;
-        let lngSum = 0;
-        const count = coordinates.length - 1; // Exclude last duplicate point
-
-        for (let i = 0; i < count; i++) {
-            latSum += coordinates[i][1];
-            lngSum += coordinates[i][0];
-        }
-
-        return {
-            lat: latSum / count,
-            lng: lngSum / count
-        };
-    }, []);
-
 
     if (loadError) {
         return (
@@ -482,7 +455,6 @@ export function MapComponent({
                                     lat: coord[1],
                                     lng: coord[0]
                                 }));
-                                const centroid = getPolygonCentroid(feature.geometry.coordinates[0]);
 
                                 return (
                                     <div key={feature.properties.id}>
@@ -512,8 +484,6 @@ export function MapComponent({
                                                 }
                                             }}
                                         />
-                                        {/* Dark label for neighborhood - always visible with word wrap, no background */}
-                                        <WrappingLabel position={centroid} text={neighborhoodName} zoom={mapZoom} />
                                     </div>
                                 );
                             })}
