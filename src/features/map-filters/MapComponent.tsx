@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { GoogleMap, Circle, Polygon, useJsApiLoader } from '@react-google-maps/api';
-import { ArrowLeft } from '@phosphor-icons/react';
+import { ArrowLeft, MapPinLine } from '@phosphor-icons/react';
 import burgasCities from '@/data/burgasCities.json';
 import citiesNeighborhoods from '@/data/citiesNeighborhoods.json';
 import styles from './MapFiltersPage.module.scss';
@@ -77,6 +77,7 @@ export function MapComponent({
     onMapLoad
 }: MapComponentProps) {
     const [map, setMap] = useState<google.maps.Map | null>(null);
+    const [mapZoom, setMapZoom] = useState<number>(13);
     const mapRef = useRef<google.maps.Map | null>(null);
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const { isLoaded, loadError } = useJsApiLoader({
@@ -90,6 +91,10 @@ export function MapComponent({
     const handleMapLoad = useCallback((mapInstance: google.maps.Map) => {
         setMap(mapInstance);
         mapRef.current = mapInstance;
+        const initialZoom = mapInstance.getZoom();
+        if (typeof initialZoom === 'number') {
+            setMapZoom(initialZoom);
+        }
 
         // Trigger resize after a short delay to ensure container is fully rendered
         setTimeout(() => {
@@ -164,10 +169,20 @@ export function MapComponent({
         mapId: GOOGLE_MAPS_MAP_ID, // Required for AdvancedMarkerElement
         styles: [
             {
-                featureType: 'administrative.neighborhood',
-                elementType: 'labels',
-                stylers: [{ visibility: 'off' }]
-            }
+                featureType: "administrative.neighborhood",
+                elementType: "labels",
+                stylers: [{ visibility: "off" }],
+              },
+              {
+                featureType: "poi",
+                elementType: "labels",
+                stylers: [{ visibility: "off" }],
+              },
+              {
+                featureType: "transit",
+                elementType: "labels",
+                stylers: [{ visibility: "off" }],
+              },
         ]
     }), []);
 
@@ -177,6 +192,9 @@ export function MapComponent({
 
         const handleZoomChanged = () => {
             const currentZoom = map.getZoom();
+            if (typeof currentZoom === 'number') {
+                setMapZoom(currentZoom);
+            }
             // Trigger back to cities mode earlier (at zoom level 11.5 or lower)
             if (currentZoom && currentZoom < 11.5 && trimmedCity && onBackToCities) {
                 onBackToCities();
@@ -292,8 +310,8 @@ export function MapComponent({
                 const lngSize = halfSideKm / (LON_KM_PER_DEG || LAT_KM_PER_DEG);
 
                 // Provide fallback minimums based on averages (reduced)
-                const adjustedLatSize = Math.max(latSize, avgSize.latSize * 0.10935); // Reduced by 10% from 0.1215
-                const adjustedLngSize = Math.max(lngSize, avgSize.lngSize * 0.10935); // Reduced by 10% from 0.1215
+                const adjustedLatSize = Math.max(latSize, avgSize.latSize * 0.095);
+                const adjustedLngSize = Math.max(lngSize, avgSize.lngSize * 0.095);
 
                 // Create square polygon around coordinate
                 const polygonCoords: number[][] = [
@@ -325,22 +343,23 @@ export function MapComponent({
         return getNeighborhoodPolygons(trimmedCity);
     }, [trimmedCity, getNeighborhoodPolygons]);
 
-    // Create custom icon element for AdvancedMarkerElement (dark red)
+    // Create custom red map pin for AdvancedMarkerElement
     const createCityIconElement = useCallback((city: CityData): HTMLElement => {
-        const iconSize = city.type === 'major' ? 20 : 16;
-        const fillColor = '#8c1c1c'; // Dark red for all cities
-
-        const pinElement = document.createElement('div');
-        pinElement.style.width = `${iconSize}px`;
-        pinElement.style.height = `${iconSize}px`;
-        pinElement.style.borderRadius = '50%';
-        pinElement.style.backgroundColor = fillColor;
-        pinElement.style.border = '2px solid #ffffff';
-        pinElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
-        pinElement.style.opacity = '0.9';
-        pinElement.style.cursor = 'pointer';
-
-        return pinElement;
+        const svgMarkup = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256">
+                <path fill="#8c1c1c" d="M128 24a72 72 0 0 0-72 72c0 67.86 66.16 121.57 68.98 123.9a8 8 0 0 0 9.97 0C133.84 217.57 200 163.86 200 96a72 72 0 0 0-72-72Zm0 104a32 32 0 1 1 32-32a32 32 0 0 1-32 32Z"/>
+                <circle cx="128" cy="96" r="24" fill="#ffffff"/>
+            </svg>
+        `;
+        const wrapper = document.createElement('div');
+        wrapper.style.width = '36px';
+        wrapper.style.height = '36px';
+        wrapper.style.cursor = 'pointer';
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.justifyContent = 'center';
+        wrapper.innerHTML = svgMarkup;
+        return wrapper;
     }, []);
 
     // Create icon elements for all cities (memoized to avoid recreation)
@@ -494,7 +513,7 @@ export function MapComponent({
                                             }}
                                         />
                                         {/* Dark label for neighborhood - always visible with word wrap, no background */}
-                                        <WrappingLabel position={centroid} text={neighborhoodName} />
+                                        <WrappingLabel position={centroid} text={neighborhoodName} zoom={mapZoom} />
                                     </div>
                                 );
                             })}

@@ -2,13 +2,34 @@
 
 import { OverlayView } from "@react-google-maps/api";
 
+interface WrappingLabelProps {
+    position: google.maps.LatLngLiteral;
+    text: string;
+    zoom?: number;
+}
+
 export function WrappingLabel({
     position,
     text,
-}: {
-    position: google.maps.LatLngLiteral;
-    text: string;
-}) {
+    zoom = 13,
+}: WrappingLabelProps) {
+    const minZoom = 8;
+    const maxZoom = 18;
+    const clampedZoom = Math.min(Math.max(zoom, minZoom), maxZoom);
+
+    const zoomProgress = (clampedZoom - minZoom) / (maxZoom - minZoom); // 0 -> 1
+    const scaleFactor = 0.65 + zoomProgress * 0.45; // 0.65x at min zoom, 1.1x at max zoom
+
+    const baseFontSize = 9;
+    const maxFontSize = 14;
+    const fontSize = baseFontSize + (maxFontSize - baseFontSize) * scaleFactor;
+
+    const baseWidth = 80;
+    const maxWidth = 120;
+    const computedWidth = baseWidth + (maxWidth - baseWidth) * scaleFactor;
+
+    const color = '#4a4a4a'; // medium gray
+
     return (
         <OverlayView
             position={position}
@@ -17,10 +38,10 @@ export function WrappingLabel({
             <div
                 style={{
                     position: "absolute",
-                    transform: "translate(-50%, -100%)",
+                    transform: "translate(-50%, -72%)",
 
                     // --- TEXT WRAPPING FIX ---
-                    maxWidth: "110px",
+                    maxWidth: `${computedWidth}px`,
                     whiteSpace: "normal",
                     overflowWrap: "normal",
                     wordBreak: "normal",
@@ -39,9 +60,9 @@ export function WrappingLabel({
                     padding: "0",
                     border: "none",
                     boxShadow: "none",
-                    fontSize: "13px",
+                    fontSize: `${fontSize}px`,
                     fontWeight: 600,
-                    color: "#222",
+                    color,
                 }}
             >
                 {text}
