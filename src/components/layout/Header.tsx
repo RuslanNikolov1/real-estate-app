@@ -80,7 +80,7 @@ export function Header() {
         </nav>
 
         <div className={styles.actions}>
-          <AudioPlayer src="/Soft Piano.mp3" label="Ambience" />
+          <AudioPlayer src="/soft-piano.mp3" label="Ambience" />
 
           <div className={styles.languageSelector}>
             <button

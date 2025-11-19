@@ -12,6 +12,12 @@ interface NeighborhoodCardProps {
   onSelect: () => void;
 }
 
+const salePriceFormatter = new Intl.NumberFormat('bg-BG', {
+  maximumFractionDigits: 0,
+  minimumFractionDigits: 0,
+  useGrouping: true,
+});
+
 export function NeighborhoodCard({ neighborhood, index, onSelect }: NeighborhoodCardProps) {
   return (
     <motion.div
@@ -46,7 +52,7 @@ export function NeighborhoodCard({ neighborhood, index, onSelect }: Neighborhood
           </div>
           <div className={styles.detailItem}>
             <TrendUp size={18} />
-            <span>От {neighborhood.averagePrice.sale.toLocaleString()} лв/м²</span>
+            <span>От {salePriceFormatter.format(neighborhood.averagePrice.sale)} лв/м²</span>
           </div>
         </div>
 

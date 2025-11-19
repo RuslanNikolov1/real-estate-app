@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { LoadScript, GoogleMap, Circle, Polygon, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, Circle, Polygon, useJsApiLoader } from '@react-google-maps/api';
 import { ArrowLeft } from '@phosphor-icons/react';
 import burgasCities from '@/data/burgasCities.json';
 import citiesNeighborhoods from '@/data/citiesNeighborhoods.json';
@@ -64,6 +64,8 @@ type PolygonFeature = {
     };
 };
 
+const libraries: ('marker')[] = ['marker'];
+
 export function MapComponent({
     city = '',
     cityCoordinates,
@@ -77,6 +79,11 @@ export function MapComponent({
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const mapRef = useRef<google.maps.Map | null>(null);
     const mapContainerRef = useRef<HTMLDivElement>(null);
+    const { isLoaded, loadError } = useJsApiLoader({
+        id: 'broker-bulgaria-google-maps',
+        googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+        libraries
+    });
 
     const trimmedCity = city.trim();
 
@@ -364,6 +371,22 @@ export function MapComponent({
     }, []);
 
 
+    if (loadError) {
+        return (
+            <div className={styles.mapWrapper}>
+                <div className={styles.mapError}>Картата не може да бъде заредена в момента.</div>
+            </div>
+        );
+    }
+
+    if (!isLoaded) {
+        return (
+            <div className={styles.mapWrapper}>
+                <div className={styles.mapLoading}>Зареждане на картата...</div>
+            </div>
+        );
+    }
+
     return (
         <div className={styles.mapWrapper}>
             {/* Back to cities button */}
@@ -378,10 +401,6 @@ export function MapComponent({
                     <span>Назад към градовете</span>
                 </button>
             )}
-            <LoadScript
-                googleMapsApiKey={GOOGLE_MAPS_API_KEY}
-                libraries={['marker']}
-            >
                 <div className={styles.mapInner}>
                     <div ref={mapContainerRef} className={styles.mapContainer}>
                         <GoogleMap
@@ -483,8 +502,6 @@ export function MapComponent({
                         </GoogleMap>
                     </div>
                 </div>
-
-            </LoadScript>
         </div>
     );
 }

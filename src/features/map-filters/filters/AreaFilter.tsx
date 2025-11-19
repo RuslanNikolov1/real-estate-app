@@ -232,7 +232,7 @@ export function AreaFilter({
                         transition={{ type: 'spring', stiffness: 200, damping: 25 }}
                     />
                     <Image
-                        src="/bed-top-view.svg"
+                        src="/real-red-bed.png"
                         alt="Bed top view illustration"
                         width={200}
                         height={60}

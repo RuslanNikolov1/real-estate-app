@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Play, Pause } from '@phosphor-icons/react';
+import { audioManager } from '@/lib/audio-manager';
 import styles from './AudioPlayer.module.scss';
 
 interface AudioPlayerProps {
@@ -10,72 +11,35 @@ interface AudioPlayerProps {
 }
 
 export function AudioPlayer({ src, label = 'Ambience' }: AudioPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [audioInitialized, setAudioInitialized] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(audioManager.isPlaying);
+  const [volume, setVolumeState] = useState(audioManager.volume);
 
   useEffect(() => {
-    if (!audioInitialized) return;
+    audioManager.initialize(src);
+    setIsPlaying(audioManager.isPlaying);
+    setVolumeState(audioManager.volume);
 
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleEnded = () => setIsPlaying(false);
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-
-    // Set initial volume and play on first initialization
-    audio.volume = isMuted ? 0 : volume;
-    audio.play().catch((error) => {
-      console.error('Error playing audio:', error);
+    const unsubscribe = audioManager.subscribe((playing) => {
+      setIsPlaying(playing);
     });
 
-    return () => {
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioInitialized]);
-
-  useEffect(() => {
-    if (!audioInitialized) return;
-
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    audio.volume = isMuted ? 0 : volume;
-  }, [volume, isMuted, audioInitialized]);
+    return unsubscribe;
+  }, [src]);
 
   const togglePlay = () => {
-    if (!audioInitialized) {
-      // Initialize audio on first click
-      setAudioInitialized(true);
+    const wasJustInitialized = audioManager.initialize(src);
+
+    if (wasJustInitialized && !audioManager.isPlaying) {
+      audioManager.play();
       return;
     }
 
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play().catch((error) => {
-        console.error('Error playing audio:', error);
-      });
-    }
+    audioManager.toggle();
   };
-
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    setIsMuted(newVolume === 0);
+    setVolumeState(newVolume);
+    audioManager.setVolume(newVolume);
   };
 
   return (
@@ -99,7 +63,7 @@ export function AudioPlayer({ src, label = 'Ambience' }: AudioPlayerProps) {
           min="0"
           max="1"
           step="0.01"
-          value={isMuted ? 0 : volume}
+          value={audioManager.isMuted ? 0 : volume}
           onChange={handleVolumeChange}
           className={styles.volumeSlider}
           aria-label="Volume"
@@ -107,8 +71,6 @@ export function AudioPlayer({ src, label = 'Ambience' }: AudioPlayerProps) {
       ) : (
         <span className={styles.label}>{label}</span>
       )}
-
-      {audioInitialized && <audio ref={audioRef} src={src} loop />}
     </div>
   );
 }
