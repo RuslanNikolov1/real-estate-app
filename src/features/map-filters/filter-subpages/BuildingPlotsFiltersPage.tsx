@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useRef, useCallback, useState, useEffect } from 'react';
+import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import {
@@ -18,6 +19,7 @@ import {
 } from '../filters/types';
 import styles from '../MapFiltersPage.module.scss';
 import { useFilterState } from '../hooks/useFilterState';
+import priceFilterStyles from '../filters/PriceFilter.module.scss';
 
 interface BuildingPlotsFiltersPageProps {
     locationState?: {
@@ -32,6 +34,8 @@ interface BuildingPlotsFiltersPageProps {
     onRightColumnFiltersReady?: (filters: React.ReactNode) => void;
     onActionButtonsReady?: (buttons: React.ReactNode) => void;
     onSearch?: () => void;
+    initialFilters?: Partial<BuildingPlotsFiltersState>;
+    isRentMode?: boolean;
 }
 
 export interface BuildingPlotsFiltersState {
@@ -41,13 +45,18 @@ export interface BuildingPlotsFiltersState {
     distance: number;
     areaFrom: number;
     areaTo: number;
-    priceFrom: number;
-    priceTo: number;
-    pricePerSqmFrom: number;
-    pricePerSqmTo: number;
+    priceFrom?: number;
+    priceTo?: number;
+    pricePerSqmFrom?: number;
+    pricePerSqmTo?: number;
     selectedFeatures: string[];
-    selectedElectricityOptions: string[];
-    selectedWaterOptions: string[];
+    selectedElectricityOptions?: string[];
+    selectedWaterOptions?: string[];
+    // Rent-specific fields
+    monthlyRentFrom?: number;
+    monthlyRentTo?: number;
+    rentPerSqmFrom?: number;
+    rentPerSqmTo?: number;
 }
 
 const createInitialBuildingPlotFilters = (): BuildingPlotsFiltersState => ({
@@ -63,7 +72,12 @@ const createInitialBuildingPlotFilters = (): BuildingPlotsFiltersState => ({
     pricePerSqmTo: BUILDING_PLOTS_PRICE_PER_SQM_SLIDER_MAX,
     selectedFeatures: [],
     selectedElectricityOptions: [],
-    selectedWaterOptions: []
+    selectedWaterOptions: [],
+    // Rent-specific fields
+    monthlyRentFrom: 1,
+    monthlyRentTo: 5600,
+    rentPerSqmFrom: 0,
+    rentPerSqmTo: 6
 });
 
 export function BuildingPlotsFiltersPage({ 
@@ -71,7 +85,9 @@ export function BuildingPlotsFiltersPage({
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
     onActionButtonsReady,
-    onSearch
+    onSearch,
+    initialFilters,
+    isRentMode = false
 }: BuildingPlotsFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
     
@@ -90,10 +106,17 @@ export function BuildingPlotsFiltersPage({
             externalOnLocationChange(state.searchTerm, state.city, state.neighborhoods, state.distance);
         }
         : setInternalLocationState;
+
+    // Rent price constants
+    const RENT_SLIDER_MAX = 5600;
+    const RENT_SLIDER_MIN = 1;
+    const RENT_PER_SQM_SLIDER_MAX = 6;
+    const RENT_PER_SQM_SLIDER_MIN = 0;
     
     const { filters, updateFilters, resetFilters } = useFilterState<BuildingPlotsFiltersState>(
         createInitialBuildingPlotFilters,
-        onFiltersChange
+        onFiltersChange,
+        initialFilters
     );
 
     // Use keys to reset components on clear
@@ -160,6 +183,15 @@ export function BuildingPlotsFiltersPage({
         updateFilters({ selectedWaterOptions: selectedOptions });
     }, [updateFilters]);
 
+    // Rent-specific handlers
+    const handleMonthlyRentChange = useCallback((rentFrom: number, rentTo: number) => {
+        updateFilters({ monthlyRentFrom: rentFrom, monthlyRentTo: rentTo });
+    }, [updateFilters]);
+
+    const handleRentPerSqmChange = useCallback((rentPerSqmFrom: number, rentPerSqmTo: number) => {
+        updateFilters({ rentPerSqmFrom, rentPerSqmTo });
+    }, [updateFilters]);
+
     const handleClear = useCallback(() => {
         // Reset location state
         setLocationState({
@@ -224,6 +256,163 @@ export function BuildingPlotsFiltersPage({
         }
     }, [filterKey, onSearch]);
 
+    // Rent Price Filter Component
+    const RentPriceFilter = React.memo(({ 
+        title, 
+        unit, 
+        sliderMin, 
+        sliderMax, 
+        from, 
+        to, 
+        onFilterChange 
+    }: {
+        title: string;
+        unit: string;
+        sliderMin: number;
+        sliderMax: number;
+        from: number;
+        to: number;
+        onFilterChange: (from: number, to: number) => void;
+    }) => {
+        const [rentFrom, setRentFrom] = useState(from);
+        const [rentTo, setRentTo] = useState(to);
+
+        useEffect(() => {
+            setRentFrom(from);
+            setRentTo(to);
+        }, [from, to]);
+
+        const rentFromClamped = Math.max(sliderMin, Math.min(rentFrom, sliderMax));
+        const rentToClamped = Math.max(sliderMin, Math.min(rentTo, sliderMax));
+
+        const piggyBankSize = useMemo(
+            () => {
+                const minSize = 32;
+                const maxSize = 64;
+                const range = sliderMax - sliderMin;
+                const normalizedValue = range > 0 ? (rentToClamped - sliderMin) / range : 0;
+                return minSize + normalizedValue * (maxSize - minSize);
+            },
+            [rentToClamped, sliderMin, sliderMax]
+        );
+
+        const handleFromChange = useCallback((val: number) => {
+            if (val > rentTo) {
+                setRentTo(val);
+                setRentFrom(val);
+                onFilterChange(val, val);
+            } else {
+                setRentFrom(val);
+                onFilterChange(val, rentTo);
+            }
+        }, [rentTo, onFilterChange]);
+
+        const handleToChange = useCallback((val: number) => {
+            if (val < rentFrom) {
+                setRentFrom(val);
+                setRentTo(val);
+                onFilterChange(val, val);
+            } else {
+                setRentTo(val);
+                onFilterChange(rentFrom, val);
+            }
+        }, [rentFrom, onFilterChange]);
+
+        return (
+            <div className={priceFilterStyles.container}>
+                <div className={priceFilterStyles.priceFilter}>
+                    <h4 className={priceFilterStyles.priceTitle}>{title} ({unit})</h4>
+                    <div className={priceFilterStyles.priceControls}>
+                        <div className={priceFilterStyles.dualRangeSlider}>
+                            <input
+                                type="range"
+                                min={sliderMin}
+                                max={sliderMax}
+                                step={sliderMax <= 100 ? 1 : sliderMax <= 1000 ? 20 : 50}
+                                value={rentFromClamped}
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if (!isNaN(val)) {
+                                        handleFromChange(val);
+                                    }
+                                }}
+                                className={`${priceFilterStyles.priceSlider} ${priceFilterStyles.priceSliderFrom}`}
+                                style={{
+                                    '--slider-value': `${((rentFromClamped - sliderMin) / (sliderMax - sliderMin)) * 100}%`,
+                                    '--slider-to-value': `${((rentToClamped - sliderMin) / (sliderMax - sliderMin)) * 100}%`
+                                } as React.CSSProperties}
+                            />
+                            <input
+                                type="range"
+                                min={sliderMin}
+                                max={sliderMax}
+                                step={sliderMax <= 100 ? 1 : sliderMax <= 1000 ? 20 : 50}
+                                value={rentToClamped}
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if (!isNaN(val)) {
+                                        handleToChange(val);
+                                    }
+                                }}
+                                className={`${priceFilterStyles.priceSlider} ${priceFilterStyles.priceSliderTo}`}
+                                style={{
+                                    '--slider-value': `${((rentToClamped - sliderMin) / (sliderMax - sliderMin)) * 100}%`
+                                } as React.CSSProperties}
+                            />
+                        </div>
+                        <div className={priceFilterStyles.priceInputs}>
+                            <div className={priceFilterStyles.priceInputWrapper}>
+                                <label htmlFor={`${title}-from`} className={priceFilterStyles.priceInputLabel}>
+                                    От
+                                </label>
+                                <input
+                                    type="number"
+                                    id={`${title}-from`}
+                                    min={sliderMin}
+                                    value={rentFrom}
+                                    onChange={(e) => {
+                                        const val = Number(e.target.value);
+                                        if (!isNaN(val) && val >= sliderMin) {
+                                            handleFromChange(val);
+                                        }
+                                    }}
+                                    className={priceFilterStyles.priceInput}
+                                    placeholder={sliderMin.toString()}
+                                />
+                            </div>
+                            <div className={priceFilterStyles.pricePiggyBankWrapper} aria-hidden="true">
+                                <PiggyBank
+                                    className={priceFilterStyles.pricePiggyBankIcon}
+                                    size={piggyBankSize}
+                                />
+                            </div>
+                            <div className={priceFilterStyles.priceInputWrapper}>
+                                <label htmlFor={`${title}-to`} className={priceFilterStyles.priceInputLabel}>
+                                    До
+                                </label>
+                                <input
+                                    type="number"
+                                    id={`${title}-to`}
+                                    min={sliderMin}
+                                    value={rentTo}
+                                    onChange={(e) => {
+                                        const val = Number(e.target.value);
+                                        if (!isNaN(val) && val >= sliderMin) {
+                                            handleToChange(val);
+                                        }
+                                    }}
+                                    className={priceFilterStyles.priceInput}
+                                    placeholder={sliderMax.toString()}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    });
+    RentPriceFilter.displayName = 'RentPriceFilter';
+
     return (
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
@@ -238,17 +427,43 @@ export function BuildingPlotsFiltersPage({
                 />
             </div>
 
-            {/* Price Filter (Цена) */}
-            <PriceFilter
-                key={`price-${filterKey}`}
-                onFilterChange={handlePriceChange}
-                initialPriceFrom={filters.priceFrom}
-                initialPriceTo={filters.priceTo}
-                initialPricePerSqmFrom={filters.pricePerSqmFrom}
-                initialPricePerSqmTo={filters.pricePerSqmTo}
-                priceSliderMax={BUILDING_PLOTS_PRICE_SLIDER_MAX}
-                pricePerSqmSliderMax={BUILDING_PLOTS_PRICE_PER_SQM_SLIDER_MAX}
-            />
+            {/* Price/Rent Filters - Conditional based on mode */}
+            {isRentMode ? (
+                <>
+                    {/* Monthly Rent Filter */}
+                    <RentPriceFilter
+                        title="Месечен наем"
+                        unit="лева"
+                        sliderMin={RENT_SLIDER_MIN}
+                        sliderMax={RENT_SLIDER_MAX}
+                        from={filters.monthlyRentFrom || RENT_SLIDER_MIN}
+                        to={filters.monthlyRentTo || RENT_SLIDER_MAX}
+                        onFilterChange={handleMonthlyRentChange}
+                    />
+
+                    {/* Rent Per Sqm Filter */}
+                    <RentPriceFilter
+                        title="Цена за кв.м"
+                        unit="лева"
+                        sliderMin={RENT_PER_SQM_SLIDER_MIN}
+                        sliderMax={RENT_PER_SQM_SLIDER_MAX}
+                        from={filters.rentPerSqmFrom || RENT_PER_SQM_SLIDER_MIN}
+                        to={filters.rentPerSqmTo || RENT_PER_SQM_SLIDER_MAX}
+                        onFilterChange={handleRentPerSqmChange}
+                    />
+                </>
+            ) : (
+                <PriceFilter
+                    key={`price-${filterKey}`}
+                    onFilterChange={handlePriceChange}
+                    initialPriceFrom={filters.priceFrom}
+                    initialPriceTo={filters.priceTo}
+                    initialPricePerSqmFrom={filters.pricePerSqmFrom}
+                    initialPricePerSqmTo={filters.pricePerSqmTo}
+                    priceSliderMax={BUILDING_PLOTS_PRICE_SLIDER_MAX}
+                    pricePerSqmSliderMax={BUILDING_PLOTS_PRICE_PER_SQM_SLIDER_MAX}
+                />
+            )}
 
             {/* Area Filter (Квадратура) */}
             <AreaFilter
@@ -261,21 +476,24 @@ export function BuildingPlotsFiltersPage({
                 title="Квадратура"
             />
 
-            <div className={styles.leftFilters}>
-                {/* Electricity Filter (Ток) */}
-                <ElectricityFilter
-                    key={`electricity-${filterKey}`}
-                    onFilterChange={handleElectricityChange}
-                    initialSelected={filters.selectedElectricityOptions}
-                />
+            {/* Electricity and Water Filters - Only for sale mode */}
+            {!isRentMode && (
+                <div className={styles.leftFilters}>
+                    {/* Electricity Filter (Ток) */}
+                    <ElectricityFilter
+                        key={`electricity-${filterKey}`}
+                        onFilterChange={handleElectricityChange}
+                        initialSelected={filters.selectedElectricityOptions}
+                    />
 
-                {/* Water Filter (Вода) */}
-                <WaterFilter
-                    key={`water-${filterKey}`}
-                    onFilterChange={handleWaterChange}
-                    initialSelected={filters.selectedWaterOptions}
-                />
-            </div>
+                    {/* Water Filter (Вода) */}
+                    <WaterFilter
+                        key={`water-${filterKey}`}
+                        onFilterChange={handleWaterChange}
+                        initialSelected={filters.selectedWaterOptions}
+                    />
+                </div>
+            )}
 
             {/* Features Filter (Особености) */}
             <FeaturesFilter

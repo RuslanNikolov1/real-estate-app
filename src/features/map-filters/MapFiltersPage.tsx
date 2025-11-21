@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ArrowLeft } from '@phosphor-icons/react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { propertyTypes } from '@/data/propertyTypes';
 import burgasCities from '@/data/burgasCities.json';
@@ -34,6 +34,13 @@ interface MapFiltersPageProps {
 
 export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPageProps) {
     const router = useRouter();
+    const pathname = usePathname();
+    let baseRoute = '/map-filters';
+    if (pathname?.startsWith('/sale/search')) {
+        baseRoute = '/sale/search';
+    } else if (pathname?.startsWith('/rent/search')) {
+        baseRoute = '/rent/search';
+    }
     
     const [selectedPropertyType, setSelectedPropertyType] = useState<string | null>(() => {
         if (!initialPropertyType) {
@@ -41,6 +48,9 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         }
         return propertyTypes.some((type) => type.id === initialPropertyType) ? initialPropertyType : null;
     });
+
+    // Store restored filters from URL
+    const [restoredFilters, setRestoredFilters] = useState<ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState | null>(null);
 
     // Shared map location state - lifted to parent so map persists across property type changes
     const [locationState, setLocationState] = useState({
@@ -79,14 +89,37 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         const params = new URLSearchParams(window.location.search);
         const hasSearchParams = params.has('search') || params.has('filters');
         setShowListings(hasSearchParams || false);
-        // Filters no longer have an expand/collapse state; they always remain visible.
         
         // Restore filters from URL if present
         if (params.has('filters')) {
             try {
                 const filtersJson = decodeURIComponent(params.get('filters') || '');
-                const restoredFilters = JSON.parse(filtersJson);
+                const restoredFilters = JSON.parse(filtersJson) as ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState;
+                setRestoredFilters(restoredFilters);
                 currentFiltersRef.current = restoredFilters;
+                
+                // Restore location state from filters
+                if (restoredFilters && 'searchTerm' in restoredFilters && 'city' in restoredFilters) {
+                    let cityCoordinates: [number, number] | undefined = undefined;
+                    if (restoredFilters.city) {
+                        const foundCity = burgasCities.cities.find(
+                            (c) =>
+                                c.name.toLowerCase() === restoredFilters.city.toLowerCase() ||
+                                c.nameEn.toLowerCase() === restoredFilters.city.toLowerCase()
+                        );
+                        if (foundCity && foundCity.coordinates && foundCity.coordinates.length === 2) {
+                            cityCoordinates = [foundCity.coordinates[0], foundCity.coordinates[1]];
+                        }
+                    }
+                    
+                    setLocationState({
+                        searchTerm: restoredFilters.searchTerm || '',
+                        city: restoredFilters.city || '',
+                        cityCoordinates,
+                        neighborhoods: restoredFilters.neighborhoods || [],
+                        distance: restoredFilters.distance || 0
+                    });
+                }
             } catch (error) {
                 console.error('Error restoring filters from URL:', error);
             }
@@ -112,7 +145,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
 
         setSelectedPropertyType(newSelectedType);
 
-        const targetRoute = newSelectedType ? `/map-filters/${newSelectedType}` : '/map-filters';
+        const targetRoute = newSelectedType ? `${baseRoute}/${newSelectedType}` : baseRoute;
         router.push(targetRoute);
     };
     
@@ -172,6 +205,34 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         console.log('Filters changed:', filters);
     }, []);
 
+    // Get initial filters for the current property type
+    const getInitialFilters = useCallback(() => {
+        if (!restoredFilters) return undefined;
+        
+        // Type guard to check if restored filters match current property type
+        if (isApartmentsSelected && 'apartmentSubtypes' in restoredFilters) {
+            return restoredFilters as Partial<ApartmentFiltersState>;
+        } else if (isHousesVillasSelected && 'houseTypes' in restoredFilters) {
+            return restoredFilters as Partial<HouseFiltersState>;
+        } else if (isStoresOfficesSelected && 'selectedFloorOptions' in restoredFilters && 'selectedBuildingTypes' in restoredFilters) {
+            return restoredFilters as Partial<CommercialFiltersState>;
+        } else if (isBuildingPlotsSelected && 'selectedElectricityOptions' in restoredFilters) {
+            return restoredFilters as Partial<BuildingPlotsFiltersState>;
+        } else if (isAgriculturalLandSelected && 'selectedCategories' in restoredFilters) {
+            return restoredFilters as Partial<AgriculturalLandFiltersState>;
+        } else if (isWarehousesIndustrialSelected && 'propertyTypes' in restoredFilters && !('selectedCategories' in restoredFilters)) {
+            return restoredFilters as Partial<WarehousesIndustrialFiltersState>;
+        } else if (isGaragesParkingSelected && 'selectedConstructionTypes' in restoredFilters && !('selectedCategories' in restoredFilters) && !('selectedFloorOptions' in restoredFilters)) {
+            return restoredFilters as Partial<GaragesParkingFiltersState>;
+        } else if (isHotelsMotelsSelected && 'selectedCategories' in restoredFilters && 'bedBaseFrom' in restoredFilters) {
+            return restoredFilters as Partial<HotelsMotelsFiltersState>;
+        } else if (isEstablishmentsSelected && 'locationTypes' in restoredFilters) {
+            return restoredFilters as Partial<EstablishmentsFiltersState>;
+        }
+        
+        return undefined;
+    }, [restoredFilters, isApartmentsSelected, isHousesVillasSelected, isStoresOfficesSelected, isBuildingPlotsSelected, isAgriculturalLandSelected, isWarehousesIndustrialSelected, isGaragesParkingSelected, isHotelsMotelsSelected, isEstablishmentsSelected]);
+
     // State to hold action buttons from filter pages
     const [actionButtons, setActionButtons] = useState<React.ReactNode>(null);
 
@@ -212,21 +273,55 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         if (filters) {
             const queryString = serializeFiltersToURL(filters);
             const currentPath = selectedPropertyType 
-                ? `/map-filters/${selectedPropertyType}` 
-                : '/map-filters';
+                ? `${baseRoute}/${selectedPropertyType}` 
+                : baseRoute;
             router.push(`${currentPath}?${queryString}`);
         }
         setShowListings(true);
-    }, [selectedPropertyType, router, serializeFiltersToURL]);
+    }, [selectedPropertyType, router, serializeFiltersToURL, baseRoute]);
 
     const handleBackToMap = useCallback(() => {
         // Remove search params from URL
         const currentPath = selectedPropertyType 
-            ? `/map-filters/${selectedPropertyType}` 
-            : '/map-filters';
+            ? `${baseRoute}/${selectedPropertyType}` 
+            : baseRoute;
         router.push(currentPath);
         setShowListings(false);
-    }, [selectedPropertyType, router]);
+    }, [selectedPropertyType, router, baseRoute]);
+
+    // Filter property types for rent/search route
+    const availablePropertyTypes = useMemo(() => {
+        if (baseRoute === '/rent/search') {
+            // Only show specific property types for rent with custom labels
+            const rentPropertyTypeIds = [
+                'apartments',
+                'houses-villas',
+                'restaurants',
+                'stores-offices',
+                'garages-parking',
+                'warehouses-industrial',
+                'building-plots',
+                'hotels-motels'
+            ];
+            const rentLabels: Record<string, string> = {
+                'apartments': 'Апартаменти',
+                'houses-villas': 'Къщи',
+                'restaurants': 'Заведения',
+                'stores-offices': 'Магазини/Офиси/Кабинети/Салони',
+                'garages-parking': 'Гаражи/Паркинги/Паркоместа под наем',
+                'warehouses-industrial': 'Складове/Промишлени и стопански имоти под наем',
+                'building-plots': 'Парцели/Терени',
+                'hotels-motels': 'Хотели/Почивни станции'
+            };
+            return propertyTypes
+                .filter(type => rentPropertyTypeIds.includes(type.id))
+                .map(type => ({
+                    ...type,
+                    label: rentLabels[type.id] || type.label
+                }));
+        }
+        return propertyTypes;
+    }, [baseRoute]);
 
     return (
         <div className={styles.mapFiltersPage}>
@@ -274,7 +369,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                     {!selectedPropertyType && (
                     <div className={styles.propertyTypeFiltersSection}>
                         <div className={styles.propertyTypeFilters}>
-                            {propertyTypes.map((type) => {
+                            {availablePropertyTypes.map((type) => {
                                 const Icon = type.icon;
                                 return (
                                     <button
@@ -343,6 +438,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
                                         onSearch={handleSearch}
+                                        isRentMode={baseRoute === '/rent/search'}
                                     />
                                 ) : isHousesVillasSelected ? (
                                     <HousesVillasFiltersPage
@@ -351,6 +447,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
                                         onSearch={handleSearch}
+                                        isRentMode={baseRoute === '/rent/search'}
                                     />
                                 ) : isStoresOfficesSelected ? (
                                     <StoresOfficesFiltersPage
@@ -359,6 +456,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
                                         onSearch={handleSearch}
+                                        isRentMode={baseRoute === '/rent/search'}
                                     />
                                 ) : isBuildingPlotsSelected ? (
                                     <BuildingPlotsFiltersPage
@@ -367,6 +465,8 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
                                         onSearch={handleSearch}
+                                        initialFilters={getInitialFilters() as Partial<BuildingPlotsFiltersState> | undefined}
+                                        isRentMode={baseRoute === '/rent/search'}
                                     />
                                 ) : isAgriculturalLandSelected ? (
                                     <AgriculturalLandFiltersPage
@@ -375,6 +475,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
                                         onSearch={handleSearch}
+                                        initialFilters={getInitialFilters() as Partial<AgriculturalLandFiltersState> | undefined}
                                     />
                                 ) : isWarehousesIndustrialSelected ? (
                                     <WarehousesIndustrialFiltersPage
@@ -383,6 +484,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
                                         onSearch={handleSearch}
+                                        isRentMode={baseRoute === '/rent/search'}
                                     />
                                 ) : isGaragesParkingSelected ? (
                                     <GaragesParkingFiltersPage
@@ -391,6 +493,8 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
                                         onSearch={handleSearch}
+                                        initialFilters={getInitialFilters() as Partial<GaragesParkingFiltersState> | undefined}
+                                        isRentMode={baseRoute === '/rent/search'}
                                     />
                                 ) : isHotelsMotelsSelected ? (
                                     <HotelsMotelsFiltersPage
@@ -399,6 +503,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
                                         onSearch={handleSearch}
+                                        isRentMode={baseRoute === '/rent/search'}
                                     />
                                 ) : isEstablishmentsSelected ? (
                                     <EstablishmentsFiltersPage
@@ -407,6 +512,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                         onFiltersChange={handleFiltersChange}
                                         onActionButtonsReady={handleActionButtonsReady}
                                         onSearch={handleSearch}
+                                        isRentMode={baseRoute === '/rent/search'}
                                     />
                                 ) : isReplaceRealEstatesSelected ? (
                                     <ReplaceRealEstatesFiltersPage

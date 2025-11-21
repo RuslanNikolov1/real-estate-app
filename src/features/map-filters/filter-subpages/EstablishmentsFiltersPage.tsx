@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useRef, useCallback, useState, useEffect } from 'react';
+import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import {
@@ -20,6 +21,7 @@ import {
     ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MAX
 } from '../filters/types';
 import styles from '../MapFiltersPage.module.scss';
+import priceFilterStyles from '../filters/PriceFilter.module.scss';
 
 interface EstablishmentsFiltersPageProps {
     locationState?: {
@@ -34,6 +36,7 @@ interface EstablishmentsFiltersPageProps {
     onRightColumnFiltersReady?: (filters: React.ReactNode) => void;
     onActionButtonsReady?: (buttons: React.ReactNode) => void;
     onSearch?: () => void;
+    isRentMode?: boolean;
 }
 
 export interface EstablishmentsFiltersState {
@@ -44,13 +47,20 @@ export interface EstablishmentsFiltersState {
     areaFrom: number;
     areaTo: number;
     locationTypes: string[];
-    selectedConstructionTypes: string[];
-    selectedCompletionStatuses: string[];
+    selectedConstructionTypes?: string[];
+    selectedCompletionStatuses?: string[];
     selectedFeatures: string[];
-    priceFrom: number;
-    priceTo: number;
-    pricePerSqmFrom: number;
-    pricePerSqmTo: number;
+    priceFrom?: number;
+    priceTo?: number;
+    pricePerSqmFrom?: number;
+    pricePerSqmTo?: number;
+    // Rent-specific fields
+    selectedFurnishing?: string[];
+    monthlyRentFrom?: number;
+    monthlyRentTo?: number;
+    rentPerSqmFrom?: number;
+    rentPerSqmTo?: number;
+    selectedWorkingOptions?: string[];
 }
 
 export function EstablishmentsFiltersPage({ 
@@ -58,7 +68,8 @@ export function EstablishmentsFiltersPage({
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
     onActionButtonsReady,
-    onSearch
+    onSearch,
+    isRentMode = false
 }: EstablishmentsFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
     
@@ -77,6 +88,26 @@ export function EstablishmentsFiltersPage({
             externalOnLocationChange(state.searchTerm, state.city, state.neighborhoods, state.distance);
         }
         : setInternalLocationState;
+
+    // Furnishing options for rent mode
+    const FURNISHING_OPTIONS = [
+        { id: 'furnished', label: 'Обзаведен' },
+        { id: 'partially-furnished', label: 'Частично обзаведен' },
+        { id: 'unfurnished', label: 'Необзаведен' }
+    ];
+
+    // Working options for rent mode
+    const WORKING_OPTIONS = [
+        { id: 'all', label: 'Всички' },
+        { id: 'year-round', label: 'Работи целогодишно' },
+        { id: 'seasonal', label: 'Работи сезонно' }
+    ];
+
+    // Rent price constants
+    const RENT_SLIDER_MAX = 7000;
+    const RENT_SLIDER_MIN = 35;
+    const RENT_PER_SQM_SLIDER_MAX = 50;
+    const RENT_PER_SQM_SLIDER_MIN = 0;
     
     // Store current filter values - all establishments filter state managed here
     const filterValuesRef = useRef<Partial<EstablishmentsFiltersState>>({
@@ -93,7 +124,14 @@ export function EstablishmentsFiltersPage({
         priceFrom: 0,
         priceTo: ESTABLISHMENTS_PRICE_SLIDER_MAX,
         pricePerSqmFrom: ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MIN,
-        pricePerSqmTo: ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MAX
+        pricePerSqmTo: ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MAX,
+        // Rent-specific fields
+        selectedFurnishing: [],
+        monthlyRentFrom: RENT_SLIDER_MIN,
+        monthlyRentTo: RENT_SLIDER_MAX,
+        rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
+        rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX,
+        selectedWorkingOptions: []
     });
 
     // Use keys to reset components on clear
@@ -174,6 +212,29 @@ export function EstablishmentsFiltersPage({
         notifyFiltersChange();
     }, [notifyFiltersChange]);
 
+    // Rent-specific handlers
+    const handleFurnishingChange = useCallback((selectedFurnishing: string[]) => {
+        filterValuesRef.current.selectedFurnishing = selectedFurnishing;
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
+
+    const handleWorkingOptionsChange = useCallback((selectedOptions: string[]) => {
+        filterValuesRef.current.selectedWorkingOptions = selectedOptions;
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
+
+    const handleMonthlyRentChange = useCallback((rentFrom: number, rentTo: number) => {
+        filterValuesRef.current.monthlyRentFrom = rentFrom;
+        filterValuesRef.current.monthlyRentTo = rentTo;
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
+
+    const handleRentPerSqmChange = useCallback((rentPerSqmFrom: number, rentPerSqmTo: number) => {
+        filterValuesRef.current.rentPerSqmFrom = rentPerSqmFrom;
+        filterValuesRef.current.rentPerSqmTo = rentPerSqmTo;
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
+
     const handleClear = useCallback(() => {
         // Reset location state
         setLocationState({
@@ -199,7 +260,14 @@ export function EstablishmentsFiltersPage({
             priceFrom: 0,
             priceTo: ESTABLISHMENTS_PRICE_SLIDER_MAX,
             pricePerSqmFrom: ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MIN,
-            pricePerSqmTo: ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MAX
+            pricePerSqmTo: ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MAX,
+            // Reset rent-specific fields
+            selectedFurnishing: [],
+            monthlyRentFrom: RENT_SLIDER_MIN,
+            monthlyRentTo: RENT_SLIDER_MAX,
+            rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
+            rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX,
+            selectedWorkingOptions: []
         };
         
         // Reset components by changing key
@@ -254,6 +322,163 @@ export function EstablishmentsFiltersPage({
         }
     }, [filterKey, onSearch]);
 
+    // Rent Price Filter Component
+    const RentPriceFilter = React.memo(({ 
+        title, 
+        unit, 
+        sliderMin, 
+        sliderMax, 
+        from, 
+        to, 
+        onFilterChange 
+    }: {
+        title: string;
+        unit: string;
+        sliderMin: number;
+        sliderMax: number;
+        from: number;
+        to: number;
+        onFilterChange: (from: number, to: number) => void;
+    }) => {
+        const [rentFrom, setRentFrom] = useState(from);
+        const [rentTo, setRentTo] = useState(to);
+
+        useEffect(() => {
+            setRentFrom(from);
+            setRentTo(to);
+        }, [from, to]);
+
+        const rentFromClamped = Math.max(sliderMin, Math.min(rentFrom, sliderMax));
+        const rentToClamped = Math.max(sliderMin, Math.min(rentTo, sliderMax));
+
+        const piggyBankSize = useMemo(
+            () => {
+                const minSize = 32;
+                const maxSize = 64;
+                const range = sliderMax - sliderMin;
+                const normalizedValue = range > 0 ? (rentToClamped - sliderMin) / range : 0;
+                return minSize + normalizedValue * (maxSize - minSize);
+            },
+            [rentToClamped, sliderMin, sliderMax]
+        );
+
+        const handleFromChange = useCallback((val: number) => {
+            if (val > rentTo) {
+                setRentTo(val);
+                setRentFrom(val);
+                onFilterChange(val, val);
+            } else {
+                setRentFrom(val);
+                onFilterChange(val, rentTo);
+            }
+        }, [rentTo, onFilterChange]);
+
+        const handleToChange = useCallback((val: number) => {
+            if (val < rentFrom) {
+                setRentFrom(val);
+                setRentTo(val);
+                onFilterChange(val, val);
+            } else {
+                setRentTo(val);
+                onFilterChange(rentFrom, val);
+            }
+        }, [rentFrom, onFilterChange]);
+
+        return (
+            <div className={priceFilterStyles.container}>
+                <div className={priceFilterStyles.priceFilter}>
+                    <h4 className={priceFilterStyles.priceTitle}>{title} ({unit})</h4>
+                    <div className={priceFilterStyles.priceControls}>
+                        <div className={priceFilterStyles.dualRangeSlider}>
+                            <input
+                                type="range"
+                                min={sliderMin}
+                                max={sliderMax}
+                                step={sliderMax <= 100 ? 1 : sliderMax <= 1000 ? 20 : 50}
+                                value={rentFromClamped}
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if (!isNaN(val)) {
+                                        handleFromChange(val);
+                                    }
+                                }}
+                                className={`${priceFilterStyles.priceSlider} ${priceFilterStyles.priceSliderFrom}`}
+                                style={{
+                                    '--slider-value': `${((rentFromClamped - sliderMin) / (sliderMax - sliderMin)) * 100}%`,
+                                    '--slider-to-value': `${((rentToClamped - sliderMin) / (sliderMax - sliderMin)) * 100}%`
+                                } as React.CSSProperties}
+                            />
+                            <input
+                                type="range"
+                                min={sliderMin}
+                                max={sliderMax}
+                                step={sliderMax <= 100 ? 1 : sliderMax <= 1000 ? 20 : 50}
+                                value={rentToClamped}
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if (!isNaN(val)) {
+                                        handleToChange(val);
+                                    }
+                                }}
+                                className={`${priceFilterStyles.priceSlider} ${priceFilterStyles.priceSliderTo}`}
+                                style={{
+                                    '--slider-value': `${((rentToClamped - sliderMin) / (sliderMax - sliderMin)) * 100}%`
+                                } as React.CSSProperties}
+                            />
+                        </div>
+                        <div className={priceFilterStyles.priceInputs}>
+                            <div className={priceFilterStyles.priceInputWrapper}>
+                                <label htmlFor={`${title}-from`} className={priceFilterStyles.priceInputLabel}>
+                                    От
+                                </label>
+                                <input
+                                    type="number"
+                                    id={`${title}-from`}
+                                    min={sliderMin}
+                                    value={rentFrom}
+                                    onChange={(e) => {
+                                        const val = Number(e.target.value);
+                                        if (!isNaN(val) && val >= sliderMin) {
+                                            handleFromChange(val);
+                                        }
+                                    }}
+                                    className={priceFilterStyles.priceInput}
+                                    placeholder={sliderMin.toString()}
+                                />
+                            </div>
+                            <div className={priceFilterStyles.pricePiggyBankWrapper} aria-hidden="true">
+                                <PiggyBank
+                                    className={priceFilterStyles.pricePiggyBankIcon}
+                                    size={piggyBankSize}
+                                />
+                            </div>
+                            <div className={priceFilterStyles.priceInputWrapper}>
+                                <label htmlFor={`${title}-to`} className={priceFilterStyles.priceInputLabel}>
+                                    До
+                                </label>
+                                <input
+                                    type="number"
+                                    id={`${title}-to`}
+                                    min={sliderMin}
+                                    value={rentTo}
+                                    onChange={(e) => {
+                                        const val = Number(e.target.value);
+                                        if (!isNaN(val) && val >= sliderMin) {
+                                            handleToChange(val);
+                                        }
+                                    }}
+                                    className={priceFilterStyles.priceInput}
+                                    placeholder={sliderMax.toString()}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    });
+    RentPriceFilter.displayName = 'RentPriceFilter';
+
     return (
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
@@ -268,18 +493,53 @@ export function EstablishmentsFiltersPage({
                 />
             </div>
 
-            {/* Price Filter (Цена) */}
-            <PriceFilter
-                key={`price-${filterKey}`}
-                onFilterChange={handlePriceChange}
-                initialPriceFrom={filterValuesRef.current.priceFrom}
-                initialPriceTo={filterValuesRef.current.priceTo}
-                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
-                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
-                priceSliderMax={ESTABLISHMENTS_PRICE_SLIDER_MAX}
-                pricePerSqmSliderMin={ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MIN}
-                pricePerSqmSliderMax={ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MAX}
-            />
+            {/* Price/Rent Filters - Conditional based on mode */}
+            {isRentMode ? (
+                <>
+                    {/* Furnishing Filter */}
+                    <SubtypeFilter
+                        key={`furnishing-${filterKey}`}
+                        title="Обзавеждане"
+                        options={FURNISHING_OPTIONS}
+                        onFilterChange={handleFurnishingChange}
+                        initialSelected={filterValuesRef.current.selectedFurnishing || []}
+                    />
+                    
+                    {/* Monthly Rent Filter */}
+                    <RentPriceFilter
+                        title="Месечен наем"
+                        unit="лева"
+                        sliderMin={RENT_SLIDER_MIN}
+                        sliderMax={RENT_SLIDER_MAX}
+                        from={filterValuesRef.current.monthlyRentFrom || RENT_SLIDER_MIN}
+                        to={filterValuesRef.current.monthlyRentTo || RENT_SLIDER_MAX}
+                        onFilterChange={handleMonthlyRentChange}
+                    />
+
+                    {/* Rent Per Sqm Filter */}
+                    <RentPriceFilter
+                        title="Цена за кв.м"
+                        unit="лева"
+                        sliderMin={RENT_PER_SQM_SLIDER_MIN}
+                        sliderMax={RENT_PER_SQM_SLIDER_MAX}
+                        from={filterValuesRef.current.rentPerSqmFrom || RENT_PER_SQM_SLIDER_MIN}
+                        to={filterValuesRef.current.rentPerSqmTo || RENT_PER_SQM_SLIDER_MAX}
+                        onFilterChange={handleRentPerSqmChange}
+                    />
+                </>
+            ) : (
+                <PriceFilter
+                    key={`price-${filterKey}`}
+                    onFilterChange={handlePriceChange}
+                    initialPriceFrom={filterValuesRef.current.priceFrom}
+                    initialPriceTo={filterValuesRef.current.priceTo}
+                    initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
+                    initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
+                    priceSliderMax={ESTABLISHMENTS_PRICE_SLIDER_MAX}
+                    pricePerSqmSliderMin={ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MIN}
+                    pricePerSqmSliderMax={ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MAX}
+                />
+            )}
 
             {/* Area Filter (Квадратура) */}
             <AreaFilter
@@ -301,21 +561,38 @@ export function EstablishmentsFiltersPage({
                 initialSelected={filterValuesRef.current.locationTypes || []}
             />
 
-            <div className={styles.leftFilters}>
-                {/* Construction Type Filter (Тип строителство) */}
-                <EstablishmentConstructionTypeFilter
-                    key={`construction-${filterKey}`}
-                    onFilterChange={handleConstructionTypeChange}
-                    initialSelected={filterValuesRef.current.selectedConstructionTypes}
-                />
-            </div>
+            {/* Construction Type Filter (Тип строителство) - Only for sale mode */}
+            {!isRentMode && (
+                <div className={styles.leftFilters}>
+                    <EstablishmentConstructionTypeFilter
+                        key={`construction-${filterKey}`}
+                        onFilterChange={handleConstructionTypeChange}
+                        initialSelected={filterValuesRef.current.selectedConstructionTypes}
+                    />
+                </div>
+            )}
 
-            {/* Completion Status Filter (Степен на завършеност) */}
-            <CompletionStatusFilter
-                key={`completion-${filterKey}`}
-                onFilterChange={handleCompletionStatusChange}
-                initialSelected={filterValuesRef.current.selectedCompletionStatuses}
-            />
+            {/* Completion Status Filter (Степен на завършеност) - Only for sale mode */}
+            {!isRentMode && (
+                <CompletionStatusFilter
+                    key={`completion-${filterKey}`}
+                    onFilterChange={handleCompletionStatusChange}
+                    initialSelected={filterValuesRef.current.selectedCompletionStatuses}
+                />
+            )}
+
+            {/* Working Options Filter (Работи) - Only for rent mode */}
+            {isRentMode && (
+                <SubtypeFilter
+                    key={`working-${filterKey}`}
+                    title="Работи"
+                    options={WORKING_OPTIONS}
+                    onFilterChange={handleWorkingOptionsChange}
+                    initialSelected={filterValuesRef.current.selectedWorkingOptions || []}
+                    leftOrder={['year-round']}
+                    rightOrder={['seasonal']}
+                />
+            )}
 
             {/* Features Filter (Особености) */}
             <FeaturesFilter

@@ -33,6 +33,7 @@ interface AgriculturalLandFiltersPageProps {
     onRightColumnFiltersReady?: (filters: React.ReactNode) => void;
     onActionButtonsReady?: (buttons: React.ReactNode) => void;
     onSearch?: () => void;
+    initialFilters?: Partial<AgriculturalLandFiltersState>;
 }
 
 export interface AgriculturalLandFiltersState {
@@ -76,7 +77,8 @@ export function AgriculturalLandFiltersPage({
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
     onActionButtonsReady,
-    onSearch
+    onSearch,
+    initialFilters
 }: AgriculturalLandFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
 
@@ -98,7 +100,8 @@ export function AgriculturalLandFiltersPage({
 
     const { filters, updateFilters, resetFilters } = useFilterState<AgriculturalLandFiltersState>(
         createInitialAgriculturalFilters,
-        onFiltersChange
+        onFiltersChange,
+        initialFilters
     );
 
     // Use keys to reset components on clear
