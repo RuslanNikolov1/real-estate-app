@@ -17,6 +17,7 @@ import {
     BUILDING_PLOTS_PRICE_PER_SQM_SLIDER_MAX
 } from '../filters/types';
 import styles from '../MapFiltersPage.module.scss';
+import { useFilterState } from '../hooks/useFilterState';
 
 interface BuildingPlotsFiltersPageProps {
     locationState?: {
@@ -49,6 +50,22 @@ export interface BuildingPlotsFiltersState {
     selectedWaterOptions: string[];
 }
 
+const createInitialBuildingPlotFilters = (): BuildingPlotsFiltersState => ({
+    searchTerm: '',
+    city: '',
+    neighborhoods: [],
+    distance: 0,
+    areaFrom: 0,
+    areaTo: BUILDING_PLOTS_AREA_SLIDER_MAX,
+    priceFrom: 0,
+    priceTo: BUILDING_PLOTS_PRICE_SLIDER_MAX,
+    pricePerSqmFrom: 0,
+    pricePerSqmTo: BUILDING_PLOTS_PRICE_PER_SQM_SLIDER_MAX,
+    selectedFeatures: [],
+    selectedElectricityOptions: [],
+    selectedWaterOptions: []
+});
+
 export function BuildingPlotsFiltersPage({ 
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
@@ -74,31 +91,13 @@ export function BuildingPlotsFiltersPage({
         }
         : setInternalLocationState;
     
-    // Store current filter values - all building plots filter state managed here
-    const filterValuesRef = useRef<Partial<BuildingPlotsFiltersState>>({
-        searchTerm: '',
-        city: '',
-        neighborhoods: [],
-        distance: 0,
-        areaFrom: 0,
-        areaTo: BUILDING_PLOTS_AREA_SLIDER_MAX,
-        priceFrom: 0,
-        priceTo: BUILDING_PLOTS_PRICE_SLIDER_MAX,
-        pricePerSqmFrom: 0,
-        pricePerSqmTo: BUILDING_PLOTS_PRICE_PER_SQM_SLIDER_MAX,
-        selectedFeatures: [],
-        selectedElectricityOptions: [],
-        selectedWaterOptions: []
-    });
+    const { filters, updateFilters, resetFilters } = useFilterState<BuildingPlotsFiltersState>(
+        createInitialBuildingPlotFilters,
+        onFiltersChange
+    );
 
     // Use keys to reset components on clear
     const [filterKey, setFilterKey] = useState(0);
-
-    const notifyFiltersChange = useCallback(() => {
-        if (onFiltersChange) {
-            onFiltersChange(filterValuesRef.current as BuildingPlotsFiltersState);
-        }
-    }, [onFiltersChange]);
 
     const handleLocationChange = useCallback((searchTerm: string, city: string, neighborhoods: string[], distance: number) => {
         // Update external location state if handler provided, otherwise update internal
@@ -128,41 +127,38 @@ export function BuildingPlotsFiltersPage({
             });
         }
 
-        filterValuesRef.current.searchTerm = searchTerm;
-        filterValuesRef.current.city = city;
-        filterValuesRef.current.neighborhoods = neighborhoods;
-        filterValuesRef.current.distance = distance;
-        notifyFiltersChange();
-    }, [externalOnLocationChange, notifyFiltersChange]);
+        updateFilters({
+            searchTerm,
+            city,
+            neighborhoods,
+            distance
+        });
+    }, [externalOnLocationChange, updateFilters]);
 
     const handleAreaChange = useCallback((areaFrom: number, areaTo: number) => {
-        filterValuesRef.current.areaFrom = areaFrom;
-        filterValuesRef.current.areaTo = areaTo;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ areaFrom, areaTo });
+    }, [updateFilters]);
 
     const handlePriceChange = useCallback((priceFrom: number, priceTo: number, pricePerSqmFrom: number, pricePerSqmTo: number) => {
-        filterValuesRef.current.priceFrom = priceFrom;
-        filterValuesRef.current.priceTo = priceTo;
-        filterValuesRef.current.pricePerSqmFrom = pricePerSqmFrom;
-        filterValuesRef.current.pricePerSqmTo = pricePerSqmTo;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({
+            priceFrom,
+            priceTo,
+            pricePerSqmFrom,
+            pricePerSqmTo
+        });
+    }, [updateFilters]);
 
     const handleFeaturesChange = useCallback((selectedFeatures: string[]) => {
-        filterValuesRef.current.selectedFeatures = selectedFeatures;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ selectedFeatures });
+    }, [updateFilters]);
 
     const handleElectricityChange = useCallback((selectedOptions: string[]) => {
-        filterValuesRef.current.selectedElectricityOptions = selectedOptions;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ selectedElectricityOptions: selectedOptions });
+    }, [updateFilters]);
 
     const handleWaterChange = useCallback((selectedOptions: string[]) => {
-        filterValuesRef.current.selectedWaterOptions = selectedOptions;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ selectedWaterOptions: selectedOptions });
+    }, [updateFilters]);
 
     const handleClear = useCallback(() => {
         // Reset location state
@@ -175,26 +171,11 @@ export function BuildingPlotsFiltersPage({
         });
 
         // Reset all filter values
-        filterValuesRef.current = {
-            searchTerm: '',
-            city: '',
-            neighborhoods: [],
-            distance: 0,
-            areaFrom: 0,
-            areaTo: BUILDING_PLOTS_AREA_SLIDER_MAX,
-            priceFrom: 0,
-            priceTo: BUILDING_PLOTS_PRICE_SLIDER_MAX,
-            pricePerSqmFrom: 0,
-            pricePerSqmTo: BUILDING_PLOTS_PRICE_PER_SQM_SLIDER_MAX,
-            selectedFeatures: [],
-            selectedElectricityOptions: [],
-            selectedWaterOptions: []
-        };
-        
+        resetFilters();
+
         // Reset components by changing key
         setFilterKey(prev => prev + 1);
-        notifyFiltersChange();
-    }, [notifyFiltersChange, setLocationState]);
+    }, [resetFilters, setLocationState]);
 
     // Track last filterKey we notified parent about to prevent infinite loops
     const lastNotifiedFilterKeyRef = useRef<number | null>(null);
@@ -228,7 +209,7 @@ export function BuildingPlotsFiltersPage({
                     <Button
                         variant="primary"
                         onClick={() => {
-                            console.log('Search with filters:', filterValuesRef.current);
+                            console.log('Search with filters:', filters);
                             if (onSearch) {
                                 onSearch();
                             }
@@ -257,49 +238,51 @@ export function BuildingPlotsFiltersPage({
                 />
             </div>
 
+            {/* Price Filter (Цена) */}
+            <PriceFilter
+                key={`price-${filterKey}`}
+                onFilterChange={handlePriceChange}
+                initialPriceFrom={filters.priceFrom}
+                initialPriceTo={filters.priceTo}
+                initialPricePerSqmFrom={filters.pricePerSqmFrom}
+                initialPricePerSqmTo={filters.pricePerSqmTo}
+                priceSliderMax={BUILDING_PLOTS_PRICE_SLIDER_MAX}
+                pricePerSqmSliderMax={BUILDING_PLOTS_PRICE_PER_SQM_SLIDER_MAX}
+            />
+
             {/* Area Filter (Квадратура) */}
             <AreaFilter
                 key={`area-${filterKey}`}
                 onFilterChange={handleAreaChange}
-                initialAreaFrom={filterValuesRef.current.areaFrom}
-                initialAreaTo={filterValuesRef.current.areaTo}
+                initialAreaFrom={filters.areaFrom}
+                initialAreaTo={filters.areaTo}
                 sliderMax={BUILDING_PLOTS_AREA_SLIDER_MAX}
                 areaCap={BUILDING_PLOTS_AREA_SLIDER_MAX}
                 title="Квадратура"
             />
 
-            {/* Electricity Filter (Ток) */}
-            <ElectricityFilter
-                key={`electricity-${filterKey}`}
-                onFilterChange={handleElectricityChange}
-                initialSelected={filterValuesRef.current.selectedElectricityOptions}
-            />
+            <div className={styles.leftFilters}>
+                {/* Electricity Filter (Ток) */}
+                <ElectricityFilter
+                    key={`electricity-${filterKey}`}
+                    onFilterChange={handleElectricityChange}
+                    initialSelected={filters.selectedElectricityOptions}
+                />
 
-            {/* Water Filter (Вода) */}
-            <WaterFilter
-                key={`water-${filterKey}`}
-                onFilterChange={handleWaterChange}
-                initialSelected={filterValuesRef.current.selectedWaterOptions}
-            />
+                {/* Water Filter (Вода) */}
+                <WaterFilter
+                    key={`water-${filterKey}`}
+                    onFilterChange={handleWaterChange}
+                    initialSelected={filters.selectedWaterOptions}
+                />
+            </div>
 
             {/* Features Filter (Особености) */}
             <FeaturesFilter
                 key={`features-${filterKey}`}
-                initialSelected={filterValuesRef.current.selectedFeatures || []}
+                initialSelected={filters.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
                 features={BUILDING_PLOTS_FEATURES}
-            />
-
-            {/* Price Filter (Цена) */}
-            <PriceFilter
-                key={`price-${filterKey}`}
-                onFilterChange={handlePriceChange}
-                initialPriceFrom={filterValuesRef.current.priceFrom}
-                initialPriceTo={filterValuesRef.current.priceTo}
-                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
-                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
-                priceSliderMax={BUILDING_PLOTS_PRICE_SLIDER_MAX}
-                pricePerSqmSliderMax={BUILDING_PLOTS_PRICE_PER_SQM_SLIDER_MAX}
             />
         </div>
     );

@@ -48,7 +48,7 @@ export interface HouseFiltersState {
     priceTo: number;
 }
 
-export function HousesVillasFiltersPage({ 
+export function HousesVillasFiltersPage({
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
@@ -56,7 +56,7 @@ export function HousesVillasFiltersPage({
     onSearch
 }: HousesVillasFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
-    
+
     // Use external location state if provided, otherwise use internal state
     const [internalLocationState, setInternalLocationState] = useState({
         searchTerm: '',
@@ -67,12 +67,12 @@ export function HousesVillasFiltersPage({
     });
 
     const locationState = externalLocationState || internalLocationState;
-    const setLocationState = externalOnLocationChange 
+    const setLocationState = externalOnLocationChange
         ? (state: typeof internalLocationState) => {
             externalOnLocationChange(state.searchTerm, state.city, state.neighborhoods, state.distance);
         }
         : setInternalLocationState;
-    
+
     // Store current filter values - all house/villa filter state managed here
     const filterValuesRef = useRef<Partial<HouseFiltersState>>({
         searchTerm: '',
@@ -187,7 +187,7 @@ export function HousesVillasFiltersPage({
             priceFrom: 0,
             priceTo: HOUSE_PRICE_SLIDER_MAX
         };
-        
+
         // Reset components by changing key
         setFilterKey(prev => prev + 1);
         notifyFiltersChange();
@@ -195,20 +195,20 @@ export function HousesVillasFiltersPage({
 
     // Track last filterKey we notified parent about to prevent infinite loops
     const lastNotifiedFilterKeyRef = useRef<number | null>(null);
-    
+
     // Store callbacks in refs to avoid dependency issues
     const onActionButtonsReadyRef = useRef(onActionButtonsReady);
     const handleClearRef = useRef(handleClear);
-    
+
     // Update refs when callbacks change
     useEffect(() => {
         onActionButtonsReadyRef.current = onActionButtonsReady;
     }, [onActionButtonsReady]);
-    
+
     useEffect(() => {
         handleClearRef.current = handleClear;
     }, [handleClear]);
-    
+
 
     // Notify parent when action buttons are ready - only when filterKey actually changes
     useEffect(() => {
@@ -255,6 +255,8 @@ export function HousesVillasFiltersPage({
                 />
             </div>
 
+
+
             {/* House Type Filter (Етажност) */}
             <SubtypeFilter
                 key={`house-type-${filterKey}`}
@@ -265,7 +267,13 @@ export function HousesVillasFiltersPage({
                 leftOrder={['one-floor', 'three-floor', 'four-plus-floor']}
                 rightOrder={['two-floor', 'house-floor', 'not-specified']}
             />
-
+            {/* Price Filter (Цена) */}
+            <PriceFilter
+                key={`price-${filterKey}`}
+                onFilterChange={handlePriceChange}
+                initialPriceFrom={filterValuesRef.current.priceFrom}
+                initialPriceTo={filterValuesRef.current.priceTo}
+            />
             {/* House Area Filter (РЗП кв.м) */}
             <AreaFilter
                 key={`house-area-${filterKey}`}
@@ -284,14 +292,6 @@ export function HousesVillasFiltersPage({
                 inputIdPrefix="yard-area"
                 initialAreaFrom={filterValuesRef.current.yardAreaFrom || 100}
                 initialAreaTo={filterValuesRef.current.yardAreaTo || 500}
-            />
-
-            {/* Price Filter (Цена) */}
-            <PriceFilter
-                key={`price-${filterKey}`}
-                onFilterChange={handlePriceChange}
-                initialPriceFrom={filterValuesRef.current.priceFrom}
-                initialPriceTo={filterValuesRef.current.priceTo}
             />
 
             {/* Features Filter (Особености) */}

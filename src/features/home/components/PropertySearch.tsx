@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   X,
@@ -11,6 +11,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import burgasCities from '@/data/burgasCities.json';
 import styles from './PropertySearch.module.scss';
 import { propertyTypes } from '@/data/propertyTypes';
 
@@ -31,6 +32,9 @@ export function PropertySearch({
   const [city, setCity] = useState('');
   const [cityError, setCityError] = useState('');
   const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>([]);
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const cityInputRef = useRef<HTMLInputElement>(null);
+  const cityDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSalesClick = () => {
     setSelectedButton('sales');
@@ -47,6 +51,7 @@ export function PropertySearch({
     setSelectedPropertyTypes([]);
     setCity('');
     setCityError('');
+    setShowCityDropdown(false);
     onExpand?.();
   };
 
@@ -98,8 +103,51 @@ export function PropertySearch({
     handleClose();
   };
 
+  const handleCitySelect = (cityName: string) => {
+    setCity(cityName);
+    setCityError('');
+    setShowCityDropdown(false);
+  };
+
+  const filteredCities = useMemo(() => {
+    const term = city.trim().toLowerCase();
+    if (!term) {
+      return burgasCities.cities.slice(0, 6);
+    }
+    return burgasCities.cities.filter((c) => {
+      return (
+        c.name.toLowerCase().includes(term) ||
+        c.nameEn.toLowerCase().includes(term)
+      );
+    });
+  }, [city]);
+
+  useEffect(() => {
+    if (!showCityDropdown) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        cityDropdownRef.current?.contains(target) ||
+        cityInputRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setShowCityDropdown(false);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showCityDropdown]);
+
+  useEffect(() => {
+    if (!isExpanded) {
+      setShowCityDropdown(false);
+    }
+  }, [isExpanded]);
+
   const canSearch =
-    city.trim() !== '' && (selectedButton === 'rent' ? true : selectedPropertyTypes.length > 0);
+    city.trim() !== '' && selectedButton !== null && selectedPropertyTypes.length > 0;
 
   return (
     <>
@@ -139,57 +187,72 @@ export function PropertySearch({
               </div>
 
               <div className={styles.topFilters}>
-                <Input
-                  id="modal-city"
-                  placeholder="Въведете град"
-                  value={city}
-                  onChange={(event) => {
-                    setCity(event.target.value);
-                    if (!isLandingExperience && cityError) {
-                      setCityError('');
-                    }
-                  }}
-                  error={isLandingExperience ? undefined : cityError}
-                  className={styles.cityInput}
-                />
+                <div className={styles.cityDropdownWrapper}>
+                  <Input
+                    id="modal-city"
+                    placeholder="Въведете град"
+                    value={city}
+                    onChange={(event) => {
+                      setCity(event.target.value);
+                      if (!isLandingExperience && cityError) {
+                        setCityError('');
+                      }
+                      setShowCityDropdown(true);
+                    }}
+                    onFocus={() => setShowCityDropdown(true)}
+                    ref={cityInputRef}
+                    error={isLandingExperience ? undefined : cityError}
+                    className={styles.cityInput}
+                    autoComplete="off"
+                  />
+                  {showCityDropdown && (
+                    <div className={styles.cityDropdown} ref={cityDropdownRef}>
+                      {filteredCities.length > 0 ? (
+                        filteredCities.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            className={styles.cityDropdownItem}
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={() => handleCitySelect(c.name)}
+                          >
+                            <span className={styles.cityName}>{c.name}</span>
+                            <span className={styles.cityNameEn}>{c.nameEn}</span>
+                          </button>
+                        ))
+                      ) : (
+                        <div className={styles.cityDropdownEmpty}>
+                          Няма съвпадения
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className={styles.searchContent}>
-                {selectedButton === 'sales' ? (
-                  <>
-                    <div className={styles.propertyTypesGrid}>
-                      {propertyTypes.map((type) => {
-                        const IconComponent = type.icon;
-                        const isSelected = selectedPropertyTypes.includes(type.id);
-                        return (
-                          <button
-                            key={type.id}
-                            type="button"
-                            className={`${styles.propertyTypeButton} ${
-                              !isLandingExperience && isSelected ? styles.selected : ''
-                            }`}
-                            onClick={() => handlePropertyTypeSelect(type.id)}
-                            aria-pressed={!isLandingExperience ? isSelected : undefined}
-                          >
-                            <div className={styles.propertyTypeContent}>
-                              <IconComponent size={28} weight="fill" />
-                              <span>{type.label}</span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </>
-                ) : (
-                  <div className={styles.searchActions}>
-                    <Button
-                      variant="outline"
-                      onClick={handleExtendedFiltersClick}
-                      className={styles.extendedFiltersButton}
-                    >
-                      <FunnelIcon />
-                      Разширени филтри
-                    </Button>
+                {selectedButton && (
+                  <div className={styles.propertyTypesGrid}>
+                    {propertyTypes.map((type) => {
+                      const IconComponent = type.icon;
+                      const isSelected = selectedPropertyTypes.includes(type.id);
+                      return (
+                        <button
+                          key={type.id}
+                          type="button"
+                          className={`${styles.propertyTypeButton} ${
+                            !isLandingExperience && isSelected ? styles.selected : ''
+                          }`}
+                          onClick={() => handlePropertyTypeSelect(type.id)}
+                          aria-pressed={!isLandingExperience ? isSelected : undefined}
+                        >
+                          <div className={styles.propertyTypeContent}>
+                            <IconComponent size={28} weight="fill" />
+                            <span>{type.label}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

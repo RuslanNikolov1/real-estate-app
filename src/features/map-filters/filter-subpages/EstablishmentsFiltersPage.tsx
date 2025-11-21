@@ -268,6 +268,19 @@ export function EstablishmentsFiltersPage({
                 />
             </div>
 
+            {/* Price Filter (Цена) */}
+            <PriceFilter
+                key={`price-${filterKey}`}
+                onFilterChange={handlePriceChange}
+                initialPriceFrom={filterValuesRef.current.priceFrom}
+                initialPriceTo={filterValuesRef.current.priceTo}
+                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
+                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
+                priceSliderMax={ESTABLISHMENTS_PRICE_SLIDER_MAX}
+                pricePerSqmSliderMin={ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MIN}
+                pricePerSqmSliderMax={ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MAX}
+            />
+
             {/* Area Filter (Квадратура) */}
             <AreaFilter
                 key={`area-${filterKey}`}
@@ -288,12 +301,14 @@ export function EstablishmentsFiltersPage({
                 initialSelected={filterValuesRef.current.locationTypes || []}
             />
 
-            {/* Construction Type Filter (Тип строителство) */}
-            <EstablishmentConstructionTypeFilter
-                key={`construction-${filterKey}`}
-                onFilterChange={handleConstructionTypeChange}
-                initialSelected={filterValuesRef.current.selectedConstructionTypes}
-            />
+            <div className={styles.leftFilters}>
+                {/* Construction Type Filter (Тип строителство) */}
+                <EstablishmentConstructionTypeFilter
+                    key={`construction-${filterKey}`}
+                    onFilterChange={handleConstructionTypeChange}
+                    initialSelected={filterValuesRef.current.selectedConstructionTypes}
+                />
+            </div>
 
             {/* Completion Status Filter (Степен на завършеност) */}
             <CompletionStatusFilter
@@ -310,18 +325,6 @@ export function EstablishmentsFiltersPage({
                 features={ESTABLISHMENTS_FEATURES}
             />
 
-            {/* Price Filter (Цена) */}
-            <PriceFilter
-                key={`price-${filterKey}`}
-                onFilterChange={handlePriceChange}
-                initialPriceFrom={filterValuesRef.current.priceFrom}
-                initialPriceTo={filterValuesRef.current.priceTo}
-                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
-                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
-                priceSliderMax={ESTABLISHMENTS_PRICE_SLIDER_MAX}
-                pricePerSqmSliderMin={ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MIN}
-                pricePerSqmSliderMax={ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MAX}
-            />
         </div>
     );
 }

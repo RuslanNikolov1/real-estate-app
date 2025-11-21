@@ -11,7 +11,6 @@ import {
     CategoryFilter,
     AGRICULTURAL_PROPERTY_TYPES,
     AGRICULTURAL_FEATURES,
-    AGRICULTURAL_AREA_PRESETS
 } from '../filters';
 import {
     AGRICULTURAL_AREA_SLIDER_MAX,
@@ -19,6 +18,7 @@ import {
     AGRICULTURAL_PRICE_PER_SQM_SLIDER_MAX
 } from '../filters/types';
 import styles from '../MapFiltersPage.module.scss';
+import { useFilterState } from '../hooks/useFilterState';
 
 interface AgriculturalLandFiltersPageProps {
     locationState?: {
@@ -53,7 +53,25 @@ export interface AgriculturalLandFiltersState {
     pricePerSqmTo: number;
 }
 
-export function AgriculturalLandFiltersPage({ 
+const createInitialAgriculturalFilters = (): AgriculturalLandFiltersState => ({
+    searchTerm: '',
+    city: '',
+    neighborhoods: [],
+    distance: 0,
+    propertyTypes: [],
+    areaFrom: 0,
+    areaTo: AGRICULTURAL_AREA_SLIDER_MAX,
+    isAreaNotProvided: false,
+    selectedPresetId: null,
+    selectedCategories: [],
+    selectedFeatures: [],
+    priceFrom: 0,
+    priceTo: AGRICULTURAL_PRICE_SLIDER_MAX,
+    pricePerSqmFrom: 0,
+    pricePerSqmTo: AGRICULTURAL_PRICE_PER_SQM_SLIDER_MAX
+});
+
+export function AgriculturalLandFiltersPage({
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
@@ -61,7 +79,7 @@ export function AgriculturalLandFiltersPage({
     onSearch
 }: AgriculturalLandFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
-    
+
     // Use external location state if provided, otherwise use internal state
     const [internalLocationState, setInternalLocationState] = useState({
         searchTerm: '',
@@ -72,39 +90,19 @@ export function AgriculturalLandFiltersPage({
     });
 
     const locationState = externalLocationState || internalLocationState;
-    const setLocationState = externalOnLocationChange 
+    const setLocationState = externalOnLocationChange
         ? (state: typeof internalLocationState) => {
             externalOnLocationChange(state.searchTerm, state.city, state.neighborhoods, state.distance);
         }
         : setInternalLocationState;
-    
-    // Store current filter values - all agricultural land filter state managed here
-    const filterValuesRef = useRef<Partial<AgriculturalLandFiltersState>>({
-        searchTerm: '',
-        city: '',
-        neighborhoods: [],
-        distance: 0,
-        propertyTypes: [],
-        areaFrom: 0,
-        areaTo: AGRICULTURAL_AREA_SLIDER_MAX,
-        isAreaNotProvided: false,
-        selectedPresetId: null,
-        selectedCategories: [],
-        selectedFeatures: [],
-        priceFrom: 0,
-        priceTo: AGRICULTURAL_PRICE_SLIDER_MAX,
-        pricePerSqmFrom: 0,
-        pricePerSqmTo: AGRICULTURAL_PRICE_PER_SQM_SLIDER_MAX
-    });
+
+    const { filters, updateFilters, resetFilters } = useFilterState<AgriculturalLandFiltersState>(
+        createInitialAgriculturalFilters,
+        onFiltersChange
+    );
 
     // Use keys to reset components on clear
     const [filterKey, setFilterKey] = useState(0);
-
-    const notifyFiltersChange = useCallback(() => {
-        if (onFiltersChange) {
-            onFiltersChange(filterValuesRef.current as AgriculturalLandFiltersState);
-        }
-    }, [onFiltersChange]);
 
     const handleLocationChange = useCallback((searchTerm: string, city: string, neighborhoods: string[], distance: number) => {
         // Update external location state if handler provided, otherwise update internal
@@ -134,47 +132,46 @@ export function AgriculturalLandFiltersPage({
             });
         }
 
-        filterValuesRef.current.searchTerm = searchTerm;
-        filterValuesRef.current.city = city;
-        filterValuesRef.current.neighborhoods = neighborhoods;
-        filterValuesRef.current.distance = distance;
-        notifyFiltersChange();
-    }, [externalOnLocationChange, notifyFiltersChange]);
+        updateFilters({
+            searchTerm,
+            city,
+            neighborhoods,
+            distance
+        });
+    }, [externalOnLocationChange, updateFilters]);
 
     const handlePropertyTypeChange = useCallback((selectedTypes: string[]) => {
-        filterValuesRef.current.propertyTypes = selectedTypes;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ propertyTypes: selectedTypes });
+    }, [updateFilters]);
 
     const handleAreaChange = useCallback((areaFrom: number, areaTo: number, isNotProvided?: boolean) => {
-        filterValuesRef.current.areaFrom = areaFrom;
-        filterValuesRef.current.areaTo = areaTo;
-        filterValuesRef.current.isAreaNotProvided = isNotProvided || false;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({
+            areaFrom,
+            areaTo,
+            isAreaNotProvided: isNotProvided || false
+        });
+    }, [updateFilters]);
 
     const handlePresetChange = useCallback((presetId: string | null) => {
-        filterValuesRef.current.selectedPresetId = presetId;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ selectedPresetId: presetId });
+    }, [updateFilters]);
 
     const handlePriceChange = useCallback((priceFrom: number, priceTo: number, pricePerSqmFrom: number, pricePerSqmTo: number) => {
-        filterValuesRef.current.priceFrom = priceFrom;
-        filterValuesRef.current.priceTo = priceTo;
-        filterValuesRef.current.pricePerSqmFrom = pricePerSqmFrom;
-        filterValuesRef.current.pricePerSqmTo = pricePerSqmTo;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({
+            priceFrom,
+            priceTo,
+            pricePerSqmFrom,
+            pricePerSqmTo
+        });
+    }, [updateFilters]);
 
     const handleFeaturesChange = useCallback((selectedFeatures: string[]) => {
-        filterValuesRef.current.selectedFeatures = selectedFeatures;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ selectedFeatures });
+    }, [updateFilters]);
 
     const handleCategoryChange = useCallback((selectedCategories: string[]) => {
-        filterValuesRef.current.selectedCategories = selectedCategories;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ selectedCategories });
+    }, [updateFilters]);
 
     const handleClear = useCallback(() => {
         // Reset location state
@@ -187,41 +184,24 @@ export function AgriculturalLandFiltersPage({
         });
 
         // Reset all filter values
-        filterValuesRef.current = {
-            searchTerm: '',
-            city: '',
-            neighborhoods: [],
-            distance: 0,
-            propertyTypes: [],
-            areaFrom: 0,
-            areaTo: AGRICULTURAL_AREA_SLIDER_MAX,
-            isAreaNotProvided: false,
-            selectedPresetId: null,
-            selectedCategories: [],
-            selectedFeatures: [],
-            priceFrom: 0,
-            priceTo: AGRICULTURAL_PRICE_SLIDER_MAX,
-            pricePerSqmFrom: 0,
-            pricePerSqmTo: AGRICULTURAL_PRICE_PER_SQM_SLIDER_MAX
-        };
-        
+        resetFilters();
+
         // Reset components by changing key
         setFilterKey(prev => prev + 1);
-        notifyFiltersChange();
-    }, [notifyFiltersChange, setLocationState]);
+    }, [resetFilters, setLocationState]);
 
     // Track last filterKey we notified parent about to prevent infinite loops
     const lastNotifiedFilterKeyRef = useRef<number | null>(null);
-    
+
     // Store callbacks in refs to avoid dependency issues
     const onActionButtonsReadyRef = useRef(onActionButtonsReady);
     const handleClearRef = useRef(handleClear);
-    
+
     // Update refs when callbacks change
     useEffect(() => {
         onActionButtonsReadyRef.current = onActionButtonsReady;
     }, [onActionButtonsReady]);
-    
+
     useEffect(() => {
         handleClearRef.current = handleClear;
     }, [handleClear]);
@@ -242,7 +222,7 @@ export function AgriculturalLandFiltersPage({
                     <Button
                         variant="primary"
                         onClick={() => {
-                            console.log('Search with filters:', filterValuesRef.current);
+                            console.log('Search with filters:', filters);
                             if (onSearch) {
                                 onSearch();
                             }
@@ -271,55 +251,58 @@ export function AgriculturalLandFiltersPage({
                 />
             </div>
 
+
+
             {/* Property Type Filter (Вид) */}
             <SubtypeFilter
                 key={`property-type-${filterKey}`}
                 title="Вид"
                 options={AGRICULTURAL_PROPERTY_TYPES}
                 onFilterChange={handlePropertyTypeChange}
-                initialSelected={filterValuesRef.current.propertyTypes || []}
+                initialSelected={filters.propertyTypes || []}
             />
-
-            {/* Area Filter (Площ) */}
-            <AreaFilter
-                key={`area-${filterKey}`}
-                onFilterChange={handleAreaChange}
-                initialAreaFrom={filterValuesRef.current.areaFrom}
-                initialAreaTo={filterValuesRef.current.areaTo}
-                sliderMax={AGRICULTURAL_AREA_SLIDER_MAX}
-                areaCap={AGRICULTURAL_AREA_SLIDER_MAX}
-                title="Площ (кв.м.)"
-                presets={AGRICULTURAL_AREA_PRESETS}
-                onPresetChange={handlePresetChange}
-                initialPresetId={filterValuesRef.current.selectedPresetId}
-            />
-
-            {/* Category Filter (Категория) */}
-            <CategoryFilter
-                key={`category-${filterKey}`}
-                onFilterChange={handleCategoryChange}
-                initialSelected={filterValuesRef.current.selectedCategories}
-            />
-
-            {/* Features Filter (Особености) */}
-            <FeaturesFilter
-                key={`features-${filterKey}`}
-                initialSelected={filterValuesRef.current.selectedFeatures || []}
-                onFilterChange={handleFeaturesChange}
-                features={AGRICULTURAL_FEATURES}
-            />
-
             {/* Price Filter (Цена на имота в лева) */}
             <PriceFilter
                 key={`price-${filterKey}`}
                 onFilterChange={handlePriceChange}
-                initialPriceFrom={filterValuesRef.current.priceFrom}
-                initialPriceTo={filterValuesRef.current.priceTo}
-                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
-                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
+                initialPriceFrom={filters.priceFrom}
+                initialPriceTo={filters.priceTo}
+                initialPricePerSqmFrom={filters.pricePerSqmFrom}
+                initialPricePerSqmTo={filters.pricePerSqmTo}
                 priceSliderMax={AGRICULTURAL_PRICE_SLIDER_MAX}
                 pricePerSqmSliderMax={AGRICULTURAL_PRICE_PER_SQM_SLIDER_MAX}
             />
+            {/* Area Filter (Площ) */}
+            <AreaFilter
+                key={`area-${filterKey}`}
+                onFilterChange={handleAreaChange}
+                initialAreaFrom={filters.areaFrom}
+                initialAreaTo={filters.areaTo}
+                sliderMax={AGRICULTURAL_AREA_SLIDER_MAX}
+                areaCap={AGRICULTURAL_AREA_SLIDER_MAX}
+                title="Площ (кв.м.)"
+                onPresetChange={handlePresetChange}
+                initialPresetId={filters.selectedPresetId}
+            />
+
+
+            <div className={styles.leftFilters}>
+                {/* Category Filter (Категория) */}
+                <CategoryFilter
+                    key={`category-${filterKey}`}
+                    onFilterChange={handleCategoryChange}
+                    initialSelected={filters.selectedCategories}
+                />
+            </div>
+
+            {/* Features Filter (Особености) */}
+            <FeaturesFilter
+                key={`features-${filterKey}`}
+                initialSelected={filters.selectedFeatures || []}
+                onFilterChange={handleFeaturesChange}
+                features={AGRICULTURAL_FEATURES}
+            />
+
         </div>
     );
 }

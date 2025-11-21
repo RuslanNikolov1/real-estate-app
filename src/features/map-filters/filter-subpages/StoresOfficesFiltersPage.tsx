@@ -62,7 +62,7 @@ export interface CommercialFiltersState {
     selectedBuildingTypes: string[];
 }
 
-export function StoresOfficesFiltersPage({ 
+export function StoresOfficesFiltersPage({
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
@@ -70,7 +70,7 @@ export function StoresOfficesFiltersPage({
     onSearch
 }: StoresOfficesFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
-    
+
     // Use external location state if provided, otherwise use internal state
     const [internalLocationState, setInternalLocationState] = useState({
         searchTerm: '',
@@ -81,12 +81,12 @@ export function StoresOfficesFiltersPage({
     });
 
     const locationState = externalLocationState || internalLocationState;
-    const setLocationState = externalOnLocationChange 
+    const setLocationState = externalOnLocationChange
         ? (state: typeof internalLocationState) => {
             externalOnLocationChange(state.searchTerm, state.city, state.neighborhoods, state.distance);
         }
         : setInternalLocationState;
-    
+
     // Store current filter values - all commercial filter state managed here
     const filterValuesRef = useRef<Partial<CommercialFiltersState>>({
         searchTerm: '',
@@ -233,7 +233,7 @@ export function StoresOfficesFiltersPage({
             selectedCompletionStatuses: [],
             selectedBuildingTypes: []
         };
-        
+
         // Reset components by changing key
         setFilterKey(prev => prev + 1);
         notifyFiltersChange();
@@ -241,16 +241,16 @@ export function StoresOfficesFiltersPage({
 
     // Track last filterKey we notified parent about to prevent infinite loops
     const lastNotifiedFilterKeyRef = useRef<number | null>(null);
-    
+
     // Store callbacks in refs to avoid dependency issues
     const onActionButtonsReadyRef = useRef(onActionButtonsReady);
     const handleClearRef = useRef(handleClear);
-    
+
     // Update refs when callbacks change
     useEffect(() => {
         onActionButtonsReadyRef.current = onActionButtonsReady;
     }, [onActionButtonsReady]);
-    
+
     useEffect(() => {
         handleClearRef.current = handleClear;
     }, [handleClear]);
@@ -300,6 +300,8 @@ export function StoresOfficesFiltersPage({
                 />
             </div>
 
+
+
             {/* Property Type Filter (Подходящ за) */}
             <SubtypeFilter
                 key={`property-type-${filterKey}`}
@@ -310,7 +312,17 @@ export function StoresOfficesFiltersPage({
                 leftOrder={['store', 'cabinet', 'sport']}
                 rightOrder={['office', 'beauty-salon', 'other']}
             />
-
+            {/* Price Filter (Цена) */}
+            <PriceFilter
+                key={`price-${filterKey}`}
+                onFilterChange={handlePriceChange}
+                initialPriceFrom={filterValuesRef.current.priceFrom}
+                initialPriceTo={filterValuesRef.current.priceTo}
+                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
+                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
+                priceSliderMax={COMMERCIAL_PRICE_SLIDER_MAX}
+                pricePerSqmSliderMax={COMMERCIAL_PRICE_PER_SQM_SLIDER_MAX}
+            />
             {/* Area Filter (Квадратура) */}
             <AreaFilter
                 key={`area-${filterKey}`}
@@ -333,26 +345,28 @@ export function StoresOfficesFiltersPage({
                 floorOptions={COMMERCIAL_FLOOR_OPTIONS}
             />
 
-            {/* Construction Type Filter (Тип строителство) */}
-            <ConstructionTypeFilter
-                key={`construction-${filterKey}`}
-                onFilterChange={handleConstructionTypeChange}
-                initialSelected={filterValuesRef.current.selectedConstructionTypes}
-            />
-
+            <div className={styles.leftFilters}>
+                {/* Construction Type Filter (Тип строителство) */}
+                <ConstructionTypeFilter
+                    key={`construction-${filterKey}`}
+                    onFilterChange={handleConstructionTypeChange}
+                    initialSelected={filterValuesRef.current.selectedConstructionTypes}
+                />
+            </div>
             {/* Completion Status Filter (Степен на завършеност) */}
             <CompletionStatusFilter
                 key={`completion-${filterKey}`}
                 onFilterChange={handleCompletionStatusChange}
                 initialSelected={filterValuesRef.current.selectedCompletionStatuses}
             />
-
-            {/* Building Type Filter (Вид сграда) */}
-            <BuildingTypeFilter
-                key={`building-type-${filterKey}`}
-                onFilterChange={handleBuildingTypeChange}
-                initialSelected={filterValuesRef.current.selectedBuildingTypes}
-            />
+            <div className={styles.leftFilters}>
+                {/* Building Type Filter (Вид сграда) */}
+                <BuildingTypeFilter
+                    key={`building-type-${filterKey}`}
+                    onFilterChange={handleBuildingTypeChange}
+                    initialSelected={filterValuesRef.current.selectedBuildingTypes}
+                />
+            </div>
 
             {/* Features Filter (Особености) */}
             <FeaturesFilter
@@ -360,18 +374,6 @@ export function StoresOfficesFiltersPage({
                 initialSelected={filterValuesRef.current.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
                 features={COMMERCIAL_FEATURES}
-            />
-
-            {/* Price Filter (Цена) */}
-            <PriceFilter
-                key={`price-${filterKey}`}
-                onFilterChange={handlePriceChange}
-                initialPriceFrom={filterValuesRef.current.priceFrom}
-                initialPriceTo={filterValuesRef.current.priceTo}
-                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
-                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
-                priceSliderMax={COMMERCIAL_PRICE_SLIDER_MAX}
-                pricePerSqmSliderMax={COMMERCIAL_PRICE_PER_SQM_SLIDER_MAX}
             />
         </div>
     );

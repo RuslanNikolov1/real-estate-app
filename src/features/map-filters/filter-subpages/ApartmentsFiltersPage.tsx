@@ -323,6 +323,8 @@ export function ApartmentsFiltersPage({
                 />
             </div>
 
+            
+
             {/* Apartment Subtype Filter */}
             <SubtypeFilter
                 key={`subtype-${filterKey}`}
@@ -333,15 +335,13 @@ export function ApartmentsFiltersPage({
                 leftOrder={['studio', 'two-bedroom', 'maisonette', 'attic']}
                 rightOrder={['one-bedroom', 'multi-bedroom', 'atelier']}
             />
-
+{/* Price Filter */}
+<PriceFilter
+                onFilterChange={handlePriceChange}
+            />
             {/* Area Filter */}
             <AreaFilter
                 onFilterChange={handleAreaChange}
-            />
-
-            {/* Price Filter */}
-            <PriceFilter
-                onFilterChange={handlePriceChange}
             />
 
             {/* Features Filter */}

@@ -61,7 +61,7 @@ export interface HotelsMotelsFiltersState {
     pricePerSqmTo: number;
 }
 
-export function HotelsMotelsFiltersPage({ 
+export function HotelsMotelsFiltersPage({
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
@@ -69,7 +69,7 @@ export function HotelsMotelsFiltersPage({
     onSearch
 }: HotelsMotelsFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
-    
+
     // Use external location state if provided, otherwise use internal state
     const [internalLocationState, setInternalLocationState] = useState({
         searchTerm: '',
@@ -80,12 +80,12 @@ export function HotelsMotelsFiltersPage({
     });
 
     const locationState = externalLocationState || internalLocationState;
-    const setLocationState = externalOnLocationChange 
+    const setLocationState = externalOnLocationChange
         ? (state: typeof internalLocationState) => {
             externalOnLocationChange(state.searchTerm, state.city, state.neighborhoods, state.distance);
         }
         : setInternalLocationState;
-    
+
     // Store current filter values - all hotels/motels filter state managed here
     const filterValuesRef = useRef<Partial<HotelsMotelsFiltersState>>({
         searchTerm: '',
@@ -234,7 +234,7 @@ export function HotelsMotelsFiltersPage({
             pricePerSqmFrom: 0,
             pricePerSqmTo: HOTELS_PRICE_PER_SQM_SLIDER_MAX
         };
-        
+
         // Reset components by changing key
         setFilterKey(prev => prev + 1);
         notifyFiltersChange();
@@ -242,16 +242,16 @@ export function HotelsMotelsFiltersPage({
 
     // Track last filterKey we notified parent about to prevent infinite loops
     const lastNotifiedFilterKeyRef = useRef<number | null>(null);
-    
+
     // Store callbacks in refs to avoid dependency issues
     const onActionButtonsReadyRef = useRef(onActionButtonsReady);
     const handleClearRef = useRef(handleClear);
-    
+
     // Update refs when callbacks change
     useEffect(() => {
         onActionButtonsReadyRef.current = onActionButtonsReady;
     }, [onActionButtonsReady]);
-    
+
     useEffect(() => {
         handleClearRef.current = handleClear;
     }, [handleClear]);
@@ -301,6 +301,8 @@ export function HotelsMotelsFiltersPage({
                 />
             </div>
 
+
+
             {/* Property Type Filter (Вид) */}
             <SubtypeFilter
                 key={`property-type-${filterKey}`}
@@ -309,7 +311,17 @@ export function HotelsMotelsFiltersPage({
                 onFilterChange={handlePropertyTypeChange}
                 initialSelected={filterValuesRef.current.propertyTypes || []}
             />
-
+            {/* Price Filter (Цена) */}
+            <PriceFilter
+                key={`price-${filterKey}`}
+                onFilterChange={handlePriceChange}
+                initialPriceFrom={filterValuesRef.current.priceFrom}
+                initialPriceTo={filterValuesRef.current.priceTo}
+                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
+                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
+                priceSliderMax={HOTELS_PRICE_SLIDER_MAX}
+                pricePerSqmSliderMax={HOTELS_PRICE_PER_SQM_SLIDER_MAX}
+            />
             {/* Area Filter (РЗП в кв.м) */}
             <AreaFilter
                 key={`area-${filterKey}`}
@@ -322,12 +334,14 @@ export function HotelsMotelsFiltersPage({
                 showNotProvided={true}
             />
 
-            {/* Category Filter (Категория) */}
-            <HotelCategoryFilter
-                key={`category-${filterKey}`}
-                onFilterChange={handleCategoryChange}
-                initialSelected={filterValuesRef.current.selectedCategories}
-            />
+            <div className={styles.leftFilters}>
+                {/* Category Filter (Категория) */}
+                <HotelCategoryFilter
+                    key={`category-${filterKey}`}
+                    onFilterChange={handleCategoryChange}
+                    initialSelected={filterValuesRef.current.selectedCategories}
+                />
+            </div>
 
             {/* Bed Base Filter (Леглова база) */}
             <BedBaseFilter
@@ -345,12 +359,14 @@ export function HotelsMotelsFiltersPage({
                 initialSelected={filterValuesRef.current.selectedCompletionStatuses}
             />
 
-            {/* Construction Type Filter (Тип строителство) */}
-            <HotelConstructionTypeFilter
-                key={`construction-${filterKey}`}
-                onFilterChange={handleConstructionTypeChange}
-                initialSelected={filterValuesRef.current.selectedConstructionTypes}
-            />
+            <div className={styles.leftFilters}>
+                {/* Construction Type Filter (Тип строителство) */}
+                <HotelConstructionTypeFilter
+                    key={`construction-${filterKey}`}
+                    onFilterChange={handleConstructionTypeChange}
+                    initialSelected={filterValuesRef.current.selectedConstructionTypes}
+                />
+            </div>
 
             {/* Features Filter (Особености) */}
             <FeaturesFilter
@@ -358,18 +374,6 @@ export function HotelsMotelsFiltersPage({
                 initialSelected={filterValuesRef.current.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
                 features={HOTELS_FEATURES}
-            />
-
-            {/* Price Filter (Цена) */}
-            <PriceFilter
-                key={`price-${filterKey}`}
-                onFilterChange={handlePriceChange}
-                initialPriceFrom={filterValuesRef.current.priceFrom}
-                initialPriceTo={filterValuesRef.current.priceTo}
-                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
-                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
-                priceSliderMax={HOTELS_PRICE_SLIDER_MAX}
-                pricePerSqmSliderMax={HOTELS_PRICE_PER_SQM_SLIDER_MAX}
             />
         </div>
     );

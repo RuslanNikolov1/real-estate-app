@@ -18,6 +18,7 @@ import {
     GARAGES_PRICE_PER_SQM_SLIDER_MAX
 } from '../filters/types';
 import styles from '../MapFiltersPage.module.scss';
+import { useFilterState } from '../hooks/useFilterState';
 
 interface GaragesParkingFiltersPageProps {
     locationState?: {
@@ -50,6 +51,22 @@ export interface GaragesParkingFiltersState {
     pricePerSqmTo: number;
 }
 
+const createInitialGaragesFilters = (): GaragesParkingFiltersState => ({
+    searchTerm: '',
+    city: '',
+    neighborhoods: [],
+    distance: 0,
+    propertyTypes: [],
+    areaFrom: 0,
+    areaTo: GARAGES_AREA_SLIDER_MAX,
+    selectedConstructionTypes: [],
+    selectedFeatures: [],
+    priceFrom: 0,
+    priceTo: GARAGES_PRICE_SLIDER_MAX,
+    pricePerSqmFrom: 0,
+    pricePerSqmTo: GARAGES_PRICE_PER_SQM_SLIDER_MAX
+});
+
 export function GaragesParkingFiltersPage({ 
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
@@ -75,31 +92,19 @@ export function GaragesParkingFiltersPage({
         }
         : setInternalLocationState;
     
-    // Store current filter values - all garages/parking filter state managed here
-    const filterValuesRef = useRef<Partial<GaragesParkingFiltersState>>({
-        searchTerm: '',
-        city: '',
-        neighborhoods: [],
-        distance: 0,
-        propertyTypes: [],
-        areaFrom: 0,
-        areaTo: GARAGES_AREA_SLIDER_MAX,
-        selectedConstructionTypes: [],
-        selectedFeatures: [],
-        priceFrom: 0,
-        priceTo: GARAGES_PRICE_SLIDER_MAX,
-        pricePerSqmFrom: 0,
-        pricePerSqmTo: GARAGES_PRICE_PER_SQM_SLIDER_MAX
-    });
+const { filters, updateFilters, resetFilters } = useFilterState<GaragesParkingFiltersState>(
+    createInitialGaragesFilters,
+    onFiltersChange
+);
 
     // Use keys to reset components on clear
     const [filterKey, setFilterKey] = useState(0);
 
-    const notifyFiltersChange = useCallback(() => {
+    useEffect(() => {
         if (onFiltersChange) {
-            onFiltersChange(filterValuesRef.current as GaragesParkingFiltersState);
+            onFiltersChange(filters);
         }
-    }, [onFiltersChange]);
+    }, [filters, onFiltersChange]);
 
     const handleLocationChange = useCallback((searchTerm: string, city: string, neighborhoods: string[], distance: number) => {
         // Update external location state if handler provided, otherwise update internal
@@ -129,41 +134,33 @@ export function GaragesParkingFiltersPage({
             });
         }
 
-        filterValuesRef.current.searchTerm = searchTerm;
-        filterValuesRef.current.city = city;
-        filterValuesRef.current.neighborhoods = neighborhoods;
-        filterValuesRef.current.distance = distance;
-        notifyFiltersChange();
-    }, [externalOnLocationChange, notifyFiltersChange]);
+        updateFilters({
+            searchTerm,
+            city,
+            neighborhoods,
+            distance
+        });
+    }, [externalOnLocationChange, updateFilters]);
 
     const handlePropertyTypeChange = useCallback((selectedTypes: string[]) => {
-        filterValuesRef.current.propertyTypes = selectedTypes;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ propertyTypes: selectedTypes });
+    }, [updateFilters]);
 
     const handleAreaChange = useCallback((areaFrom: number, areaTo: number, isNotProvided?: boolean) => {
-        filterValuesRef.current.areaFrom = areaFrom;
-        filterValuesRef.current.areaTo = areaTo;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ areaFrom, areaTo });
+    }, [updateFilters]);
 
     const handleConstructionTypeChange = useCallback((selectedTypes: string[]) => {
-        filterValuesRef.current.selectedConstructionTypes = selectedTypes;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ selectedConstructionTypes: selectedTypes });
+    }, [updateFilters]);
 
     const handlePriceChange = useCallback((priceFrom: number, priceTo: number, pricePerSqmFrom: number, pricePerSqmTo: number) => {
-        filterValuesRef.current.priceFrom = priceFrom;
-        filterValuesRef.current.priceTo = priceTo;
-        filterValuesRef.current.pricePerSqmFrom = pricePerSqmFrom;
-        filterValuesRef.current.pricePerSqmTo = pricePerSqmTo;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ priceFrom, priceTo, pricePerSqmFrom, pricePerSqmTo });
+    }, [updateFilters]);
 
     const handleFeaturesChange = useCallback((selectedFeatures: string[]) => {
-        filterValuesRef.current.selectedFeatures = selectedFeatures;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
+        updateFilters({ selectedFeatures });
+    }, [updateFilters]);
 
     const handleClear = useCallback(() => {
         // Reset location state
@@ -176,26 +173,11 @@ export function GaragesParkingFiltersPage({
         });
 
         // Reset all filter values
-        filterValuesRef.current = {
-            searchTerm: '',
-            city: '',
-            neighborhoods: [],
-            distance: 0,
-            propertyTypes: [],
-            areaFrom: 0,
-            areaTo: GARAGES_AREA_SLIDER_MAX,
-            selectedConstructionTypes: [],
-            selectedFeatures: [],
-            priceFrom: 0,
-            priceTo: GARAGES_PRICE_SLIDER_MAX,
-            pricePerSqmFrom: 0,
-            pricePerSqmTo: GARAGES_PRICE_PER_SQM_SLIDER_MAX
-        };
-        
+        resetFilters();
+
         // Reset components by changing key
         setFilterKey(prev => prev + 1);
-        notifyFiltersChange();
-    }, [notifyFiltersChange, setLocationState]);
+    }, [resetFilters, setLocationState]);
 
     // Track last filterKey we notified parent about to prevent infinite loops
     const lastNotifiedFilterKeyRef = useRef<number | null>(null);
@@ -229,7 +211,6 @@ export function GaragesParkingFiltersPage({
                     <Button
                         variant="primary"
                         onClick={() => {
-                            console.log('Search with filters:', filterValuesRef.current);
                             if (onSearch) {
                                 onSearch();
                             }
@@ -258,51 +239,53 @@ export function GaragesParkingFiltersPage({
                 />
             </div>
 
+            
+
             {/* Property Type Filter (Вид) */}
             <SubtypeFilter
                 key={`property-type-${filterKey}`}
                 title="Вид"
                 options={GARAGES_PROPERTY_TYPES}
                 onFilterChange={handlePropertyTypeChange}
-                initialSelected={filterValuesRef.current.propertyTypes || []}
+                initialSelected={filters.propertyTypes || []}
             />
-
+{/* Price Filter (Цена) */}
+<PriceFilter
+                key={`price-${filterKey}`}
+                onFilterChange={handlePriceChange}
+                initialPriceFrom={filters.priceFrom}
+                initialPriceTo={filters.priceTo}
+                initialPricePerSqmFrom={filters.pricePerSqmFrom}
+                initialPricePerSqmTo={filters.pricePerSqmTo}
+                priceSliderMax={GARAGES_PRICE_SLIDER_MAX}
+                pricePerSqmSliderMax={GARAGES_PRICE_PER_SQM_SLIDER_MAX}
+            />
             {/* Area Filter (Квадратура) */}
             <AreaFilter
                 key={`area-${filterKey}`}
                 onFilterChange={handleAreaChange}
-                initialAreaFrom={filterValuesRef.current.areaFrom}
-                initialAreaTo={filterValuesRef.current.areaTo}
+                initialAreaFrom={filters.areaFrom}
+                initialAreaTo={filters.areaTo}
                 sliderMax={GARAGES_AREA_SLIDER_MAX}
                 areaCap={GARAGES_AREA_SLIDER_MAX}
                 title="Квадратура"
             />
 
-            {/* Construction Type Filter (Вид конструкция) */}
-            <GarageConstructionTypeFilter
-                key={`construction-${filterKey}`}
-                onFilterChange={handleConstructionTypeChange}
-                initialSelected={filterValuesRef.current.selectedConstructionTypes}
-            />
+            <div className={styles.leftFilters}>
+                {/* Construction Type Filter (Вид конструкция) */}
+                <GarageConstructionTypeFilter
+                    key={`construction-${filterKey}`}
+                    onFilterChange={handleConstructionTypeChange}
+                    initialSelected={filters.selectedConstructionTypes}
+                />
+            </div>
 
             {/* Features Filter (Особености) */}
             <FeaturesFilter
                 key={`features-${filterKey}`}
-                initialSelected={filterValuesRef.current.selectedFeatures || []}
+                initialSelected={filters.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
                 features={GARAGES_FEATURES}
-            />
-
-            {/* Price Filter (Цена) */}
-            <PriceFilter
-                key={`price-${filterKey}`}
-                onFilterChange={handlePriceChange}
-                initialPriceFrom={filterValuesRef.current.priceFrom}
-                initialPriceTo={filterValuesRef.current.priceTo}
-                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
-                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
-                priceSliderMax={GARAGES_PRICE_SLIDER_MAX}
-                pricePerSqmSliderMax={GARAGES_PRICE_PER_SQM_SLIDER_MAX}
             />
         </div>
     );

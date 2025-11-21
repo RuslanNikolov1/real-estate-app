@@ -48,7 +48,7 @@ export interface WarehousesIndustrialFiltersState {
     pricePerSqmTo: number;
 }
 
-export function WarehousesIndustrialFiltersPage({ 
+export function WarehousesIndustrialFiltersPage({
     locationState: externalLocationState,
     onLocationChange: externalOnLocationChange,
     onFiltersChange,
@@ -56,7 +56,7 @@ export function WarehousesIndustrialFiltersPage({
     onSearch
 }: WarehousesIndustrialFiltersPageProps) {
     const cityInputRef = useRef<HTMLDivElement>(null);
-    
+
     // Use external location state if provided, otherwise use internal state
     const [internalLocationState, setInternalLocationState] = useState({
         searchTerm: '',
@@ -67,12 +67,12 @@ export function WarehousesIndustrialFiltersPage({
     });
 
     const locationState = externalLocationState || internalLocationState;
-    const setLocationState = externalOnLocationChange 
+    const setLocationState = externalOnLocationChange
         ? (state: typeof internalLocationState) => {
             externalOnLocationChange(state.searchTerm, state.city, state.neighborhoods, state.distance);
         }
         : setInternalLocationState;
-    
+
     // Store current filter values - all warehouses/industrial filter state managed here
     const filterValuesRef = useRef<Partial<WarehousesIndustrialFiltersState>>({
         searchTerm: '',
@@ -182,7 +182,7 @@ export function WarehousesIndustrialFiltersPage({
             pricePerSqmFrom: 0,
             pricePerSqmTo: WAREHOUSES_PRICE_PER_SQM_SLIDER_MAX
         };
-        
+
         // Reset components by changing key
         setFilterKey(prev => prev + 1);
         notifyFiltersChange();
@@ -190,16 +190,16 @@ export function WarehousesIndustrialFiltersPage({
 
     // Track last filterKey we notified parent about to prevent infinite loops
     const lastNotifiedFilterKeyRef = useRef<number | null>(null);
-    
+
     // Store callbacks in refs to avoid dependency issues
     const onActionButtonsReadyRef = useRef(onActionButtonsReady);
     const handleClearRef = useRef(handleClear);
-    
+
     // Update refs when callbacks change
     useEffect(() => {
         onActionButtonsReadyRef.current = onActionButtonsReady;
     }, [onActionButtonsReady]);
-    
+
     useEffect(() => {
         handleClearRef.current = handleClear;
     }, [handleClear]);
@@ -249,6 +249,7 @@ export function WarehousesIndustrialFiltersPage({
                 />
             </div>
 
+
             {/* Property Type Filter (Вид) */}
             <SubtypeFilter
                 key={`property-type-${filterKey}`}
@@ -258,6 +259,17 @@ export function WarehousesIndustrialFiltersPage({
                 initialSelected={filterValuesRef.current.propertyTypes || []}
             />
 
+            {/* Price Filter (Цена) */}
+            <PriceFilter
+                key={`price-${filterKey}`}
+                onFilterChange={handlePriceChange}
+                initialPriceFrom={filterValuesRef.current.priceFrom}
+                initialPriceTo={filterValuesRef.current.priceTo}
+                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
+                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
+                priceSliderMax={WAREHOUSES_PRICE_SLIDER_MAX}
+                pricePerSqmSliderMax={WAREHOUSES_PRICE_PER_SQM_SLIDER_MAX}
+            />
             {/* Area Filter (Квадратура) */}
             <AreaFilter
                 key={`area-${filterKey}`}
@@ -275,18 +287,6 @@ export function WarehousesIndustrialFiltersPage({
                 initialSelected={filterValuesRef.current.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
                 features={WAREHOUSES_FEATURES}
-            />
-
-            {/* Price Filter (Цена) */}
-            <PriceFilter
-                key={`price-${filterKey}`}
-                onFilterChange={handlePriceChange}
-                initialPriceFrom={filterValuesRef.current.priceFrom}
-                initialPriceTo={filterValuesRef.current.priceTo}
-                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
-                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
-                priceSliderMax={WAREHOUSES_PRICE_SLIDER_MAX}
-                pricePerSqmSliderMax={WAREHOUSES_PRICE_PER_SQM_SLIDER_MAX}
             />
         </div>
     );
