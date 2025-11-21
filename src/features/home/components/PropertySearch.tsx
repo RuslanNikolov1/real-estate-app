@@ -62,6 +62,18 @@ export function PropertySearch({
       return;
     }
 
+    if (selectedButton === 'sales') {
+      window.location.href = `/sale/search/${typeId}`;
+      handleClose();
+      return;
+    }
+
+    if (selectedButton === 'rent') {
+      window.location.href = `/rent/search/${typeId}`;
+      handleClose();
+      return;
+    }
+
     setSelectedPropertyTypes((prev) =>
       prev.includes(typeId)
         ? prev.filter((id) => id !== typeId)
@@ -99,6 +111,16 @@ export function PropertySearch({
   };
 
   const handleExtendedFiltersClick = () => {
+    if (selectedButton === 'sales') {
+      window.location.href = '/sale/search';
+      handleClose();
+      return;
+    }
+    if (selectedButton === 'rent') {
+      window.location.href = '/rent/search';
+      handleClose();
+      return;
+    }
     window.location.href = '/map-filters';
     handleClose();
   };
@@ -148,6 +170,44 @@ export function PropertySearch({
 
   const canSearch =
     city.trim() !== '' && selectedButton !== null && selectedPropertyTypes.length > 0;
+
+  // Filter property types based on mode
+  const availablePropertyTypes = useMemo(() => {
+    if (selectedButton === 'rent') {
+      // Rent-specific categories
+      const rentCategories = [
+        'apartments',
+        'houses-villas',
+        'stores-offices',
+        'building-plots',
+        'warehouses-industrial',
+        'garages-parking',
+        'hotels-motels',
+        'restaurants'
+      ];
+      
+      return propertyTypes
+        .filter(type => rentCategories.includes(type.id))
+        .map(type => {
+          // Override labels for rent mode
+          const labelOverrides: Record<string, string> = {
+            'houses-villas': 'Къщи',
+            'building-plots': 'Парцели/Терени',
+            'warehouses-industrial': 'Складове/Промишлени и стопански имоти под наем',
+            'garages-parking': 'Гаражи/Паркинги/Паркоместа под наем',
+            'hotels-motels': 'Хотели/Почивни станции',
+            'restaurants': 'Заведения'
+          };
+          
+          return {
+            ...type,
+            label: labelOverrides[type.id] || type.label
+          };
+        });
+    }
+    // For sales, show all property types
+    return propertyTypes;
+  }, [selectedButton]);
 
   return (
     <>
@@ -233,7 +293,7 @@ export function PropertySearch({
               <div className={styles.searchContent}>
                 {selectedButton && (
                   <div className={styles.propertyTypesGrid}>
-                    {propertyTypes.map((type) => {
+                    {availablePropertyTypes.map((type) => {
                       const IconComponent = type.icon;
                       const isSelected = selectedPropertyTypes.includes(type.id);
                       return (
@@ -260,7 +320,6 @@ export function PropertySearch({
               <div className={styles.modalActions}>
                 <div className={styles.leftActions}>
                   <Button
-                    variant="outline"
                     onClick={handleExtendedFiltersClick}
                     className={styles.extendedFiltersButton}
                   >

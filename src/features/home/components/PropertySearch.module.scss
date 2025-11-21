@@ -462,7 +462,7 @@
       border-color: $dark-red !important;
       color: $white !important;
       border-radius: 24px;
-      padding: $spacing-md;
+      padding: 0.75rem;
 
       &:hover {
         background-color: color.adjust($dark-red, $lightness: -5%) !important;
