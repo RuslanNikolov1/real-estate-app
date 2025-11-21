@@ -3,9 +3,8 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Bed, Bathtub, Square, Eye } from '@phosphor-icons/react';
+import { MapPin, Bed, Square } from '@phosphor-icons/react';
 import { Property } from '@/types';
-import { useTranslation } from 'react-i18next';
 import styles from './PropertyCard.module.scss';
 
 interface PropertyCardProps {
@@ -14,7 +13,6 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, onClick }: PropertyCardProps) {
-  const { t } = useTranslation();
 
   const primaryImage = property.images?.find((img) => img.is_primary) || property.images?.[0];
 
@@ -37,27 +35,20 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
               alt={property.title}
               fill
               className={styles.image}
-              sizes="(max-width: 768px) 100vw, 400px"
+              sizes="(max-width: 768px) 100vw, 40vw"
             />
           ) : (
             <div className={styles.placeholder}>Няма снимка</div>
           )}
-          <div className={styles.badge}>
-            {property.status === 'for-sale' ? t('nav.forSale') : t('nav.forRent')}
-          </div>
-          <div className={styles.viewCount}>
-            <Eye size={16} />
-            <span>{property.view_count}</span>
-          </div>
         </div>
 
         <div className={styles.content}>
           <div className={styles.header}>
-            <h2 className={styles.title}>{property.title}</h2>
             <div className={styles.price}>
               {property.price.toLocaleString()} {property.currency}
               {property.status === 'for-rent' && <span className={styles.perMonth}>/месец</span>}
             </div>
+            <h2 className={styles.title}>{property.title}</h2>
           </div>
 
           <div className={styles.location}>
@@ -75,12 +66,6 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
                 <span>{property.rooms} стаи</span>
               </div>
             )}
-            {property.bathrooms && (
-              <div className={styles.detail}>
-                <Bathtub size={18} />
-                <span>{property.bathrooms} бани</span>
-              </div>
-            )}
             <div className={styles.detail}>
               <Square size={18} />
               <span>{property.area} м²</span>
@@ -93,10 +78,6 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
               </div>
             )}
           </div>
-
-          {property.description && (
-            <p className={styles.description}>{property.description}</p>
-          )}
         </div>
       </Link>
     </motion.div>
