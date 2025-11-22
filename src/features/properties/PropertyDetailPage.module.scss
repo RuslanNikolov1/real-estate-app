@@ -1,4 +1,5 @@
 @use '@/styles/variables' as *;
+@use 'sass:color';
 
 .propertyPage {
   min-height: 100vh;
@@ -8,193 +9,89 @@
 
 .main {
   flex: 1;
-  background: $light-gray;
+  padding: $spacing-2xl 0;
+  background: linear-gradient(to bottom, #f5f5f5, #e8e8e8);
 }
 
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: $spacing-xl $spacing-lg;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: $spacing-xl;
-  margin-bottom: $spacing-xl;
-  background: $white;
-  padding: $spacing-xl;
-  border-radius: 24px; // Very rounded
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 0 $spacing-lg;
 
   @media (max-width: $breakpoint-md) {
-    flex-direction: column;
+    padding: 0 $spacing-md;
   }
 }
 
-.headerLeft {
-  flex: 1;
-}
-
-.title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: $black;
-  margin-bottom: $spacing-md;
-  font-family: $font-headline;
-  line-height: 1.3;
-
-  @media (max-width: $breakpoint-md) {
-    font-size: 2rem;
-  }
-}
-
-.location {
-  display: flex;
-  align-items: center;
-  gap: $spacing-xs;
-  color: $dark-gray;
-  font-size: 1.125rem;
-
-  svg {
-    color: $dark-red;
-    flex-shrink: 0;
-  }
-}
-
-.headerRight {
-  flex-shrink: 0;
-}
-
-.price {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: $dark-red;
-  font-family: $font-headline;
-  white-space: nowrap;
-
-  @media (max-width: $breakpoint-md) {
-    font-size: 2rem;
-  }
-}
-
-.perMonth {
-  font-size: 1rem;
-  font-weight: 400;
-  color: $dark-gray;
-}
-
-.quickDetails {
+// Image Gallery Section - Clickable
+.imageSection {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr 1.75fr 1fr;
   gap: $spacing-lg;
-  margin-bottom: $spacing-xl;
-  background: $white;
-  padding: $spacing-xl;
-  border-radius: 24px; // Very rounded
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+  margin-bottom: $spacing-3xl;
 
-.quickDetail {
-  display: flex;
-  align-items: center;
-  gap: $spacing-md;
-  padding: $spacing-md;
-  background: $light-gray;
-  border-radius: 16px; // Rounded
-  transition: all $transition-base;
-
-  &:hover {
-    background: rgba(225, 6, 0, 0.1);
-    transform: translateY(-2px);
-  }
-
-  svg {
-    color: $dark-red;
-    flex-shrink: 0;
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
   }
 }
 
-.quickDetailLabel {
-  display: block;
-  font-size: 0.875rem;
-  color: $dark-gray;
-  margin-bottom: $spacing-xs;
+.mainImageContainer {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 4px solid $dark-red;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(128, 46, 46, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: $breakpoint-md) {
+    height: 250px;
+  }
 }
 
-.quickDetailValue {
-  display: block;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: $black;
-}
-
-.actions {
-  margin-bottom: $spacing-xl;
-}
-
-.actionCard {
-  background: $white;
-  padding: $spacing-xl;
-  border-radius: 24px; // Very rounded
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.leftImagesContainer,
+.rightImagesContainer {
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
-}
+  gap: $spacing-lg;
+  height: 400px;
 
-.actionItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: $spacing-md;
-  border-bottom: 1px solid $light-gray;
-}
-
-.actionLabel {
-  font-size: 0.9375rem;
-  color: $dark-gray;
-}
-
-.actionValue {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: $black;
-}
-
-.actionButton {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $spacing-xs;
-}
-
-.gallery {
-  margin-bottom: $spacing-xl;
-  background: $white;
-  padding: $spacing-xl;
-  border-radius: 24px; // Very rounded
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  @media (max-width: $breakpoint-md) {
+    height: 250px;
+  }
 }
 
 .mainImage {
   position: relative;
   width: 100%;
-  height: 600px;
-  border-radius: 16px; // Rounded
-  overflow: hidden;
-  background: $light-gray;
-  margin-bottom: $spacing-md;
-
-  @media (max-width: $breakpoint-md) {
-    height: 400px;
-  }
+  height: 100%;
 }
 
 .image {
   object-fit: cover;
+  border-radius: 16px;
+}
+
+.imagePlaceholder {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+}
+
+.logoImage {
+  object-fit: contain;
+  object-position: center;
+  padding: $spacing-md;
+  max-width: 90%;
+  max-height: 90%;
+  margin: auto;
 }
 
 .placeholder {
@@ -202,411 +99,754 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  background: linear-gradient(135deg, $light-gray 0%, color.adjust($light-gray, $lightness: -5%) 100%);
   color: $dark-gray;
-  font-size: 1.125rem;
+  font-size: 1rem;
 }
 
-.fullscreenButton {
-  position: absolute;
-  top: $spacing-md;
-  right: $spacing-md;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%; // Circular
-  background: rgba(0, 0, 0, 0.7);
-  color: $white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.sideImage {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 190px;
+  height: calc((400px - $spacing-lg) / 2);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 4px solid $dark-red;
   cursor: pointer;
-  transition: all $transition-base;
-  z-index: 1;
+  box-shadow: 0 4px 16px rgba(128, 46, 46, 0.15);
 
-  &:hover {
-    background: rgba(0, 0, 0, 0.9);
-    transform: scale(1.1);
+  @media (max-width: $breakpoint-md) {
+    min-height: 115px;
+    height: calc((250px - $spacing-md) / 2);
   }
 }
 
-.navButton {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-  border-radius: 50%; // Circular
-  background: rgba(255, 255, 255, 0.9);
-  color: $dark-gray;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all $transition-base;
-  z-index: 1;
-
-  &:hover {
-    background: $white;
-    transform: translateY(-50%) scale(1.1);
-  }
-
-  &.next {
-    right: $spacing-md;
-  }
-
-  &:not(.next) {
-    left: $spacing-md;
-  }
-}
-
-.imageCounter {
+.moreImagesLabel {
   position: absolute;
   bottom: $spacing-md;
   right: $spacing-md;
-  padding: $spacing-xs $spacing-md;
-  background: rgba(0, 0, 0, 0.7);
-  color: $white;
-  border-radius: 9999px; // Pill shape
-  font-size: 0.875rem;
-  z-index: 1;
-}
-
-.thumbnailGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: $spacing-md;
-  margin-bottom: $spacing-md;
-}
-
-.thumbnail {
-  position: relative;
-  width: 100%;
-  height: 100px;
-  border-radius: 12px; // Rounded
-  overflow: hidden;
-  border: 3px solid transparent;
-  cursor: pointer;
-  transition: all $transition-base;
-  background: $light-gray;
-
-  &:hover {
-    border-color: $dark-red;
-    transform: scale(1.05);
-  }
-
-  &.active {
-    border-color: $dark-red;
-  }
-}
-
-.thumbnailImage {
-  object-fit: cover;
-}
-
-.floorPlanButton,
-.videoButton {
-  padding: $spacing-sm $spacing-lg;
-  border-radius: 9999px; // Pill shape
-  background: $dark-red;
-  color: $white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all $transition-base;
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-xs;
-  margin-right: $spacing-md;
-
-  &:hover {
-    background: $dark-red;
-    transform: translateY(-2px);
-  }
-}
-
-.descriptionSection,
-.additionalDetails,
-.nearbySection,
-.contactSection,
-.priceHistorySection,
-.recommendedSection {
-  background: $white;
-  padding: $spacing-xl;
-  border-radius: 24px; // Very rounded
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: $spacing-xl;
-}
-
-.sectionTitle {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: $black;
-  margin-bottom: $spacing-lg;
-  font-family: $font-headline;
-}
-
-.description {
-  font-size: 1.125rem;
-  line-height: 1.8;
-  color: $dark-gray;
-}
-
-.detailsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: $spacing-lg;
-}
-
-.detailItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: $spacing-md;
-  background: $light-gray;
-  border-radius: 12px; // Rounded
-}
-
-.detailLabel {
-  font-weight: 600;
-  color: $dark-gray;
-}
-
-.detailValue {
-  font-weight: 600;
-  color: $black;
-}
-
-.amenitiesList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: $spacing-md;
-}
-
-.amenity {
-  padding: $spacing-sm $spacing-lg;
-  background: $light-gray;
-  border-radius: 9999px; // Pill shape
-  color: $dark-gray;
-  font-weight: 500;
-}
-
-.contactContent {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: $spacing-2xl;
-
-  @media (max-width: $breakpoint-lg) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.brokerInfo {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-lg;
-}
-
-.brokerAvatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%; // Circular
-  background: linear-gradient(135deg, $dark-red 0%, $dark-red 100%);
-  color: $white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  font-weight: 700;
-  font-family: $font-headline;
-}
-
-.brokerName {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: $black;
-  margin-bottom: $spacing-xs;
-  font-family: $font-headline;
-}
-
-.brokerTitle {
-  font-size: 1rem;
-  color: $dark-gray;
-  margin-bottom: $spacing-md;
-}
-
-.brokerContact {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-}
-
-.contactLink {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  color: $dark-red;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color $transition-base;
-
-  &:hover {
-    color: $dark-red;
-  }
-
-  svg {
-    flex-shrink: 0;
-  }
-}
-
-.contactForm {
-  background: $light-gray;
-  padding: $spacing-xl;
-  border-radius: 20px; // Rounded
-}
-
-.formTitle {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: $black;
-  margin-bottom: $spacing-lg;
-  font-family: $font-headline;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-}
-
-.textareaWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xs;
-}
-
-.label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: $dark-gray;
-}
-
-.textarea {
   padding: $spacing-sm $spacing-md;
-  border: 1px solid $light-gray;
-  border-radius: 12px; // More rounded
-  font-size: 1rem;
-  font-family: $font-body;
-  color: $black;
-  background-color: $white;
-  resize: vertical;
-  transition: border-color $transition-base;
+  background: linear-gradient(135deg, rgba(128, 46, 46, 0.95), rgba(128, 46, 46, 0.85));
+  color: $white;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  z-index: 2;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.3px;
+}
 
-  &:focus {
-    outline: none;
-    border-color: $dark-red;
+// Two Column Layout
+.contentLayout {
+  display: grid;
+  grid-template-columns: 66% 33%;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-3xl;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+    gap: $spacing-2xl;
   }
 }
 
-.formActions {
-  display: flex;
-  gap: $spacing-md;
-  flex-wrap: wrap;
-}
-
-.priceHistory {
+// Left Column (66%)
+.leftColumn {
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
+  gap: $spacing-2xl;
 }
 
-.priceEntry {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: $spacing-md;
-  background: $light-gray;
-  border-radius: 12px; // Rounded
-}
-
-.priceDate {
-  font-size: 0.9375rem;
-  color: $dark-gray;
-}
-
-.priceAmount {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: $dark-red;
-  font-family: $font-headline;
-}
-
-.recommendedGrid {
+// Price and Details Section
+.priceDetailsSection {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: $spacing-xl;
+  grid-template-columns: 1fr 1fr;
+  padding: $spacing-2xl;
+  background: $white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(128, 46, 46, 0.1);
 
   @media (max-width: $breakpoint-md) {
     grid-template-columns: 1fr;
   }
 }
 
+// Price Section
+.priceSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+}
+
+.priceValue {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $dark-red;
+  font-family: $font-headline;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.pricePerSqmRow {
+  display: flex;
+  align-items: center;
+}
+
+.pricePerSqmValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $dark-red;
+  font-family: $font-headline;
+  letter-spacing: -0.3px;
+}
+
+// Details Row
+.detailsRow {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-lg;
+  flex-wrap: wrap;
+}
+
+.detailBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: $white;
+  border-radius: 16px;
+  border: 2px solid $dark-red;
+
+  svg {
+    color: $dark-red;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(128, 46, 46, 0.2));
+  }
+}
+
+.detailValue {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: $dark-red;
+  font-family: $font-headline;
+  margin-bottom: $spacing-xs;
+  letter-spacing: -0.5px;
+}
+
+.detailLabel {
+  font-size: 0.875rem;
+  color: $dark-gray;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Description Section
+.descriptionSection {
+  padding: $spacing-2xl;
+  background: $white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(128, 46, 46, 0.1);
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: $black;
+  margin-bottom: $spacing-xl;
+  font-family: $font-headline;
+  letter-spacing: -0.5px;
+  position: relative;
+  padding-bottom: $spacing-md;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, $dark-red, color.adjust($dark-red, $lightness: 10%));
+    border-radius: 2px;
+  }
+}
+
+.description {
+  color: $dark-gray;
+  line-height: 1.9;
+  font-size: 1rem;
+  white-space: pre-line;
+  letter-spacing: 0.2px;
+}
+
+// Features Section
+.featuresSection {
+  padding: $spacing-2xl;
+  background: $white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(128, 46, 46, 0.1);
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: $spacing-lg;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  background: $white;
+  border-radius: 14px;
+  border: 2px solid $dark-red;
+}
+
+.featureIcon {
+  display: flex;
+  align-items: center;
+  color: $dark-red;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(128, 46, 46, 0.2));
+}
+
+.featureLabel {
+  font-size: 0.9375rem;
+  color: $dark-red;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+// Construction Section
+.constructionSection {
+  padding: $spacing-2xl;
+  background: $white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(128, 46, 46, 0.1);
+}
+
+.constructionGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.constructionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-lg;
+  background: $white;
+  border-radius: 14px;
+  border: 2px solid $dark-red;
+}
+
+.constructionLabel {
+  font-size: 1rem;
+  color: $dark-red;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.constructionValue {
+  font-size: 1.0625rem;
+  color: $dark-red;
+  font-weight: 700;
+  font-family: $font-headline;
+}
+
+// Inquiry Form
+.inquirySection {
+  padding: $spacing-2xl;
+  background: $white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(128, 46, 46, 0.1);
+}
+
+.inquiryForm {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-lg;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.messageTextarea {
+  padding: $spacing-lg;
+  border: 2px solid $light-gray;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-family: $font-body;
+  color: $black;
+  background-color: $white;
+  resize: vertical;
+  transition: all $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: $dark-red;
+    box-shadow: 0 0 0 4px rgba(128, 46, 46, 0.1);
+  }
+}
+
+// Price History
+.priceHistorySection {
+  padding: $spacing-2xl;
+  background: $white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(128, 46, 46, 0.1);
+}
+
+.priceChart {
+  padding: $spacing-xl;
+  background: linear-gradient(135deg, $light-gray 0%, color.adjust($light-gray, $lightness: 2%) 100%);
+  border-radius: 16px;
+  border: 2px solid rgba(128, 46, 46, 0.1);
+}
+
+.chartSvg {
+  width: 100%;
+  height: 300px;
+}
+
+.chartArea {
+  width: 100%;
+  height: 100%;
+}
+
+// Recommended Properties
+.recommendedSection {
+  padding: $spacing-2xl;
+  background: $white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(128, 46, 46, 0.1);
+}
+
+.recommendedRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-lg;
+
+  @media (max-width: $breakpoint-lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.recommendedCard {
+  display: flex;
+  flex-direction: column;
+  background: $white;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid $light-gray;
+  transition: all $transition-base;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(128, 46, 46, 0.2);
+  }
+}
+
+.recommendedImage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: visible;
+  background: $white;
+  box-sizing: border-box;
+}
+
+.recommendedImageContent {
+  object-fit: cover;
+  border-radius: 12px;
+  inset: 2px;
+}
+
+.recommendedPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: $dark-gray;
+  font-size: 0.875rem;
+}
+
+.recommendedDetails {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  padding: $spacing-md;
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+}
+
+.recommendedPrice {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: $dark-red;
+  font-family: $font-headline;
+}
+
+.recommendedInfo {
+  font-size: 1rem;
+  color: $dark-gray;
+  font-weight: 500;
+}
+
+.recommendedLocation {
+  font-size: 0.9375rem;
+  color: $dark-gray;
+}
+
+.recommendedDivider {
+  width: 45%;
+  height: 0;
+  border-top: 2px dotted $dark-red;
+  margin: $spacing-xs 0;
+}
+
+// Right Column (33%)
+.rightColumn {
+  height: fit-content;
+  align-self: start;
+}
+
+.rightCard {
+  padding: $spacing-2xl;
+  background: $white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(128, 46, 46, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.locationSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 2px solid $dark-red;
+}
+
+.locationRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.locationItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  color: $dark-gray;
+  font-size: 1.0625rem;
+  font-weight: 500;
+
+  svg {
+    color: $dark-red;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(128, 46, 46, 0.2));
+  }
+}
+
+.locationText {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: $dark-gray;
+  font-size: 1.0625rem;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-md;
+  padding-bottom: $spacing-md;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  border-bottom: 2px solid $dark-red;
+}
+
+.infoLabel {
+  font-size: 0.875rem;
+  color: $dark-gray;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.infoValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: $dark-red;
+  font-family: $font-headline;
+  letter-spacing: -0.5px;
+}
+
+.infoText {
+  font-size: 0.9375rem;
+  color: $dark-gray;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  font-weight: 500;
+
+  svg {
+    color: $dark-red;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(128, 46, 46, 0.2));
+  }
+}
+
+.actionButtons {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+  width: 100%;
+  justify-content: center;
+}
+
+.actionButton {
+  flex: 1;
+  width: 100%;
+  justify-content: center;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all $transition-base;
+  min-width: 0;
+  padding-top: $spacing-md;
+  padding-bottom: $spacing-md;
+  padding-left: $spacing-xl !important;
+  padding-right: $spacing-xl;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(128, 46, 46, 0.2);
+  }
+}
+
+.outlinedHeart {
+  color: $dark-red !important;
+  opacity: 1 !important;
+  stroke: $dark-red !important;
+  stroke-width: 2.5 !important;
+  fill: none !important;
+  
+  :global(.button.outline) & {
+    color: $dark-red !important;
+    stroke: $dark-red !important;
+    fill: none !important;
+  }
+  
+  :global(.button.outline:hover) & {
+    color: $dark-red !important;
+    stroke: $dark-red !important;
+    fill: none !important;
+  }
+  
+  path {
+    stroke: $dark-red !important;
+    fill: none !important;
+  }
+}
+
+.brokerSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  background: transparent;
+  border-radius: 16px;
+  border: 3px solid $dark-red;
+  transition: all $transition-base;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(128, 46, 46, 0.2);
+  }
+}
+
+.brokerImage {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 4px solid $dark-red;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.brokerAvatar {
+  object-fit: cover;
+}
+
+.brokerDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-xs;
+  width: 100%;
+  text-align: center;
+}
+
+.brokerName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: $dark-red;
+  font-family: $font-headline;
+  letter-spacing: -0.3px;
+  text-align: center;
+}
+
+.brokerTitle {
+  font-size: 0.9375rem;
+  color: $dark-red;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  padding-bottom: $spacing-sm;
+  border-bottom: 1px solid $dark-red;
+  width: 50%;
+}
+
+.brokerContact {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  color: $dark-red;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-top: $spacing-xs;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+  transition: all $transition-base;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  svg {
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+}
+
+// Fullscreen Modal
 .fullscreenModal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(0, 0, 0, 0.97);
   z-index: $z-modal;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  backdrop-filter: blur(8px);
 }
 
-.closeFullscreen {
+.closeButton {
   position: absolute;
   top: $spacing-xl;
   right: $spacing-xl;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%; // Circular
-  background: rgba(255, 255, 255, 0.2);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   color: $white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all $transition-base;
-  z-index: 1;
+  z-index: 10;
+  backdrop-filter: blur(8px);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
   }
+}
+
+.fullscreenImageContainer {
+  position: relative;
+  width: 90%;
+  max-width: 1200px;
+  height: 90vh;
+  cursor: default;
 }
 
 .fullscreenImage {
   object-fit: contain;
-  max-width: 90%;
-  max-height: 90%;
 }
 
-.fullscreenNav {
+.fullscreenNavButton {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 64px;
-  height: 64px;
-  border-radius: 50%; // Circular
-  background: rgba(255, 255, 255, 0.2);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   color: $white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all $transition-base;
-  z-index: 1;
+  z-index: 10;
+  backdrop-filter: blur(8px);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-50%) scale(1.1);
   }
 
   &.next {
@@ -616,4 +856,20 @@
   &:not(.next) {
     left: $spacing-xl;
   }
+}
+
+.fullscreenCounter {
+  position: absolute;
+  bottom: $spacing-xl;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: $spacing-md $spacing-lg;
+  background: rgba(0, 0, 0, 0.7);
+  color: $white;
+  border-radius: 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
 }

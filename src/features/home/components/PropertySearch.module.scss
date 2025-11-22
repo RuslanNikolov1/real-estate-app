@@ -40,6 +40,7 @@
     background-color: $dark-red !important;
     border-color: $dark-red !important;
     color: $white !important;
+    box-shadow: 0 6px 16px color.change($dark-red, $alpha: 0.4);
 
     svg {
       color: $white;

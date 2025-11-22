@@ -95,6 +95,35 @@
   }
 }
 
+.audioPlayerWrapper {
+  position: relative;
+}
+
+.ambienceMessage {
+  position: absolute;
+  top: calc(100% + $spacing-md);
+  left: 0;
+  padding: $spacing-sm $spacing-md;
+  background: $black;
+  color: $white;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: $z-modal;
+  pointer-events: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: $spacing-md;
+    border: 6px solid transparent;
+    border-bottom-color: $black;
+  }
+}
+
 .languageSelector {
   position: relative;
 

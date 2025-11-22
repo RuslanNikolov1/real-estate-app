@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -34,6 +34,24 @@ export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
+  const [showAmbienceMessage, setShowAmbienceMessage] = useState(false);
+
+  useEffect(() => {
+    // Show message after 3 seconds
+    const showTimer = setTimeout(() => {
+      setShowAmbienceMessage(true);
+    }, 3000);
+
+    // Hide message after 5 seconds (8 seconds total from page load)
+    const hideTimer = setTimeout(() => {
+      setShowAmbienceMessage(false);
+    }, 8000);
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, []);
 
   const navItems = [
     { href: '/', label: t('nav.home'), icon: House },
@@ -80,7 +98,21 @@ export function Header() {
         </nav>
 
         <div className={styles.actions}>
+          <div className={styles.audioPlayerWrapper}>
           <AudioPlayer src="/soft-piano.mp3" label="Ambience" />
+            <AnimatePresence>
+              {showAmbienceMessage && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={styles.ambienceMessage}
+                >
+                  Soft piano while you browse
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <div className={styles.languageSelector}>
             <button

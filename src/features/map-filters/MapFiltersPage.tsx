@@ -410,7 +410,6 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                                 <PropertyCard
                                                     key={property.id}
                                                     property={property}
-                                                    onClick={() => router.push(`/properties/${property.id}`)}
                                                 />
                                             ))}
                                         </div>

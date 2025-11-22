@@ -16,6 +16,19 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
 
   const primaryImage = property.images?.find((img) => img.is_primary) || property.images?.[0];
 
+  // Consistent number formatter to avoid hydration mismatch
+  const formatNumber = (num: number) => {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  };
+
+  // For sales apartments, use sales/apartments/[id] route
+  const getPropertyUrl = () => {
+    if (property.status === 'for-sale' && property.type === 'apartment') {
+      return `/sale/apartments/${property.id}`;
+    }
+    return `/properties/${property.id}`;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -24,12 +37,15 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
       className={styles.card}
     >
       <Link
-        href={`/properties/${property.id}`}
+        href={getPropertyUrl()}
         className={styles.link}
         onClick={onClick}
+        target="_blank"
+        rel="noopener noreferrer"
       >
         <div className={styles.imageContainer}>
           {primaryImage ? (
+            <>
             <Image
               src={primaryImage.url}
               alt={property.title}
@@ -37,6 +53,12 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
               className={styles.image}
               sizes="(max-width: 768px) 100vw, 40vw"
             />
+              {property.images && property.images.length > 1 && (
+                <div className={styles.moreImagesLabel}>
+                  Още {property.images.length - 1} снимки
+                </div>
+              )}
+            </>
           ) : (
             <div className={styles.placeholder}>Няма снимка</div>
           )}
@@ -45,7 +67,7 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
         <div className={styles.content}>
           <div className={styles.header}>
             <div className={styles.price}>
-              {property.price.toLocaleString()} {property.currency}
+              {formatNumber(property.price)} {property.currency}
               {property.status === 'for-rent' && <span className={styles.perMonth}>/месец</span>}
             </div>
             <h2 className={styles.title}>{property.title}</h2>
