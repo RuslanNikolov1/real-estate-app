@@ -203,6 +203,61 @@
   }
 }
 
+.userMenuWrapper {
+  position: relative;
+}
+
+.userMenuButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: $white;
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: $white;
+    outline: none;
+  }
+}
+
+.userMenu {
+  position: absolute;
+  top: calc(100% + $spacing-xs);
+  right: 0;
+  background: $white;
+  border: 1px solid $light-gray;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: $spacing-xs 0;
+  z-index: $z-dropdown;
+}
+
+.userMenuLink {
+  padding: $spacing-sm $spacing-lg;
+  color: $dark-gray;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background $transition-base, color $transition-base;
+
+  &:hover,
+  &:focus-visible {
+    background: $light-gray;
+    color: $dark-red;
+    outline: none;
+  }
+}
+
 .mobileMenuButton {
   display: none;
   align-items: center;

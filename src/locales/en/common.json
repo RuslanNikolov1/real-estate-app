@@ -26,7 +26,8 @@
     "favorites": "Favorites",
     "login": "Login",
     "logout": "Logout",
-    "admin": "Admin"
+    "admin": "Admin",
+    "adminPanel": "Admin Panel"
   },
   "home": {
     "title": "RENTALS | SALES | PROPERTY VALUATIONS | CREDIT CONSULTING",

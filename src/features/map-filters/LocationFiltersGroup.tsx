@@ -4,7 +4,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { Input } from '@/components/ui/Input';
 import { CrosshairSimple } from '@phosphor-icons/react';
 import burgasCities from '@/data/burgasCities.json';
-import citiesNeighborhoods from '@/data/citiesNeighborhoods.json';
+import { getNeighborhoodsByCity } from '@/lib/neighborhoods';
+import { NeighborhoodSelect } from '@/components/forms/NeighborhoodSelect';
 import styles from './LocationFiltersGroup.module.scss';
 
 type CityData = {
@@ -38,8 +39,6 @@ export function LocationFiltersGroup({
     const [neighborhoods, setNeighborhoods] = useState<string[]>(initialNeighborhoods);
     const [distance, setDistance] = useState(initialDistance);
     const [showCityDropdown, setShowCityDropdown] = useState(false);
-    const [showNeighborhoodDropdown, setShowNeighborhoodDropdown] = useState(false);
-    const [neighborhoodSearchTerm, setNeighborhoodSearchTerm] = useState('');
     const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
     // Sync internal state with initial props when they change (e.g., from map clicks)
@@ -52,8 +51,6 @@ export function LocationFiltersGroup({
     const internalCityInputRef = useRef<HTMLDivElement | null>(null);
     const cityInputRefForDropdown = useRef<HTMLInputElement>(null);
     const cityDropdownRef = useRef<HTMLDivElement>(null);
-    const neighborhoodInputRef = useRef<HTMLInputElement>(null);
-    const neighborhoodDropdownRef = useRef<HTMLDivElement>(null);
     
     // Use external ref if provided, otherwise use internal ref
     const cityInputRef = externalCityInputRef || internalCityInputRef;
@@ -72,24 +69,6 @@ export function LocationFiltersGroup({
     const isCitySelected = isValidCity(trimmedCity);
     const showAdditionalFilters = isCitySelected;
 
-    const getNeighborhoodsForCity = useCallback((cityName: string) => {
-        if (!cityName) return [];
-
-        // Find the city in burgasCities to get its id
-        const foundCity = burgasCities.cities.find(
-            (c) => c.name.toLowerCase() === cityName.toLowerCase() ||
-                c.nameEn.toLowerCase() === cityName.toLowerCase()
-        );
-
-        if (!foundCity) return [];
-
-        // Map city id to citiesNeighborhoods key (lowercase)
-        const cityKey = foundCity.id.toLowerCase();
-        const cityData = citiesNeighborhoods[cityKey as keyof typeof citiesNeighborhoods];
-
-        return cityData?.neighborhoods || [];
-    }, []);
-
     const handleCitySelect = useCallback((cityName: string, coordinates: [number, number]) => {
         setCity(cityName);
         setNeighborhoods([]);
@@ -99,32 +78,45 @@ export function LocationFiltersGroup({
         onFilterChange(searchTerm, cityName, [], 0);
     }, [searchTerm, onFilterChange]);
 
-    const handleNeighborhoodToggle = useCallback((neighborhoodName: string) => {
-        const updated = neighborhoods.includes(neighborhoodName)
-            ? neighborhoods.filter(n => n !== neighborhoodName)
-            : [...neighborhoods, neighborhoodName];
-        setNeighborhoods(updated);
-        onFilterChange(searchTerm, city, updated, distance);
-    }, [neighborhoods, searchTerm, city, distance, onFilterChange]);
+    const handleNeighborhoodSelectChange = useCallback(
+        (value: string | string[]) => {
+            const next = Array.isArray(value) ? value : value ? [value] : [];
+            setNeighborhoods(next);
+            onFilterChange(searchTerm, city, next, distance);
+        },
+        [searchTerm, city, distance, onFilterChange],
+    );
 
-    const handleRemoveNeighborhood = useCallback((neighborhoodName: string) => {
-        const updated = neighborhoods.filter(n => n !== neighborhoodName);
-        setNeighborhoods(updated);
-        onFilterChange(searchTerm, city, updated, distance);
-    }, [neighborhoods, searchTerm, city, distance, onFilterChange]);
+    const handleRemoveNeighborhood = useCallback(
+        (neighborhoodName: string) => {
+            const updated = neighborhoods.filter((n) => n !== neighborhoodName);
+            setNeighborhoods(updated);
+            onFilterChange(searchTerm, city, updated, distance);
+        },
+        [neighborhoods, searchTerm, city, distance, onFilterChange],
+    );
 
     // Clear neighborhood search and close dropdown when city changes or becomes invalid
     useEffect(() => {
         if (!isCitySelected) {
-            setNeighborhoods([]);
-            setNeighborhoodSearchTerm('');
-            setShowNeighborhoodDropdown(false);
-            setDistance(0);
-        } else {
-            setNeighborhoodSearchTerm('');
-            setShowNeighborhoodDropdown(false);
+            if (neighborhoods.length > 0) {
+                setNeighborhoods([]);
+                onFilterChange(searchTerm, city, [], 0);
+            }
+            if (distance !== 0) {
+                setDistance(0);
+            }
+            return;
         }
-    }, [trimmedCity, isCitySelected]);
+
+        const validNeighborhoods = neighborhoods.filter((n) =>
+            getNeighborhoodsByCity(city).includes(n),
+        );
+        if (validNeighborhoods.length !== neighborhoods.length) {
+            setNeighborhoods(validNeighborhoods);
+            onFilterChange(searchTerm, city, validNeighborhoods, distance);
+        }
+    }, [isCitySelected, neighborhoods, city, distance, onFilterChange, searchTerm]);
 
     // Reset distance when showAdditionalFilters becomes false
     useEffect(() => {
@@ -283,71 +275,14 @@ export function LocationFiltersGroup({
                 </div>
                 {showAdditionalFilters && (
                     <div className={styles.neighborhoodFilter}>
-                        <div className={styles.autocompleteWrapper}>
-                            <Input
-                                id="filters-neighborhood"
-                                label="Квартал"
-                                placeholder="Изберете квартал"
-                                value={neighborhoodSearchTerm}
-                                onChange={(event) => {
-                                    setNeighborhoodSearchTerm(event.target.value);
-                                    setShowNeighborhoodDropdown(true);
-                                }}
-                                onFocus={() => {
-                                    if (showAdditionalFilters) {
-                                        setShowNeighborhoodDropdown(true);
-                                    }
-                                }}
-                                onBlur={(e) => {
-                                    // Delay hiding dropdown to allow click on dropdown item
-                                    setTimeout(() => {
-                                        if (!neighborhoodDropdownRef.current?.contains(document.activeElement)) {
-                                            setShowNeighborhoodDropdown(false);
-                                        }
-                                    }, 200);
-                                }}
-                                ref={neighborhoodInputRef}
-                                className={styles.filterInput}
-                            />
-                            {showNeighborhoodDropdown && showAdditionalFilters && (
-                                <div
-                                    ref={neighborhoodDropdownRef}
-                                    className={styles.neighborhoodDropdown}
-                                >
-                                    {getNeighborhoodsForCity(trimmedCity)
-                                        .filter((n) => {
-                                            const searchTerm = neighborhoodSearchTerm.toLowerCase().trim();
-                                            if (!searchTerm) return true;
-                                            return n.name.toLowerCase().includes(searchTerm) ||
-                                                n.nameEn.toLowerCase().includes(searchTerm);
-                                        })
-                                        .map((n) => {
-                                            const isSelected = neighborhoods.includes(n.name);
-                                            return (
-                                                <label
-                                                    key={n.id}
-                                                    className={styles.neighborhoodDropdownItem}
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isSelected}
-                                                        onChange={() => handleNeighborhoodToggle(n.name)}
-                                                        onMouseDown={(e) => {
-                                                            e.preventDefault(); // Prevent input blur
-                                                        }}
-                                                    />
-                                                    <span>{n.name}</span>
-                                                </label>
-                                            );
-                                        })}
-                                    {getNeighborhoodsForCity(trimmedCity).length === 0 && (
-                                        <div className={styles.noNeighborhoodsMessage}>
-                                            Няма налични квартали за този град
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                        <NeighborhoodSelect
+                            city={isCitySelected ? city : ''}
+                            value={neighborhoods}
+                            onChange={handleNeighborhoodSelectChange}
+                            multiple
+                            disabled={!isCitySelected}
+                            label="Квартали"
+                        />
                         {neighborhoods.length > 0 && (
                             <>
                                 <div className={styles.selectedNeighborhoods}>

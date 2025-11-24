@@ -556,17 +556,17 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                 <h2 className={styles.sectionTitle}>Детайли за строителството</h2>
                 <div className={styles.constructionGrid}>
                   <div className={styles.constructionItem}>
-                    <span className={styles.constructionLabel}>Вид строителство:</span>
+                    <span className={styles.constructionLabel}>Вид строителство</span>
                     <span className={styles.constructionValue}>{getConstructionLabel()}</span>
                   </div>
                   {property.year_built && (
                     <div className={styles.constructionItem}>
-                      <span className={styles.constructionLabel}>Година на строителство:</span>
+                      <span className={styles.constructionLabel}>Година на строителство</span>
                       <span className={styles.constructionValue}>{property.year_built}</span>
                     </div>
                   )}
                   <div className={styles.constructionItem}>
-                    <span className={styles.constructionLabel}>Степен на завършеност:</span>
+                    <span className={styles.constructionLabel}>Степен на завършеност</span>
                     <span className={styles.constructionValue}>{getCompletionLabel()}</span>
                   </div>
                 </div>

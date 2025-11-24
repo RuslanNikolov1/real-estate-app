@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -35,6 +35,8 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const [showAmbienceMessage, setShowAmbienceMessage] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Show message after 3 seconds
@@ -63,6 +65,11 @@ export function Header() {
     { href: '/valuation', label: t('nav.valuation'), icon: ChartBar },
   ];
 
+  const userMenuItems = [
+    { href: '/login', label: t('nav.login') },
+    { href: '/admin-panel', label: t('nav.adminPanel') },
+  ];
+
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
     setIsLanguageMenuOpen(false);
@@ -71,6 +78,32 @@ export function Header() {
   const resolvedLanguage = (i18n.resolvedLanguage || i18n.language || '').split('-')[0];
   const currentLanguageLabel =
     languages.find((l) => l.code === resolvedLanguage)?.label || languages[0].label;
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsUserMenuOpen(false);
+  }, [pathname]);
 
   return (
     <header className={styles.header}>
@@ -150,9 +183,38 @@ export function Header() {
             <Heart size={20} color="white" />
           </Link>
 
-          <Link href="/login" className={styles.iconButton} aria-label="Login">
-            <User size={20} color="white" />
-          </Link>
+          <div className={styles.userMenuWrapper} ref={userMenuRef}>
+            <button
+              type="button"
+              className={styles.userMenuButton}
+              aria-haspopup="menu"
+              aria-expanded={isUserMenuOpen}
+              onClick={() => setIsUserMenuOpen((prev) => !prev)}
+            >
+              <User size={20} color="white" />
+            </button>
+            <AnimatePresence>
+              {isUserMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={styles.userMenu}
+                >
+                  {userMenuItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={styles.userMenuLink}
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <button
             className={styles.mobileMenuButton}

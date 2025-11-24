@@ -1,0 +1,135 @@
+@use '@/styles/variables' as *;
+
+.page {
+  min-height: 100vh;
+  background: $light-gray;
+}
+
+.main {
+  padding: $spacing-2xl $spacing-xl;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-xl $spacing-lg;
+  }
+}
+
+.panel {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: $white;
+  border-radius: 24px;
+  padding: $spacing-2xl;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-xl $spacing-lg;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-xl;
+  flex-wrap: wrap;
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-lg;
+  border-radius: 999px;
+  background: $dark-red;
+  color: $white;
+  border: 2px solid $dark-red;
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: transform $transition-fast, box-shadow $transition-fast, background $transition-fast;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+
+  span:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    color: $white;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-2px);
+    background: darken($dark-red, 5%);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.2);
+    outline: none;
+  }
+}
+
+.title {
+  font-size: 2.5rem;
+  color: $dark-gray;
+  margin-bottom: $spacing-sm;
+  font-family: $font-headline;
+}
+
+.subtitle {
+  color: $medium-gray;
+  font-size: 1rem;
+  max-width: 640px;
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+  flex-wrap: wrap;
+}
+
+.inputLabel {
+  font-weight: 600;
+  color: $dark-gray;
+}
+
+.input {
+  max-width: 320px;
+}
+
+
+.resultsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+  border-bottom: 1px solid $light-gray;
+  padding-bottom: $spacing-md;
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  span {
+    font-size: 0.9rem;
+  }
+}
+
+.propertiesList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.noResults {
+  color: $medium-gray;
+  font-size: 1rem;
+  text-align: center;
+}
+

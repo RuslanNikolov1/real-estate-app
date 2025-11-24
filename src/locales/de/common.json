@@ -26,7 +26,8 @@
     "favorites": "Favoriten",
     "login": "Anmelden",
     "logout": "Abmelden",
-    "admin": "Admin"
+    "admin": "Admin",
+    "adminPanel": "Admin-Panel"
   },
   "home": {
     "title": "VERMIETUNG | VERKAUF | IMMOBILIENBEWERTUNG | KREDITBERATUNG",

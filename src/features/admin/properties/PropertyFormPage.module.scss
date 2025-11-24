@@ -200,6 +200,140 @@
   flex-wrap: wrap;
 }
 
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: $spacing-md;
+}
+
+.featureCard {
+  border: 1px solid $light-gray;
+  border-radius: 14px;
+  padding: $spacing-sm $spacing-md;
+  background: $white;
+  text-align: left;
+  font-weight: 600;
+  color: $dark-gray;
+  transition: border-color $transition-fast, background $transition-fast, color $transition-fast;
+
+  &.active {
+    border-color: $dark-red;
+    background: rgba($dark-red, 0.08);
+    color: $dark-red;
+  }
+
+  &:hover {
+    border-color: $dark-red;
+  }
+}
+
+.imagesList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.imageRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $light-gray;
+  border-radius: 12px;
+  background: $white;
+}
+
+.imagePreview {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  flex: 1;
+
+  img {
+    width: 82px;
+    height: 82px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid $light-gray;
+  }
+}
+
+.imagePlaceholder {
+  width: 82px;
+  height: 82px;
+  border-radius: 12px;
+  border: 1px dashed $light-gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: $medium-gray;
+}
+
+.imageUrl {
+  font-size: 0.95rem;
+  color: $dark-gray;
+  word-break: break-all;
+}
+
+.noImages {
+  margin: 0;
+  color: $medium-gray;
+}
+
+.removeImage {
+  border: 1px dashed $dark-red;
+  background: transparent;
+  color: $dark-red;
+  border-radius: 999px;
+  padding: $spacing-xs $spacing-md;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background $transition-fast, color $transition-fast;
+
+  &:hover,
+  &:focus-visible {
+    background: $dark-red;
+    color: $white;
+    outline: none;
+  }
+}
+
+.dropzone {
+  border: 2px dashed $light-gray;
+  border-radius: 16px;
+  padding: $spacing-lg;
+  text-align: center;
+  color: $medium-gray;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  align-items: center;
+
+  button {
+    border: 1px solid $dark-red;
+    background: transparent;
+    color: $dark-red;
+    border-radius: 999px;
+    padding: $spacing-xs $spacing-md;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background $transition-fast, color $transition-fast;
+
+    &:hover,
+    &:focus-visible {
+      background: $dark-red;
+      color: $white;
+      outline: none;
+    }
+  }
+}
+
+.fileInput {
+  display: none;
+}
+
 
 
 

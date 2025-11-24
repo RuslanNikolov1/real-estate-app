@@ -3,16 +3,19 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Bed, Square } from '@phosphor-icons/react';
+import { MapPin, Bed, Square, PencilSimple, Trash } from '@phosphor-icons/react';
+import type { MouseEvent } from 'react';
 import { Property } from '@/types';
 import styles from './PropertyCard.module.scss';
 
 interface PropertyCardProps {
   property: Property;
   onClick?: () => void;
+  onDelete?: (propertyId: string) => void;
+  onEdit?: (propertyId: string) => void;
 }
 
-export function PropertyCard({ property, onClick }: PropertyCardProps) {
+export function PropertyCard({ property, onClick, onDelete, onEdit }: PropertyCardProps) {
 
   const primaryImage = property.images?.find((img) => img.is_primary) || property.images?.[0];
 
@@ -29,6 +32,29 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
     return `/properties/${property.id}`;
   };
 
+  const handleIconClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleDeleteClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (!onDelete) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    onDelete(property.id);
+  };
+
+  const handleEditClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (!onEdit) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    onEdit(property.id);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -36,6 +62,17 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
       transition={{ duration: 0.3 }}
       className={styles.card}
     >
+      {onDelete && (
+        <button
+          type="button"
+          className={`${styles.actionButton} ${styles.deleteButton}`}
+          aria-label="Изтрий имот"
+          onClick={handleDeleteClick}
+        >
+          <Trash size={20} weight="fill" />
+          <span>Изтрий</span>
+        </button>
+      )}
       <Link
         href={getPropertyUrl()}
         className={styles.link}
@@ -102,6 +139,17 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
           </div>
         </div>
       </Link>
+      {onEdit && (
+        <button
+          type="button"
+          className={`${styles.actionButton} ${styles.editButton}`}
+          aria-label="Редактирай имот"
+          onClick={handleEditClick}
+        >
+          <PencilSimple size={22} weight="fill" />
+          <span>Редактирай</span>
+        </button>
+      )}
     </motion.div>
   );
 }

@@ -1,0 +1,41 @@
+@use '@/styles/variables' as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $dark-gray;
+}
+
+.select {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid $light-gray;
+  padding: $spacing-sm $spacing-md;
+  font-size: 1rem;
+  font-family: inherit;
+  background-color: $white;
+  transition: border-color $transition-base;
+
+  &:disabled {
+    background: $light-gray;
+    cursor: not-allowed;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $dark-red;
+  }
+}
+
+.error {
+  font-size: 0.85rem;
+  color: $dark-red;
+  margin: 0;
+}
+
