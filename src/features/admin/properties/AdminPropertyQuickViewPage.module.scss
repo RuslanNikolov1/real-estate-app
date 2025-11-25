@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '@/styles/variables' as *;
 
 .page {
@@ -67,7 +68,7 @@
   &:hover,
   &:focus-visible {
     transform: translateY(-2px);
-    background: darken($dark-red, 5%);
+    background: color.adjust($dark-red, $lightness: -5%);
     box-shadow: 0 16px 28px rgba(0, 0, 0, 0.2);
     outline: none;
   }

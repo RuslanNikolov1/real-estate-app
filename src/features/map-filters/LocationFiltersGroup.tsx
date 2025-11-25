@@ -74,7 +74,6 @@ export function LocationFiltersGroup({
         setNeighborhoods([]);
         setDistance(0);
         setShowCityDropdown(false);
-        setNeighborhoodSearchTerm('');
         onFilterChange(searchTerm, cityName, [], 0);
     }, [searchTerm, onFilterChange]);
 

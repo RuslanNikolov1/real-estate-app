@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '@/styles/variables' as *;
 
 .card {
@@ -189,7 +190,7 @@
   &:focus-visible {
     transform: translateY(-2px);
     box-shadow: 0 16px 28px rgba(0, 0, 0, 0.25);
-    background: darken($dark-red, 5%);
+    background: color.adjust($dark-red, $lightness: -5%);
     outline: none;
   }
 
