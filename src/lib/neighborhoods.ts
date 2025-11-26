@@ -30,3 +30,6 @@ export const getNeighborhoodsByCity = (cityName?: string): string[] => {
 
 export const getInitialCity = () => CITY_OPTIONS[0] ?? '';
 
+
+
+

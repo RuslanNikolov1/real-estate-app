@@ -1,0 +1,87 @@
+@use '@/styles/variables' as *;
+
+.selectWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  .label {
+    font-weight: 600;
+    color: $dark-gray;
+    font-size: 0.9rem;
+  }
+
+  .select {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid $light-gray;
+    padding: $spacing-sm $spacing-md;
+    font-size: 1rem;
+    font-family: inherit;
+    background: $white;
+    cursor: pointer;
+    transition: border-color $transition-fast;
+
+    &:hover,
+    &:focus {
+      outline: none;
+      border-color: $dark-red;
+    }
+  }
+
+  .errorMessage {
+    color: $dark-red;
+    font-size: 0.85rem;
+    margin: 0;
+  }
+}
+
+.featuresWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+
+  .label {
+    font-weight: 600;
+    color: $dark-gray;
+    font-size: 1rem;
+  }
+
+  .featuresGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: $spacing-md;
+  }
+
+  .featureCard {
+    border: 1px solid $light-gray;
+    border-radius: 12px;
+    padding: $spacing-md;
+    text-align: left;
+    font-weight: 500;
+    color: $dark-gray;
+    background: $white;
+    cursor: pointer;
+    transition: border-color $transition-fast, background $transition-fast, color $transition-fast;
+
+    &:hover,
+    &:focus {
+      outline: none;
+      border-color: $dark-red;
+    }
+
+    &.active {
+      border-color: $dark-red;
+      background: rgba($dark-red, 0.08);
+      color: $dark-red;
+      font-weight: 600;
+    }
+  }
+
+  .errorMessage {
+    color: $dark-red;
+    font-size: 0.85rem;
+    margin: 0;
+  }
+}
+

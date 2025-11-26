@@ -4,3 +4,6 @@ export default function AdminPropertiesQuickView() {
   return <AdminPropertyQuickViewPage />;
 }
 
+
+
+

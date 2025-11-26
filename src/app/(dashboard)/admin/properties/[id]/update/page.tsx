@@ -8,3 +8,6 @@ export default function AdminPropertyUpdatePage({
   return <PropertyFormPage propertyId={params.id} />;
 }
 
+
+
+

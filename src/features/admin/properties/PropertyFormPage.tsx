@@ -16,37 +16,15 @@ import { NeighborhoodSelect } from '@/components/forms/NeighborhoodSelect';
 import { FloppyDisk, X, Globe, SpinnerGap } from '@phosphor-icons/react';
 import { mockProperties } from '@/features/properties/PropertiesListPage';
 import {
-  APARTMENT_FEATURE_FILTERS,
-  CONSTRUCTION_FILTERS,
-  COMPLETION_STATUSES,
-} from '@/features/map-filters/filters/constants';
+  generatePropertySchema,
+  getPropertyTypeSchema,
+  getFieldsForPropertyType,
+} from '@/lib/property-schemas';
+import type { PropertyType } from '@/types';
+import { DynamicPropertyField } from '@/components/forms/DynamicPropertyField';
 import styles from './PropertyFormPage.module.scss';
 
-const propertySchema = z.object({
-  title: z.string().min(1, 'Заглавието е задължително'),
-  description: z.string().min(1, 'Описанието е задължително'),
-  type: z.enum(['apartment', 'house', 'villa', 'office', 'shop', 'warehouse', 'land', 'hotel']),
-  status: z.enum(['for-sale', 'for-rent']),
-  location_type: z.enum(['urban', 'mountain', 'coastal']),
-  city: z.string().min(1, 'Градът е задължителен'),
-  neighborhood: z.string().optional(),
-  address: z.string().optional(),
-  price: z.number().min(0, 'Цената трябва да е положително число'),
-  currency: z.string().min(1, 'Валутата е задължителна'),
-  area: z.number().min(0, 'Площта трябва да е положително число'),
-  price_per_sqm: z.number().optional(),
-  rooms: z.number().optional(),
-  floor: z.number().optional(),
-  total_floors: z.number().optional(),
-  year_built: z.number().optional(),
-  construction_type: z.string().optional(),
-  completion_status: z.string().optional(),
-  broker_name: z.string().optional(),
-  broker_title: z.string().optional(),
-  broker_phone: z.string().optional(),
-});
-
-type PropertyFormData = z.infer<typeof propertySchema>;
+type PropertyFormData = z.infer<ReturnType<typeof generatePropertySchema>>;
 
 interface PropertyFormPageProps {
   propertyId?: string;
@@ -128,12 +106,37 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   }, []);
 
 
+  // Initialize property type from existing property or default to apartment
+  const [propertyType, setPropertyType] = useState<PropertyType>(() => {
+    if (property?.type && ['apartment', 'house', 'villa', 'office', 'shop', 'warehouse', 'land', 'hotel', 'agricultural', 'garage', 'restaurant', 'replace-real-estates', 'buy-real-estates', 'other-real-estates'].includes(property.type)) {
+      // Map villa to house since they're combined
+      return property.type === 'villa' ? 'house' : (property.type as PropertyType);
+    }
+    return 'apartment';
+  });
+  
+  // Update property type when property changes (for edit mode)
+  useEffect(() => {
+    if (property?.type && property.type !== propertyType) {
+      const validTypes: PropertyType[] = ['apartment', 'house', 'villa', 'office', 'shop', 'warehouse', 'land', 'hotel', 'agricultural', 'garage', 'restaurant', 'replace-real-estates', 'buy-real-estates', 'other-real-estates'];
+      if (validTypes.includes(property.type as PropertyType)) {
+        // Map villa to house since they're combined
+        const mappedType = property.type === 'villa' ? 'house' : property.type;
+        setPropertyType(mappedType as PropertyType);
+      }
+    }
+  }, [property?.type, propertyType]);
+
+  // Generate schema dynamically based on property type
+  const propertySchema = useMemo(() => generatePropertySchema(propertyType), [propertyType]);
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
     setValue,
+    reset,
   } = useForm<PropertyFormData>({
     resolver: zodResolver(propertySchema),
     defaultValues: property
@@ -147,16 +150,16 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
           neighborhood: property.neighborhood || '',
           address: property.address || '',
           price: property.price,
-          currency: property.currency,
           area: property.area,
-          rooms: property.rooms,
           floor: property.floor,
           total_floors: property.total_floors,
-          year_built: property.year_built,
           price_per_sqm:
             property.area && property.price ? Math.round(property.price / property.area) : undefined,
           construction_type: (property as any).construction_type || '',
           completion_status: (property as any).completion_status || '',
+          subtype: (property as any).subtype || '',
+          yard_area: (property as any).yard_area || undefined,
+          hotel_category: (property as any).hotel_category || '',
           broker_name: (property as any)?.broker?.name || '',
           broker_title: (property as any)?.broker?.title || '',
           broker_phone: (property as any)?.broker?.phone || '',
@@ -171,15 +174,15 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
           neighborhood: '',
           address: '',
           price: 0,
-          currency: 'лв',
           area: 0,
           price_per_sqm: undefined,
-          rooms: undefined,
           floor: undefined,
           total_floors: undefined,
-          year_built: undefined,
           construction_type: '',
           completion_status: '',
+          subtype: '',
+          yard_area: undefined,
+          hotel_category: '',
           broker_name: '',
           broker_title: '',
           broker_phone: '',
@@ -188,8 +191,80 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
 
   const cityValue = watch('city');
   const neighborhoodValue = watch('neighborhood');
+  const watchedType = watch('type') as PropertyType;
+
+  // Update property type when it changes and reset type-specific fields
+  useEffect(() => {
+    if (watchedType && watchedType !== propertyType) {
+      const currentValues = watch();
+      setPropertyType(watchedType);
+      
+      // Get the new schema
+      const newSchema = getPropertyTypeSchema(watchedType);
+      
+      // Prepare values to keep (base fields that are common)
+      const valuesToKeep: any = {
+        title: currentValues.title || '',
+        description: currentValues.description || '',
+        type: watchedType,
+        status: currentValues.status || 'for-sale',
+        location_type: currentValues.location_type || 'urban',
+        city: currentValues.city || CITY_OPTIONS[0] || 'Бургас',
+        neighborhood: currentValues.neighborhood || '',
+        address: currentValues.address || '',
+        price: currentValues.price || 0,
+        area: currentValues.area || 0,
+        price_per_sqm: currentValues.price_per_sqm,
+        year_built: currentValues.year_built,
+        broker_name: currentValues.broker_name || '',
+        broker_title: currentValues.broker_title || '',
+        broker_phone: currentValues.broker_phone || '',
+        // Reset type-specific fields
+        subtype: '',
+        rooms: undefined,
+        floor: undefined,
+        total_floors: undefined,
+        yard_area: undefined,
+        construction_type: '',
+        completion_status: '',
+        hotel_category: '',
+        agricultural_category: '',
+        features: [],
+      };
+      
+      // Reset features UI state
+      setSelectedFeatures([]);
+      
+      // Update form with cleared values
+      reset(valuesToKeep);
+    }
+  }, [watchedType, propertyType, setValue, reset, watch]);
 
   const neighborhoodOptions = useMemo(() => getNeighborhoodsByCity(cityValue), [cityValue]);
+  
+  // Get fields for current property type
+  const typeSchema = useMemo(() => getPropertyTypeSchema(propertyType), [propertyType]);
+  const typeFields = useMemo(() => getFieldsForPropertyType(propertyType), [propertyType]);
+  
+  // Get features list for current property type
+  const featuresList = useMemo(() => {
+    const featuresField = typeSchema.fields.find(f => f.key === 'features');
+    return featuresField?.options || [];
+  }, [typeSchema]);
+  
+  // Check which fields should be shown based on property type
+  
+  const showFloor = useMemo(() => {
+    return propertyType === 'apartment' || propertyType === 'office' || propertyType === 'shop';
+  }, [propertyType]);
+  
+  const showTotalFloors = useMemo(() => {
+    return propertyType === 'apartment';
+  }, [propertyType]);
+  
+  const showYardArea = useMemo(() => {
+    return propertyType === 'house';
+  }, [propertyType]);
 
   useEffect(() => {
     if (!neighborhoodOptions.length) {
@@ -299,7 +374,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                   <Input
                     label="Заглавие *"
                     {...register('title')}
-                    error={errors.title?.message}
+                    error={errors.title?.message ? String(errors.title.message) : undefined}
                   />
                 </div>
 
@@ -321,82 +396,132 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       <select
                         {...register('type')}
                         className={styles.select}
+                        onChange={(e) => {
+                          setValue('type', e.target.value);
+                          setPropertyType(e.target.value as PropertyType);
+                        }}
                       >
                         <option value="apartment">Апартамент</option>
-                        <option value="house">Къща</option>
-                        <option value="villa">Вила</option>
+                        <option value="house">Къща/Вила</option>
                         <option value="office">Офис</option>
                         <option value="shop">Магазин</option>
                         <option value="warehouse">Склад</option>
                         <option value="land">Земя</option>
                         <option value="hotel">Хотел</option>
+                        <option value="agricultural">Земеделска земя</option>
+                        <option value="garage">Гараж/Паркоместа</option>
+                        <option value="restaurant">Ресторант</option>
+                        <option value="replace-real-estates">Замяна на недвижими имоти</option>
+                        <option value="buy-real-estates">Купуване на недвижими имоти</option>
+                        <option value="other-real-estates">Други недвижими имоти</option>
                       </select>
                     </div>
+                    {/* Subtype field - shown based on property type */}
+                    {typeSchema.subtypeOptions.length > 0 && (
+                      <div className={styles.selectWrapper}>
+                        <label className={styles.label}>
+                          {propertyType === 'house'
+                            ? 'Етажност' 
+                            : propertyType === 'apartment'
+                            ? 'Подтип'
+                            : 'Подтип'}
+                        </label>
+                        <select
+                          {...register('subtype')}
+                          className={styles.select}
+                          value={watch('subtype') || ''}
+                          onChange={(e) => setValue('subtype', e.target.value)}
+                        >
+                          <option value="">Изберете</option>
+                          {typeSchema.subtypeOptions.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.subtype?.message && (
+                          <p className={styles.errorMessage}>
+                            {String(errors.subtype.message)}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className={styles.formRow}>
                     <Input
-                      label="Стаи"
-                      type="number"
-                      {...register('rooms', { valueAsNumber: true })}
-                      error={errors.rooms?.message}
-                    />
-                    <Input
-                      label="Площ (м²) *"
+                      label={propertyType === 'hotel' ? "РЗП (м²) *" : "Площ (м²) *"}
                       type="number"
                       {...register('area', { valueAsNumber: true })}
-                      error={errors.area?.message}
+                      error={errors.area?.message ? String(errors.area.message) : undefined}
                     />
                     <Input
                       label="Цена *"
                       type="number"
                       {...register('price', { valueAsNumber: true })}
-                      error={errors.price?.message}
+                      error={errors.price?.message ? String(errors.price.message) : undefined}
                     />
-                    <Input
-                      label="Валута *"
-                      {...register('currency')}
-                      error={errors.currency?.message}
-                    />
-                  </div>
-                  <div className={styles.formRow}>
                     <Input
                       label="Цена на м²"
                       type="number"
                       {...register('price_per_sqm', { valueAsNumber: true })}
-                      error={errors.price_per_sqm?.message}
+                      error={errors.price_per_sqm?.message ? String(errors.price_per_sqm.message) : undefined}
                     />
-                    <Input
-                      label="Етаж"
-                      type="number"
-                      {...register('floor', { valueAsNumber: true })}
-                      error={errors.floor?.message}
-                    />
-                    <Input
-                      label="Общо етажи"
-                      type="number"
-                      {...register('total_floors', { valueAsNumber: true })}
-                      error={errors.total_floors?.message}
-                    />
+                  </div>
+                  {/* Dynamic fields based on property type - conditionally shown */}
+                  <div className={styles.formRow}>
+                    {/* Floor - only for apartments, offices, shops */}
+                    {showFloor && (
+                      <Input
+                        label="Етаж"
+                        type="number"
+                        {...register('floor', { valueAsNumber: true })}
+                        error={errors.floor?.message ? String(errors.floor.message) : undefined}
+                        placeholder="Етаж"
+                      />
+                    )}
+                    {/* Total floors - only for apartments */}
+                    {showTotalFloors && (
+                      <Input
+                        label="Общо етажи"
+                        type="number"
+                        {...register('total_floors', { valueAsNumber: true })}
+                        error={errors.total_floors?.message ? String(errors.total_floors.message) : undefined}
+                        placeholder="Общо етажи"
+                      />
+                    )}
+                    {/* Yard area - only for houses */}
+                    {showYardArea && (
+                      <Input
+                        label="Площ на двора (м²)"
+                        type="number"
+                        {...register('yard_area' as any, { valueAsNumber: true })}
+                        error={errors.yard_area?.message ? String(errors.yard_area.message) : undefined}
+                        placeholder="Площ на двора"
+                      />
+                    )}
                   </div>
                 </div>
 
-                <div className={styles.section}>
-                  <h2 className={styles.sectionTitle}>Особености</h2>
-                  <div className={styles.featuresGrid}>
-                    {APARTMENT_FEATURE_FILTERS.map((feature) => (
-                      <button
-                        key={feature.id}
-                        type="button"
-                        className={`${styles.featureCard} ${
-                          selectedFeatures.includes(feature.id) ? styles.active : ''
-                        }`}
-                        onClick={() => toggleFeature(feature.id)}
-                      >
-                        <span>{feature.label}</span>
-                      </button>
-                    ))}
+                {/* Features section - dynamically rendered based on property type */}
+                {featuresList.length > 0 && (
+                  <div className={styles.section}>
+                    <h2 className={styles.sectionTitle}>Особености</h2>
+                    <DynamicPropertyField
+                      field={{
+                        key: 'features',
+                        label: 'Особености',
+                        type: 'multi-select',
+                        required: false,
+                        options: featuresList,
+                      }}
+                      register={register}
+                      errors={errors}
+                      setValue={setValue}
+                      onFeaturesChange={setSelectedFeatures}
+                      selectedFeatures={selectedFeatures}
+                    />
                   </div>
-                </div>
+                )}
 
                 <div className={styles.section}>
                   <h2 className={styles.sectionTitle}>Локация</h2>
@@ -414,7 +539,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                         ))}
                       </select>
                       {errors.city?.message && (
-                        <p className={styles.errorMessage}>{errors.city.message}</p>
+                        <p className={styles.errorMessage}>{String(errors.city.message)}</p>
                       )}
                     </div>
                     <NeighborhoodSelect
@@ -424,46 +549,33 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                         setValue('neighborhood', Array.isArray(val) ? val[0] ?? '' : val)
                       }
                       disabled={!cityValue}
-                      error={errors.neighborhood?.message}
+                      error={errors.neighborhood?.message ? String(errors.neighborhood.message) : undefined}
                     />
                   </div>
                   <div className={styles.formRow}>
-                    <div className={styles.selectWrapper}>
-                      <label className={styles.label}>Година на строеж</label>
-                      <Input
-                        type="number"
-                        {...register('year_built', { valueAsNumber: true })}
-                        error={errors.year_built?.message}
-                      />
-                    </div>
-                    <div className={styles.selectWrapper}>
-                      <label className={styles.label}>Тип строителство</label>
-                      <select
-                        {...register('construction_type')}
-                        className={styles.select}
-                      >
-                        <option value="">Изберете</option>
-                        {CONSTRUCTION_FILTERS.map((option) => (
-                          <option key={option.id} value={option.id}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className={styles.selectWrapper}>
-                      <label className={styles.label}>Степен на завършеност</label>
-                      <select
-                        {...register('completion_status')}
-                        className={styles.select}
-                      >
-                        <option value="">Изберете</option>
-                        {COMPLETION_STATUSES.map((option) => (
-                          <option key={option.id} value={option.id}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    {/* Year built - shown for all property types */}
+                    <Input
+                      label="Година на строеж"
+                      type="number"
+                      {...register('year_built', { valueAsNumber: true })}
+                      error={errors.year_built?.message ? String(errors.year_built.message) : undefined}
+                      placeholder="Година"
+                    />
+                    {/* Dynamic fields from schema - construction, completion, building_type, hotel_category, agricultural_category, electricity, water, bed_base */}
+                    {typeFields
+                      .filter(field => 
+                        ['construction_type', 'completion_status', 'building_type', 'hotel_category', 'agricultural_category', 'electricity', 'water', 'bed_base'].includes(field.key)
+                      )
+                      .map(field => (
+                        <DynamicPropertyField
+                          key={field.key}
+                          field={field}
+                          register={register}
+                          errors={errors}
+                          setValue={setValue}
+                          value={watch(field.key as any)}
+                        />
+                      ))}
                   </div>
                 </div>
 
@@ -534,7 +646,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       />
                     </div>
                     {errors.description && (
-                      <p className={styles.errorMessage}>{errors.description.message}</p>
+                      <p className={styles.errorMessage}>{String(errors.description.message)}</p>
                     )}
                   </div>
                 </div>
@@ -599,17 +711,17 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                   <Input
                     label="Име"
                     {...register('broker_name')}
-                    error={errors.broker_name?.message}
+                    error={errors.broker_name?.message ? String(errors.broker_name.message) : undefined}
                   />
                   <Input
                     label="Длъжност"
                     {...register('broker_title')}
-                    error={errors.broker_title?.message}
+                    error={errors.broker_title?.message ? String(errors.broker_title.message) : undefined}
                   />
                   <Input
                     label="Телефон"
                     {...register('broker_phone')}
-                    error={errors.broker_phone?.message}
+                    error={errors.broker_phone?.message ? String(errors.broker_phone.message) : undefined}
                   />
                 </div>
               </div>

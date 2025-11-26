@@ -2,7 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
-import { EnvelopeSimple, Phone, MapPin, FacebookLogo, InstagramLogo, LinkedinLogo } from '@phosphor-icons/react';
+import { EnvelopeSimple, Phone, MapPin, FacebookLogo, InstagramLogo, LinkedinLogo, UserCircleDashed } from '@phosphor-icons/react';
 import styles from './Footer.module.scss';
 
 export function Footer() {
@@ -99,8 +99,17 @@ export function Footer() {
         </div>
 
         <div className={styles.bottom}>
+          <a 
+            href="https://portfolio-website-dusky-five-28.vercel.app/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={styles.creatorCredit}
+          >
+            <UserCircleDashed size={18} color="#40E0D0" weight="fill" />
+            <span>Created by <span className={styles.creatorName}>Ruslan Nikolov</span></span>
+          </a>
           <p className={styles.copyright}>
-            © {new Date().getFullYear()} Broker Bulgaria. Всички права запазени.
+            © 2025 Broker Bulgaria. Всички права запазени.
           </p>
         </div>
       </div>

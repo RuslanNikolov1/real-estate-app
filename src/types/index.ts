@@ -7,7 +7,13 @@ export type PropertyType =
   | 'shop'
   | 'warehouse'
   | 'land'
-  | 'hotel';
+  | 'hotel'
+  | 'agricultural'
+  | 'garage'
+  | 'restaurant'
+  | 'replace-real-estates'
+  | 'buy-real-estates'
+  | 'other-real-estates';
 
 export type PropertyStatus = 'for-sale' | 'for-rent' | 'sold' | 'rented';
 

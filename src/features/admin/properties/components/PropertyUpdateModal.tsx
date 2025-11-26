@@ -14,7 +14,6 @@ import styles from './PropertyUpdateModal.module.scss';
 const updateSchema = z.object({
   price: z.number().min(0, 'Цената трябва да е положително число').optional(),
   status: z.enum(['for-sale', 'for-rent', 'sold', 'rented']).optional(),
-  currency: z.string().optional(),
 });
 
 type UpdateFormData = z.infer<typeof updateSchema>;
@@ -44,7 +43,6 @@ export function PropertyUpdateModal({
       status: property?.status === 'for-sale' || property?.status === 'for-rent' 
         ? property.status 
         : 'for-sale',
-      currency: property?.currency,
     },
   });
 
@@ -55,7 +53,6 @@ export function PropertyUpdateModal({
         status: property.status === 'for-sale' || property.status === 'for-rent' 
           ? property.status 
           : 'for-sale',
-        currency: property.currency,
       });
     }
   }, [property, reset]);
@@ -69,9 +66,6 @@ export function PropertyUpdateModal({
     }
     if (data.status) {
       updates.status = data.status;
-    }
-    if (data.currency) {
-      updates.currency = data.currency;
     }
 
     onUpdate(property.id, updates);
@@ -118,19 +112,12 @@ export function PropertyUpdateModal({
                   <CurrencyDollar size={20} />
                   Цена
                 </h3>
-                <div className={styles.formRow}>
-                  <Input
-                    label="Цена"
-                    type="number"
-                    {...register('price', { valueAsNumber: true })}
-                    error={errors.price?.message}
-                  />
-                  <Input
-                    label="Валута"
-                    {...register('currency')}
-                    error={errors.currency?.message}
-                  />
-                </div>
+                <Input
+                  label="Цена"
+                  type="number"
+                  {...register('price', { valueAsNumber: true })}
+                  error={errors.price?.message}
+                />
               </div>
 
               <div className={styles.formSection}>
