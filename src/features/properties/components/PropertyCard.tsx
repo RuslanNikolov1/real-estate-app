@@ -1,11 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Bed, Square, PencilSimple, Trash } from '@phosphor-icons/react';
 import type { MouseEvent } from 'react';
 import { Property } from '@/types';
+import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
 import styles from './PropertyCard.module.scss';
 
 interface PropertyCardProps {
@@ -83,8 +83,9 @@ export function PropertyCard({ property, onClick, onDelete, onEdit }: PropertyCa
         <div className={styles.imageContainer}>
           {primaryImage ? (
             <>
-            <Image
+            <CloudinaryImage
               src={primaryImage.url}
+              publicId={primaryImage.public_id}
               alt={property.title}
               fill
               className={styles.image}

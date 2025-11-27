@@ -1,10 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { PencilSimple, Trash, Eye, ArrowsClockwise } from '@phosphor-icons/react';
 import { Property } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
 import styles from './AdminPropertyCard.module.scss';
 
 interface AdminPropertyCardProps {
@@ -30,8 +30,9 @@ export function AdminPropertyCard({
     >
       <div className={styles.imageContainer}>
         {primaryImage ? (
-          <Image
+          <CloudinaryImage
             src={primaryImage.url}
+            publicId={primaryImage.public_id}
             alt={property.title}
             fill
             sizes="(max-width: 768px) 100vw, 300px"

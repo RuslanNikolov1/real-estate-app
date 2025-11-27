@@ -2,6 +2,7 @@
 
 import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import styles from '../MapFiltersPage.module.scss';
 
@@ -22,6 +23,7 @@ interface ReplaceRealEstatesFiltersPageProps {
 
 export interface ReplaceRealEstatesFiltersState {
     searchTerm: string;
+    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
@@ -44,6 +46,7 @@ export function ReplaceRealEstatesFiltersPage({
         neighborhoods: [] as string[],
         distance: 0
     });
+    const [propertyId, setPropertyId] = useState('');
 
     const locationState = externalLocationState || internalLocationState;
     const setLocationState = externalOnLocationChange 
@@ -55,6 +58,7 @@ export function ReplaceRealEstatesFiltersPage({
     // Store current filter values
     const filterValuesRef = useRef<Partial<ReplaceRealEstatesFiltersState>>({
         searchTerm: '',
+        propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0
@@ -104,6 +108,12 @@ export function ReplaceRealEstatesFiltersPage({
         notifyFiltersChange();
     }, [externalOnLocationChange, notifyFiltersChange]);
 
+    const handlePropertyIdChange = useCallback((value: string) => {
+        setPropertyId(value);
+        filterValuesRef.current.propertyId = value.trim();
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
+
     const handleClear = useCallback(() => {
         // Reset location state
         setLocationState({
@@ -113,6 +123,7 @@ export function ReplaceRealEstatesFiltersPage({
             neighborhoods: [],
             distance: 0
         });
+        setPropertyId('');
 
         // Reset all filter values
         filterValuesRef.current = {
@@ -178,6 +189,14 @@ export function ReplaceRealEstatesFiltersPage({
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
+                <div className={styles.idFilter}>
+                    <Input
+                        label="ID на имот"
+                        placeholder="Въведете ID"
+                        value={propertyId}
+                        onChange={(event) => handlePropertyIdChange(event.target.value)}
+                    />
+                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}

@@ -12,6 +12,11 @@
   color: $dark-gray;
 }
 
+.requiredMarker {
+  color: $dark-red;
+  margin-left: 0.125rem;
+}
+
 .select {
   width: 100%;
   border-radius: 12px;
@@ -38,6 +43,9 @@
   color: $dark-red;
   margin: 0;
 }
+
+
+
 
 
 

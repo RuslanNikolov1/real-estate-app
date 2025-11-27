@@ -3,6 +3,7 @@
 import React, { useRef, useCallback, useState, useMemo, useEffect } from 'react';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import {
     SubtypeFilter,
@@ -38,6 +39,7 @@ interface HousesVillasFiltersPageProps {
 
 export interface HouseFiltersState {
     searchTerm: string;
+    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
@@ -75,6 +77,7 @@ export function HousesVillasFiltersPage({
         neighborhoods: [] as string[],
         distance: 0
     });
+    const [propertyId, setPropertyId] = useState('');
 
     const locationState = externalLocationState || internalLocationState;
     const setLocationState = externalOnLocationChange
@@ -99,6 +102,7 @@ export function HousesVillasFiltersPage({
     // Store current filter values - all house/villa filter state managed here
     const filterValuesRef = useRef<Partial<HouseFiltersState>>({
         searchTerm: '',
+        propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0,
@@ -162,6 +166,12 @@ export function HousesVillasFiltersPage({
         notifyFiltersChange();
     }, [externalOnLocationChange, notifyFiltersChange]);
 
+    const handlePropertyIdChange = useCallback((value: string) => {
+        setPropertyId(value);
+        filterValuesRef.current.propertyId = value.trim();
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
+
     const handleHouseTypeChange = useCallback((selectedTypes: string[]) => {
         filterValuesRef.current.houseTypes = selectedTypes;
         notifyFiltersChange();
@@ -218,6 +228,7 @@ export function HousesVillasFiltersPage({
             neighborhoods: [],
             distance: 0
         });
+        setPropertyId('');
 
         // Reset all filter values
         filterValuesRef.current = {
@@ -225,6 +236,7 @@ export function HousesVillasFiltersPage({
             city: '',
             neighborhoods: [],
             distance: 0,
+            propertyId: '',
             houseTypes: [],
             houseAreaFrom: 50,
             houseAreaTo: 200,
@@ -455,6 +467,14 @@ export function HousesVillasFiltersPage({
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
+                <div className={styles.idFilter}>
+                    <Input
+                        label="ID на имот"
+                        placeholder="Въведете ID"
+                        value={propertyId}
+                        onChange={(event) => handlePropertyIdChange(event.target.value)}
+                    />
+                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}

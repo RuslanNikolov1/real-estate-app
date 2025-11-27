@@ -1,8 +1,11 @@
-import { PropertyConfiguratorPage } from '@/features/admin/properties/PropertyConfiguratorPage';
+import { AddPropertyPage } from '@/features/admin/properties/AddPropertyPage';
 
 export default function AdminPropertyConfigurator() {
-  return <PropertyConfiguratorPage />;
+  return <AddPropertyPage />;
 }
+
+
+
 
 
 

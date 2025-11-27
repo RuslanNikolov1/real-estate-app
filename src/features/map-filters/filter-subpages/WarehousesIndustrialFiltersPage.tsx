@@ -3,6 +3,7 @@
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import {
     SubtypeFilter,
@@ -38,6 +39,7 @@ interface WarehousesIndustrialFiltersPageProps {
 
 export interface WarehousesIndustrialFiltersState {
     searchTerm: string;
+    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
@@ -74,6 +76,7 @@ export function WarehousesIndustrialFiltersPage({
         neighborhoods: [] as string[],
         distance: 0
     });
+    const [propertyId, setPropertyId] = useState('');
 
     const locationState = externalLocationState || internalLocationState;
     const setLocationState = externalOnLocationChange
@@ -91,6 +94,7 @@ export function WarehousesIndustrialFiltersPage({
     // Store current filter values - all warehouses/industrial filter state managed here
     const filterValuesRef = useRef<Partial<WarehousesIndustrialFiltersState>>({
         searchTerm: '',
+        propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0,
@@ -153,6 +157,12 @@ export function WarehousesIndustrialFiltersPage({
         notifyFiltersChange();
     }, [externalOnLocationChange, notifyFiltersChange]);
 
+    const handlePropertyIdChange = useCallback((value: string) => {
+        setPropertyId(value);
+        filterValuesRef.current.propertyId = value.trim();
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
+
     const handlePropertyTypeChange = useCallback((selectedTypes: string[]) => {
         filterValuesRef.current.propertyTypes = selectedTypes;
         notifyFiltersChange();
@@ -199,10 +209,12 @@ export function WarehousesIndustrialFiltersPage({
             neighborhoods: [],
             distance: 0
         });
+        setPropertyId('');
 
         // Reset all filter values
         filterValuesRef.current = {
             searchTerm: '',
+            propertyId: '',
             city: '',
             neighborhoods: [],
             distance: 0,
@@ -434,6 +446,14 @@ export function WarehousesIndustrialFiltersPage({
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
+                <div className={styles.idFilter}>
+                    <Input
+                        label="ID на имот"
+                        placeholder="Въведете ID"
+                        value={propertyId}
+                        onChange={(event) => handlePropertyIdChange(event.target.value)}
+                    />
+                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}

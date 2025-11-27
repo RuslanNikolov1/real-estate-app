@@ -29,6 +29,14 @@
     "admin": "Admin",
     "adminPanel": "Admin Panel"
   },
+  "header": {
+    "ambienceLabel": "Ambience",
+    "ambienceMessage": "Soft piano while you browse"
+  },
+  "admin": {
+    "addPropertyButton": "Add Property",
+    "addPropertySubmitting": "Adding..."
+  },
   "home": {
     "title": "RENTALS | SALES | PROPERTY VALUATIONS | CREDIT CONSULTING",
     "subtitle": "Professional services for rental, sale and valuation of properties in Burgas. Credit consulting and full support for every transaction.",

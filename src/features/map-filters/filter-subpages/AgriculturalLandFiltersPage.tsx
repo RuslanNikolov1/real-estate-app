@@ -2,6 +2,7 @@
 
 import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import {
     SubtypeFilter,
@@ -38,6 +39,7 @@ interface AgriculturalLandFiltersPageProps {
 
 export interface AgriculturalLandFiltersState {
     searchTerm: string;
+    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
@@ -56,6 +58,7 @@ export interface AgriculturalLandFiltersState {
 
 const createInitialAgriculturalFilters = (): AgriculturalLandFiltersState => ({
     searchTerm: '',
+    propertyId: '',
     city: '',
     neighborhoods: [],
     distance: 0,
@@ -176,6 +179,10 @@ export function AgriculturalLandFiltersPage({
         updateFilters({ selectedCategories });
     }, [updateFilters]);
 
+    const handlePropertyIdChange = useCallback((value: string) => {
+        updateFilters({ propertyId: value });
+    }, [updateFilters]);
+
     const handleClear = useCallback(() => {
         // Reset location state
         setLocationState({
@@ -244,6 +251,14 @@ export function AgriculturalLandFiltersPage({
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
+                <div className={styles.idFilter}>
+                    <Input
+                        label="ID на имот"
+                        placeholder="Въведете ID"
+                        value={filters.propertyId || ''}
+                        onChange={(event) => handlePropertyIdChange(event.target.value)}
+                    />
+                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}

@@ -132,7 +132,7 @@ export function Header() {
 
         <div className={styles.actions}>
           <div className={styles.audioPlayerWrapper}>
-          <AudioPlayer src="/soft-piano.mp3" label="Ambience" />
+            <AudioPlayer src="/soft-piano.mp3" label={t('header.ambienceLabel')} />
             <AnimatePresence>
               {showAmbienceMessage && (
                 <motion.div
@@ -141,7 +141,7 @@ export function Header() {
                   exit={{ opacity: 0, y: -10 }}
                   className={styles.ambienceMessage}
                 >
-                  Soft piano while you browse
+                  {t('header.ambienceMessage')}
                 </motion.div>
               )}
             </AnimatePresence>

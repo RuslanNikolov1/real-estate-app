@@ -3,6 +3,7 @@
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import {
     AreaFilter,
@@ -40,6 +41,7 @@ interface BuildingPlotsFiltersPageProps {
 
 export interface BuildingPlotsFiltersState {
     searchTerm: string;
+    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
@@ -61,6 +63,7 @@ export interface BuildingPlotsFiltersState {
 
 const createInitialBuildingPlotFilters = (): BuildingPlotsFiltersState => ({
     searchTerm: '',
+    propertyId: '',
     city: '',
     neighborhoods: [],
     distance: 0,
@@ -181,6 +184,10 @@ export function BuildingPlotsFiltersPage({
 
     const handleWaterChange = useCallback((selectedOptions: string[]) => {
         updateFilters({ selectedWaterOptions: selectedOptions });
+    }, [updateFilters]);
+
+    const handlePropertyIdChange = useCallback((value: string) => {
+        updateFilters({ propertyId: value });
     }, [updateFilters]);
 
     // Rent-specific handlers
@@ -417,6 +424,14 @@ export function BuildingPlotsFiltersPage({
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
+                <div className={styles.idFilter}>
+                    <Input
+                        label="ID на имот"
+                        placeholder="Въведете ID"
+                        value={filters.propertyId || ''}
+                        onChange={(event) => handlePropertyIdChange(event.target.value)}
+                    />
+                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}

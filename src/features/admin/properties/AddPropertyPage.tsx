@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, DragEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, DragEvent, useId } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Input } from '@/components/ui/Input';
@@ -17,7 +19,7 @@ import {
   getPropertyTypeSchema,
 } from '@/lib/property-schemas';
 import type { PropertyType } from '@/types';
-import styles from './PropertyConfiguratorPage.module.scss';
+import styles from './AddPropertyPage.module.scss';
 
 const PROPERTY_TYPES = [
   { id: 'apartment', label: 'Апартамент' },
@@ -41,7 +43,9 @@ const PROPERTY_STATUSES = [
 ];
 
 
-export function PropertyConfiguratorPage() {
+export function AddPropertyPage() {
+  const { t } = useTranslation();
+  const router = useRouter();
   const [selectedType, setSelectedType] = useState(PROPERTY_TYPES[0].id);
   const [selectedStatus, setSelectedStatus] = useState(PROPERTY_STATUSES[0].id);
   const [selectedCompletion, setSelectedCompletion] = useState(COMPLETION_STATUSES[0].id);
@@ -54,19 +58,20 @@ export function PropertyConfiguratorPage() {
     return initialOptions[0] ?? '';
   });
   const [description, setDescription] = useState('');
+  const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const [area, setArea] = useState('');
   const [pricePerSqm, setPricePerSqm] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const createdObjectUrls = useRef<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const imageFilesRef = useRef<File[]>([]);
   const [broker, setBroker] = useState({
     name: '',
     title: '',
     phone: '',
   });
   const [yearBuilt, setYearBuilt] = useState('');
-  const [propertyId, setPropertyId] = useState('');
   const [subtype, setSubtype] = useState('');
   const [yardArea, setYardArea] = useState('');
   const [floor, setFloor] = useState('');
@@ -77,6 +82,9 @@ export function PropertyConfiguratorPage() {
   const [hotelCategory, setHotelCategory] = useState('');
   const [agriculturalCategory, setAgriculturalCategory] = useState('');
   const [bedBase, setBedBase] = useState('');
+  const descriptionFieldId = useId();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Get schema for current property type
   const typeSchema = useMemo(() => getPropertyTypeSchema(selectedType as PropertyType), [selectedType]);
@@ -174,6 +182,7 @@ export function PropertyConfiguratorPage() {
   const addObjectUrl = (file: File) => {
     const url = URL.createObjectURL(file);
     createdObjectUrls.current.push(url);
+    imageFilesRef.current.push(file);
     setImages((prev) => [...prev, url]);
   };
 
@@ -193,24 +202,165 @@ export function PropertyConfiguratorPage() {
     fileInputRef.current?.click();
   };
 
-  const handleSubmit = () => {
-    const summary = [
-      propertyId ? `ID: ${propertyId}` : '',
-      `Тип: ${selectedType}`,
-      `Статус: ${selectedStatus}`,
-      `Град: ${city}`,
-      `Квартал: ${neighborhood || '—'}`,
-      `Площ: ${area}`,
-      `Цена: ${price}`,
-      `Цена/м²: ${pricePerSqm || calculatedPricePerSqm}`,
-      `Конструкция: ${selectedConstruction}`,
-      `Степен: ${selectedCompletion}`,
-      `Опции: ${selectedFeatures.length ? selectedFeatures.join(', ') : '—'}`,
-      `Брокер: ${broker.name || 'не е добавен'}`,
-    ]
-      .filter(Boolean)
-      .join('\n');
-    alert(`Конфигурацията е запазена:\n${summary}`);
+  const handleSubmit = async () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    setSubmitError(null);
+
+    const trimmedTitle = title.trim();
+    const trimmedDescription = description.trim();
+    const trimmedBrokerName = broker.name.trim();
+    const trimmedBrokerPhone = broker.phone.trim();
+    const numericArea = Number(area);
+    const numericPrice = Number(price);
+
+    if (!trimmedTitle) {
+      setSubmitError('Заглавието е задължително');
+      return;
+    }
+
+    if (!trimmedDescription) {
+      setSubmitError('Описанието е задължително');
+      return;
+    }
+
+    if (!Number.isFinite(numericArea) || numericArea <= 0) {
+      setSubmitError('Площта трябва да е положително число');
+      return;
+    }
+
+    if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+      setSubmitError('Цената трябва да е положително число');
+      return;
+    }
+
+    if (!neighborhood) {
+      setSubmitError('Моля, изберете квартал');
+      return;
+    }
+
+    if (imageFilesRef.current.length === 0) {
+      setSubmitError('Добавете поне едно изображение');
+      return;
+    }
+
+    if (!trimmedBrokerName || !trimmedBrokerPhone) {
+      setSubmitError('Името и телефонът на брокера са задължителни');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const saleOrRentValue = selectedStatus === 'for-rent' ? 'rent' : 'sale';
+      const formData = new FormData();
+      formData.append('status', selectedStatus);
+      formData.append('sale_or_rent', saleOrRentValue);
+      formData.append('type', selectedType);
+
+      if (subtype) {
+        formData.append('subtype', subtype);
+      }
+
+      formData.append('area_sqm', numericArea.toString());
+      formData.append('price', numericPrice.toString());
+
+      const resolvedPricePerSqm = pricePerSqm || calculatedPricePerSqm;
+      if (resolvedPricePerSqm) {
+        formData.append('price_per_sqm', resolvedPricePerSqm);
+      }
+
+      if (floor) {
+        formData.append('floor', floor);
+      }
+
+      if (totalFloors) {
+        formData.append('total_floors', totalFloors);
+      }
+
+      formData.append('city', city);
+      formData.append('neighborhood', neighborhood);
+
+      formData.append('title', trimmedTitle);
+      formData.append('description', trimmedDescription);
+
+      if (yearBuilt) {
+        formData.append('build_year', yearBuilt);
+      }
+
+      if (selectedConstruction) {
+        formData.append('construction_type', selectedConstruction);
+      }
+
+      if (selectedCompletion) {
+        formData.append('completion_degree', selectedCompletion);
+      }
+
+      if (buildingType) {
+        formData.append('building_type', buildingType);
+      }
+
+      if (hotelCategory) {
+        formData.append('hotel_category', hotelCategory);
+      }
+
+      if (agriculturalCategory) {
+        formData.append('agricultural_category', agriculturalCategory);
+      }
+
+      if (bedBase) {
+        formData.append('bed_base', bedBase);
+      }
+
+      if (electricity) {
+        formData.append('electricity', electricity);
+      }
+
+      if (water) {
+        formData.append('water', water);
+      }
+
+      if (yardArea) {
+        formData.append('yard_area', yardArea);
+      }
+
+      selectedFeatures.forEach((feature) => {
+        formData.append('features', feature);
+      });
+
+      formData.append('broker_name', trimmedBrokerName);
+
+      if (broker.title.trim()) {
+        formData.append('broker_position', broker.title.trim());
+      }
+
+      formData.append('broker_phone', trimmedBrokerPhone);
+
+      imageFilesRef.current.forEach((file) => {
+        formData.append('images', file);
+      });
+
+      const response = await fetch('/api/properties', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || 'Грешка при добавянето на имота');
+      }
+
+      router.push('/admin/properties/quick-view?status=property-added');
+    } catch (error) {
+      console.error('Failed to create property via configurator:', error);
+      setSubmitError(
+        error instanceof Error ? error.message : 'Неуспешно добавяне на имота. Моля, опитайте отново.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
 
@@ -221,6 +371,7 @@ export function PropertyConfiguratorPage() {
         URL.revokeObjectURL(target);
         createdObjectUrls.current = createdObjectUrls.current.filter((url) => url !== target);
       }
+      imageFilesRef.current = imageFilesRef.current.filter((_, i) => i !== index);
       return prev.filter((_, i) => i !== index);
     });
   };
@@ -229,6 +380,7 @@ export function PropertyConfiguratorPage() {
     return () => {
       createdObjectUrls.current.forEach((url) => URL.revokeObjectURL(url));
       createdObjectUrls.current = [];
+      imageFilesRef.current = [];
     };
   }, []);
 
@@ -254,10 +406,11 @@ export function PropertyConfiguratorPage() {
 
           <section className={styles.section}>
             <Input
-              label="ID"
-              placeholder="Въведете ID на имота"
-              value={propertyId}
-              onChange={(event) => setPropertyId(event.target.value)}
+              label="Заглавие *"
+              placeholder="Луксозен апартамент в центъра"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              required
             />
           </section>
 
@@ -265,7 +418,7 @@ export function PropertyConfiguratorPage() {
             <h2>Основна информация</h2>
             <div className={styles.optionGrid}>
               <div className={styles.control}>
-                <label>Статус</label>
+                <label>Статус *</label>
                 <div className={styles.radioGroup}>
                   {PROPERTY_STATUSES.map((status) => (
                     <label key={status.id} className={styles.radio}>
@@ -275,6 +428,7 @@ export function PropertyConfiguratorPage() {
                         value={status.id}
                         checked={selectedStatus === status.id}
                         onChange={() => setSelectedStatus(status.id)}
+                        required
                       />
                       <span>{status.label}</span>
                     </label>
@@ -282,7 +436,7 @@ export function PropertyConfiguratorPage() {
                 </div>
               </div>
               <div className={styles.control}>
-                <label>Тип имот</label>
+                <label>Тип имот *</label>
                 <div className={styles.chipGroup}>
                   {PROPERTY_TYPES.map((type) => (
                     <button
@@ -327,16 +481,18 @@ export function PropertyConfiguratorPage() {
             <h2>Основни стойности</h2>
             <div className={styles.inputsRow}>
               <Input
-                label={selectedType === 'hotel' ? "РЗП (м²)" : "Площ (м²)"}
+                label={`${selectedType === 'hotel' ? 'РЗП (м²)' : 'Площ (м²)'} *`}
                 placeholder="120"
                 value={area}
                 onChange={(event) => setArea(event.target.value)}
+                required
               />
               <Input
-                label="Цена"
+                label="Цена *"
                 placeholder="250 000"
                 value={price}
                 onChange={(event) => setPrice(event.target.value)}
+                required
               />
               <Input
                 label="Цена на м²"
@@ -378,11 +534,12 @@ export function PropertyConfiguratorPage() {
             <h2>Локация</h2>
             <div className={styles.inputsRow}>
               <div className={styles.control}>
-                <label>Град</label>
+                <label>Град *</label>
                 <select
                   value={city}
                   onChange={(event) => setCity(event.target.value)}
                   className={styles.select}
+                  required
                 >
                   {CITY_OPTIONS.map((cityName) => (
                     <option key={cityName} value={cityName}>
@@ -396,12 +553,16 @@ export function PropertyConfiguratorPage() {
                 value={neighborhood}
                 onChange={(val) => setNeighborhood(Array.isArray(val) ? val[0] ?? '' : val)}
                 disabled={!city}
+                label="Квартал"
+                required
               />
             </div>
           </section>
 
           <section className={styles.section}>
-            <h2>Изображения</h2>
+            <h2>
+              Изображения <span className={styles.requiredMarker}>*</span>
+            </h2>
             <div className={styles.imagesList}>
               {images.length > 0 ? (
                 images.map((image, index) => (
@@ -412,7 +573,6 @@ export function PropertyConfiguratorPage() {
                       ) : (
                         <div className={styles.imagePlaceholder}>Няма визуализация</div>
                       )}
-                      <span className={styles.imageUrl}>{image}</span>
                     </div>
                     <button
                       type="button"
@@ -456,12 +616,17 @@ export function PropertyConfiguratorPage() {
 
           <section className={styles.section}>
             <h2>Описание</h2>
+            <label htmlFor={descriptionFieldId} className={styles.textareaLabel}>
+              Описание *
+            </label>
             <textarea
+              id={descriptionFieldId}
               className={styles.textarea}
               placeholder="Добавете описание на имота..."
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               rows={5}
+              required
             />
           </section>
 
@@ -664,10 +829,11 @@ export function PropertyConfiguratorPage() {
             <h2>Брокер</h2>
             <div className={styles.brokerGrid}>
               <Input
-                label="Име"
+                label="Име *"
                 placeholder="Иван Петров"
                 value={broker.name}
                 onChange={(event) => setBroker((prev) => ({ ...prev, name: event.target.value }))}
+                required
               />
               <Input
                 label="Длъжност"
@@ -676,17 +842,24 @@ export function PropertyConfiguratorPage() {
                 onChange={(event) => setBroker((prev) => ({ ...prev, title: event.target.value }))}
               />
               <Input
-                label="Телефон"
+                label="Телефон *"
                 placeholder="+359 888 123 456"
                 value={broker.phone}
                 onChange={(event) => setBroker((prev) => ({ ...prev, phone: event.target.value }))}
+                required
               />
             </div>
           </section>
 
+          {submitError && (
+            <div className={styles.errorBanner} role="alert">
+              {submitError}
+            </div>
+          )}
+
           <div className={styles.actions}>
-            <Button variant="primary" onClick={handleSubmit}>
-              Запази конфигурацията
+            <Button variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? t('admin.addPropertySubmitting') : t('admin.addPropertyButton')}
             </Button>
             <Link href="/admin/properties/quick-view" className={styles.linkButton}>
               Отказ

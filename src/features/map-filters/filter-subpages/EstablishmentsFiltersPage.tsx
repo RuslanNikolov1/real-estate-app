@@ -3,6 +3,7 @@
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import {
     SubtypeFilter,
@@ -41,6 +42,7 @@ interface EstablishmentsFiltersPageProps {
 
 export interface EstablishmentsFiltersState {
     searchTerm: string;
+    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
@@ -81,6 +83,7 @@ export function EstablishmentsFiltersPage({
         neighborhoods: [] as string[],
         distance: 0
     });
+    const [propertyId, setPropertyId] = useState('');
 
     const locationState = externalLocationState || internalLocationState;
     const setLocationState = externalOnLocationChange 
@@ -112,6 +115,7 @@ export function EstablishmentsFiltersPage({
     // Store current filter values - all establishments filter state managed here
     const filterValuesRef = useRef<Partial<EstablishmentsFiltersState>>({
         searchTerm: '',
+        propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0,
@@ -177,6 +181,12 @@ export function EstablishmentsFiltersPage({
         filterValuesRef.current.distance = distance;
         notifyFiltersChange();
     }, [externalOnLocationChange, notifyFiltersChange]);
+
+    const handlePropertyIdChange = useCallback((value: string) => {
+        setPropertyId(value);
+        filterValuesRef.current.propertyId = value.trim();
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
 
     const handleAreaChange = useCallback((areaFrom: number, areaTo: number, isNotProvided?: boolean) => {
         filterValuesRef.current.areaFrom = areaFrom;
@@ -244,6 +254,7 @@ export function EstablishmentsFiltersPage({
             neighborhoods: [],
             distance: 0
         });
+        setPropertyId('');
 
         // Reset all filter values
         filterValuesRef.current = {
@@ -251,6 +262,7 @@ export function EstablishmentsFiltersPage({
             city: '',
             neighborhoods: [],
             distance: 0,
+            propertyId: '',
             areaFrom: 0,
             areaTo: ESTABLISHMENTS_AREA_SLIDER_MAX,
             locationTypes: [],
@@ -483,6 +495,14 @@ export function EstablishmentsFiltersPage({
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
+                <div className={styles.idFilter}>
+                    <Input
+                        label="ID на имот"
+                        placeholder="Въведете ID"
+                        value={propertyId}
+                        onChange={(event) => handlePropertyIdChange(event.target.value)}
+                    />
+                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}

@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 import { X } from '@phosphor-icons/react';
 import { Certificate } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
 import styles from './CertificateModal.module.scss';
 
 interface CertificateModalProps {
@@ -139,8 +139,9 @@ export function CertificateModal({
 
             {formData.image_url && (
               <div className={styles.imagePreview}>
-                <Image
+                <CloudinaryImage
                   src={formData.image_url}
+                  publicId={formData.public_id}
                   alt="Preview"
                   width={600}
                   height={300}

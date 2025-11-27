@@ -319,6 +319,12 @@
         }
     }
 
+    .idFilter {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+    }
+
     .mapWrapper {
         position: sticky;
         top: 14vh;

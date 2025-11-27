@@ -29,6 +29,14 @@
     "admin": "Admin",
     "adminPanel": "Admin-Panel"
   },
+  "header": {
+    "ambienceLabel": "Ambiente",
+    "ambienceMessage": "Sanfte Pianoklänge beim Stöbern"
+  },
+  "admin": {
+    "addPropertyButton": "Immobilie hinzufügen",
+    "addPropertySubmitting": "Immobilie wird hinzugefügt..."
+  },
   "home": {
     "title": "VERMIETUNG | VERKAUF | IMMOBILIENBEWERTUNG | KREDITBERATUNG",
     "subtitle": "Professionelle Dienstleistungen für Vermietung, Verkauf und Bewertung von Immobilien in Burgas. Kreditberatung und volle Unterstützung bei jeder Transaktion.",

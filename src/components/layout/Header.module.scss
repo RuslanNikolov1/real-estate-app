@@ -43,7 +43,7 @@
 
 .nav {
   display: flex;
-  gap: $spacing-xl;
+  gap: $spacing-lg;
   align-items: center;
   flex: 1;
   justify-content: center;
@@ -102,7 +102,7 @@
 .ambienceMessage {
   position: absolute;
   top: calc(100% + $spacing-md);
-  left: 0;
+  left: -7.5vw;
   padding: $spacing-sm $spacing-md;
   background: $black;
   color: $white;
@@ -118,7 +118,8 @@
     content: '';
     position: absolute;
     bottom: 100%;
-    left: $spacing-md;
+    left: 50%;
+    transform: translateX(-50%);
     border: 6px solid transparent;
     border-bottom-color: $black;
   }

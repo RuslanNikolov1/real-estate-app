@@ -3,6 +3,7 @@
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import {
     SubtypeFilter,
@@ -41,6 +42,7 @@ interface GaragesParkingFiltersPageProps {
 
 export interface GaragesParkingFiltersState {
     searchTerm: string;
+    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
@@ -62,6 +64,7 @@ export interface GaragesParkingFiltersState {
 
 const createInitialGaragesFilters = (): GaragesParkingFiltersState => ({
     searchTerm: '',
+    propertyId: '',
     city: '',
     neighborhoods: [],
     distance: 0,
@@ -164,6 +167,10 @@ const { filters, updateFilters, resetFilters } = useFilterState<GaragesParkingFi
             distance
         });
     }, [externalOnLocationChange, updateFilters]);
+
+    const handlePropertyIdChange = useCallback((value: string) => {
+        updateFilters({ propertyId: value });
+    }, [updateFilters]);
 
     const handlePropertyTypeChange = useCallback((selectedTypes: string[]) => {
         updateFilters({ propertyTypes: selectedTypes });
@@ -418,6 +425,14 @@ const { filters, updateFilters, resetFilters } = useFilterState<GaragesParkingFi
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
+                <div className={styles.idFilter}>
+                    <Input
+                        label="ID на имот"
+                        placeholder="Въведете ID"
+                        value={filters.propertyId || ''}
+                        onChange={(event) => handlePropertyIdChange(event.target.value)}
+                    />
+                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}

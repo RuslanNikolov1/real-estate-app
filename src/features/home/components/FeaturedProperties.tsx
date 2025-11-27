@@ -1,11 +1,11 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { MapPin, Bed, Bathtub, Square } from '@phosphor-icons/react';
 import { Property } from '@/types';
+import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
 import styles from './FeaturedProperties.module.scss';
 
 interface FeaturedPropertiesProps {
@@ -35,8 +35,9 @@ export function FeaturedProperties({ properties }: FeaturedPropertiesProps) {
               <Link href={`/properties/${property.id}`} className={styles.card}>
                 <div className={styles.imageContainer}>
                   {property.images && property.images.length > 0 ? (
-                    <Image
+                    <CloudinaryImage
                       src={property.images[0].url}
+                      publicId={property.images[0].public_id}
                       alt={property.title}
                       fill
                       className={styles.image}

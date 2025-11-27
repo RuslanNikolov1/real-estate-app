@@ -2,8 +2,8 @@
 
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { PartnerService } from '@/types';
+import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
 import styles from './PartnerServices.module.scss';
 
 interface PartnerServicesProps {
@@ -33,7 +33,7 @@ export function PartnerServices({ services }: PartnerServicesProps) {
             >
               {service.logo_url && (
                 <div className={styles.logoContainer}>
-                  <Image
+                  <CloudinaryImage
                     src={service.logo_url}
                     alt={service.name}
                     width={120}

@@ -4,6 +4,7 @@ import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion';
 import { PiggyBank, MoneyWavy } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import {
     SubtypeFilter,
@@ -44,6 +45,7 @@ interface ApartmentsFiltersPageProps {
 
 export interface ApartmentFiltersState {
     searchTerm: string;
+    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
@@ -90,6 +92,7 @@ export function ApartmentsFiltersPage({
         neighborhoods: [] as string[],
         distance: 0
     });
+    const [propertyId, setPropertyId] = useState('');
 
     const locationState = externalLocationState || internalLocationState;
     const setLocationState = externalOnLocationChange 
@@ -114,6 +117,7 @@ export function ApartmentsFiltersPage({
     // Store current filter values - all apartment filter state managed here
     const filterValuesRef = useRef<Partial<ApartmentFiltersState>>({
         searchTerm: '',
+        propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0,
@@ -200,6 +204,12 @@ export function ApartmentsFiltersPage({
         notifyFiltersChange();
     }, [externalOnLocationChange, notifyFiltersChange]);
 
+    const handlePropertyIdChange = useCallback((value: string) => {
+        setPropertyId(value);
+        filterValuesRef.current.propertyId = value.trim();
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
+
 
     const handleApartmentSubtypeChange = useCallback((selectedSubtypes: string[]) => {
         filterValuesRef.current.apartmentSubtypes = selectedSubtypes;
@@ -282,6 +292,7 @@ export function ApartmentsFiltersPage({
             neighborhoods: [],
             distance: 0
         });
+        setPropertyId('');
 
         // Reset all filter values
         filterValuesRef.current = {
@@ -289,6 +300,7 @@ export function ApartmentsFiltersPage({
             city: '',
             neighborhoods: [],
             distance: 0,
+            propertyId: '',
             apartmentSubtypes: [],
             areaFrom: 20,
             areaTo: 100,
@@ -523,6 +535,14 @@ export function ApartmentsFiltersPage({
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
+                <div className={styles.idFilter}>
+                    <Input
+                        label="ID на имот"
+                        placeholder="Въведете ID"
+                        value={propertyId}
+                        onChange={(event) => handlePropertyIdChange(event.target.value)}
+                    />
+                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}

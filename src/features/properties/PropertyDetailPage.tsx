@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
 import { Property } from '@/types';
 import {
   MapPin,
@@ -374,6 +375,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   const middleImage = property.images?.[2];
   const rightImages = property.images?.slice(3, 5) || [];
   const remainingImagesCount = Math.max(0, (property.images?.length || 0) - 5);
+  const activeFullscreenImage = property.images?.[currentImageIndex];
   const logoImageUrl = '/Red Logo.jpg'; // Logo from public folder
 
   const handleImageError = (imageId: string) => {
@@ -406,8 +408,9 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       />
                     </div>
                   ) : (
-                    <Image
+                    <CloudinaryImage
                       src={img.url}
+                      publicId={img.public_id}
                       alt={`${property.title} - ${index + 1}`}
                       fill
                       className={styles.image}
@@ -435,8 +438,9 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       />
                     </div>
                   ) : (
-                    <Image
+                    <CloudinaryImage
                       src={middleImage.url}
+                      publicId={middleImage.public_id}
                       alt={property.title}
                       fill
                       className={styles.image}
@@ -470,8 +474,9 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       />
                     </div>
                   ) : (
-                    <Image
+                    <CloudinaryImage
                       src={img.url}
+                      publicId={img.public_id}
                       alt={`${property.title} - ${index + 4}`}
                       fill
                       className={styles.image}
@@ -756,8 +761,9 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     <div key={prop.id} className={styles.recommendedCard}>
                       <div className={styles.recommendedImage}>
                         {primaryImage ? (
-                          <Image
+                          <CloudinaryImage
                             src={primaryImage.url}
+                            publicId={primaryImage.public_id}
                             alt={prop.title}
                             fill
                             className={styles.recommendedImageContent}
@@ -813,13 +819,16 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
               <X size={32} />
             </button>
             <div className={styles.fullscreenImageContainer} onClick={(e) => e.stopPropagation()}>
-              <Image
-                src={property.images[currentImageIndex].url}
-                alt={`${property.title} - ${currentImageIndex + 1}`}
-                fill
-                className={styles.fullscreenImage}
-                sizes="100vw"
-              />
+              {activeFullscreenImage && (
+                <CloudinaryImage
+                  src={activeFullscreenImage.url}
+                  publicId={activeFullscreenImage.public_id}
+                  alt={`${property.title} - ${currentImageIndex + 1}`}
+                  fill
+                  className={styles.fullscreenImage}
+                  sizes="100vw"
+                />
+              )}
               {property.images.length > 1 && (
                 <>
                   <button

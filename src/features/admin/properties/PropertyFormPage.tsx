@@ -22,6 +22,7 @@ import {
 } from '@/lib/property-schemas';
 import type { PropertyType } from '@/types';
 import { DynamicPropertyField } from '@/components/forms/DynamicPropertyField';
+import { plateValueToPlainText } from '@/lib/plate-utils';
 import styles from './PropertyFormPage.module.scss';
 
 type PropertyFormData = z.infer<ReturnType<typeof generatePropertySchema>>;
@@ -51,7 +52,10 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>(
     (property as any)?.features ?? [],
   );
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const createdObjectUrlsRef = useRef<string[]>([]);
+  const imageFilesRef = useRef<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const cityOptions = useMemo(() => {
@@ -64,6 +68,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   const addObjectUrl = (file: File) => {
     const url = URL.createObjectURL(file);
     createdObjectUrlsRef.current.push(url);
+    imageFilesRef.current.push(file);
     setImageUrls((prev) => [...prev, url]);
   };
 
@@ -93,6 +98,11 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       if (target && target.startsWith('blob:')) {
         URL.revokeObjectURL(target);
         createdObjectUrlsRef.current = createdObjectUrlsRef.current.filter((url) => url !== target);
+        // Remove corresponding file from ref
+        imageFilesRef.current = imageFilesRef.current.filter((_, i) => i !== index);
+      } else {
+        // For non-blob URLs (existing images), just remove from array
+        imageFilesRef.current = imageFilesRef.current.filter((_, i) => i !== index);
       }
       return prev.filter((_, i) => i !== index);
     });
@@ -341,24 +351,119 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   };
 
   const onSubmit = async (data: PropertyFormData) => {
-    try {
-      // Convert editor value to JSON string
-      const descriptionJson = JSON.stringify(editorValue);
+    setIsSubmittingForm(true);
+    setSubmitError(null);
 
-      // TODO: Save to Supabase
-      console.log('Property data:', {
-        ...data,
-        description: descriptionJson,
-        translations,
-        images: imageUrls.filter((url) => url.trim().length > 0),
-        features: selectedFeatures,
+    try {
+      const saleOrRent = data.status === 'for-rent' ? 'rent' : 'sale';
+      // Get all new image files (exclude existing URLs that aren't blobs)
+      const newImageFiles = imageFilesRef.current.filter((_, index) => {
+        const url = imageUrls[index];
+        return url && url.startsWith('blob:');
       });
+
+      if (newImageFiles.length === 0) {
+        setSubmitError('Поне едно изображение е задължително');
+        setIsSubmittingForm(false);
+        return;
+      }
+
+      // Convert Plate editor JSON to plain text
+      const descriptionText = plateValueToPlainText(editorValue);
+      if (!descriptionText.trim()) {
+        setSubmitError('Описанието е задължително');
+        setIsSubmittingForm(false);
+        return;
+      }
+
+      // Create FormData for multipart/form-data submission
+      const formData = new FormData();
+
+      // Map form fields to API fields
+      formData.append('status', data.status);
+      formData.append('sale_or_rent', saleOrRent);
+      formData.append('type', data.type);
+      if (data.subtype) {
+        formData.append('subtype', data.subtype);
+      }
+      
+      // Map area -> area_sqm
+      formData.append('area_sqm', String(data.area));
+      formData.append('price', String(data.price));
+      if (data.price_per_sqm) {
+        formData.append('price_per_sqm', String(data.price_per_sqm));
+      }
+      if (data.floor !== undefined) {
+        formData.append('floor', String(data.floor));
+      }
+      if (data.total_floors !== undefined) {
+        formData.append('total_floors', String(data.total_floors));
+      }
+      
+      // Location
+      formData.append('city', data.city);
+      formData.append('neighborhood', data.neighborhood);
+      if (data.address) {
+        formData.append('address', data.address);
+      }
+      
+      // Description
+      formData.append('title', data.title);
+      formData.append('description', descriptionText);
+      
+      // Map year_built -> build_year
+      if (data.year_built) {
+        formData.append('build_year', String(data.year_built));
+      }
+      if (data.construction_type) {
+        formData.append('construction_type', data.construction_type);
+      }
+      // Map completion_status -> completion_degree
+      if (data.completion_status) {
+        formData.append('completion_degree', data.completion_status);
+      }
+      
+      // Features
+      selectedFeatures.forEach((feature) => {
+        formData.append('features', feature);
+      });
+      
+      // Broker
+      formData.append('broker_name', data.broker_name);
+      if (data.broker_title) {
+        formData.append('broker_position', data.broker_title);
+      }
+      formData.append('broker_phone', data.broker_phone);
+      
+      // Images - append all files
+      newImageFiles.forEach((file) => {
+        formData.append('images', file);
+      });
+
+      // Call the API
+      const response = await fetch('/api/properties', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const createdProperty = await response.json();
+      console.log('Property created successfully:', createdProperty);
 
       // Redirect to admin properties list
       router.push('/admin/properties');
     } catch (error) {
       console.error('Error saving property:', error);
-      alert('Грешка при запазването. Моля, опитайте отново.');
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Грешка при запазването. Моля, опитайте отново.'
+      );
+      setIsSubmittingForm(false);
     }
   };
 
@@ -591,7 +696,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                             ) : (
                               <div className={styles.imagePlaceholder}>Няма визуализация</div>
                             )}
-                            <span className={styles.imageUrl}>{url}</span>
                           </div>
                           <button
                             type="button"
@@ -728,8 +832,22 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
             </div>
 
             <div className={styles.formActions}>
-              <Button type="submit" variant="primary" disabled={isSubmitting}>
-                <FloppyDisk size={20} /> {propertyId ? 'Запази промените' : 'Добави имот'}
+              {submitError && (
+                <div className={styles.errorBanner}>
+                  <p className={styles.errorMessage}>{submitError}</p>
+                </div>
+              )}
+              <Button type="submit" variant="primary" disabled={isSubmitting || isSubmittingForm}>
+                {isSubmitting || isSubmittingForm ? (
+                  <>
+                    <SpinnerGap size={20} className={styles.spinner} />
+                    {propertyId ? 'Запазване...' : 'Добавяне...'}
+                  </>
+                ) : (
+                  <>
+                    <FloppyDisk size={20} /> {propertyId ? 'Запази промените' : 'Добави имот'}
+                  </>
+                )}
               </Button>
               <Button type="button" variant="outline" onClick={() => router.back()}>
                 Отказ

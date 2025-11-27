@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -12,8 +12,10 @@ import styles from './AdminPropertyQuickViewPage.module.scss';
 
 export function AdminPropertyQuickViewPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [propertyId, setPropertyId] = useState('');
   const [properties, setProperties] = useState(mockProperties);
+  const [flashMessage, setFlashMessage] = useState<string | null>(null);
   const trimmedId = propertyId.trim();
 
   const recentProperties = useMemo(() => properties.slice(0, 10), [properties]);
@@ -36,11 +38,30 @@ export function AdminPropertyQuickViewPage() {
     router.push(`/admin/properties/${id}/update`);
   };
 
+  useEffect(() => {
+    const status = searchParams.get('status');
+
+    if (status !== 'property-added') {
+      return;
+    }
+
+    setFlashMessage('Property added!');
+    const timer = setTimeout(() => setFlashMessage(null), 4000);
+    router.replace('/admin/properties/quick-view', { scroll: false });
+
+    return () => clearTimeout(timer);
+  }, [router, searchParams]);
+
   return (
     <div className={styles.page}>
       <Header />
       <main className={styles.main}>
         <section className={styles.panel}>
+          {flashMessage && (
+            <div className={styles.flashMessage} role="status" aria-live="polite">
+              {flashMessage}
+            </div>
+          )}
           <div className={styles.header}>
             <div>
               <h1 className={styles.title}>Имоти</h1>

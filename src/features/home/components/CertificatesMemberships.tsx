@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { CaretRight } from '@phosphor-icons/react';
-import Image from 'next/image';
 import { Certificate } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
 import styles from './CertificatesMemberships.module.scss';
 
 interface CertificatesMembershipsProps {
@@ -47,8 +47,9 @@ export function CertificatesMemberships({
               className={styles.card}
             >
               <div className={styles.imageContainer}>
-                <Image
+                <CloudinaryImage
                   src={certificate.image_url}
+                  publicId={certificate.public_id}
                   alt={certificate.title}
                   fill
                   className={styles.image}

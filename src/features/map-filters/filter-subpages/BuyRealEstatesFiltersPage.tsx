@@ -2,6 +2,7 @@
 
 import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import { PriceFilter } from '../filters';
 import { BUY_REAL_ESTATES_PRICE_SLIDER_MAX } from '../filters/types';
@@ -24,6 +25,7 @@ interface BuyRealEstatesFiltersPageProps {
 
 export interface BuyRealEstatesFiltersState {
     searchTerm: string;
+    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
@@ -48,6 +50,7 @@ export function BuyRealEstatesFiltersPage({
         neighborhoods: [] as string[],
         distance: 0
     });
+    const [propertyId, setPropertyId] = useState('');
 
     const locationState = externalLocationState || internalLocationState;
     const setLocationState = externalOnLocationChange 
@@ -59,6 +62,7 @@ export function BuyRealEstatesFiltersPage({
     // Store current filter values
     const filterValuesRef = useRef<Partial<BuyRealEstatesFiltersState>>({
         searchTerm: '',
+        propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0,
@@ -110,6 +114,12 @@ export function BuyRealEstatesFiltersPage({
         notifyFiltersChange();
     }, [externalOnLocationChange, notifyFiltersChange]);
 
+    const handlePropertyIdChange = useCallback((value: string) => {
+        setPropertyId(value);
+        filterValuesRef.current.propertyId = value.trim();
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
+
     const handlePriceChange = useCallback((priceFrom: number, priceTo: number, pricePerSqmFrom: number, pricePerSqmTo: number) => {
         filterValuesRef.current.priceFrom = priceFrom;
         filterValuesRef.current.priceTo = priceTo;
@@ -125,6 +135,7 @@ export function BuyRealEstatesFiltersPage({
             neighborhoods: [],
             distance: 0
         });
+        setPropertyId('');
 
         // Reset all filter values
         filterValuesRef.current = {
@@ -132,6 +143,7 @@ export function BuyRealEstatesFiltersPage({
             city: '',
             neighborhoods: [],
             distance: 0,
+            propertyId: '',
             priceFrom: 0,
             priceTo: BUY_REAL_ESTATES_PRICE_SLIDER_MAX
         };
@@ -192,6 +204,14 @@ export function BuyRealEstatesFiltersPage({
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
+                <div className={styles.idFilter}>
+                    <Input
+                        label="ID на имот"
+                        placeholder="Въведете ID"
+                        value={propertyId}
+                        onChange={(event) => handlePropertyIdChange(event.target.value)}
+                    />
+                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}

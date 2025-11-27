@@ -12,6 +12,7 @@ type NeighborhoodSelectProps = {
   multiple?: boolean;
   name?: string;
   error?: string;
+  required?: boolean;
 };
 
 export function NeighborhoodSelect({
@@ -24,6 +25,7 @@ export function NeighborhoodSelect({
   multiple = false,
   name,
   error,
+  required = false,
 }: NeighborhoodSelectProps) {
   const options = useMemo(() => getNeighborhoodsByCity(city), [city]);
 
@@ -51,7 +53,12 @@ export function NeighborhoodSelect({
 
   return (
     <div className={styles.container}>
-      {label && <label className={styles.label}>{label}</label>}
+      {label && (
+        <label className={styles.label}>
+          {label}
+          {required && <span className={styles.requiredMarker}>*</span>}
+        </label>
+      )}
       <select
         className={styles.select}
         onChange={handleChange}
@@ -59,6 +66,7 @@ export function NeighborhoodSelect({
         multiple={multiple}
         disabled={!options.length || disabled}
         name={name}
+        required={required}
       >
         {!multiple && (
           <option value="">{options.length ? placeholder : 'Няма налични квартали'}</option>
@@ -73,6 +81,9 @@ export function NeighborhoodSelect({
     </div>
   );
 }
+
+
+
 
 
 

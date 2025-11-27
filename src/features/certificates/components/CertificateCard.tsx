@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { Medal } from '@phosphor-icons/react';
 import { Certificate } from '@/types';
+import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
 import styles from './CertificateCard.module.scss';
 
 interface CertificateCardProps {
@@ -20,8 +20,9 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
       className={styles.card}
     >
       <div className={styles.imageContainer}>
-        <Image
+        <CloudinaryImage
           src={certificate.image_url}
+          publicId={certificate.public_id}
           alt={certificate.title}
           fill
           className={styles.image}
