@@ -20,10 +20,8 @@ export const mockProperties: Property[] = [
       'Модерен тристаен апартамент с изглед към морето. Пълно обзавеждане, паркинг, близо до плажа.',
     type: 'apartment',
     status: 'for-sale',
-    location_type: 'urban',
     city: 'Бургас',
     neighborhood: 'Център',
-    address: 'ул. Александровска 15',
     price: 180000,
     currency: 'лв',
     area: 95,
@@ -53,10 +51,8 @@ export const mockProperties: Property[] = [
       'Двуетажна къща с голям двор, гараж и градина. Идеална за семейство. Санирана през 2022.',
     type: 'house',
     status: 'for-sale',
-    location_type: 'urban',
     city: 'Бургас',
     neighborhood: 'Славейков',
-    address: 'ул. Славейков 42',
     price: 320000,
     currency: 'лв',
     area: 180,
@@ -86,10 +82,8 @@ export const mockProperties: Property[] = [
       'Двустаен апартамент на 200м от плажа. Пълно обзавеждане, климатик, балкон с изглед.',
     type: 'apartment',
     status: 'for-rent',
-    location_type: 'coastal',
     city: 'Бургас',
     neighborhood: 'Морска градина',
-    address: 'ул. Приморска 8',
     price: 600,
     currency: 'лв',
     area: 65,
@@ -119,10 +113,8 @@ export const mockProperties: Property[] = [
       'Луксозна вила с частен плаж, басейн и градина. Идеална за почивка или постоянен престой.',
     type: 'villa',
     status: 'for-sale',
-    location_type: 'coastal',
     city: 'Бургас',
     neighborhood: 'Сарафово',
-    address: 'ул. Морска 25',
     price: 850000,
     currency: 'лв',
     area: 350,
@@ -152,10 +144,8 @@ export const mockProperties: Property[] = [
       'Модерно офис пространство с 4 стаи, рецепция и кухня. Идеално за малък бизнес.',
     type: 'office',
     status: 'for-rent',
-    location_type: 'urban',
     city: 'Бургас',
     neighborhood: 'Център',
-    address: 'бул. Демокрация 12',
     price: 1200,
     currency: 'лв',
     area: 120,
@@ -185,10 +175,8 @@ export const mockProperties: Property[] = [
       'Търговски обект на първия етаж с витрина. Висок трафик, идеално за бизнес.',
     type: 'shop',
     status: 'for-rent',
-    location_type: 'urban',
     city: 'Бургас',
     neighborhood: 'Меден рудник',
-    address: 'ул. Търговска 33',
     price: 800,
     currency: 'лв',
     area: 45,
@@ -218,10 +206,8 @@ export const mockProperties: Property[] = [
       'Къща с изглед към планината, голям двор и гараж. Спокойна зона, идеална за семейство.',
     type: 'house',
     status: 'for-sale',
-    location_type: 'mountain',
     city: 'Бургас',
     neighborhood: 'Изгрев',
-    address: 'ул. Планинска 7',
     price: 280000,
     currency: 'лв',
     area: 160,
@@ -251,10 +237,8 @@ export const mockProperties: Property[] = [
       'Компактно студио с пълно обзавеждане. Идеално за студенти или млади професионалисти.',
     type: 'apartment',
     status: 'for-rent',
-    location_type: 'urban',
     city: 'Бургас',
     neighborhood: 'Център',
-    address: 'ул. Цар Освободител 20',
     price: 350,
     currency: 'лв',
     area: 35,
@@ -284,10 +268,8 @@ export const mockProperties: Property[] = [
       'Просторен склад с висок таван и рампа за товарене. Идеален за логистика или производство.',
     type: 'warehouse',
     status: 'for-rent',
-    location_type: 'urban',
     city: 'Бургас',
     neighborhood: 'Индустриална зона',
-    address: 'ул. Индустриална 45',
     price: 1500,
     currency: 'лв',
     area: 500,
@@ -317,10 +299,8 @@ export const mockProperties: Property[] = [
       'Просторен апартамент с голяма тераса и изглед. Пълно обзавеждане, паркинг, асансьор.',
     type: 'apartment',
     status: 'for-sale',
-    location_type: 'urban',
     city: 'Бургас',
     neighborhood: 'Лозово',
-    address: 'ул. Лозова 18',
     price: 220000,
     currency: 'лв',
     area: 125,
@@ -353,7 +333,6 @@ function PropertiesListContent() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filters, setFilters] = useState<PropertySearchFilters>({
-    location_type: [],
     type: [],
     status: [],
   });
@@ -365,11 +344,6 @@ function PropertiesListContent() {
 
   const filteredProperties = useMemo(() => {
     return mockProperties.filter((property) => {
-      if (filters.location_type && filters.location_type.length > 0) {
-        if (!filters.location_type.includes(property.location_type)) {
-          return false;
-        }
-      }
       if (filters.type && filters.type.length > 0) {
         if (!filters.type.includes(property.type)) {
           return false;

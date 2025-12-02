@@ -382,10 +382,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       year_built: property.year_built,
       construction_type: (property as any).construction_type || '',
       completion_status: (property as any).completion_degree || '', // Redirect completion_degree to completion_status input
-      completion_degree: (property as any).completion_degree || '',
       subtype: (property as any).subtype || '',
       yard_area: (property as any).yard_area || undefined,
-      building_type: (property as any).building_type || '',
       hotel_category: (property as any).hotel_category || '',
       agricultural_category: (property as any).agricultural_category || '',
       bed_base: (property as any).bed_base || undefined,
@@ -568,10 +566,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       // Map completion_status -> completion_degree (redirect from form input)
       if (data.completion_status) {
         formData.append('completion_degree', data.completion_status);
-      }
-      // Also check completion_degree directly (in case form uses it)
-      if (data.completion_degree) {
-        formData.append('completion_degree', data.completion_degree);
       }
       
       // Additional property-specific fields
@@ -855,10 +849,10 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       error={errors.year_built?.message ? translateErrorMessage(String(errors.year_built.message)) : undefined}
                       placeholder="Година"
                     />
-                    {/* Dynamic fields from schema - construction, completion, building_type, hotel_category, agricultural_category, electricity, water, bed_base */}
+                    {/* Dynamic fields from schema - construction, completion, hotel_category, agricultural_category, electricity, water, bed_base */}
                     {typeFields
                       .filter(field => 
-                        ['construction_type', 'completion_status', 'building_type', 'hotel_category', 'agricultural_category', 'electricity', 'water', 'bed_base'].includes(field.key)
+                        ['construction_type', 'completion_status', 'hotel_category', 'agricultural_category', 'electricity', 'water', 'bed_base'].includes(field.key)
                       )
                       .map(field => (
                         <DynamicPropertyField
