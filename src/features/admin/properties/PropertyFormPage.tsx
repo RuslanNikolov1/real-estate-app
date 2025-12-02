@@ -349,9 +349,24 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     }
 
     // Prefill form fields from loaded property
+    // Handle description - it might be a string or Plate JSON value
+    let descriptionText = property.description || '';
+    if (descriptionText && typeof descriptionText === 'string') {
+      try {
+        // Try to parse as JSON (Plate value)
+        const parsed = JSON.parse(descriptionText);
+        if (Array.isArray(parsed)) {
+          descriptionText = plateValueToPlainText(parsed);
+        }
+      } catch {
+        // If parsing fails, it's already plain text, use as is
+        descriptionText = descriptionText;
+      }
+    }
+    
     const mappedDefaults: Partial<PropertyFormData> = {
       title: property.title,
-      description: plateValueToPlainText(property.description) || property.description || '',
+      description: descriptionText,
       type: property.type as any,
       status:
         property.status === 'for-sale' || property.status === 'for-rent'
