@@ -19,12 +19,14 @@ interface PropertySearchProps {
   isExpanded?: boolean;
   onExpand?: () => void;
   onSearch?: (searchFilters: { mode: 'sales' | 'rent'; city: string; types?: string[] }) => void;
+  onPropertyTypeSelect?: (mode: 'sales' | 'rent', typeId: string) => void;
 }
 
 export function PropertySearch({
   isExpanded = false,
   onExpand,
   onSearch,
+  onPropertyTypeSelect,
 }: PropertySearchProps) {
   const { t } = useTranslation();
   const isLandingExperience = !onSearch;
@@ -57,6 +59,11 @@ export function PropertySearch({
 
   const handlePropertyTypeSelect = (typeId: string) => {
     if (isLandingExperience) {
+      if (onPropertyTypeSelect && selectedButton) {
+        onPropertyTypeSelect(selectedButton, typeId);
+        handleClose();
+        return;
+      }
       window.location.href = `/mock-search?type=${typeId}`;
       handleClose();
       return;

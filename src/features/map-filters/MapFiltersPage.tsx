@@ -25,7 +25,6 @@ import { BuyRealEstatesFiltersPage, BuyRealEstatesFiltersState } from './filter-
 import { OtherRealEstatesFiltersPage, OtherRealEstatesFiltersState } from './filter-subpages/OtherRealEstatesFiltersPage';
 import { MapComponent } from './MapComponent';
 import { PropertyCard } from '@/features/properties/components/PropertyCard';
-import { mockProperties } from '@/features/properties/PropertiesListPage';
 import { MapPin } from '@phosphor-icons/react';
 import type { Property } from '@/types';
 
@@ -121,11 +120,40 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                         distance: restoredFilters.distance || 0
                     });
                 }
+                
+                // Fetch properties based on restored filters
+                if (restoredFilters && !('propertyId' in restoredFilters && restoredFilters.propertyId && restoredFilters.propertyId.trim())) {
+                    setIsLoadingProperties(true);
+                    const fetchParams = new URLSearchParams();
+                    fetchParams.set('baseRoute', baseRoute);
+                    if (selectedPropertyType) {
+                        fetchParams.set('propertyTypeId', selectedPropertyType);
+                    }
+                    fetchParams.set('filters', encodeURIComponent(JSON.stringify(restoredFilters)));
+                    
+                    fetch(`/api/properties?${fetchParams.toString()}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Failed to fetch properties');
+                            }
+                            return response.json();
+                        })
+                        .then((data: Property[]) => {
+                            setFilteredProperties(data);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching properties:', error);
+                            setPropertiesError('Грешка при зареждането на имотите.');
+                        })
+                        .finally(() => {
+                            setIsLoadingProperties(false);
+                        });
+                }
             } catch (error) {
                 console.error('Error restoring filters from URL:', error);
             }
         }
-    }, []);
+    }, [baseRoute, selectedPropertyType]);
 
     const isApartmentsSelected = selectedPropertyType === 'apartments';
     const isHousesVillasSelected = selectedPropertyType === 'houses-villas';
@@ -245,6 +273,11 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
     const [selectedPropertyById, setSelectedPropertyById] = useState<Property | null>(null);
     const [propertyByIdError, setPropertyByIdError] = useState<string | null>(null);
     const [isLoadingPropertyById, setIsLoadingPropertyById] = useState(false);
+    
+    // State for filtered properties
+    const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+    const [isLoadingProperties, setIsLoadingProperties] = useState(false);
+    const [propertiesError, setPropertiesError] = useState<string | null>(null);
 
     // State to track whether to show map or listings
     const [showListings, setShowListings] = useState(() => {
@@ -279,6 +312,8 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         setSelectedPropertyById(null);
         setPropertyByIdError(null);
         setIsLoadingPropertyById(false);
+        setFilteredProperties([]);
+        setPropertiesError(null);
 
         if (filters && 'propertyId' in filters && filters.propertyId && filters.propertyId.trim()) {
             const shortId = filters.propertyId.trim();
@@ -303,6 +338,32 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                 setIsLoadingPropertyById(false);
             }
         } else if (filters) {
+            // Fetch properties based on filters
+            setIsLoadingProperties(true);
+            try {
+                const params = new URLSearchParams();
+                params.set('baseRoute', baseRoute);
+                if (selectedPropertyType) {
+                    params.set('propertyTypeId', selectedPropertyType);
+                }
+                if (filters) {
+                    params.set('filters', encodeURIComponent(JSON.stringify(filters)));
+                }
+                
+                const response = await fetch(`/api/properties?${params.toString()}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch properties');
+                }
+                const data: Property[] = await response.json();
+                setFilteredProperties(data);
+            } catch (error) {
+                console.error('Error fetching properties:', error);
+                setPropertiesError('Грешка при зареждането на имотите.');
+            } finally {
+                setIsLoadingProperties(false);
+            }
+            
+            // Also update URL
             const queryString = serializeFiltersToURL(filters);
             const currentPath = selectedPropertyType 
                 ? `${baseRoute}/${selectedPropertyType}` 
@@ -429,7 +490,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                         <div className={styles.listingsHeader}>
                                             <h2 className={styles.listingsTitle}>
                                                 Намерени имоти:{' '}
-                                                {selectedPropertyById ? 1 : mockProperties.length}
+                                                {selectedPropertyById ? 1 : filteredProperties.length}
                                             </h2>
                                             <Button
                                                 variant="outline"
@@ -447,8 +508,14 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                                 <PropertyCard property={selectedPropertyById} />
                                             ) : propertyByIdError ? (
                                                 <p className={styles.noResults}>{propertyByIdError}</p>
+                                            ) : isLoadingProperties ? (
+                                                <p className={styles.noResults}>Зареждане на имоти...</p>
+                                            ) : propertiesError ? (
+                                                <p className={styles.noResults}>{propertiesError}</p>
+                                            ) : filteredProperties.length === 0 ? (
+                                                <p className={styles.noResults}>Няма намерени имоти с избраните филтри</p>
                                             ) : (
-                                                mockProperties.map((property) => (
+                                                filteredProperties.map((property) => (
                                                     <PropertyCard
                                                         key={property.id}
                                                         property={property}

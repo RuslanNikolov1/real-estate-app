@@ -102,14 +102,155 @@ export async function GET(request: NextRequest) {
   try {
     const supabaseAdmin = getSupabaseAdminClient();
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const limit = parseInt(searchParams.get('limit') || '100', 10);
+    
+    // Check if filters are provided
+    const filtersParam = searchParams.get('filters');
+    let filters: any = null;
+    if (filtersParam) {
+      try {
+        filters = JSON.parse(decodeURIComponent(filtersParam));
+      } catch (e) {
+        console.error('Error parsing filters:', e);
+      }
+    }
 
-    // Fetch last N properties ordered by created_at descending
-    const { data: properties, error } = await supabaseAdmin
-      .from('properties')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    // Build query
+    let query = supabaseAdmin.from('properties').select('*');
+
+    // Apply filters if provided
+    if (filters) {
+      // Status filter (for-sale/for-rent)
+      if (filters.city) {
+        query = query.eq('city', filters.city);
+      }
+      
+      if (filters.neighborhoods && Array.isArray(filters.neighborhoods) && filters.neighborhoods.length > 0) {
+        query = query.in('neighborhood', filters.neighborhoods);
+      }
+      
+      // Property type filter - map filter types to database types
+      const typeMapping: Record<string, string[]> = {
+        'apartments': ['apartment'],
+        'houses-villas': ['house', 'villa'],
+        'stores-offices': ['office', 'shop'],
+        'building-plots': ['land'],
+        'agricultural-land': ['agricultural'],
+        'warehouses-industrial': ['warehouse'],
+        'garages-parking': ['garage'],
+        'hotels-motels': ['hotel'],
+        'restaurants': ['restaurant'],
+        'replace-real-estates': ['replace-real-estates'],
+        'buy-real-estates': ['buy-real-estates'],
+        'other-real-estates': ['other-real-estates'],
+      };
+      
+      // Determine property types from baseRoute or filters
+      const baseRoute = searchParams.get('baseRoute');
+      const propertyTypeId = searchParams.get('propertyTypeId');
+      
+      if (propertyTypeId && typeMapping[propertyTypeId]) {
+        query = query.in('type', typeMapping[propertyTypeId]);
+      }
+      
+      // Status filter based on baseRoute
+      if (baseRoute === '/sale/search') {
+        query = query.eq('status', 'for-sale');
+      } else if (baseRoute === '/rent/search') {
+        query = query.eq('status', 'for-rent');
+      }
+      
+      // Area filters
+      if (filters.areaFrom !== undefined && filters.areaFrom > 0) {
+        query = query.gte('area_sqm', filters.areaFrom);
+      }
+      if (filters.areaTo !== undefined && filters.areaTo > 0) {
+        query = query.lte('area_sqm', filters.areaTo);
+      }
+      
+      // Price filters
+      if (filters.priceFrom !== undefined && filters.priceFrom > 0) {
+        query = query.gte('price', filters.priceFrom);
+      }
+      if (filters.priceTo !== undefined && filters.priceTo > 0) {
+        query = query.lte('price', filters.priceTo);
+      }
+      
+      // Price per sqm filters
+      if (filters.pricePerSqmFrom !== undefined && filters.pricePerSqmFrom > 0) {
+        query = query.gte('price_per_sqm', filters.pricePerSqmFrom);
+      }
+      if (filters.pricePerSqmTo !== undefined && filters.pricePerSqmTo > 0) {
+        query = query.lte('price_per_sqm', filters.pricePerSqmTo);
+      }
+      
+      // Subtype filter (for apartments, houses, etc.)
+      if (filters.apartmentSubtypes && Array.isArray(filters.apartmentSubtypes) && filters.apartmentSubtypes.length > 0) {
+        query = query.in('subtype', filters.apartmentSubtypes);
+      }
+      if (filters.houseTypes && Array.isArray(filters.houseTypes) && filters.houseTypes.length > 0) {
+        query = query.in('subtype', filters.houseTypes);
+      }
+      
+      // Construction type
+      if (filters.selectedConstructionTypes && Array.isArray(filters.selectedConstructionTypes) && filters.selectedConstructionTypes.length > 0) {
+        query = query.in('construction_type', filters.selectedConstructionTypes);
+      }
+      
+      // Completion degree
+      if (filters.selectedCompletionStatuses && Array.isArray(filters.selectedCompletionStatuses) && filters.selectedCompletionStatuses.length > 0) {
+        query = query.in('completion_degree', filters.selectedCompletionStatuses);
+      }
+      
+      // Floor filters - floor is stored as text in database
+      if (filters.floorFrom !== undefined && filters.floorFrom > 0) {
+        // Convert to string for text comparison, or use numeric comparison if possible
+        query = query.gte('floor', filters.floorFrom.toString());
+      }
+      if (filters.floorTo !== undefined && filters.floorTo > 0) {
+        query = query.lte('floor', filters.floorTo.toString());
+      }
+      
+      // Floor options filter (specific floor values)
+      if (filters.selectedFloorOptions && Array.isArray(filters.selectedFloorOptions) && filters.selectedFloorOptions.length > 0) {
+        query = query.in('floor', filters.selectedFloorOptions);
+      }
+      
+      // Year built filters
+      if (filters.yearFrom !== undefined && filters.yearFrom > 0) {
+        query = query.gte('build_year', filters.yearFrom);
+      }
+      if (filters.yearTo !== undefined && filters.yearTo > 0) {
+        query = query.lte('build_year', filters.yearTo);
+      }
+      
+      // Features filter (array contains)
+      if (filters.selectedFeatures && Array.isArray(filters.selectedFeatures) && filters.selectedFeatures.length > 0) {
+        query = query.contains('features', filters.selectedFeatures);
+      }
+      
+      // Hotel category
+      if (filters.selectedCategories && Array.isArray(filters.selectedCategories) && filters.selectedCategories.length > 0) {
+        if (propertyTypeId === 'hotels-motels') {
+          query = query.in('hotel_category', filters.selectedCategories);
+        } else if (propertyTypeId === 'agricultural-land') {
+          query = query.in('agricultural_category', filters.selectedCategories);
+        }
+      }
+      
+      // Bed base for hotels
+      if (filters.bedBaseFrom !== undefined && filters.bedBaseFrom > 0) {
+        query = query.gte('bed_base', filters.bedBaseFrom);
+      }
+      if (filters.bedBaseTo !== undefined && filters.bedBaseTo > 0) {
+        query = query.lte('bed_base', filters.bedBaseTo);
+      }
+    }
+
+    // Order and limit
+    query = query.order('created_at', { ascending: false }).limit(limit);
+
+    const { data: properties, error } = await query;
 
     if (error) {
       console.error('Error fetching properties:', error);

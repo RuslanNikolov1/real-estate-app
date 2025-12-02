@@ -1,0 +1,236 @@
+@use '@/styles/variables' as *;
+@use 'sass:color';
+
+.propertiesListView {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $light-gray;
+  z-index: 10000;
+  overflow-y: auto;
+  padding: $spacing-xl;
+  pointer-events: auto;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-lg;
+  }
+}
+
+.header {
+  margin-bottom: $spacing-xl;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+
+  .headerContent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-xl;
+
+    @media (max-width: $breakpoint-md) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-lg;
+    }
+  }
+
+  .headerText {
+    flex: 1;
+  }
+
+  .headerIcon {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    color: $dark-red;
+    flex-shrink: 0;
+    align-self: flex-end;
+
+    @media (max-width: $breakpoint-md) {
+      margin-bottom: 0;
+
+      svg {
+        width: 80px;
+        height: 80px;
+      }
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      svg {
+        width: 60px;
+        height: 60px;
+      }
+    }
+  }
+
+  .closeButton {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-lg;
+    background-color: $white !important;
+    border-color: $dark-red !important;
+    color: $dark-red !important;
+
+    &:hover {
+      background-color: $dark-red !important;
+      color: $white !important;
+    }
+  }
+
+  .title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: $black;
+    margin-bottom: $spacing-md;
+    font-family: $font-heading;
+
+    @media (max-width: $breakpoint-md) {
+      font-size: 2rem;
+    }
+  }
+
+  .subtitle {
+    font-size: 1.125rem;
+    color: $dark-gray;
+    max-width: 600px;
+
+    @media (max-width: $breakpoint-md) {
+      font-size: 1rem;
+    }
+  }
+}
+
+.filtersPropertiesLayout {
+  position: relative;
+  margin-top: $spacing-xl;
+  display: flex;
+  gap: $spacing-xl;
+  align-items: flex-start;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+
+  @media (max-width: $breakpoint-lg) {
+    flex-direction: column;
+  }
+}
+
+.leftPropertiesColumn {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+  flex: 0 0 66%;
+  max-width: 66%;
+  min-width: 0;
+
+  @media (max-width: $breakpoint-lg) {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
+.propertiesList {
+  background: $white;
+  border-radius: 16px;
+  padding: $spacing-lg;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+  height: 100%;
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-md;
+    max-height: calc(100vh - 250px);
+  }
+}
+
+.listingsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-sm;
+  }
+}
+
+.listingsTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.25rem;
+  }
+}
+
+.viewAllButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.listingsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.noResults {
+  text-align: center;
+  color: $dark-gray;
+  font-size: 1.125rem;
+  padding: $spacing-2xl;
+}
+
+.rightFiltersColumn {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+  flex: 0 0 34%;
+  max-width: 34%;
+  min-width: 0;
+  align-self: flex-start;
+  position: sticky;
+  top: $spacing-xl;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+
+  @media (max-width: $breakpoint-lg) {
+    flex: 1 1 100%;
+    max-width: 100%;
+    position: relative;
+    top: 0;
+    max-height: none;
+  }
+}
+
+.actionButtonsWrapper {
+  position: fixed;
+  bottom: 24px;
+  right: 1%;
+  transform: translateX(-50%);
+  z-index: 10001;
+  display: flex;
+  gap: 12px;
+  pointer-events: auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+
+  @media (max-width: 768px) {
+    bottom: 16px;
+    gap: 8px;
+  }
+}
+
+

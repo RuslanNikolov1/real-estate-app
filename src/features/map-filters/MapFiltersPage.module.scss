@@ -457,6 +457,13 @@
         gap: $spacing-lg;
     }
 
+    .noResults {
+        text-align: center;
+        color: $dark-gray;
+        font-size: 1.125rem;
+        padding: $spacing-2xl;
+    }
+
     .actionButtonsWrapper {
         position: fixed;
         bottom: 24px;
