@@ -34,24 +34,26 @@ export type HeatingType = 'central' | 'electric' | 'gas' | 'wood' | 'none';
 
 export interface Property {
   id: string;
+  short_id?: number;
   title: string;
   description: string;
   type: PropertyType;
   status: PropertyStatus;
-  location_type: LocationType;
   city: string;
   neighborhood?: string;
-  address?: string;
   price: number;
   currency: string;
   area: number;
   rooms?: number;
   bathrooms?: number;
+  subtype?: string;
   floor?: number;
   total_floors?: number;
   year_built?: number;
   images: PropertyImage[];
   features?: string[];
+  construction_type?: string;
+  completion_degree?: string;
   coordinates?: {
     lat: number;
     lng: number;
@@ -79,12 +81,15 @@ export interface Property {
     date: string;
     price: number;
   }>;
+  broker_name?: string;
+  broker_phone?: string;
+  broker_position?: string;
+  broker_image?: string;
 }
 
 export interface PropertySearchFilters {
   type?: PropertyType[];
   status?: PropertyStatus[];
-  location_type?: LocationType[];
   city?: string;
   neighborhood?: string;
   min_price?: number;

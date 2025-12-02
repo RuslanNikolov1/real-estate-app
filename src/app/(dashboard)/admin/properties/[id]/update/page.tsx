@@ -1,12 +1,19 @@
 import { PropertyFormPage } from '@/features/admin/properties/PropertyFormPage';
 
-export default function AdminPropertyUpdatePage({
+export default async function AdminPropertyUpdatePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  return <PropertyFormPage propertyId={params.id} />;
+  const { id } = await params;
+  return <PropertyFormPage propertyId={id} />;
 }
+
+
+
+
+
+
 
 
 

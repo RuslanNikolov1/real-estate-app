@@ -683,16 +683,16 @@ export function getFieldsForPropertyType(type: PropertyType): FieldConfig[] {
  */
 export function generatePropertySchema(type?: PropertyType) {
   const baseSchema = z.object({
-    title: z.string().min(1, 'Заглавието е задължително'),
-    description: z.string().min(1, 'Описанието е задължително'),
+    title: z.string().min(1, 'errors.titleRequired'),
+    description: z.string().min(1, 'errors.descriptionRequired'),
     type: z.enum(['apartment', 'house', 'villa', 'office', 'shop', 'warehouse', 'land', 'hotel', 'agricultural', 'garage', 'restaurant', 'replace-real-estates', 'buy-real-estates', 'other-real-estates']),
     status: z.enum(['for-sale', 'for-rent']),
     location_type: z.enum(['urban', 'mountain', 'coastal']),
-    city: z.string().min(1, 'Градът е задължителен'),
+    city: z.string().min(1, 'errors.cityRequired'),
     neighborhood: z.string().optional(),
     address: z.string().optional(),
-    price: z.number().min(0, 'Цената трябва да е положително число'),
-    area: z.number().min(0, 'Площта трябва да е положително число'),
+    price: z.number().min(0, 'errors.priceMustBePositive'),
+    area: z.number().min(0, 'errors.areaMustBePositive'),
     price_per_sqm: z.number().optional(),
     year_built: z.number().optional(),
     broker_name: z.string().optional(),
@@ -730,7 +730,7 @@ export function generatePropertySchema(type?: PropertyType) {
         if (field.required) {
           extensions[field.key] = z
             .number()
-            .min(field.min ?? 0, `${field.label} трябва да е положително число`);
+            .min(field.min ?? 0, `errors.fieldMustBePositive:${field.label}`);
         } else {
           extensions[field.key] = z
             .number()
@@ -740,7 +740,7 @@ export function generatePropertySchema(type?: PropertyType) {
         break;
       case 'select':
         if (field.required) {
-          extensions[field.key] = z.string().min(1, `${field.label} е задължителен`);
+          extensions[field.key] = z.string().min(1, `errors.fieldRequired:${field.label}`);
         } else {
           extensions[field.key] = z.string().optional();
         }
@@ -750,7 +750,7 @@ export function generatePropertySchema(type?: PropertyType) {
         break;
       default:
         if (field.required) {
-          extensions[field.key] = z.string().min(1, `${field.label} е задължителен`);
+          extensions[field.key] = z.string().min(1, `errors.fieldRequired:${field.label}`);
         } else {
           extensions[field.key] = z.string().optional();
         }

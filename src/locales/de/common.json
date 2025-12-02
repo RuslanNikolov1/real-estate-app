@@ -81,6 +81,37 @@
     "contactAgent": "Kontaktieren Sie den Agenten",
     "addToFavorites": "Zu Favoriten hinzufügen",
     "removeFromFavorites": "Aus Favoriten entfernen"
+  },
+  "flashMessages": {
+    "propertyAdded": "Immobilie hinzugefügt!",
+    "propertyUpdated": "Immobilie aktualisiert!",
+    "loginSuccess": "Anmeldung erfolgreich!",
+    "loginError": "Anmeldefehler. Bitte versuchen Sie es erneut.",
+    "registerSuccess": "Registrierung erfolgreich! Bitte überprüfen Sie Ihre E-Mail zur Bestätigung.",
+    "registerError": "Registrierungsfehler. Bitte versuchen Sie es erneut.",
+    "resetPasswordSuccess": "E-Mail zum Zurücksetzen des Passworts gesendet! Bitte überprüfen Sie Ihren Posteingang.",
+    "resetPasswordError": "Fehler beim Senden der E-Mail. Bitte versuchen Sie es erneut.",
+    "unexpectedError": "Unerwarteter Fehler. Bitte versuchen Sie es erneut.",
+    "propertyAddError": "Fehler beim Hinzufügen der Immobilie. Bitte versuchen Sie es erneut.",
+    "propertySaveError": "Fehler beim Speichern. Bitte versuchen Sie es erneut."
+  },
+  "errors": {
+    "fileSizeExceeded": "Datei {{fileName}} überschreitet das Limit von 8MB",
+    "brokerImageSizeExceeded": "Maklerbild überschreitet das Limit von 8MB",
+    "fileNotImage": "Datei {{fileName}} ist kein Bild",
+    "brokerImageNotImage": "Maklerbild muss eine gültige Bilddatei sein",
+    "titleRequired": "Titel ist erforderlich",
+    "descriptionRequired": "Beschreibung ist erforderlich",
+    "cityRequired": "Stadt ist erforderlich",
+    "priceMustBePositive": "Preis muss eine positive Zahl sein",
+    "areaMustBePositive": "Fläche muss eine positive Zahl sein",
+    "fieldMustBePositive": "{{fieldLabel}} muss eine positive Zahl sein",
+    "fieldRequired": "{{fieldLabel}} ist erforderlich",
+    "atLeastOneImageRequired": "Mindestens ein Bild ist erforderlich",
+    "addAtLeastOneImage": "Bitte fügen Sie mindestens ein Bild hinzu",
+    "neighborhoodRequired": "Bitte wählen Sie einen Stadtteil",
+    "brokerNameAndPhoneRequired": "Maklername und Telefon sind erforderlich",
+    "firstImagePreviewNote": "Das erste Bild wird als Vorschau und Hauptbild auf der Immobilienseite verwendet."
   }
 }
 

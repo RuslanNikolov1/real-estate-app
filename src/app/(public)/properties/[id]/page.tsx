@@ -1,7 +1,17 @@
 import { PropertyDetailPage } from '@/features/properties/PropertyDetailPage';
 
-export default function Page({ params }: { params: { id: string } }) {
-  return <PropertyDetailPage propertyId={params.id} />;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  
+  if (!id) {
+    return null;
+  }
+  
+  return <PropertyDetailPage propertyId={id} />;
 }
 
 

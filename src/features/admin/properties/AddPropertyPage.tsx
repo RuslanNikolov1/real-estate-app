@@ -66,6 +66,9 @@ export function AddPropertyPage() {
   const createdObjectUrls = useRef<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const imageFilesRef = useRef<File[]>([]);
+  const brokerImageInputRef = useRef<HTMLInputElement | null>(null);
+  const brokerImageFileRef = useRef<File | null>(null);
+  const [brokerImagePreview, setBrokerImagePreview] = useState<string | null>(null);
   const [broker, setBroker] = useState({
     name: '',
     title: '',
@@ -202,6 +205,28 @@ export function AddPropertyPage() {
     fileInputRef.current?.click();
   };
 
+  const handleBrokerImageFile = (file: File | null) => {
+    if (!file) return;
+    if (brokerImagePreview && brokerImagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(brokerImagePreview);
+    }
+    const url = URL.createObjectURL(file);
+    brokerImageFileRef.current = file;
+    setBrokerImagePreview(url);
+  };
+
+  const handleBrokerImageDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files?.[0];
+    if (file) {
+      handleBrokerImageFile(file);
+    }
+  };
+
+  const handleBrowseBrokerImage = () => {
+    brokerImageInputRef.current?.click();
+  };
+
   const handleSubmit = async () => {
     if (isSubmitting) {
       return;
@@ -217,37 +242,37 @@ export function AddPropertyPage() {
     const numericPrice = Number(price);
 
     if (!trimmedTitle) {
-      setSubmitError('Заглавието е задължително');
+      setSubmitError(t('errors.titleRequired'));
       return;
     }
 
     if (!trimmedDescription) {
-      setSubmitError('Описанието е задължително');
+      setSubmitError(t('errors.descriptionRequired'));
       return;
     }
 
     if (!Number.isFinite(numericArea) || numericArea <= 0) {
-      setSubmitError('Площта трябва да е положително число');
+      setSubmitError(t('errors.areaMustBePositive'));
       return;
     }
 
     if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
-      setSubmitError('Цената трябва да е положително число');
+      setSubmitError(t('errors.priceMustBePositive'));
       return;
     }
 
     if (!neighborhood) {
-      setSubmitError('Моля, изберете квартал');
+      setSubmitError(t('errors.neighborhoodRequired'));
       return;
     }
 
-    if (imageFilesRef.current.length === 0) {
-      setSubmitError('Добавете поне едно изображение');
+    if (images.length === 0) {
+      setSubmitError(t('errors.addAtLeastOneImage'));
       return;
     }
 
     if (!trimmedBrokerName || !trimmedBrokerPhone) {
-      setSubmitError('Името и телефонът на брокера са задължителни');
+      setSubmitError(t('errors.brokerNameAndPhoneRequired'));
       return;
     }
 
@@ -298,9 +323,7 @@ export function AddPropertyPage() {
         formData.append('completion_degree', selectedCompletion);
       }
 
-      if (buildingType) {
-        formData.append('building_type', buildingType);
-      }
+      // building_type field removed - not saving to database
 
       if (hotelCategory) {
         formData.append('hotel_category', hotelCategory);
@@ -338,6 +361,10 @@ export function AddPropertyPage() {
 
       formData.append('broker_phone', trimmedBrokerPhone);
 
+      if (brokerImageFileRef.current) {
+        formData.append('broker_image', brokerImageFileRef.current);
+      }
+
       imageFilesRef.current.forEach((file) => {
         formData.append('images', file);
       });
@@ -349,14 +376,29 @@ export function AddPropertyPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.error || 'Грешка при добавянето на имота');
+        const errorMessage = errorData?.error || 'flashMessages.propertyAddError';
+        // Translate error message if it's a translation key
+        const translatedError = errorMessage.startsWith('errors.') 
+          ? t(errorMessage as any, { fileName: errorMessage.split(':')[1] || '' })
+          : errorMessage.startsWith('flashMessages.')
+          ? t(errorMessage as any)
+          : errorMessage;
+        throw new Error(translatedError);
+      }
+
+      const createdProperty = await response.json();
+      
+      // Store optimistic property in sessionStorage for immediate UI update
+      if (createdProperty) {
+        sessionStorage.setItem('optimistic-property', JSON.stringify(createdProperty));
+        sessionStorage.setItem('optimistic-action', 'add');
       }
 
       router.push('/admin/properties/quick-view?status=property-added');
     } catch (error) {
       console.error('Failed to create property via configurator:', error);
       setSubmitError(
-        error instanceof Error ? error.message : 'Неуспешно добавяне на имота. Моля, опитайте отново.',
+        error instanceof Error ? error.message : t('flashMessages.propertyAddError'),
       );
     } finally {
       setIsSubmitting(false);
@@ -381,6 +423,9 @@ export function AddPropertyPage() {
       createdObjectUrls.current.forEach((url) => URL.revokeObjectURL(url));
       createdObjectUrls.current = [];
       imageFilesRef.current = [];
+      if (brokerImagePreview && brokerImagePreview.startsWith('blob:')) {
+        URL.revokeObjectURL(brokerImagePreview);
+      }
     };
   }, []);
 
@@ -467,7 +512,7 @@ export function AddPropertyPage() {
                   >
                     <option value="">Изберете</option>
                     {typeSchema.subtypeOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
+                      <option key={option.id} value={option.label}>
                         {option.label}
                       </option>
                     ))}
@@ -588,6 +633,7 @@ export function AddPropertyPage() {
                   Все още няма добавени изображения. Плъзнете файлове или използвайте бутона по-долу.
                 </p>
               )}
+              <p className={styles.imageNote}>{t('errors.firstImagePreviewNote')}</p>
               <div
                 className={styles.dropzone}
                 onDragOver={(event) => event.preventDefault()}
@@ -848,6 +894,52 @@ export function AddPropertyPage() {
                 onChange={(event) => setBroker((prev) => ({ ...prev, phone: event.target.value }))}
                 required
               />
+            </div>
+            <div className={styles.imagesList}>
+              <h3 className={styles.brokerImageSectionTitle}>Снимка на брокера</h3>
+              {brokerImagePreview && (
+                <div className={`${styles.imageRow} ${styles.brokerImageRow}`}>
+                  <div className={styles.imagePreview}>
+                    <img src={brokerImagePreview} alt="Снимка на брокера" />
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.removeImage}
+                    onClick={() => {
+                      if (brokerImagePreview && brokerImagePreview.startsWith('blob:')) {
+                        URL.revokeObjectURL(brokerImagePreview);
+                      }
+                      brokerImageFileRef.current = null;
+                      setBrokerImagePreview(null);
+                    }}
+                  >
+                    Премахни
+                  </button>
+                </div>
+              )}
+              <div
+                className={styles.dropzone}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={handleBrokerImageDrop}
+              >
+                <p>Пуснете снимка на брокера тук или</p>
+                <button type="button" onClick={handleBrowseBrokerImage}>
+                  качи от компютър
+                </button>
+                <input
+                  ref={brokerImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className={styles.fileInput}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    handleBrokerImageFile(file);
+                    if (event.target.value) {
+                      event.target.value = '';
+                    }
+                  }}
+                />
+              </div>
             </div>
           </section>
 

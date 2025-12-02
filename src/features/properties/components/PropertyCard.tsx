@@ -24,12 +24,14 @@ export function PropertyCard({ property, onClick, onDelete, onEdit }: PropertyCa
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   };
 
-  // For sales apartments, use sales/apartments/[id] route
+  // For sales apartments, use sales/apartments/[short_id] route when available
   const getPropertyUrl = () => {
     if (property.status === 'for-sale' && property.type === 'apartment') {
-      return `/sale/apartments/${property.id}`;
+      const idForUrl = property.short_id ?? property.id;
+      return `/sale/apartments/${idForUrl}`;
     }
-    return `/properties/${property.id}`;
+    const idForUrl = property.short_id ?? property.id;
+    return `/properties/${idForUrl}`;
   };
 
   const handleIconClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -120,10 +122,10 @@ export function PropertyCard({ property, onClick, onDelete, onEdit }: PropertyCa
           </div>
 
           <div className={styles.details}>
-            {property.rooms && (
+            {property.subtype && (
               <div className={styles.detail}>
                 <Bed size={18} />
-                <span>{property.rooms} стаи</span>
+                <span>{property.subtype}</span>
               </div>
             )}
             <div className={styles.detail}>

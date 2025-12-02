@@ -220,16 +220,19 @@
 }
 
 .imagesList {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: $spacing-md;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .imageRow {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: $spacing-md;
+  flex-direction: column;
+  gap: $spacing-sm;
   padding: $spacing-sm $spacing-md;
   border: 1px solid $light-gray;
   border-radius: 12px;
@@ -240,8 +243,7 @@
 .imagePreview {
   display: flex;
   align-items: center;
-  gap: $spacing-md;
-  flex: 1;
+  justify-content: center;
 
   img {
     width: 120px;
@@ -290,7 +292,16 @@
   }
 }
 
+.imageNote {
+  grid-column: 1 / -1;
+  font-size: 0.875rem;
+  color: $medium-gray;
+  margin-bottom: $spacing-md;
+  line-height: 1.5;
+}
+
 .dropzone {
+  grid-column: 1 / -1;
   border: 2px dashed $light-gray;
   border-radius: 16px;
   padding: $spacing-lg;
@@ -328,6 +339,17 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: $spacing-md;
+}
+
+.brokerImageSectionTitle {
+  margin-top: $spacing-lg;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: $dark-gray;
+}
+
+.brokerImageRow {
+  grid-column: 1 / -1;
 }
 
 .actions {

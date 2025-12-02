@@ -81,6 +81,37 @@
     "contactAgent": "Свържи се с брокер",
     "addToFavorites": "Добави в любими",
     "removeFromFavorites": "Премахни от любими"
+  },
+  "flashMessages": {
+    "propertyAdded": "Имотът е добавен!",
+    "propertyUpdated": "Имотът е обновен!",
+    "loginSuccess": "Успешно влизане!",
+    "loginError": "Грешка при влизане. Моля, опитайте отново.",
+    "registerSuccess": "Регистрацията е успешна! Моля, проверете имейла си за потвърждение.",
+    "registerError": "Грешка при регистрация. Моля, опитайте отново.",
+    "resetPasswordSuccess": "Имейл за възстановяване на парола е изпратен! Моля, проверете пощата си.",
+    "resetPasswordError": "Грешка при изпращането на имейла. Моля, опитайте отново.",
+    "unexpectedError": "Неочаквана грешка. Моля, опитайте отново.",
+    "propertyAddError": "Грешка при добавянето на имота. Моля, опитайте отново.",
+    "propertySaveError": "Грешка при запазването. Моля, опитайте отново."
+  },
+  "errors": {
+    "fileSizeExceeded": "Файлът {{fileName}} надхвърля лимита от 8MB",
+    "brokerImageSizeExceeded": "Снимката на брокера надхвърля лимита от 8MB",
+    "fileNotImage": "Файлът {{fileName}} не е изображение",
+    "brokerImageNotImage": "Снимката на брокера не е валидно изображение",
+    "titleRequired": "Заглавието е задължително",
+    "descriptionRequired": "Описанието е задължително",
+    "cityRequired": "Градът е задължителен",
+    "priceMustBePositive": "Цената трябва да е положително число",
+    "areaMustBePositive": "Площта трябва да е положително число",
+    "fieldMustBePositive": "{{fieldLabel}} трябва да е положително число",
+    "fieldRequired": "{{fieldLabel}} е задължителен",
+    "atLeastOneImageRequired": "Поне едно изображение е задължително",
+    "addAtLeastOneImage": "Добавете поне едно изображение",
+    "neighborhoodRequired": "Моля, изберете квартал",
+    "brokerNameAndPhoneRequired": "Името и телефонът на брокера са задължителни",
+    "firstImagePreviewNote": "Първото изображение ще се използва като преглед и основно изображение на страницата на имота."
   }
 }
 

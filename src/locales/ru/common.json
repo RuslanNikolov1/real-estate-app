@@ -81,6 +81,37 @@
     "contactAgent": "Связаться с агентом",
     "addToFavorites": "Добавить в избранное",
     "removeFromFavorites": "Удалить из избранного"
+  },
+  "flashMessages": {
+    "propertyAdded": "Объект добавлен!",
+    "propertyUpdated": "Объект обновлен!",
+    "loginSuccess": "Вход выполнен успешно!",
+    "loginError": "Ошибка входа. Пожалуйста, попробуйте снова.",
+    "registerSuccess": "Регистрация успешна! Пожалуйста, проверьте свою электронную почту для подтверждения.",
+    "registerError": "Ошибка регистрации. Пожалуйста, попробуйте снова.",
+    "resetPasswordSuccess": "Письмо для сброса пароля отправлено! Пожалуйста, проверьте свой почтовый ящик.",
+    "resetPasswordError": "Ошибка отправки письма. Пожалуйста, попробуйте снова.",
+    "unexpectedError": "Неожиданная ошибка. Пожалуйста, попробуйте снова.",
+    "propertyAddError": "Ошибка добавления объекта. Пожалуйста, попробуйте снова.",
+    "propertySaveError": "Ошибка сохранения. Пожалуйста, попробуйте снова."
+  },
+  "errors": {
+    "fileSizeExceeded": "Файл {{fileName}} превышает лимит 8MB",
+    "brokerImageSizeExceeded": "Изображение брокера превышает лимит 8MB",
+    "fileNotImage": "Файл {{fileName}} не является изображением",
+    "brokerImageNotImage": "Изображение брокера должно быть валидным файлом изображения",
+    "titleRequired": "Название обязательно",
+    "descriptionRequired": "Описание обязательно",
+    "cityRequired": "Город обязателен",
+    "priceMustBePositive": "Цена должна быть положительным числом",
+    "areaMustBePositive": "Площадь должна быть положительным числом",
+    "fieldMustBePositive": "{{fieldLabel}} должна быть положительным числом",
+    "fieldRequired": "{{fieldLabel}} обязательно",
+    "atLeastOneImageRequired": "Требуется хотя бы одно изображение",
+    "addAtLeastOneImage": "Пожалуйста, добавьте хотя бы одно изображение",
+    "neighborhoodRequired": "Пожалуйста, выберите район",
+    "brokerNameAndPhoneRequired": "Имя и телефон брокера обязательны",
+    "firstImagePreviewNote": "Первое изображение будет использоваться в качестве превью и основного изображения на странице объекта."
   }
 }
 

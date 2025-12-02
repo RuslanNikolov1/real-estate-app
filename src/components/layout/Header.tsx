@@ -39,9 +39,19 @@ export function Header() {
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Check if message has already been shown in this session
+    const hasShownMessage = sessionStorage.getItem('ambienceMessageShown');
+    
+    if (hasShownMessage) {
+      // Message already shown, don't show again
+      return;
+    }
+
     // Show message after 3 seconds
     const showTimer = setTimeout(() => {
       setShowAmbienceMessage(true);
+      // Mark as shown in sessionStorage
+      sessionStorage.setItem('ambienceMessageShown', 'true');
     }, 3000);
 
     // Hide message after 5 seconds (8 seconds total from page load)

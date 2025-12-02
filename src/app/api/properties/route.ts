@@ -50,7 +50,7 @@ async function uploadImageWithLimit(
             secure_url: '',
             public_id: '',
             success: false,
-            error: `File ${file.name} exceeds 8MB limit`,
+            error: `errors.fileSizeExceeded:${file.name}`,
           });
           semaphore.count--;
           if (semaphore.queue.length > 0) {
@@ -98,6 +98,79 @@ async function uploadImageWithLimit(
   });
 }
 
+export async function GET(request: NextRequest) {
+  try {
+    const supabaseAdmin = getSupabaseAdminClient();
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+
+    // Fetch last N properties ordered by created_at descending
+    const { data: properties, error } = await supabaseAdmin
+      .from('properties')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Error fetching properties:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch properties', details: error.message },
+        { status: 500 }
+      );
+    }
+
+    // Transform database properties to match Property interface
+    const transformedProperties = (properties || []).map((prop: any) => ({
+      id: prop.id,
+      short_id: prop.short_id ?? undefined,
+      title: prop.title || '',
+      description: prop.description || '',
+      type: prop.type,
+      status: prop.status,
+      city: prop.city || '',
+      neighborhood: prop.neighborhood || undefined,
+      price: Number(prop.price) || 0,
+      currency: 'лв',
+      area: Number(prop.area_sqm) || 0,
+      rooms: prop.rooms || undefined,
+      bathrooms: prop.bathrooms || undefined,
+      subtype: prop.subtype || undefined,
+      construction_type: prop.construction_type || undefined,
+      completion_degree: prop.completion_degree || undefined,
+      floor: prop.floor ? Number(prop.floor) : undefined,
+      total_floors: prop.total_floors ? Number(prop.total_floors) : undefined,
+      year_built: prop.build_year || undefined,
+      images: (prop.image_urls || []).map((url: string, index: number) => ({
+        id: `${prop.id}-img-${index}`,
+        url,
+        public_id: prop.image_public_ids?.[index] || '',
+        width: 0,
+        height: 0,
+        is_primary: index === 0,
+      })),
+      features: prop.features || [],
+      broker_name: prop.broker_name || undefined,
+      broker_phone: prop.broker_phone || undefined,
+      broker_position: prop.broker_position || undefined,
+      broker_image: prop.broker_image || undefined,
+      view_count: 0,
+      created_at: prop.created_at || prop.date_posted || new Date().toISOString(),
+      updated_at: prop.updated_at || new Date().toISOString(),
+    }));
+
+    return NextResponse.json(transformedProperties, { status: 200 });
+  } catch (error) {
+    console.error('Unexpected error in GET /api/properties:', error);
+    return NextResponse.json(
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Parse multipart/form-data
@@ -108,7 +181,7 @@ export async function POST(request: NextRequest) {
     const featuresArray: string[] = [];
     
     for (const [key, value] of formData.entries()) {
-      if (key === 'images') continue; // Handle images separately
+      if (key === 'images' || key === 'broker_image') continue; // Handle images separately
       
       if (key === 'features') {
         // Handle features array - collect all feature values
@@ -125,6 +198,7 @@ export async function POST(request: NextRequest) {
 
     // Extract images
     const imageFiles = formData.getAll('images') as File[];
+    const brokerImageFile = formData.get('broker_image') as File | null;
     
     // Validate images exist
     if (!imageFiles || imageFiles.length === 0) {
@@ -150,7 +224,29 @@ export async function POST(request: NextRequest) {
       }
       if (file.size > MAX_FILE_SIZE) {
         return NextResponse.json(
-          { error: `File ${file.name} exceeds 8MB limit` },
+          { error: `errors.fileSizeExceeded:${file.name}` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate broker image if provided
+    if (brokerImageFile) {
+      if (!(brokerImageFile instanceof File)) {
+        return NextResponse.json(
+          { error: 'Broker image must be a valid file' },
+          { status: 400 }
+        );
+      }
+      if (!brokerImageFile.type.startsWith('image/')) {
+        return NextResponse.json(
+          { error: `Broker image must be an image file` },
+          { status: 400 }
+        );
+      }
+      if (brokerImageFile.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: 'errors.brokerImageSizeExceeded' },
           { status: 400 }
         );
       }
@@ -222,6 +318,21 @@ export async function POST(request: NextRequest) {
     const uploadedPublicIds = successfulUploads.map((u) => u.public_id);
     const imageUrls = successfulUploads.map((u) => u.secure_url);
 
+    // Upload broker image if provided
+    let brokerImageUrl: string | null = null;
+    let brokerImagePublicId: string | null = null;
+    if (brokerImageFile) {
+      const brokerArrayBuffer = await brokerImageFile.arrayBuffer();
+      const brokerBuffer = Buffer.from(brokerArrayBuffer);
+      try {
+        const brokerUpload = await uploadBufferToCloudinary(brokerBuffer, 'brokers');
+        brokerImageUrl = brokerUpload.secure_url;
+        brokerImagePublicId = brokerUpload.public_id;
+      } catch (error) {
+        console.error('Error uploading broker image:', error);
+      }
+    }
+
     // Calculate price_per_sqm if not provided
     const pricePerSqm = validatedData.price_per_sqm
       ? validatedData.price_per_sqm
@@ -240,7 +351,6 @@ export async function POST(request: NextRequest) {
       total_floors: validatedData.total_floors || null,
       city: validatedData.city,
       neighborhood: validatedData.neighborhood,
-      address: validatedData.address || null,
       title: validatedData.title,
       description: validatedData.description,
       build_year: validatedData.build_year || null,
@@ -250,6 +360,7 @@ export async function POST(request: NextRequest) {
       broker_name: validatedData.broker_name,
       broker_position: validatedData.broker_position || null,
       broker_phone: validatedData.broker_phone,
+      broker_image: brokerImageUrl,
       image_urls: imageUrls,
       image_public_ids: uploadedPublicIds,
     };
@@ -266,8 +377,10 @@ export async function POST(request: NextRequest) {
     if (insertError || !insertedProperty) {
       console.error('Supabase insert error:', insertError);
       
-      // Cleanup all uploaded images
-      await deleteMultipleFromCloudinary(uploadedPublicIds);
+      // Cleanup all uploaded images (including broker image if any)
+      await deleteMultipleFromCloudinary(
+        brokerImagePublicId ? [...uploadedPublicIds, brokerImagePublicId] : uploadedPublicIds
+      );
 
       return NextResponse.json(
         {

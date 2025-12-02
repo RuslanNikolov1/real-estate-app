@@ -4,6 +4,7 @@ create extension if not exists "pgcrypto";
 -- Create properties table
 create table if not exists public.properties (
   id uuid primary key default gen_random_uuid(),
+  short_id bigint generated always as identity unique,
 
   -- posting/meta
   title text not null default '',           -- Merged from 002/004
@@ -19,13 +20,10 @@ create table if not exists public.properties (
   -- basic categorisation
   type text not null,
   subtype text,
-  location_type text,
   city text not null,
   
   -- SPELLING FIX: Changed from 'neighbourhood' to 'neighborhood'
-  neighborhood text, 
-  
-  address text,
+  neighborhood text,
 
   -- pricing + size
   price numeric(12,2) not null,
@@ -38,11 +36,7 @@ create table if not exists public.properties (
   
   -- construction & completion
   build_year integer,                       -- Merged from 004
-  year_of_construction integer,             -- (Kept original just in case)
   construction_type text,
-  degree_of_completion text,
-  completion_status text,
-  building_type text,
   completion_degree text,                   -- Merged from 004
 
   -- land / infrastructure extras
@@ -56,16 +50,14 @@ create table if not exists public.properties (
 
   -- general feature buckets
   features text[],
-  images jsonb not null default '[]'::jsonb,
   
-  -- New image array columns from 004
+  -- Image array columns
   image_urls text[] default '{}'::text[] not null,
   image_public_ids text[] default '{}'::text[] not null,
 
   -- broker info
   broker_image text,
   broker_name text,
-  broker_title text,
   broker_phone text,
   broker_position text                      -- Merged from 003/004
 );
@@ -101,3 +93,8 @@ create policy "Public can view properties"
   on public.properties
   for select
   using (true);
+
+
+
+
+

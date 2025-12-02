@@ -107,21 +107,21 @@ export const COMPLETION_STATUSES: CompletionStatus[] = [
 
 export const HOUSE_TYPES: HouseType[] = [
     { id: 'all', label: 'Всички' },
-    { id: 'one-floor', label: 'Едноетажна къща', icon: <HouseLine size={20} weight="regular" /> },
-    { id: 'two-floor', label: 'Двуетажна къща', icon: (
+    { id: 'one-floor', label: 'Едноетажна', icon: <HouseLine size={20} weight="regular" /> },
+    { id: 'two-floor', label: 'Двуетажна', icon: (
         <>
             <HouseLine size={20} weight="regular" />
             <HouseLine size={20} weight="regular" />
         </>
     ) },
-    { id: 'three-floor', label: 'Триетажна къща', icon: (
+    { id: 'three-floor', label: 'Триетажна', icon: (
         <>
             <HouseLine size={20} weight="regular" />
             <HouseLine size={20} weight="regular" />
             <HouseLine size={20} weight="regular" />
         </>
     ) },
-    { id: 'house-floor', label: 'Етаж от къща', icon: <Cube size={20} weight="regular" /> },
+    { id: 'house-floor', label: 'Етаж от сграда', icon: <Cube size={20} weight="regular" /> },
     { id: 'four-plus-floor', label: 'Четириетажна+', icon: (
         <>
             <HouseLine size={20} weight="regular" />

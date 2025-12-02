@@ -81,6 +81,37 @@
     "contactAgent": "Contact Agent",
     "addToFavorites": "Add to Favorites",
     "removeFromFavorites": "Remove from Favorites"
+  },
+  "flashMessages": {
+    "propertyAdded": "Property added!",
+    "propertyUpdated": "Property updated!",
+    "loginSuccess": "Login successful!",
+    "loginError": "Login error. Please try again.",
+    "registerSuccess": "Registration successful! Please check your email for confirmation.",
+    "registerError": "Registration error. Please try again.",
+    "resetPasswordSuccess": "Password reset email sent! Please check your inbox.",
+    "resetPasswordError": "Error sending email. Please try again.",
+    "unexpectedError": "Unexpected error. Please try again.",
+    "propertyAddError": "Error adding property. Please try again.",
+    "propertySaveError": "Error saving. Please try again."
+  },
+  "errors": {
+    "fileSizeExceeded": "File {{fileName}} exceeds 8MB limit",
+    "brokerImageSizeExceeded": "Broker image exceeds 8MB limit",
+    "fileNotImage": "File {{fileName}} is not an image",
+    "brokerImageNotImage": "Broker image must be a valid image file",
+    "titleRequired": "Title is required",
+    "descriptionRequired": "Description is required",
+    "cityRequired": "City is required",
+    "priceMustBePositive": "Price must be a positive number",
+    "areaMustBePositive": "Area must be a positive number",
+    "fieldMustBePositive": "{{fieldLabel}} must be a positive number",
+    "fieldRequired": "{{fieldLabel}} is required",
+    "atLeastOneImageRequired": "At least one image is required",
+    "addAtLeastOneImage": "Please add at least one image",
+    "neighborhoodRequired": "Please select a neighborhood",
+    "brokerNameAndPhoneRequired": "Broker name and phone are required",
+    "firstImagePreviewNote": "The first image will be used as a preview and main image on the property page."
   }
 }
 

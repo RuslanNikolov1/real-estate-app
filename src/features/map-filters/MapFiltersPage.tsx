@@ -27,6 +27,7 @@ import { MapComponent } from './MapComponent';
 import { PropertyCard } from '@/features/properties/components/PropertyCard';
 import { mockProperties } from '@/features/properties/PropertiesListPage';
 import { MapPin } from '@phosphor-icons/react';
+import type { Property } from '@/types';
 
 interface MapFiltersPageProps {
     initialPropertyType?: string | null;
@@ -240,6 +241,11 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         setActionButtons(buttons);
     }, []);
 
+    // State for direct ID search result
+    const [selectedPropertyById, setSelectedPropertyById] = useState<Property | null>(null);
+    const [propertyByIdError, setPropertyByIdError] = useState<string | null>(null);
+    const [isLoadingPropertyById, setIsLoadingPropertyById] = useState(false);
+
     // State to track whether to show map or listings
     const [showListings, setShowListings] = useState(() => {
         // Check if URL has search params on initial load
@@ -268,9 +274,35 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         return params.toString();
     }, []);
 
-    const handleSearch = useCallback(() => {
+    const handleSearch = useCallback(async () => {
         const filters = currentFiltersRef.current;
-        if (filters) {
+        setSelectedPropertyById(null);
+        setPropertyByIdError(null);
+        setIsLoadingPropertyById(false);
+
+        if (filters && 'propertyId' in filters && filters.propertyId && filters.propertyId.trim()) {
+            const shortId = filters.propertyId.trim();
+            setIsLoadingPropertyById(true);
+            try {
+                const response = await fetch(`/api/properties/short/${shortId}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        setPropertyByIdError('Имот с това ID не е намерен.');
+                    } else {
+                        const data = await response.json().catch(() => null);
+                        setPropertyByIdError(data?.error || 'Грешка при зареждането на имота по ID.');
+                    }
+                } else {
+                    const data: Property = await response.json();
+                    setSelectedPropertyById(data);
+                }
+            } catch (error) {
+                console.error('Error fetching property by short_id:', error);
+                setPropertyByIdError('Грешка при зареждането на имота по ID.');
+            } finally {
+                setIsLoadingPropertyById(false);
+            }
+        } else if (filters) {
             const queryString = serializeFiltersToURL(filters);
             const currentPath = selectedPropertyType 
                 ? `${baseRoute}/${selectedPropertyType}` 
@@ -395,7 +427,10 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                 {showListings ? (
                                     <div className={styles.propertyListings}>
                                         <div className={styles.listingsHeader}>
-                                            <h2 className={styles.listingsTitle}>Намерени имоти: {mockProperties.length}</h2>
+                                            <h2 className={styles.listingsTitle}>
+                                                Намерени имоти:{' '}
+                                                {selectedPropertyById ? 1 : mockProperties.length}
+                                            </h2>
                                             <Button
                                                 variant="outline"
                                                 onClick={handleBackToMap}
@@ -406,12 +441,20 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                             </Button>
                                         </div>
                                         <div className={styles.listingsGrid}>
-                                            {mockProperties.map((property) => (
-                                                <PropertyCard
-                                                    key={property.id}
-                                                    property={property}
-                                                />
-                                            ))}
+                                            {isLoadingPropertyById ? (
+                                                <p className={styles.noResults}>Зареждане на имот по ID...</p>
+                                            ) : selectedPropertyById ? (
+                                                <PropertyCard property={selectedPropertyById} />
+                                            ) : propertyByIdError ? (
+                                                <p className={styles.noResults}>{propertyByIdError}</p>
+                                            ) : (
+                                                mockProperties.map((property) => (
+                                                    <PropertyCard
+                                                        key={property.id}
+                                                        property={property}
+                                                    />
+                                                ))
+                                            )}
                                         </div>
                                     </div>
                                 ) : (

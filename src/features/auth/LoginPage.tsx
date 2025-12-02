@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslation } from 'react-i18next';
 import * as z from 'zod';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
@@ -46,6 +47,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 export function LoginPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [mode, setMode] = useState<'login' | 'register' | 'reset'>('login');
   const [showPassword, setShowPassword] = useState(false);
@@ -90,19 +92,19 @@ export function LoginPage() {
       });
 
       if (authError) {
-        setError(authError.message || 'Грешка при влизане. Моля, опитайте отново.');
+        setError(authError.message || t('flashMessages.loginError'));
         return;
       }
 
       if (authData.user) {
-        setSuccess('Успешно влизане!');
+        setSuccess(t('flashMessages.loginSuccess'));
         // Redirect to admin panel or home
         setTimeout(() => {
           router.push('/admin/properties');
         }, 1000);
       }
     } catch (err) {
-      setError('Неочаквана грешка. Моля, опитайте отново.');
+      setError(t('flashMessages.unexpectedError'));
       console.error('Login error:', err);
     } finally {
       setIsLoading(false);
@@ -126,15 +128,15 @@ export function LoginPage() {
       });
 
       if (authError) {
-        setError(authError.message || 'Грешка при регистрация. Моля, опитайте отново.');
+        setError(authError.message || t('flashMessages.registerError'));
         return;
       }
 
       if (authData.user) {
-        setSuccess('Регистрацията е успешна! Моля, проверете имейла си за потвърждение.');
+        setSuccess(t('flashMessages.registerSuccess'));
       }
     } catch (err) {
-      setError('Неочаквана грешка. Моля, опитайте отново.');
+      setError(t('flashMessages.unexpectedError'));
       console.error('Register error:', err);
     } finally {
       setIsLoading(false);
@@ -152,13 +154,13 @@ export function LoginPage() {
       });
 
       if (resetError) {
-        setError(resetError.message || 'Грешка при изпращането на имейла. Моля, опитайте отново.');
+        setError(resetError.message || t('flashMessages.resetPasswordError'));
         return;
       }
 
-      setSuccess('Имейл за възстановяване на парола е изпратен! Моля, проверете пощата си.');
+      setSuccess(t('flashMessages.resetPasswordSuccess'));
     } catch (err) {
-      setError('Неочаквана грешка. Моля, опитайте отново.');
+      setError(t('flashMessages.unexpectedError'));
       console.error('Reset password error:', err);
     } finally {
       setIsLoading(false);

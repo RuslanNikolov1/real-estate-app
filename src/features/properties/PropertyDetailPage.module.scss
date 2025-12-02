@@ -36,6 +36,30 @@
   }
 }
 
+// Property Title Section
+.propertyTitleSection {
+  margin-bottom: $spacing-2xl;
+  padding: 0 $spacing-md;
+
+  @media (max-width: $breakpoint-md) {
+    margin-bottom: $spacing-xl;
+    padding: 0;
+  }
+}
+
+.propertyTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $dark-gray;
+  margin: 0;
+  line-height: 1.2;
+  font-family: $font-headline;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.75rem;
+  }
+}
+
 .mainImageContainer {
   position: relative;
   width: 100%;
@@ -161,7 +185,8 @@
 // Price and Details Section
 .priceDetailsSection {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 2fr;
+  gap: 6vw;
   padding: $spacing-2xl;
   background: $white;
   border-radius: 20px;

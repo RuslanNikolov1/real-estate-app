@@ -25,7 +25,33 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { PropertyCard } from './components/PropertyCard';
 import { motion, AnimatePresence } from 'framer-motion';
-import { APARTMENT_FEATURE_FILTERS, CONSTRUCTION_FILTERS, COMPLETION_STATUSES } from '@/features/map-filters/filters/constants';
+import {
+  APARTMENT_FEATURE_FILTERS,
+  HOUSE_FEATURES,
+  COMMERCIAL_FEATURES,
+  BUILDING_PLOTS_FEATURES,
+  AGRICULTURAL_FEATURES,
+  WAREHOUSES_FEATURES,
+  GARAGES_FEATURES,
+  HOTELS_FEATURES,
+  ESTABLISHMENTS_FEATURES,
+  CONSTRUCTION_FILTERS,
+  COMPLETION_STATUSES,
+  APARTMENT_SUBTYPES,
+  HOUSE_TYPES,
+  COMMERCIAL_PROPERTY_TYPES,
+  WAREHOUSES_PROPERTY_TYPES,
+  HOTELS_PROPERTY_TYPES,
+  GARAGES_PROPERTY_TYPES,
+  AGRICULTURAL_PROPERTY_TYPES,
+  BUILDING_TYPES,
+  HOTEL_CATEGORIES,
+  AGRICULTURAL_CATEGORIES,
+  ELECTRICITY_OPTIONS,
+  WATER_OPTIONS,
+  GARAGE_CONSTRUCTION_TYPES,
+  ESTABLISHMENT_CONSTRUCTION_TYPES,
+} from '@/features/map-filters/filters/constants';
 import { mockProperties as baseProperties } from './PropertiesListPage';
 import styles from './PropertyDetailPage.module.scss';
 
@@ -100,21 +126,14 @@ const mockProperties: Property[] = baseProperties.map((prop) => {
   };
 });
 
-// Mock broker data
-const mockBroker = {
-  id: '1',
-  name: 'Иван Петров',
-  title: 'Старши брокер',
-  phone: '+359 888 123 456',
-  email: 'ivan.petrov@example.com',
-  avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
-};
-
 interface PropertyDetailPageProps {
   propertyId: string;
 }
 
 export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
+  const [remoteProperty, setRemoteProperty] = useState<Property | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -126,14 +145,78 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
     message: '',
   });
 
-  const property = useMemo(
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchProperty = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/properties/short/${propertyId}`);
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            if (isMounted) {
+              setRemoteProperty(null);
+              setError('Имотът не е намерен.');
+            }
+            return;
+          }
+
+          throw new Error('Грешка при зареждането на имота');
+        }
+
+        const data: Property = await response.json();
+        if (isMounted) {
+          setRemoteProperty(data);
+        }
+      } catch (err) {
+        console.error('Error fetching property by id:', err);
+        if (isMounted) {
+          setError('Грешка при зареждането на имота.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchProperty();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [propertyId]);
+
+  const fallbackProperty = useMemo(
     () => mockProperties.find((p) => p.id === propertyId),
     [propertyId]
   );
 
+  const property = useMemo(
+    () => remoteProperty ?? fallbackProperty,
+    [remoteProperty, fallbackProperty]
+  );
+
+  // Basic runtime validation for required property fields
+  const hasRequiredFields =
+    !!property &&
+    !!property.title &&
+    !!property.description &&
+    typeof property.price === 'number' &&
+    property.price > 0 &&
+    typeof property.area === 'number' &&
+    property.area > 0 &&
+    !!property.city &&
+    !!property.currency;
+
   const recommendedProperties = useMemo(() => {
-    const filtered = mockProperties.filter((p) => p.id !== propertyId && p.status === 'for-sale' && p.type === 'apartment');
-    
+    const filtered = mockProperties.filter(
+      (p) => p.id !== propertyId && p.status === 'for-sale' && p.type === 'apartment',
+    );
+
     // If we don't have enough, add some mock properties
     if (filtered.length < 4) {
       const additionalProperties: Property[] = [
@@ -143,7 +226,6 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           description: 'Двустаен апартамент с балкон и изглед към града.',
           type: 'apartment',
           status: 'for-sale',
-          location_type: 'urban',
           city: 'Бургас',
           neighborhood: 'Изгрев',
           price: 145000,
@@ -153,14 +235,16 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           bathrooms: 1,
           floor: 4,
           total_floors: 6,
-          images: [{
-            id: 'rec1-img',
-            url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af',
-            public_id: 'rec1-1',
-            width: 1200,
-            height: 800,
-            is_primary: true,
-          }],
+          images: [
+            {
+              id: 'rec1-img',
+              url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af',
+              public_id: 'rec1-1',
+              width: 1200,
+              height: 800,
+              is_primary: true,
+            },
+          ],
           view_count: 156,
           created_at: '2024-01-10T10:00:00Z',
           updated_at: '2024-01-10T10:00:00Z',
@@ -171,7 +255,6 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           description: 'Тристаен апартамент на първа линия море.',
           type: 'apartment',
           status: 'for-sale',
-          location_type: 'coastal',
           city: 'Бургас',
           neighborhood: 'Морска градина',
           price: 220000,
@@ -181,14 +264,16 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           bathrooms: 2,
           floor: 2,
           total_floors: 5,
-          images: [{
-            id: 'rec2-img',
-            url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2',
-            public_id: 'rec2-1',
-            width: 1200,
-            height: 800,
-            is_primary: true,
-          }],
+          images: [
+            {
+              id: 'rec2-img',
+              url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2',
+              public_id: 'rec2-1',
+              width: 1200,
+              height: 800,
+              is_primary: true,
+            },
+          ],
           view_count: 234,
           created_at: '2024-01-12T10:00:00Z',
           updated_at: '2024-01-12T10:00:00Z',
@@ -199,7 +284,6 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           description: 'Едностаен апартамент в нова сграда.',
           type: 'apartment',
           status: 'for-sale',
-          location_type: 'urban',
           city: 'Бургас',
           neighborhood: 'Лазур',
           price: 95000,
@@ -209,14 +293,16 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           bathrooms: 1,
           floor: 1,
           total_floors: 4,
-          images: [{
-            id: 'rec3-img',
-            url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb',
-            public_id: 'rec3-1',
-            width: 1200,
-            height: 800,
-            is_primary: true,
-          }],
+          images: [
+            {
+              id: 'rec3-img',
+              url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb',
+              public_id: 'rec3-1',
+              width: 1200,
+              height: 800,
+              is_primary: true,
+            },
+          ],
           view_count: 98,
           created_at: '2024-01-14T10:00:00Z',
           updated_at: '2024-01-14T10:00:00Z',
@@ -227,7 +313,6 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           description: 'Голям апартамент на последен етаж с голяма тераса.',
           type: 'apartment',
           status: 'for-sale',
-          location_type: 'urban',
           city: 'Бургас',
           neighborhood: 'Център',
           price: 280000,
@@ -237,25 +322,86 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           bathrooms: 3,
           floor: 8,
           total_floors: 8,
-          images: [{
-            id: 'rec4-img',
-            url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2',
-            public_id: 'rec4-1',
-            width: 1200,
-            height: 800,
-            is_primary: true,
-          }],
+          images: [
+            {
+              id: 'rec4-img',
+              url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2',
+              public_id: 'rec4-1',
+              width: 1200,
+              height: 800,
+              is_primary: true,
+            },
+          ],
           view_count: 412,
           created_at: '2024-01-16T10:00:00Z',
           updated_at: '2024-01-16T10:00:00Z',
         },
       ];
-      
+
       return [...filtered, ...additionalProperties].slice(0, 4);
     }
-    
+
     return filtered.slice(0, 4);
   }, [propertyId]);
+
+  // Keyboard navigation for slideshow
+  const imagesLength = property?.images?.length ?? 0;
+  useEffect(() => {
+    if (!isFullscreen || !property || !property.images || imagesLength <= 1) {
+      return;
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setCurrentImageIndex((prev) => (prev + 1) % imagesLength);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setCurrentImageIndex((prev) => (prev - 1 + imagesLength) % imagesLength);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        setIsFullscreen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isFullscreen, imagesLength, property]);
+
+  if (isLoading && !property) {
+    return (
+      <div className={styles.propertyPage}>
+        <Header />
+        <main className={styles.main}>
+          <div className={styles.container}>
+            <p>Зареждане...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if ((!property && !isLoading) || error || (property && !hasRequiredFields)) {
+    return (
+      <div className={styles.propertyPage}>
+        <Header />
+        <main className={styles.main}>
+          <div className={styles.container}>
+            <p>
+              {error ||
+                (property && !hasRequiredFields
+                  ? 'Имотът има непълни задължителни данни.'
+                  : 'Имотът не е намерен.')}
+            </p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!property) {
     return (
@@ -313,13 +459,53 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   };
 
-  // Format property ID to 3 digits
-  const formatPropertyId = (id: string) => {
-    const numId = parseInt(id, 10);
+  // Format property ID (prefer short_id) to 3 digits
+  const formatPropertyId = (id: string | number | undefined) => {
+    if (id === undefined || id === null) return '';
+    const numId = typeof id === 'number' ? id : parseInt(id, 10);
     if (!isNaN(numId)) {
       return numId.toString().padStart(3, '0');
     }
-    return id;
+    return String(id);
+  };
+
+  const getSubtypeLabel = () => {
+    if (!property.subtype) return 'Не е посочено';
+
+    let options:
+      | { id: string; label: string }[]
+      | undefined;
+
+    switch (property.type) {
+      case 'apartment':
+        options = APARTMENT_SUBTYPES;
+        break;
+      case 'house':
+      case 'villa':
+        options = HOUSE_TYPES;
+        break;
+      case 'office':
+      case 'shop':
+        options = COMMERCIAL_PROPERTY_TYPES;
+        break;
+      case 'warehouse':
+        options = WAREHOUSES_PROPERTY_TYPES;
+        break;
+      case 'hotel':
+        options = HOTELS_PROPERTY_TYPES;
+        break;
+      case 'garage':
+        options = GARAGES_PROPERTY_TYPES;
+        break;
+      case 'agricultural':
+        options = AGRICULTURAL_PROPERTY_TYPES;
+        break;
+      default:
+        options = undefined;
+    }
+
+    const match = options?.find((opt) => opt.id === property.subtype);
+    return match?.label ?? property.subtype;
   };
 
   // Get construction type label
@@ -330,8 +516,44 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
 
   // Get completion status label
   const getCompletionLabel = () => {
-    const completion = COMPLETION_STATUSES.find((c) => c.id === (property as any).completion_status);
+    const completion = COMPLETION_STATUSES.find((c) => c.id === (property as any).completion_degree);
     return completion?.label || 'Не е посочено';
+  };
+
+  // Get hotel category label
+  const getHotelCategoryLabel = () => {
+    const category = HOTEL_CATEGORIES.find((c) => c.id === (property as any).hotel_category);
+    return category?.label || 'Не е посочено';
+  };
+
+  // Get agricultural category label
+  const getAgriculturalCategoryLabel = () => {
+    const category = AGRICULTURAL_CATEGORIES.find((c) => c.id === (property as any).agricultural_category);
+    return category?.label || 'Не е посочено';
+  };
+
+  // Get electricity label
+  const getElectricityLabel = () => {
+    const electricity = ELECTRICITY_OPTIONS.find((e) => e.id === (property as any).electricity);
+    return electricity?.label || 'Не е посочено';
+  };
+
+  // Get water label
+  const getWaterLabel = () => {
+    const water = WATER_OPTIONS.find((w) => w.id === (property as any).water);
+    return water?.label || 'Не е посочено';
+  };
+
+  // Get garage construction type label
+  const getGarageConstructionLabel = () => {
+    const construction = GARAGE_CONSTRUCTION_TYPES.find((c) => c.id === (property as any).construction_type);
+    return construction?.label || 'Не е посочено';
+  };
+
+  // Get establishment construction type label (for restaurants)
+  const getEstablishmentConstructionLabel = () => {
+    const construction = ESTABLISHMENT_CONSTRUCTION_TYPES.find((c) => c.id === (property as any).construction_type);
+    return construction?.label || 'Не е посочено';
   };
 
   const handleInquirySubmit = (e: React.FormEvent) => {
@@ -346,37 +568,19 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
     }
   };
 
-  // Keyboard navigation for slideshow
-  useEffect(() => {
-    if (!isFullscreen || !property.images || property.images.length <= 1) {
-      return;
-    }
+  const logoImageUrl = '/Red Logo.jpg'; // Logo from public folder
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        setCurrentImageIndex((prev) => (prev + 1) % property.images!.length);
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        setCurrentImageIndex((prev) => (prev - 1 + property.images!.length) % property.images!.length);
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        setIsFullscreen(false);
-      }
-    };
+  // Prepare exactly 5 display slots, filling missing ones with null (logo fallback)
+  // First image goes to middle (main), then left column (top to bottom), then right column
+  const images = property.images || [];
+  const middleSlot = images[0] || null; // First image as main
+  const leftSlot1 = images[1] || null; // Second image, left column top
+  const leftSlot2 = images[2] || null; // Third image, left column bottom
+  const rightSlot1 = images[3] || null; // Fourth image, right column top
+  const rightSlot2 = images[4] || null; // Fifth image, right column bottom
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isFullscreen, property.images]);
-
-  const leftImages = property.images?.slice(0, 2) || [];
-  const middleImage = property.images?.[2];
-  const rightImages = property.images?.slice(3, 5) || [];
   const remainingImagesCount = Math.max(0, (property.images?.length || 0) - 5);
   const activeFullscreenImage = property.images?.[currentImageIndex];
-  const logoImageUrl = '/Red Logo.jpg'; // Logo from public folder
 
   const handleImageError = (imageId: string) => {
     setFailedImages((prev) => new Set(prev).add(imageId));
@@ -391,13 +595,13 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           <div className={styles.imageSection}>
             {/* Left Column - 2 images stacked */}
             <div className={styles.leftImagesContainer}>
-              {leftImages.map((img, index) => (
-                <div 
-                  key={img.id} 
+              {[leftSlot1, leftSlot2].map((img, index) => (
+                <div
+                  key={img?.id ?? `placeholder-left-${index}`}
                   className={styles.sideImage}
                   onClick={handleImageClick}
                 >
-                  {failedImages.has(img.id) ? (
+                  {!img || failedImages.has(img.id) ? (
                     <div className={styles.imagePlaceholder}>
                       <Image
                         src={logoImageUrl}
@@ -425,45 +629,41 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
             
             {/* Middle Column - 1 main image */}
             <div className={styles.mainImageContainer} onClick={handleImageClick}>
-              {middleImage ? (
-                <div className={styles.mainImage}>
-                  {failedImages.has(middleImage.id) ? (
-                    <div className={styles.imagePlaceholder}>
-                      <Image
-                        src={logoImageUrl}
-                        alt="Logo"
-                        fill
-                        className={styles.logoImage}
-                        sizes="(max-width: 768px) 100vw, 40vw"
-                      />
-                    </div>
-                  ) : (
-                    <CloudinaryImage
-                      src={middleImage.url}
-                      publicId={middleImage.public_id}
-                      alt={property.title}
+              <div className={styles.mainImage}>
+                {!middleSlot || failedImages.has(middleSlot.id) ? (
+                  <div className={styles.imagePlaceholder}>
+                    <Image
+                      src={logoImageUrl}
+                      alt="Logo"
                       fill
-                      className={styles.image}
+                      className={styles.logoImage}
                       sizes="(max-width: 768px) 100vw, 40vw"
-                      priority
-                      onError={() => handleImageError(middleImage.id)}
                     />
-                  )}
-                </div>
-              ) : (
-                <div className={styles.placeholder}>Няма снимка</div>
-              )}
+                  </div>
+                ) : (
+                  <CloudinaryImage
+                    src={middleSlot.url}
+                    publicId={middleSlot.public_id}
+                    alt={property.title}
+                    fill
+                    className={styles.image}
+                    sizes="(max-width: 768px) 100vw, 40vw"
+                    priority
+                    onError={() => handleImageError(middleSlot.id)}
+                  />
+                )}
+              </div>
             </div>
             
             {/* Right Column - 2 images stacked */}
             <div className={styles.rightImagesContainer}>
-              {rightImages.map((img, index) => (
-                <div 
-                  key={img.id} 
+              {[rightSlot1, rightSlot2].map((img, index) => (
+                <div
+                  key={img?.id ?? `placeholder-right-${index}`}
                   className={styles.sideImage}
                   onClick={handleImageClick}
                 >
-                  {failedImages.has(img.id) ? (
+                  {!img || failedImages.has(img.id) ? (
                     <div className={styles.imagePlaceholder}>
                       <Image
                         src={logoImageUrl}
@@ -494,6 +694,13 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
             </div>
           </div>
 
+          {/* Property Title */}
+          {property.title && (
+            <div className={styles.propertyTitleSection}>
+              <h1 className={styles.propertyTitle}>{property.title}</h1>
+            </div>
+          )}
+
           {/* Two Column Layout */}
           <div className={styles.contentLayout}>
             {/* Left Column - 66% */}
@@ -512,20 +719,28 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
 
                 {/* Details Row */}
                 <div className={styles.detailsRow}>
-                  {property.rooms && (
+                  {/* Subtype - only show for types that have it in schema */}
+                  {(property.type !== 'land' && 
+                    property.type !== 'replace-real-estates' && 
+                    property.type !== 'buy-real-estates' && 
+                    property.type !== 'other-real-estates' &&
+                    property.subtype) && (
                     <div className={styles.detailBox}>
                       <Bed size={24} />
-                      <div className={styles.detailValue}>{property.rooms} стаи</div>
+                      <div className={styles.detailValue}>{getSubtypeLabel()}</div>
                     </div>
                   )}
                   <div className={styles.detailBox}>
                     <Square size={24} />
                     <div className={styles.detailValue}>{property.area} м²</div>
                   </div>
-                  {property.floor && (
+                  {/* Floor - only show for apartments, offices, shops, restaurants */}
+                  {((property.type === 'apartment' || property.type === 'office' || property.type === 'shop' || property.type === 'restaurant') && property.floor) && (
                     <div className={styles.detailBox}>
                       <Buildings size={24} />
-                      <div className={styles.detailValue}>{property.floor}/{property.total_floors} етаж</div>
+                      <div className={styles.detailValue}>
+                        {property.total_floors ? `${property.floor}/${property.total_floors} етаж` : `${property.floor} етаж`}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -543,8 +758,42 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   <h2 className={styles.sectionTitle}>Особености</h2>
                   <div className={styles.featuresGrid}>
                     {property.features.map((featureId) => {
-                      const feature = APARTMENT_FEATURE_FILTERS.find((f) => f.id === featureId);
+                      let source;
+
+                      switch (property.type) {
+                        case 'house':
+                        case 'villa':
+                          source = HOUSE_FEATURES;
+                          break;
+                        case 'office':
+                        case 'shop':
+                          source = COMMERCIAL_FEATURES;
+                          break;
+                        case 'warehouse':
+                          source = WAREHOUSES_FEATURES;
+                          break;
+                        case 'land':
+                          source = BUILDING_PLOTS_FEATURES;
+                          break;
+                        case 'agricultural':
+                          source = AGRICULTURAL_FEATURES;
+                          break;
+                        case 'garage':
+                          source = GARAGES_FEATURES;
+                          break;
+                        case 'hotel':
+                          source = HOTELS_FEATURES;
+                          break;
+                        case 'restaurant':
+                          source = ESTABLISHMENTS_FEATURES;
+                          break;
+                        default:
+                          source = APARTMENT_FEATURE_FILTERS;
+                      }
+
+                      const feature = source.find((f) => f.id === featureId);
                       if (!feature) return null;
+
                       return (
                         <div key={featureId} className={styles.featureItem}>
                           {feature.icon && <span className={styles.featureIcon}>{feature.icon}</span>}
@@ -556,26 +805,118 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                 </div>
               )}
 
-              {/* Construction Details */}
-              <div className={styles.constructionSection}>
-                <h2 className={styles.sectionTitle}>Детайли за строителството</h2>
-                <div className={styles.constructionGrid}>
-                  <div className={styles.constructionItem}>
-                    <span className={styles.constructionLabel}>Вид строителство</span>
-                    <span className={styles.constructionValue}>{getConstructionLabel()}</span>
-                  </div>
-                  {property.year_built && (
-                    <div className={styles.constructionItem}>
-                      <span className={styles.constructionLabel}>Година на строителство</span>
-                      <span className={styles.constructionValue}>{property.year_built}</span>
-                    </div>
-                  )}
-                  <div className={styles.constructionItem}>
-                    <span className={styles.constructionLabel}>Степен на завършеност</span>
-                    <span className={styles.constructionValue}>{getCompletionLabel()}</span>
+              {/* Construction Details / Additional Details */}
+              {(() => {
+                const propType = property.type;
+                const prop = property as any;
+                const hasConstructionDetails = 
+                  (propType === 'apartment' && (prop.construction_type || prop.completion_degree || property.year_built)) ||
+                  ((propType === 'office' || propType === 'shop' || propType === 'restaurant') && (prop.construction_type || prop.completion_degree || property.year_built || property.floor)) ||
+                  (propType === 'hotel' && (prop.construction_type || prop.completion_degree || prop.hotel_category || prop.bed_base || property.year_built)) ||
+                  (propType === 'garage' && (prop.construction_type || property.year_built)) ||
+                  ((propType === 'house' || propType === 'villa') && (property.year_built || prop.yard_area)) ||
+                  (propType === 'agricultural' && prop.agricultural_category) ||
+                  (propType === 'land' && (prop.electricity || prop.water));
+                return hasConstructionDetails;
+              })() && (
+                <div className={styles.constructionSection}>
+                  <h2 className={styles.sectionTitle}>
+                    {property.type === 'land' || property.type === 'agricultural' 
+                      ? 'Допълнителни параметри' 
+                      : 'Детайли за строителството'}
+                  </h2>
+                  <div className={styles.constructionGrid}>
+                    {/* Construction Type - for apartments, offices, shops, hotels, restaurants */}
+                    {((property.type === 'apartment' || property.type === 'office' || property.type === 'shop' || property.type === 'hotel' || property.type === 'restaurant') && (property as any).construction_type) && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>
+                          {property.type === 'apartment' ? 'Вид строителство' : 
+                           property.type === 'hotel' ? 'Тип строителство' :
+                           property.type === 'restaurant' ? 'Тип строителство' : 'Тип строителство'}
+                        </span>
+                        <span className={styles.constructionValue}>
+                          {property.type === 'apartment' ? getConstructionLabel() :
+                           property.type === 'restaurant' ? getEstablishmentConstructionLabel() :
+                           getConstructionLabel()}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Garage Construction Type */}
+                    {property.type === 'garage' && (property as any).construction_type && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Вид конструкция</span>
+                        <span className={styles.constructionValue}>{getGarageConstructionLabel()}</span>
+                      </div>
+                    )}
+
+
+                    {/* Completion Status - for apartments, offices, shops, hotels, restaurants */}
+                    {(property.type === 'apartment' || property.type === 'office' || property.type === 'shop' || property.type === 'hotel' || property.type === 'restaurant') && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Степен на завършеност</span>
+                        <span className={styles.constructionValue}>{getCompletionLabel()}</span>
+                      </div>
+                    )}
+
+                    {/* Year Built - for all types that have it */}
+                    {property.year_built && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Година на строителство</span>
+                        <span className={styles.constructionValue}>{property.year_built}</span>
+                      </div>
+                    )}
+
+                    {/* Yard Area - for houses/villas */}
+                    {((property.type === 'house' || property.type === 'villa') && (property as any).yard_area) && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Площ на двора (м²)</span>
+                        <span className={styles.constructionValue}>{(property as any).yard_area}</span>
+                      </div>
+                    )}
+
+                    {/* Hotel Category */}
+                    {property.type === 'hotel' && (property as any).hotel_category && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Категория</span>
+                        <span className={styles.constructionValue}>{getHotelCategoryLabel()}</span>
+                      </div>
+                    )}
+
+                    {/* Hotel Bed Base */}
+                    {property.type === 'hotel' && (property as any).bed_base && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Леглова база</span>
+                        <span className={styles.constructionValue}>{(property as any).bed_base}</span>
+                      </div>
+                    )}
+
+                    {/* Agricultural Category */}
+                    {property.type === 'agricultural' && (property as any).agricultural_category && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Категория</span>
+                        <span className={styles.constructionValue}>{getAgriculturalCategoryLabel()}</span>
+                      </div>
+                    )}
+
+                    {/* Land - Electricity */}
+                    {property.type === 'land' && (property as any).electricity && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Ток</span>
+                        <span className={styles.constructionValue}>{getElectricityLabel()}</span>
+                      </div>
+                    )}
+
+                    {/* Land - Water */}
+                    {property.type === 'land' && (property as any).water && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Вода</span>
+                        <span className={styles.constructionValue}>{getWaterLabel()}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Price History Graph */}
               {property.price_history && property.price_history.length > 0 && (
@@ -674,7 +1015,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                 <div className={styles.infoItem}>
                   <div className={styles.infoText}>
                     <IdentificationBadge size={24} />
-                    <span>ID: {formatPropertyId(property.id)}</span>
+                    <span>ID: {formatPropertyId(property.short_id ?? property.id)}</span>
                   </div>
                   <div className={styles.infoText}>
                     <Calendar size={24} />
@@ -727,25 +1068,35 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                 </div>
 
                 {/* Broker Info */}
-                <div className={styles.brokerSection}>
-                  <div className={styles.brokerImage}>
-                    <Image
-                      src={mockBroker.avatar}
-                      alt={mockBroker.name}
-                      fill
-                      className={styles.brokerAvatar}
-                      sizes="100px"
-                    />
+                {(property.broker_name || property.broker_phone || property.broker_position) && (
+                  <div className={styles.brokerSection}>
+                    <div className={styles.brokerImage}>
+                      <Image
+                        src={property.broker_image || '/Red Logo.jpg'}
+                        alt={property.broker_name || 'Брокер'}
+                        fill
+                        className={styles.brokerAvatar}
+                        sizes="100px"
+                      />
+                    </div>
+                    <div className={styles.brokerDetails}>
+                      {property.broker_name && (
+                        <div className={styles.brokerName}>{property.broker_name}</div>
+                      )}
+                      {property.broker_position && (
+                        <div className={styles.brokerTitle}>
+                          {property.broker_position}
+                        </div>
+                      )}
+                      {property.broker_phone && (
+                        <a href={`tel:${property.broker_phone}`} className={styles.brokerContact}>
+                          <Phone size={18} />
+                          <span>{property.broker_phone}</span>
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <div className={styles.brokerDetails}>
-                    <div className={styles.brokerName}>{mockBroker.name}</div>
-                    <div className={styles.brokerTitle}>{mockBroker.title}</div>
-                    <a href={`tel:${mockBroker.phone}`} className={styles.brokerContact}>
-                      <Phone size={18} />
-                      <span>{mockBroker.phone}</span>
-                    </a>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

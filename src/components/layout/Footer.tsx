@@ -99,14 +99,16 @@ export function Footer() {
         </div>
 
         <div className={styles.bottom}>
-          <a 
-            href="https://portfolio-website-dusky-five-28.vercel.app/" 
-            target="_blank" 
+          <a
+            href="https://portfolio-website-dusky-five-28.vercel.app/"
+            target="_blank"
             rel="noopener noreferrer"
             className={styles.creatorCredit}
           >
             <UserCircleDashed size={18} color="#40E0D0" weight="fill" />
-            <span>Created by <span className={styles.creatorName}>Ruslan Nikolov</span></span>
+            <span className={styles.creatorName}>
+              Created by Ruslan Nikolov ❤️
+            </span>
           </a>
           <p className={styles.copyright}>
             © 2025 Broker Bulgaria. Всички права запазени.
