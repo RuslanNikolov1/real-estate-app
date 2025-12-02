@@ -36,7 +36,6 @@ export const createPropertySchema = z.object({
   // Локация
   city: z.string().min(1, 'Градът е задължителен'),
   neighborhood: z.string().min(1, 'Кварталът е задължителен'),
-  address: z.string().optional(),
 
   // Описание
   title: z.string().min(1, 'Заглавието е задължително'),

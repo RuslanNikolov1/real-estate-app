@@ -690,7 +690,6 @@ export function generatePropertySchema(type?: PropertyType) {
     location_type: z.enum(['urban', 'mountain', 'coastal']),
     city: z.string().min(1, 'errors.cityRequired'),
     neighborhood: z.string().optional(),
-    address: z.string().optional(),
     price: z.number().min(0, 'errors.priceMustBePositive'),
     area: z.number().min(0, 'errors.areaMustBePositive'),
     price_per_sqm: z.number().optional(),
