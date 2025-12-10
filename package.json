@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "dev": "cross-env NODE_OPTIONS=\"--no-deprecation\" next dev",
+    "build": "cross-env NODE_OPTIONS=\"--no-deprecation\" next build",
+    "start": "cross-env NODE_OPTIONS=\"--no-deprecation\" next start",
     "lint": "next lint",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },

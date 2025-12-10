@@ -213,7 +213,7 @@ export async function GET(request: NextRequest) {
           // Even though filters send English IDs, normalize for safety and to handle edge cases
           const normalizedSubtypes = validSubtypes
             .map((subtype: string) => normalizeSubtypeToId(subtype))
-            .filter((id): id is string => id !== null && id !== 'all');
+            .filter((id: string | null): id is string => id !== null && id !== 'all');
           
           if (normalizedSubtypes.length > 0) {
             // Get all possible search values (both English IDs and Bulgarian labels) for each normalized subtype
