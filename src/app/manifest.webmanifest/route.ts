@@ -1,14 +1,16 @@
-import { MetadataRoute } from 'next';
+import { NextResponse } from 'next/server';
 import { getBaseUrl } from '@/lib/base-url';
+import type { MetadataRoute } from 'next';
 
 /**
- * Web App Manifest for PWA support
- * https://nextjs.org/docs/app/api-reference/file-conventions/metadata/manifest
+ * Route handler for web app manifest
+ * This explicit route handler satisfies Vercel's requirement for route files
+ * and serves the manifest at /manifest.webmanifest
  */
-export default function manifest(): MetadataRoute.Manifest {
+export async function GET() {
   const baseUrl = getBaseUrl();
   
-  return {
+  const manifest: MetadataRoute.Manifest = {
     name: 'Broker Bulgaria - Недвижими имоти в Бургас',
     short_name: 'Broker Bulgaria',
     description: 'Професионални недвижими имоти в Бургас. Апартаменти, къщи, вили и бизнес имоти за продажба и наем.',
@@ -28,7 +30,12 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     lang: 'bg',
   };
+
+  return NextResponse.json(manifest, {
+    headers: {
+      'Content-Type': 'application/manifest+json',
+      'Cache-Control': 'public, max-age=3600',
+    },
+  });
 }
-
-
 
