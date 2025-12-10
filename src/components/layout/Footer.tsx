@@ -47,19 +47,19 @@ export function Footer() {
             <h4 className={styles.columnTitle}>Бързи връзки</h4>
             <ul className={styles.links}>
               <li>
-                <Link href="/properties/for-sale">{t('nav.forSale')}</Link>
+                <Link href="/properties/for-sale" prefetch={false}>{t('nav.forSale')}</Link>
               </li>
               <li>
-                <Link href="/properties/for-rent">{t('nav.forRent')}</Link>
+                <Link href="/properties/for-rent" prefetch={false}>{t('nav.forRent')}</Link>
               </li>
               <li>
-                <Link href="/neighborhoods">{t('nav.neighborhoods')}</Link>
+                <Link href="/neighborhoods" prefetch={false}>{t('nav.neighborhoods')}</Link>
               </li>
               <li>
-                <Link href="/reviews">{t('nav.reviews')}</Link>
+                <Link href="/reviews" prefetch={false}>{t('nav.reviews')}</Link>
               </li>
               <li>
-                <Link href="/certificates">{t('nav.certificates')}</Link>
+                <Link href="/certificates" prefetch={false}>{t('nav.certificates')}</Link>
               </li>
             </ul>
           </div>
@@ -68,13 +68,13 @@ export function Footer() {
             <h4 className={styles.columnTitle}>Услуги</h4>
             <ul className={styles.links}>
               <li>
-                <Link href="/valuation">{t('nav.valuation')}</Link>
+                <Link href="/valuation" prefetch={false}>{t('nav.valuation')}</Link>
               </li>
               <li>
-                <Link href="/properties/add">Добави обява</Link>
+                <Link href="/properties/add" prefetch={false}>Добави обява</Link>
               </li>
               <li>
-                <Link href="/favorites">{t('nav.favorites')}</Link>
+                <Link href="/favorites" prefetch={false}>{t('nav.favorites')}</Link>
               </li>
             </ul>
           </div>

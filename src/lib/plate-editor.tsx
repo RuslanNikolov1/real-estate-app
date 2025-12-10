@@ -14,6 +14,52 @@ export interface PlateEditorProps {
   placeholder?: string;
 }
 
+/**
+ * Validates URL to prevent XSS attacks
+ * Only allows http://, https://, or mailto: protocols
+ */
+function isValidUrl(url: string): boolean {
+  if (!url || typeof url !== 'string') {
+    return false;
+  }
+
+  // Trim whitespace
+  const trimmedUrl = url.trim();
+
+  // Check for dangerous protocols (javascript:, data:, vbscript:, etc.)
+  const dangerousProtocols = /^(javascript|data|vbscript|file|about):/i;
+  if (dangerousProtocols.test(trimmedUrl)) {
+    return false;
+  }
+
+  // Only allow safe protocols
+  const safeProtocols = /^(https?|mailto):/i;
+  if (!safeProtocols.test(trimmedUrl)) {
+    return false;
+  }
+
+  // Additional validation: try to create URL object for http/https
+  if (/^https?:/i.test(trimmedUrl)) {
+    try {
+      const urlObj = new URL(trimmedUrl);
+      // Ensure it's not a dangerous domain pattern
+      if (!urlObj.hostname || urlObj.hostname.length === 0) {
+        return false;
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // For mailto: links, basic validation
+  if (/^mailto:/i.test(trimmedUrl)) {
+    return trimmedUrl.length > 7; // mailto: + at least one character
+  }
+
+  return false;
+}
+
 // Simple rich text editor using contentEditable
 // This is a simplified version until Plate packages are properly configured
 export function PlateEditor({ value, onChange, placeholder }: PlateEditorProps) {
@@ -101,8 +147,10 @@ export function PlateEditor({ value, onChange, placeholder }: PlateEditorProps) 
           type="button"
           onClick={() => {
             const url = prompt('Enter URL:');
-            if (url) {
+            if (url && isValidUrl(url)) {
               document.execCommand('createLink', false, url);
+            } else if (url) {
+              alert('Невалиден URL адрес. Моля, въведете валиден URL (напр. https://example.com)');
             }
           }}
           className="toolbar-button"
@@ -114,8 +162,10 @@ export function PlateEditor({ value, onChange, placeholder }: PlateEditorProps) 
           type="button"
           onClick={() => {
             const url = prompt('Enter image URL:');
-            if (url) {
+            if (url && isValidUrl(url)) {
               document.execCommand('insertImage', false, url);
+            } else if (url) {
+              alert('Невалиден URL адрес. Моля, въведете валиден URL (напр. https://example.com/image.jpg)');
             }
           }}
           className="toolbar-button"

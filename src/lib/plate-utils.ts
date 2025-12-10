@@ -31,8 +31,24 @@ export function plateValueToPlainText(value: Value): string {
 }
 
 /**
+ * Escapes HTML special characters to prevent XSS attacks
+ * Works in both client and server contexts
+ */
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
+/**
  * Convert Plate editor JSON value to HTML
  * Useful for displaying rich text content
+ * Note: Text content is escaped to prevent XSS attacks
  */
 export function plateValueToHTML(value: Value): string {
   if (!value || !Array.isArray(value)) {
@@ -45,19 +61,21 @@ export function plateValueToHTML(value: Value): string {
         const text = node.children
           .map((child: any) => {
             if (typeof child === 'string') {
-              return child;
+              // Escape HTML in string values
+              return escapeHtml(child);
             }
             if (child && typeof child === 'object' && 'text' in child) {
-              let textContent = child.text || '';
+              // Escape HTML content before wrapping in tags
+              const textContent = escapeHtml(child.text || '');
               // Handle formatting (bold, italic, etc.)
               if (child.bold) {
-                textContent = `<strong>${textContent}</strong>`;
+                return `<strong>${textContent}</strong>`;
               }
               if (child.italic) {
-                textContent = `<em>${textContent}</em>`;
+                return `<em>${textContent}</em>`;
               }
               if (child.underline) {
-                textContent = `<u>${textContent}</u>`;
+                return `<u>${textContent}</u>`;
               }
               return textContent;
             }
@@ -71,6 +89,12 @@ export function plateValueToHTML(value: Value): string {
     .filter(Boolean)
     .join('');
 }
+
+
+
+
+
+
 
 
 

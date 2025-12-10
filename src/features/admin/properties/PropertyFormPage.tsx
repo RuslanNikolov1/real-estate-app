@@ -22,6 +22,7 @@ import {
 } from '@/lib/property-schemas';
 import { DynamicPropertyField } from '@/components/forms/DynamicPropertyField';
 import { plateValueToPlainText } from '@/lib/plate-utils';
+import { normalizeSubtypeToId } from '@/lib/subtype-mapper';
 import styles from './PropertyFormPage.module.scss';
 
 type PropertyFormData = z.infer<ReturnType<typeof generatePropertySchema>>;
@@ -382,7 +383,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       year_built: property.year_built,
       construction_type: (property as any).construction_type || '',
       completion_status: (property as any).completion_degree || '', // Redirect completion_degree to completion_status input
-      subtype: (property as any).subtype || '',
+      // Normalize subtype to ID (in case database has Bulgarian label)
+      subtype: normalizeSubtypeToId((property as any).subtype) || '',
       yard_area: (property as any).yard_area || undefined,
       hotel_category: (property as any).hotel_category || '',
       agricultural_category: (property as any).agricultural_category || '',
@@ -722,7 +724,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                         >
                           <option value="">Изберете</option>
                           {typeSchema.subtypeOptions.map((option) => (
-                            <option key={option.id} value={option.label}>
+                            <option key={option.id} value={option.id}>
                               {option.label}
                             </option>
                           ))}

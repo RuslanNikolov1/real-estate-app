@@ -34,12 +34,16 @@ export function SubtypeFilter({
         setSelectedIds(initialSelected);
     }, [initialSelected]);
 
+    // IMPORTANT: This component always sends English IDs (option.id), never labels
+    // This ensures language-agnostic filtering regardless of the site's UI language
+    // Labels can be translated for display, but IDs remain English for database consistency
     const handleSubtypeToggle = useCallback((subtypeId: string) => {
         if (subtypeId === 'all') {
             if (selectedIds.includes('all')) {
                 setSelectedIds([]);
                 onFilterChange([]);
             } else {
+                // Always use option.id (English IDs like 'studio', 'one-bedroom')
                 const allIds = options.map(o => o.id);
                 setSelectedIds(allIds);
                 onFilterChange(allIds);
@@ -53,6 +57,7 @@ export function SubtypeFilter({
                 const allOptionsExceptAll = options.filter(o => o.id !== 'all').map(o => o.id);
                 const hasAllOptions = allOptionsExceptAll.every(id => newSelection.includes(id));
 
+                // Always use option.id (English IDs)
                 const finalSelection = hasAllOptions ? options.map(o => o.id) : newSelection;
                 onFilterChange(finalSelection);
                 return finalSelection;

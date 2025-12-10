@@ -215,6 +215,7 @@ export function Header() {
                     <Link
                       key={item.href}
                       href={item.href}
+                      prefetch={false}
                       className={styles.userMenuLink}
                       onClick={() => setIsUserMenuOpen(false)}
                     >

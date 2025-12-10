@@ -512,7 +512,7 @@ export function AddPropertyPage() {
                   >
                     <option value="">Изберете</option>
                     {typeSchema.subtypeOptions.map((option) => (
-                      <option key={option.id} value={option.label}>
+                      <option key={option.id} value={option.id}>
                         {option.label}
                       </option>
                     ))}

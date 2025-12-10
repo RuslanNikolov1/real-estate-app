@@ -29,7 +29,7 @@ export function CertificatesMemberships({
       <div className={styles.container}>
         <div className={styles.header}>
           <h2 className={styles.title}>{t('home.certificatesMemberships')}</h2>
-          <Link href="/certificates">
+          <Link href="/certificates" prefetch={false}>
             <Button variant="outline" className={styles.viewAllButton}>
               Виж всички
               <CaretRight size={16} />

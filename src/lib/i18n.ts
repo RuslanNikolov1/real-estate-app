@@ -30,7 +30,7 @@ i18n
     fallbackLng: 'bg',
     defaultNS: 'translation',
     interpolation: {
-      escapeValue: false,
+      escapeValue: true, // Enable HTML escaping to prevent XSS attacks
     },
     detection: {
       order: ['localStorage', 'navigator'],

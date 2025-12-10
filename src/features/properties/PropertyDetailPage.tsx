@@ -430,14 +430,18 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   };
 
   const handleShare = () => {
+    const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+    // Use current window location for sharing (already correct for localhost or production)
+    const shareUrl = currentUrl;
+    
     if (navigator.share) {
       navigator.share({
         title: property.title,
         text: property.description,
-        url: window.location.href,
+        url: shareUrl,
       });
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(shareUrl);
       alert('Линкът е копиран в клипборда!');
     }
   };

@@ -26,7 +26,7 @@ export function ClientReviews({ reviews }: ClientReviewsProps) {
       <div className={styles.container}>
         <div className={styles.header}>
           <h2 className={styles.title}>{t('home.clientReviews')}</h2>
-          <Link href="/reviews">
+          <Link href="/reviews" prefetch={false}>
             <Button variant="outline" className={styles.viewAllButton}>
               {t('home.viewAllReviews')}
               <CaretRight size={16} />

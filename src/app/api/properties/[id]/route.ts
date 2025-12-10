@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { deleteMultipleFromCloudinary, uploadBufferToCloudinary } from '@/lib/cloudinary-server';
 import { createPropertySchema } from '@/lib/validations/property-create';
+import { normalizeSubtypeToId } from '@/lib/subtype-mapper';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -472,12 +473,20 @@ export async function PUT(
       ? Number(textFields.price_per_sqm)
       : area > 0 ? price / area : 0;
 
+    // LANGUAGE-AGNOSTIC: Normalize subtype to English ID before updating database
+    // Admin forms send English IDs (from option.id), but we normalize for safety and backward compatibility
+    // This ensures database always stores English IDs regardless of UI language
+    const subtypeValue = textFields.subtype || existingProperty.subtype;
+    const normalizedSubtype = subtypeValue 
+      ? normalizeSubtypeToId(subtypeValue) 
+      : null;
+
     // Prepare update payload
     const updatePayload: any = {
       status: textFields.status || existingProperty.status,
       sale_or_rent: textFields.sale_or_rent || existingProperty.sale_or_rent,
       type: textFields.type || existingProperty.type,
-      subtype: textFields.subtype || existingProperty.subtype || null,
+      subtype: normalizedSubtype,
       area_sqm: area,
       price: price,
       price_per_sqm: pricePerSqm,

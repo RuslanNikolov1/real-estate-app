@@ -1,5 +1,6 @@
 'use client';
 
+import { Metadata } from 'next';
 import { useParams } from 'next/navigation';
 import { PropertyDetailPage } from '@/features/properties/PropertyDetailPage';
 

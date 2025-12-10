@@ -1,11 +1,12 @@
 import { MetadataRoute } from 'next';
+import { getBaseUrl } from '@/lib/base-url';
 
 /**
  * Dynamic sitemap for Google Search Console
  * https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://your-domain.com';
+  const baseUrl = getBaseUrl();
 
   // Static pages
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -141,6 +142,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [...staticRoutes];
 }
+
+
+
+
+
+
 
 
 

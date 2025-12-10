@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { uploadBufferToCloudinary, deleteMultipleFromCloudinary } from '@/lib/cloudinary-server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { createPropertySchema } from '@/lib/validations/property-create';
+import { normalizeSubtypeToId, getSubtypeSearchValues } from '@/lib/subtype-mapper';
 
 // Vercel serverless function configuration
 export const runtime = 'nodejs';
@@ -184,12 +185,77 @@ export async function GET(request: NextRequest) {
         query = query.lte('price_per_sqm', filters.pricePerSqmTo);
       }
       
-      // Subtype filter (for apartments, houses, etc.)
+      // Subtype filter (for apartments only)
+      // LANGUAGE-AGNOSTIC: Filter always receives English IDs (e.g., 'one-bedroom', 'studio')
+      // regardless of the site's UI language. This ensures consistent database queries.
+      // 
+      // Ensure apartmentSubtypes filter ONLY applies to apartment type properties
+      // Filter apartments by subtype - exclude "all" from the filter
+      // Handle both IDs (from filters) and labels (possibly stored in database for backward compatibility)
       if (filters.apartmentSubtypes && Array.isArray(filters.apartmentSubtypes) && filters.apartmentSubtypes.length > 0) {
-        query = query.in('subtype', filters.apartmentSubtypes);
+        // Filter out "all" option and any empty values
+        const validSubtypes = filters.apartmentSubtypes.filter(
+          (subtype: string) => subtype && subtype !== 'all'
+        );
+        
+        // Only apply filter if we have valid subtypes (not just "all" selected)
+        if (validSubtypes.length > 0) {
+          // Ensure we only filter apartment types when using apartment subtypes
+          // This prevents subtype filters from accidentally matching other property types
+          // Database stores type as 'apartment' (singular), filter UI uses 'apartments' (plural)
+          // Type filter is already applied at line 154 if propertyTypeId === 'apartments'
+          // Only apply type filter if propertyTypeId is not set or is not 'apartments'
+          if (!propertyTypeId || propertyTypeId !== 'apartments') {
+            query = query.in('type', ['apartment']);
+          }
+          
+          // Normalize all subtype IDs first to ensure consistency
+          // Even though filters send English IDs, normalize for safety and to handle edge cases
+          const normalizedSubtypes = validSubtypes
+            .map((subtype: string) => normalizeSubtypeToId(subtype))
+            .filter((id): id is string => id !== null && id !== 'all');
+          
+          if (normalizedSubtypes.length > 0) {
+            // Get all possible search values (both English IDs and Bulgarian labels) for each normalized subtype
+            // This handles cases where database might have labels instead of IDs (for backward compatibility)
+            // The filter ALWAYS sends English IDs like 'one-bedroom', 'two-bedroom', 'studio', etc.
+            // We also search for Bulgarian labels to find old data that might have been stored with labels
+            const searchValues = new Set<string>();
+            
+            normalizedSubtypes.forEach((normalizedId: string) => {
+              // normalizedId is always an English ID (e.g., 'one-bedroom', 'studio', 'two-bedroom', 'multi-bedroom', etc.)
+              // Use helper function to get both English ID and Bulgarian label for database matching
+              // This ensures we find properties stored with either format
+              const values = getSubtypeSearchValues(normalizedId);
+              values.forEach(value => searchValues.add(value));
+            });
+            
+            // Use OR query to match either ID or label
+            // This will match properties where:
+            // - subtype = 'studio' OR subtype = 'Едностаен'
+            // - subtype = 'one-bedroom' OR subtype = 'Двустаен'
+            // - subtype = 'two-bedroom' OR subtype = 'Тристаен'
+            // - etc. for all subtypes
+            // Combined with type = 'apartment' filter, this ensures we only get apartment properties
+            // Works regardless of site language because IDs are always English
+            const finalSearchValues = Array.from(searchValues);
+            if (finalSearchValues.length > 0) {
+              query = query.in('subtype', finalSearchValues);
+            }
+          }
+        }
+        // If "all" is selected or only "all" is in the array, don't filter by subtype
       }
+      
+      // House types filter - same logic
       if (filters.houseTypes && Array.isArray(filters.houseTypes) && filters.houseTypes.length > 0) {
-        query = query.in('subtype', filters.houseTypes);
+        const validHouseTypes = filters.houseTypes.filter(
+          (houseType: string) => houseType && houseType !== 'all'
+        );
+        
+        if (validHouseTypes.length > 0) {
+          query = query.in('subtype', validHouseTypes);
+        }
       }
       
       // Construction type
@@ -479,12 +545,19 @@ export async function POST(request: NextRequest) {
       ? validatedData.price_per_sqm
       : validatedData.price / validatedData.area_sqm;
 
+    // LANGUAGE-AGNOSTIC: Normalize subtype to English ID before saving to database
+    // Admin forms send English IDs (from option.id), but we normalize for safety
+    // This ensures database always stores English IDs regardless of UI language
+    const normalizedSubtype = validatedData.subtype 
+      ? normalizeSubtypeToId(validatedData.subtype) 
+      : null;
+
     // Prepare payload for Supabase
     const payload = {
       status: validatedData.status,
       sale_or_rent: validatedData.sale_or_rent,
       type: validatedData.type,
-      subtype: validatedData.subtype || null,
+      subtype: normalizedSubtype,
       area_sqm: validatedData.area_sqm,
       price: validatedData.price,
       price_per_sqm: pricePerSqm,
