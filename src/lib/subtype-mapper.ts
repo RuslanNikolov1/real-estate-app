@@ -33,7 +33,6 @@ const SUBTYPE_LABEL_TO_ID_MAP: Record<string, string> = {
   'Однокомнатная': 'studio',
   'Однокомнатная квартира': 'studio',
   'Студия': 'studio',
-  'Студио': 'studio',
   'Двухкомнатная': 'one-bedroom',
   'Двухкомнатная квартира': 'one-bedroom',
   'Трехкомнатная': 'two-bedroom',
@@ -71,14 +70,11 @@ const SUBTYPE_LABEL_TO_ID_MAP: Record<string, string> = {
   
   // German labels to IDs
   'Einzimmerwohnung': 'studio',
-  'Studio': 'studio',
   'Zweizimmerwohnung': 'one-bedroom',
   '2-Zimmer-Wohnung': 'one-bedroom',
   'Dreizimmerwohnung': 'two-bedroom',
   '3-Zimmer-Wohnung': 'two-bedroom',
   'Mehrzimmerwohnung': 'multi-bedroom',
-  'Maisonette': 'maisonette',
-  'Atelier': 'atelier',
   'Dachgeschoss': 'attic',
   'Dachwohnung': 'attic',
   
