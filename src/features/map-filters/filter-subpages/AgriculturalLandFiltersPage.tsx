@@ -44,16 +44,16 @@ export interface AgriculturalLandFiltersState {
     neighborhoods: string[];
     distance: number;
     propertyTypes: string[];
-    areaFrom: number;
-    areaTo: number;
+    areaFrom?: number;
+    areaTo?: number;
     isAreaNotProvided: boolean;
     selectedPresetId: string | null;
     selectedCategories: string[];
     selectedFeatures: string[];
-    priceFrom: number;
-    priceTo: number;
-    pricePerSqmFrom: number;
-    pricePerSqmTo: number;
+    priceFrom?: number;
+    priceTo?: number;
+    pricePerSqmFrom?: number;
+    pricePerSqmTo?: number;
 }
 
 const createInitialAgriculturalFilters = (): AgriculturalLandFiltersState => ({
