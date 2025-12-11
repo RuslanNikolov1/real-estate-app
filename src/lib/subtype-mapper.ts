@@ -39,7 +39,6 @@ const SUBTYPE_LABEL_TO_ID_MAP: Record<string, string> = {
   'Трехкомнатная квартира': 'two-bedroom',
   'Многокомнатная': 'multi-bedroom',
   'Многокомнатная квартира': 'multi-bedroom',
-  'Мезонет': 'maisonette',
   'Ателье': 'atelier',
   'Студия/Ателье': 'atelier',
   'Мансарда': 'attic',
