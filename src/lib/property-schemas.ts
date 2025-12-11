@@ -689,7 +689,7 @@ export function generatePropertySchema(type?: PropertyType) {
     title: z.string().min(1, 'errors.titleRequired'),
     description: z.string().min(1, 'errors.descriptionRequired'),
     type: z.enum(['apartment', 'house', 'villa', 'office', 'shop', 'warehouse', 'land', 'hotel', 'agricultural', 'garage', 'restaurant', 'replace-real-estates', 'buy-real-estates', 'other-real-estates']),
-    // status removed - using sale_or_rent instead (derived from status in forms)
+    status: z.enum(['for-sale', 'for-rent']).optional(), // Used in forms, converted to sale_or_rent for API
     location_type: z.enum(['urban', 'mountain', 'coastal']),
     city: z.string().min(1, 'errors.cityRequired'),
     neighborhood: z.string().optional(),
