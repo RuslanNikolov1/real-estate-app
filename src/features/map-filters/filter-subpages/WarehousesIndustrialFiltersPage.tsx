@@ -44,8 +44,8 @@ export interface WarehousesIndustrialFiltersState {
     neighborhoods: string[];
     distance: number;
     propertyTypes: string[];
-    areaFrom: number;
-    areaTo: number;
+    areaFrom?: number;
+    areaTo?: number;
     selectedFeatures: string[];
     priceFrom?: number;
     priceTo?: number;

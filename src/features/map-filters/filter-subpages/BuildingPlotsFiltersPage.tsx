@@ -45,8 +45,8 @@ export interface BuildingPlotsFiltersState {
     city: string;
     neighborhoods: string[];
     distance: number;
-    areaFrom: number;
-    areaTo: number;
+    areaFrom?: number;
+    areaTo?: number;
     priceFrom?: number;
     priceTo?: number;
     pricePerSqmFrom?: number;

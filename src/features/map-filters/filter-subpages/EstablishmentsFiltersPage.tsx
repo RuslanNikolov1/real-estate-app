@@ -46,8 +46,8 @@ export interface EstablishmentsFiltersState {
     city: string;
     neighborhoods: string[];
     distance: number;
-    areaFrom: number;
-    areaTo: number;
+    areaFrom?: number;
+    areaTo?: number;
     locationTypes: string[];
     selectedConstructionTypes?: string[];
     selectedCompletionStatuses?: string[];

@@ -49,12 +49,12 @@ export interface HotelsMotelsFiltersState {
     neighborhoods: string[];
     distance: number;
     propertyTypes: string[];
-    areaFrom: number;
-    areaTo: number;
+    areaFrom?: number;
+    areaTo?: number;
     isAreaNotProvided: boolean;
     selectedCategories: string[];
-    bedBaseFrom: number;
-    bedBaseTo: number;
+    bedBaseFrom?: number;
+    bedBaseTo?: number;
     isBedBaseNotProvided: boolean;
     selectedPresetId: string | null;
     selectedCompletionStatuses?: string[];

@@ -47,8 +47,8 @@ export interface GaragesParkingFiltersState {
     neighborhoods: string[];
     distance: number;
     propertyTypes: string[];
-    areaFrom: number;
-    areaTo: number;
+    areaFrom?: number;
+    areaTo?: number;
     selectedConstructionTypes?: string[];
     selectedFeatures: string[];
     priceFrom?: number;
