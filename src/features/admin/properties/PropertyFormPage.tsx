@@ -23,6 +23,7 @@ import {
 import { DynamicPropertyField } from '@/components/forms/DynamicPropertyField';
 import { plateValueToPlainText } from '@/lib/plate-utils';
 import { normalizeSubtypeToId } from '@/lib/subtype-mapper';
+import { FLOOR_SPECIAL_OPTIONS } from '@/features/map-filters/filters/constants';
 import styles from './PropertyFormPage.module.scss';
 
 type PropertyFormData = z.infer<ReturnType<typeof generatePropertySchema>>;
@@ -226,6 +227,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     reset,
   } = useForm<PropertyFormData>({
     resolver: zodResolver(propertySchema),
+    shouldFocusError: false, // Prevent automatic scroll to error
     defaultValues: {
       title: '',
       description: '',
@@ -318,9 +320,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     return propertyType === 'apartment' || propertyType === 'office' || propertyType === 'shop';
   }, [propertyType]);
   
-  const showTotalFloors = useMemo(() => {
-    return propertyType === 'apartment';
-  }, [propertyType]);
   
   const showYardArea = useMemo(() => {
     return propertyType === 'house';
@@ -514,6 +513,13 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       if (!hasAnyImages) {
         setSubmitError(t('errors.atLeastOneImageRequired'));
         setIsSubmittingForm(false);
+        // Scroll to error message
+        setTimeout(() => {
+          const errorElement = document.querySelector(`.${styles.errorMessage}`);
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
         return;
       }
 
@@ -522,6 +528,28 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       if (!descriptionText.trim()) {
         setSubmitError(t('errors.descriptionRequired'));
         setIsSubmittingForm(false);
+        // Scroll to error message
+        setTimeout(() => {
+          const errorElement = document.querySelector(`.${styles.errorMessage}`);
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+        return;
+      }
+
+      // Validate broker image
+      const hasBrokerImage = brokerImageFileRef.current || (brokerImageUrl && !brokerImageUrl.startsWith('blob:'));
+      if (!hasBrokerImage) {
+        setSubmitError(t('errors.brokerImageRequired') || 'Снимката на брокера е задължителна');
+        setIsSubmittingForm(false);
+        // Scroll to error message
+        setTimeout(() => {
+          const errorElement = document.querySelector(`.${styles.errorMessage}`);
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
         return;
       }
 
@@ -529,7 +557,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       const formData = new FormData();
 
       // Map form fields to API fields
-      formData.append('status', data.status);
+      // Note: status column removed from database, using sale_or_rent instead
       formData.append('sale_or_rent', saleOrRent);
       formData.append('type', data.type);
       if (data.subtype) {
@@ -542,11 +570,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       if (data.price_per_sqm) {
         formData.append('price_per_sqm', String(data.price_per_sqm));
       }
-      if (data.floor !== undefined) {
+      if (data.floor !== undefined && data.floor !== null) {
         formData.append('floor', String(data.floor));
-      }
-      if (data.total_floors !== undefined) {
-        formData.append('total_floors', String(data.total_floors));
       }
       
       // Location
@@ -602,8 +627,14 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
         formData.append('broker_position', data.broker_title);
       }
       formData.append('broker_phone', data.broker_phone);
+      // Broker image is required - validation already checked above
       if (brokerImageFileRef.current) {
         formData.append('broker_image', brokerImageFileRef.current);
+      } else if (!brokerImageUrl || brokerImageUrl.startsWith('blob:')) {
+        // This should not happen due to validation, but handle it gracefully
+        setSubmitError(t('errors.brokerImageRequired') || 'Снимката на брокера е задължителна');
+        setIsSubmittingForm(false);
+        return;
       }
       
       // Images - append existing image URLs and new files
@@ -643,7 +674,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       }
 
       // Redirect to quick view with status for flash message
-      router.push('/admin/properties/quick-view?status=property-updated');
+      // Use replace to avoid adding to history and prevent back button issues
+      router.replace('/admin/properties/quick-view?status=property-updated');
     } catch (error) {
       console.error('Error saving property:', error);
       const errorMessage = error instanceof Error ? error.message : 'flashMessages.propertySaveError';
@@ -656,7 +688,20 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     <div className={styles.propertyFormPage}>
       <main className={styles.main}>
         <div className={styles.container}>
-          <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+          <form 
+            onSubmit={handleSubmit(onSubmit, (errors) => {
+              // Handle validation errors - scroll to first error
+              const firstErrorField = Object.keys(errors)[0];
+              if (firstErrorField) {
+                const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
+                if (errorElement) {
+                  errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  (errorElement as HTMLElement).focus();
+                }
+              }
+            })} 
+            className={styles.form}
+          >
             <div className={styles.formGrid}>
               <div className={styles.formMain}>
                 <div className={styles.section}>
@@ -681,6 +726,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                         <option value="for-rent">Под наем</option>
                       </select>
                     </div>
+                  </div>
+                  <div className={styles.formRow}>
                     <div className={styles.selectWrapper}>
                       <label className={styles.label}>Тип имот *</label>
                       <select
@@ -714,13 +761,14 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                             ? 'Етажност' 
                             : propertyType === 'apartment'
                             ? 'Подтип'
-                            : 'Подтип'}
+                            : 'Подтип'} *
                         </label>
                         <select
-                          {...register('subtype')}
+                          {...register('subtype', { required: 'Подтипът е задължителен' })}
                           className={styles.select}
                           value={watch('subtype') || ''}
                           onChange={(e) => setValue('subtype', e.target.value)}
+                          required
                         >
                           <option value="">Изберете</option>
                           {typeSchema.subtypeOptions.map((option) => (
@@ -759,25 +807,22 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                   </div>
                   {/* Dynamic fields based on property type - conditionally shown */}
                   <div className={styles.formRow}>
-                    {/* Floor - only for apartments, offices, shops */}
+                    {/* Floor Options - only for apartments, offices, shops */}
                     {showFloor && (
-                      <Input
-                        label="Етаж"
-                        type="number"
-                        {...register('floor', { valueAsNumber: true })}
-                        error={errors.floor?.message ? translateErrorMessage(String(errors.floor.message)) : undefined}
-                        placeholder="Етаж"
-                      />
-                    )}
-                    {/* Total floors - only for apartments */}
-                    {showTotalFloors && (
-                      <Input
-                        label="Общо етажи"
-                        type="number"
-                        {...register('total_floors', { valueAsNumber: true })}
-                        error={errors.total_floors?.message ? translateErrorMessage(String(errors.total_floors.message)) : undefined}
-                        placeholder="Общо етажи"
-                      />
+                      <div className={styles.selectWrapper}>
+                        <label className={styles.label}>Етаж</label>
+                        <select
+                          {...register('floor')}
+                          className={styles.select}
+                        >
+                          <option value="">Изберете етаж</option>
+                          {FLOOR_SPECIAL_OPTIONS.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     )}
                     {/* Yard area - only for houses */}
                     {showYardArea && (
@@ -832,15 +877,18 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                         <p className={styles.errorMessage}>{translateErrorMessage(String(errors.city.message))}</p>
                       )}
                     </div>
-                    <NeighborhoodSelect
-                      city={cityValue}
-                      value={neighborhoodValue || ''}
-                      onChange={(val) =>
-                        setValue('neighborhood', Array.isArray(val) ? val[0] ?? '' : val)
-                      }
-                      disabled={!cityValue}
-                      error={errors.neighborhood?.message ? translateErrorMessage(String(errors.neighborhood.message)) : undefined}
-                    />
+                    <div className={styles.selectWrapper}>
+                      <NeighborhoodSelect
+                        city={cityValue}
+                        value={neighborhoodValue || ''}
+                        onChange={(val) =>
+                          setValue('neighborhood', Array.isArray(val) ? val[0] ?? '' : val)
+                        }
+                        disabled={!cityValue}
+                        error={errors.neighborhood?.message ? translateErrorMessage(String(errors.neighborhood.message)) : undefined}
+                        required
+                      />
+                    </div>
                   </div>
                   <div className={styles.formRow}>
                     {/* Year built - shown for all property types */}
@@ -1004,9 +1052,10 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                     error={errors.broker_name?.message ? translateErrorMessage(String(errors.broker_name.message)) : undefined}
                   />
                   <Input
-                    label="Длъжност"
-                    {...register('broker_title')}
+                    label="Длъжност *"
+                    {...register('broker_title', { required: 'Длъжността е задължителна' })}
                     error={errors.broker_title?.message ? translateErrorMessage(String(errors.broker_title.message)) : undefined}
+                    required
                   />
                   <Input
                     label="Телефон"
@@ -1014,7 +1063,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                     error={errors.broker_phone?.message ? translateErrorMessage(String(errors.broker_phone.message)) : undefined}
                   />
                   <div className={styles.brokerImageSection}>
-                    <h3 className={styles.brokerImageSectionTitle}>Снимка на брокера</h3>
+                    <h3 className={styles.brokerImageSectionTitle}>Снимка на брокера *</h3>
                     {brokerImageUrl && (
                       <div className={styles.imageRow}>
                         <div className={styles.imagePreview}>

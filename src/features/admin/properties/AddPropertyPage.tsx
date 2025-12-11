@@ -12,6 +12,7 @@ import {
   APARTMENT_FEATURE_FILTERS,
   CONSTRUCTION_FILTERS,
   COMPLETION_STATUSES,
+  FLOOR_SPECIAL_OPTIONS,
 } from '@/features/map-filters/filters/constants';
 import { CITY_OPTIONS, getNeighborhoodsByCity, getInitialCity } from '@/lib/neighborhoods';
 import { NeighborhoodSelect } from '@/components/forms/NeighborhoodSelect';
@@ -77,8 +78,7 @@ export function AddPropertyPage() {
   const [yearBuilt, setYearBuilt] = useState('');
   const [subtype, setSubtype] = useState('');
   const [yardArea, setYardArea] = useState('');
-  const [floor, setFloor] = useState('');
-  const [totalFloors, setTotalFloors] = useState('');
+  const [floor, setFloor] = useState<string>('');
   const [buildingType, setBuildingType] = useState('');
   const [electricity, setElectricity] = useState('');
   const [water, setWater] = useState('');
@@ -104,9 +104,6 @@ export function AddPropertyPage() {
     return selectedType === 'apartment' || selectedType === 'office' || selectedType === 'shop';
   }, [selectedType]);
   
-  const showTotalFloors = useMemo(() => {
-    return selectedType === 'apartment';
-  }, [selectedType]);
   
   const showYardArea = useMemo(() => {
     return selectedType === 'house';
@@ -130,9 +127,8 @@ export function AddPropertyPage() {
     if (selectedType !== 'house') {
       setYardArea('');
     }
-    if (selectedType !== 'apartment') {
+    if (selectedType !== 'apartment' && selectedType !== 'office' && selectedType !== 'shop') {
       setFloor('');
-      setTotalFloors('');
     }
     // Reset features
     setSelectedFeatures([]);
@@ -266,6 +262,21 @@ export function AddPropertyPage() {
       return;
     }
 
+    if (typeSchema.subtypeOptions.length > 0 && !subtype) {
+      setSubmitError(t('errors.subtypeRequired') || 'Подтипът е задължителен');
+      return;
+    }
+
+    if (!broker.title.trim()) {
+      setSubmitError(t('errors.brokerPositionRequired') || 'Длъжността е задължителна');
+      return;
+    }
+
+    if (!brokerImageFileRef.current && !brokerImagePreview) {
+      setSubmitError(t('errors.brokerImageRequired') || 'Снимката на брокера е задължителна');
+      return;
+    }
+
     if (images.length === 0) {
       setSubmitError(t('errors.addAtLeastOneImage'));
       return;
@@ -281,11 +292,11 @@ export function AddPropertyPage() {
     try {
       const saleOrRentValue = selectedStatus === 'for-rent' ? 'rent' : 'sale';
       const formData = new FormData();
-      formData.append('status', selectedStatus);
+      // Note: status column removed from database, using sale_or_rent instead
       formData.append('sale_or_rent', saleOrRentValue);
       formData.append('type', selectedType);
 
-      if (subtype) {
+      if (typeSchema.subtypeOptions.length > 0) {
         formData.append('subtype', subtype);
       }
 
@@ -299,10 +310,6 @@ export function AddPropertyPage() {
 
       if (floor) {
         formData.append('floor', floor);
-      }
-
-      if (totalFloors) {
-        formData.append('total_floors', totalFloors);
       }
 
       formData.append('city', city);
@@ -354,15 +361,16 @@ export function AddPropertyPage() {
       });
 
       formData.append('broker_name', trimmedBrokerName);
-
-      if (broker.title.trim()) {
-        formData.append('broker_position', broker.title.trim());
-      }
-
+      formData.append('broker_position', broker.title.trim());
       formData.append('broker_phone', trimmedBrokerPhone);
 
+      // Broker image is required - validation already checked above
       if (brokerImageFileRef.current) {
         formData.append('broker_image', brokerImageFileRef.current);
+      } else {
+        // This should not happen due to validation, but handle it gracefully
+        setSubmitError(t('errors.brokerImageRequired') || 'Снимката на брокера е задължителна');
+        return;
       }
 
       imageFilesRef.current.forEach((file) => {
@@ -480,45 +488,54 @@ export function AddPropertyPage() {
                   ))}
                 </div>
               </div>
-              <div className={styles.control}>
-                <label>Тип имот *</label>
-                <div className={styles.chipGroup}>
-                  {PROPERTY_TYPES.map((type) => (
-                    <button
-                      key={type.id}
-                      type="button"
-                      className={`${styles.chip} ${
-                        selectedType === type.id ? styles.active : ''
-                      }`}
-                      onClick={() => setSelectedType(type.id)}
-                    >
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Subtype field - shown based on property type */}
-              {typeSchema.subtypeOptions.length > 0 && (
-                <div className={styles.control}>
-                  <label>
-                    {selectedType === 'house'
-                      ? 'Етажност'
-                      : 'Подтип'}
-                  </label>
+              <div className={styles.inputsRow}>
+                <div className={styles.selectWrapper}>
+                  <label className={styles.label}>Тип имот *</label>
                   <select
-                    value={subtype}
-                    onChange={(e) => setSubtype(e.target.value)}
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
                     className={styles.select}
+                    required
                   >
-                    <option value="">Изберете</option>
-                    {typeSchema.subtypeOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
+                    <option value="apartment">Апартамент</option>
+                    <option value="house">Къща/Вила</option>
+                    <option value="office">Офис</option>
+                    <option value="shop">Магазин</option>
+                    <option value="warehouse">Склад</option>
+                    <option value="land">Земя</option>
+                    <option value="hotel">Хотел</option>
+                    <option value="agricultural">Земеделска земя</option>
+                    <option value="garage">Гараж/Паркоместа</option>
+                    <option value="restaurant">Ресторант</option>
+                    <option value="replace-real-estates">Замяна на недвижими имоти</option>
+                    <option value="buy-real-estates">Купуване на недвижими имоти</option>
+                    <option value="other-real-estates">Други недвижими имоти</option>
                   </select>
                 </div>
-              )}
+                {/* Subtype field - shown based on property type */}
+                {typeSchema.subtypeOptions.length > 0 && (
+                  <div className={styles.selectWrapper}>
+                    <label className={styles.label}>
+                      {selectedType === 'house'
+                        ? 'Етажност'
+                        : 'Подтип'} *
+                    </label>
+                    <select
+                      value={subtype}
+                      onChange={(e) => setSubtype(e.target.value)}
+                      className={styles.select}
+                      required
+                    >
+                      <option value="">Изберете</option>
+                      {typeSchema.subtypeOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 
@@ -554,23 +571,23 @@ export function AddPropertyPage() {
                   onChange={(event) => setYardArea(event.target.value)}
                 />
               )}
-              {/* Floor - only for apartments, offices, shops */}
+              {/* Floor Options - only for apartments, offices, shops */}
               {showFloor && (
-                <Input
-                  label="Етаж"
-                  placeholder="3"
-                  value={floor}
-                  onChange={(event) => setFloor(event.target.value)}
-                />
-              )}
-              {/* Total floors - only for apartments */}
-              {showTotalFloors && (
-                <Input
-                  label="Общо етажи"
-                  placeholder="5"
-                  value={totalFloors}
-                  onChange={(event) => setTotalFloors(event.target.value)}
-                />
+                <div className={styles.selectWrapper}>
+                  <label className={styles.label}>Етаж</label>
+                  <select
+                    value={floor}
+                    onChange={(e) => setFloor(e.target.value)}
+                    className={styles.select}
+                  >
+                    <option value="">Изберете етаж</option>
+                    {FLOOR_SPECIAL_OPTIONS.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
             </div>
           </section>
@@ -593,14 +610,16 @@ export function AddPropertyPage() {
                   ))}
                 </select>
               </div>
-              <NeighborhoodSelect
-                city={city}
-                value={neighborhood}
-                onChange={(val) => setNeighborhood(Array.isArray(val) ? val[0] ?? '' : val)}
-                disabled={!city}
-                label="Квартал"
-                required
-              />
+              <div className={styles.control}>
+                <NeighborhoodSelect
+                  city={city}
+                  value={neighborhood}
+                  onChange={(val) => setNeighborhood(Array.isArray(val) ? val[0] ?? '' : val)}
+                  disabled={!city}
+                  label="Квартал"
+                  required
+                />
+              </div>
             </div>
           </section>
 
@@ -714,20 +733,18 @@ export function AddPropertyPage() {
               {showCompletion && (
                 <div className={styles.control}>
                   <label>Степен на завършеност</label>
-                  <div className={styles.chipGroup}>
+                  <select
+                    value={selectedCompletion}
+                    onChange={(e) => setSelectedCompletion(e.target.value)}
+                    className={styles.select}
+                  >
+                    <option value="">Изберете</option>
                     {COMPLETION_STATUSES.map((status) => (
-                      <button
-                        key={status.id}
-                        type="button"
-                        className={`${styles.chipSmall} ${
-                          selectedCompletion === status.id ? styles.active : ''
-                        }`}
-                        onClick={() => setSelectedCompletion(status.id)}
-                      >
+                      <option key={status.id} value={status.id}>
                         {status.label}
-                      </button>
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
               )}
               {/* Building Type - for offices/shops */}
@@ -882,10 +899,11 @@ export function AddPropertyPage() {
                 required
               />
               <Input
-                label="Длъжност"
+                label="Длъжност *"
                 placeholder="Старши брокер"
                 value={broker.title}
                 onChange={(event) => setBroker((prev) => ({ ...prev, title: event.target.value }))}
+                required
               />
               <Input
                 label="Телефон *"
@@ -896,7 +914,7 @@ export function AddPropertyPage() {
               />
             </div>
             <div className={styles.imagesList}>
-              <h3 className={styles.brokerImageSectionTitle}>Снимка на брокера</h3>
+              <h3 className={styles.brokerImageSectionTitle}>Снимка на брокера *</h3>
               {brokerImagePreview && (
                 <div className={`${styles.imageRow} ${styles.brokerImageRow}`}>
                   <div className={styles.imagePreview}>

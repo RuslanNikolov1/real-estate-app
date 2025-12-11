@@ -63,16 +63,16 @@ const createInitialAgriculturalFilters = (): AgriculturalLandFiltersState => ({
     neighborhoods: [],
     distance: 0,
     propertyTypes: [],
-    areaFrom: 0,
-    areaTo: AGRICULTURAL_AREA_SLIDER_MAX,
+    areaFrom: undefined,
+    areaTo: undefined,
     isAreaNotProvided: false,
     selectedPresetId: null,
     selectedCategories: [],
     selectedFeatures: [],
-    priceFrom: 0,
-    priceTo: AGRICULTURAL_PRICE_SLIDER_MAX,
-    pricePerSqmFrom: 0,
-    pricePerSqmTo: AGRICULTURAL_PRICE_PER_SQM_SLIDER_MAX
+    priceFrom: undefined,
+    priceTo: undefined,
+    pricePerSqmFrom: undefined,
+    pricePerSqmTo: undefined
 });
 
 export function AgriculturalLandFiltersPage({

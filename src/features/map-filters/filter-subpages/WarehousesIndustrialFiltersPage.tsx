@@ -92,6 +92,7 @@ export function WarehousesIndustrialFiltersPage({
     const RENT_PER_SQM_SLIDER_MIN = 0;
 
     // Store current filter values - all warehouses/industrial filter state managed here
+    // Use undefined for numeric filters so they're not sent unless user explicitly sets them
     const filterValuesRef = useRef<Partial<WarehousesIndustrialFiltersState>>({
         searchTerm: '',
         propertyId: '',
@@ -99,18 +100,18 @@ export function WarehousesIndustrialFiltersPage({
         neighborhoods: [],
         distance: 0,
         propertyTypes: [],
-        areaFrom: 0,
-        areaTo: WAREHOUSES_AREA_SLIDER_MAX,
+        areaFrom: undefined,
+        areaTo: undefined,
         selectedFeatures: [],
-        priceFrom: 0,
-        priceTo: WAREHOUSES_PRICE_SLIDER_MAX,
-        pricePerSqmFrom: 0,
-        pricePerSqmTo: WAREHOUSES_PRICE_PER_SQM_SLIDER_MAX,
+        priceFrom: undefined,
+        priceTo: undefined,
+        pricePerSqmFrom: undefined,
+        pricePerSqmTo: undefined,
         // Rent-specific fields
-        monthlyRentFrom: RENT_SLIDER_MIN,
-        monthlyRentTo: RENT_SLIDER_MAX,
-        rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
-        rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX
+        monthlyRentFrom: undefined,
+        monthlyRentTo: undefined,
+        rentPerSqmFrom: undefined,
+        rentPerSqmTo: undefined
     });
 
     // Use keys to reset components on clear
@@ -219,18 +220,18 @@ export function WarehousesIndustrialFiltersPage({
             neighborhoods: [],
             distance: 0,
             propertyTypes: [],
-            areaFrom: 0,
-            areaTo: WAREHOUSES_AREA_SLIDER_MAX,
+            areaFrom: undefined,
+            areaTo: undefined,
             selectedFeatures: [],
-            priceFrom: 0,
-            priceTo: WAREHOUSES_PRICE_SLIDER_MAX,
-            pricePerSqmFrom: 0,
-            pricePerSqmTo: WAREHOUSES_PRICE_PER_SQM_SLIDER_MAX,
+            priceFrom: undefined,
+            priceTo: undefined,
+            pricePerSqmFrom: undefined,
+            pricePerSqmTo: undefined,
             // Reset rent-specific fields
-            monthlyRentFrom: RENT_SLIDER_MIN,
-            monthlyRentTo: RENT_SLIDER_MAX,
-            rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
-            rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX
+            monthlyRentFrom: undefined,
+            monthlyRentTo: undefined,
+            rentPerSqmFrom: undefined,
+            rentPerSqmTo: undefined
         };
 
         // Reset components by changing key

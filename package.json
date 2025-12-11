@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=\"--no-deprecation\" next dev",
-    "build": "cross-env NODE_OPTIONS=\"--no-deprecation\" next build",
-    "start": "cross-env NODE_OPTIONS=\"--no-deprecation\" next start",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "lint": "next lint",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },
@@ -37,7 +37,6 @@
     "@types/react": "^19.2.3",
     "@types/react-dom": "^19.2.2",
     "baseline-browser-mapping": "^2.8.32",
-    "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.0.8",
     "prettier": "^3.4.2",

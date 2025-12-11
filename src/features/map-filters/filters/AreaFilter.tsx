@@ -23,8 +23,8 @@ interface AreaFilterProps {
 
 export function AreaFilter({ 
     onFilterChange, 
-    initialAreaFrom = 20, 
-    initialAreaTo = 100,
+    initialAreaFrom, 
+    initialAreaTo,
     title = 'Площ в кв.м',
     sliderMax = AREA_SLIDER_MAX,
     areaCap = SQUARE_AREA_CAP,
@@ -34,8 +34,11 @@ export function AreaFilter({
     initialPresetId = null,
     showNotProvided = false
 }: AreaFilterProps) {
-    const [areaFrom, setAreaFrom] = useState(initialAreaFrom);
-    const [areaTo, setAreaTo] = useState(initialAreaTo);
+    // Use default values for UI display only
+    const defaultAreaFrom = 20;
+    const defaultAreaTo = 100;
+    const [areaFrom, setAreaFrom] = useState(initialAreaFrom ?? defaultAreaFrom);
+    const [areaTo, setAreaTo] = useState(initialAreaTo ?? defaultAreaTo);
     const [selectedPresetId, setSelectedPresetId] = useState<string | null>(initialPresetId || null);
     const [isNotProvided, setIsNotProvided] = useState(false);
 
@@ -78,6 +81,7 @@ export function AreaFilter({
         setAreaTo(preset.to);
         setSelectedPresetId(preset.id);
         setIsNotProvided(false);
+        setHasUserInteracted(true);
         onFilterChange(preset.from, preset.to, false);
         if (onPresetChange) {
             onPresetChange(preset.id);

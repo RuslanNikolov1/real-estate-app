@@ -100,6 +100,7 @@ export function HousesVillasFiltersPage({
     const RENT_PER_SQM_SLIDER_MIN = 0;
 
     // Store current filter values - all house/villa filter state managed here
+    // Use undefined for numeric filters so they're not sent unless user explicitly sets them
     const filterValuesRef = useRef<Partial<HouseFiltersState>>({
         searchTerm: '',
         propertyId: '',
@@ -107,19 +108,19 @@ export function HousesVillasFiltersPage({
         neighborhoods: [],
         distance: 0,
         houseTypes: [],
-        houseAreaFrom: 50,
-        houseAreaTo: 200,
-        yardAreaFrom: 100,
-        yardAreaTo: 500,
+        houseAreaFrom: undefined,
+        houseAreaTo: undefined,
+        yardAreaFrom: undefined,
+        yardAreaTo: undefined,
         selectedFeatures: [],
-        priceFrom: 0,
-        priceTo: HOUSE_PRICE_SLIDER_MAX,
+        priceFrom: undefined,
+        priceTo: undefined,
         // Rent-specific fields
         selectedFurnishing: [],
-        monthlyRentFrom: RENT_SLIDER_MIN,
-        monthlyRentTo: RENT_SLIDER_MAX,
-        rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
-        rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX
+        monthlyRentFrom: undefined,
+        monthlyRentTo: undefined,
+        rentPerSqmFrom: undefined,
+        rentPerSqmTo: undefined
     });
 
     // Use keys to reset components on clear
@@ -238,19 +239,19 @@ export function HousesVillasFiltersPage({
             distance: 0,
             propertyId: '',
             houseTypes: [],
-            houseAreaFrom: 50,
-            houseAreaTo: 200,
-            yardAreaFrom: 100,
-            yardAreaTo: 500,
+            houseAreaFrom: undefined,
+            houseAreaTo: undefined,
+            yardAreaFrom: undefined,
+            yardAreaTo: undefined,
             selectedFeatures: [],
-            priceFrom: 0,
-            priceTo: HOUSE_PRICE_SLIDER_MAX,
+            priceFrom: undefined,
+            priceTo: undefined,
             // Reset rent-specific fields
             selectedFurnishing: [],
-            monthlyRentFrom: RENT_SLIDER_MIN,
-            monthlyRentTo: RENT_SLIDER_MAX,
-            rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
-            rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX
+            monthlyRentFrom: undefined,
+            monthlyRentTo: undefined,
+            rentPerSqmFrom: undefined,
+            rentPerSqmTo: undefined
         };
 
         // Reset components by changing key
@@ -556,8 +557,8 @@ export function HousesVillasFiltersPage({
                 sliderMax={YARD_AREA_SLIDER_MAX}
                 areaCap={YARD_AREA_CAP}
                 inputIdPrefix="yard-area"
-                initialAreaFrom={filterValuesRef.current.yardAreaFrom || 100}
-                initialAreaTo={filterValuesRef.current.yardAreaTo || 500}
+                initialAreaFrom={filterValuesRef.current.yardAreaFrom}
+                initialAreaTo={filterValuesRef.current.yardAreaTo}
             />
 
             {/* Features Filter (Особености) */}

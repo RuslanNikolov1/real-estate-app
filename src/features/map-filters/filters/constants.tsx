@@ -94,8 +94,7 @@ export const FLOOR_SPECIAL_OPTIONS: FloorSpecialOption[] = [
     { id: 'first-residential', label: 'Първи жилищен' },
     { id: 'not-last', label: 'Непоследен' },
     { id: 'last', label: 'Последен' },
-    { id: 'attic', label: 'Мансарда/Таванско помещение' },
-    { id: 'unspecified', label: 'Не е посочено' },
+    { id: 'attic', label: 'Таванско' },
 ];
 
 export const COMPLETION_STATUSES: CompletionStatus[] = [

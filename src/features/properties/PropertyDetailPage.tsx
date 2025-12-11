@@ -20,11 +20,15 @@ import {
   Cube,
   IdentificationBadge,
   Buildings,
+  Envelope,
+  ChatCircle,
+  ChatCircleDots,
 } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { PropertyCard } from './components/PropertyCard';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { getSubtypeLabel as getSubtypeLabelTranslated } from '@/lib/subtype-mapper';
 import {
   APARTMENT_FEATURE_FILTERS,
   HOUSE_FEATURES,
@@ -52,7 +56,7 @@ import {
   GARAGE_CONSTRUCTION_TYPES,
   ESTABLISHMENT_CONSTRUCTION_TYPES,
 } from '@/features/map-filters/filters/constants';
-import { mockProperties as baseProperties } from './PropertiesListPage';
+import { mockProperties as baseProperties } from './mockProperties';
 import styles from './PropertyDetailPage.module.scss';
 
 // Extended mock properties with additional details
@@ -131,6 +135,11 @@ interface PropertyDetailPageProps {
 }
 
 export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
+  // Hooks must be called in the same order on every render
+  // Call useTranslation at the top, before any conditional logic or early returns
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language || 'bg';
+
   const [remoteProperty, setRemoteProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -138,12 +147,6 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-  const [inquiryForm, setInquiryForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
-  });
 
   useEffect(() => {
     let isMounted = true;
@@ -229,7 +232,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           city: 'Бургас',
           neighborhood: 'Изгрев',
           price: 145000,
-          currency: 'лв',
+          currency: '€',
           area: 75,
           rooms: 2,
           bathrooms: 1,
@@ -258,7 +261,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           city: 'Бургас',
           neighborhood: 'Морска градина',
           price: 220000,
-          currency: 'лв',
+          currency: '€',
           area: 110,
           rooms: 3,
           bathrooms: 2,
@@ -287,7 +290,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           city: 'Бургас',
           neighborhood: 'Лазур',
           price: 95000,
-          currency: 'лв',
+          currency: '€',
           area: 55,
           rooms: 1,
           bathrooms: 1,
@@ -316,7 +319,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           city: 'Бургас',
           neighborhood: 'Център',
           price: 280000,
-          currency: 'лв',
+          currency: '€',
           area: 130,
           rooms: 4,
           bathrooms: 3,
@@ -476,14 +479,17 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   const getSubtypeLabel = () => {
     if (!property.subtype) return 'Не е посочено';
 
+    // For apartments, use the translation function
+    if (property.type === 'apartment') {
+      return getSubtypeLabelTranslated(property.subtype, currentLanguage) || property.subtype;
+    }
+
+    // For other property types, fall back to the original logic
     let options:
       | { id: string; label: string }[]
       | undefined;
 
     switch (property.type) {
-      case 'apartment':
-        options = APARTMENT_SUBTYPES;
-        break;
       case 'house':
       case 'villa':
         options = HOUSE_TYPES;
@@ -560,11 +566,6 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
     return construction?.label || 'Не е посочено';
   };
 
-  const handleInquirySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('Заявката е изпратена успешно!');
-    setInquiryForm({ name: '', email: '', phone: '', message: '' });
-  };
 
   const handleImageClick = () => {
     if (property.images && property.images.length > 0) {
@@ -969,45 +970,41 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                 </div>
               )}
 
-              {/* Inquiry Form */}
-              <div className={styles.inquirySection}>
-                <h2 className={styles.sectionTitle}>Запитване</h2>
-                <form onSubmit={handleInquirySubmit} className={styles.inquiryForm}>
-                  <div className={styles.formRow}>
-                    <Input
-                      type="text"
-                      placeholder="Вашето име"
-                      value={inquiryForm.name}
-                      onChange={(e) => setInquiryForm({ ...inquiryForm, name: e.target.value })}
-                      required
-                    />
-                    <Input
-                      type="email"
-                      placeholder="Вашият имейл"
-                      value={inquiryForm.email}
-                      onChange={(e) => setInquiryForm({ ...inquiryForm, email: e.target.value })}
-                      required
-                    />
-                    <Input
-                      type="tel"
-                      placeholder="Вашият телефон"
-                      value={inquiryForm.phone}
-                      onChange={(e) => setInquiryForm({ ...inquiryForm, phone: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <textarea
-                    className={styles.messageTextarea}
-                    placeholder="Вашето съобщение"
-                    value={inquiryForm.message}
-                    onChange={(e) => setInquiryForm({ ...inquiryForm, message: e.target.value })}
-                    rows={5}
-                    required
-                  />
-                  <Button type="submit" variant="primary">
-                    Изпрати запитване
-                  </Button>
-                </form>
+              {/* Contact Buttons */}
+              <div className={styles.contactSection}>
+                <h2 className={styles.sectionTitle}>Свържете се с нас</h2>
+                <div className={styles.contactButtons}>
+                  <a
+                    href="tel:+359898993030"
+                    className={`${styles.contactButton} ${styles.phoneButton}`}
+                  >
+                    <Phone size={24} weight="fill" />
+                    <span>Телефон</span>
+                  </a>
+                  <a
+                    href="viber://chat?number=+359898993030"
+                    className={`${styles.contactButton} ${styles.viberButton}`}
+                  >
+                    <ChatCircle size={24} weight="fill" />
+                    <span>Viber</span>
+                  </a>
+                  <a
+                    href="https://wa.me/359898993030"
+                    className={`${styles.contactButton} ${styles.whatsappButton}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ChatCircleDots size={24} weight="fill" />
+                    <span>WhatsApp</span>
+                  </a>
+                  <a
+                    href="mailto:brokerbulgaria1@abv.bg"
+                    className={`${styles.contactButton} ${styles.emailButton}`}
+                  >
+                    <Envelope size={24} weight="fill" />
+                    <span>Имейл</span>
+                  </a>
+                </div>
               </div>
 
             </div>
@@ -1023,7 +1020,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   </div>
                   <div className={styles.infoText}>
                     <Calendar size={24} />
-                    <span>{formatDate(property.created_at)}</span>
+                    <span>{property.created_at ? formatDate(property.created_at) : 'Не е посочено'}</span>
                   </div>
                 </div>
 

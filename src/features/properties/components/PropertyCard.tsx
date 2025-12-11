@@ -4,8 +4,10 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { MapPin, Bed, Square, PencilSimple, Trash } from '@phosphor-icons/react';
 import type { MouseEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
+import { getSubtypeLabel } from '@/lib/subtype-mapper';
 import styles from './PropertyCard.module.scss';
 
 interface PropertyCardProps {
@@ -16,6 +18,8 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, onClick, onDelete, onEdit }: PropertyCardProps) {
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language || 'bg';
 
   const primaryImage = property.images?.find((img) => img.is_primary) || property.images?.[0];
 
@@ -125,7 +129,7 @@ export function PropertyCard({ property, onClick, onDelete, onEdit }: PropertyCa
             {property.subtype && (
               <div className={styles.detail}>
                 <Bed size={18} />
-                <span>{property.subtype}</span>
+                <span>{getSubtypeLabel(property.subtype, currentLanguage)}</span>
               </div>
             )}
             <div className={styles.detail}>

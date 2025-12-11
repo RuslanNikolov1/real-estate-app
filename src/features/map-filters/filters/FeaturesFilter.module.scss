@@ -171,7 +171,12 @@
     transition: all $transition-base;
 
     &:hover {
-        background: rgba($dark-red, 0.08);
+        background: $dark-red;
+        color: $white;
+
+        .featureIcon {
+            color: $white;
+        }
     }
 }
 

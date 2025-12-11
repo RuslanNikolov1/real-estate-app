@@ -2,7 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
-import { EnvelopeSimple, Phone, MapPin, FacebookLogo, InstagramLogo, LinkedinLogo, UserCircleDashed } from '@phosphor-icons/react';
+import { EnvelopeSimple, Phone, MapPin, FacebookLogo, InstagramLogo, LinkedinLogo, UserCircleDashed, Heart } from '@phosphor-icons/react';
 import styles from './Footer.module.scss';
 
 export function Footer() {
@@ -105,9 +105,8 @@ export function Footer() {
             rel="noopener noreferrer"
             className={styles.creatorCredit}
           >
-            <UserCircleDashed size={18} color="#40E0D0" weight="fill" />
             <span className={styles.creatorName}>
-              Created by Ruslan Nikolov ❤️
+              Created by Ruslan Nikolov with <Heart size={16} weight="fill" color="#802E2E" className={styles.heartIcon} />
             </span>
           </a>
           <p className={styles.copyright}>

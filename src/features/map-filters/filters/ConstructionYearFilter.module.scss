@@ -29,6 +29,32 @@
     gap: $spacing-md;
 }
 
+.select {
+    width: 100%;
+    border-radius: 12px;
+    border: 2px solid $dark-red;
+    padding: $spacing-sm $spacing-md;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    background: $white;
+    color: $dark-gray;
+    cursor: pointer;
+    transition: all $transition-base;
+    outline: none;
+
+    &:hover,
+    &:focus {
+        border-color: color.adjust($dark-red, $lightness: -5%);
+        box-shadow: 0 0 0 3px rgba($dark-red, 0.1);
+    }
+
+    option {
+        padding: $spacing-sm;
+        font-weight: 600;
+    }
+}
+
 .constructionGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -54,7 +80,12 @@
     transition: all $transition-base;
 
     &:hover {
-        background: rgba($dark-red, 0.08);
+        background: $dark-red;
+        color: $white;
+
+        .featureIcon {
+            color: $white;
+        }
     }
 }
 

@@ -253,7 +253,7 @@ export function ValuationPage() {
                         error={errorsRequest.year_built?.message}
                       />
                       <Input
-                        label="Текуща цена (лв)"
+                        label="Текуща цена (€)"
                         type="number"
                         {...registerRequest('current_price', { valueAsNumber: true })}
                         error={errorsRequest.current_price?.message}
@@ -302,7 +302,7 @@ export function ValuationPage() {
                   <div className={styles.formSection}>
                     <div className={styles.formRow}>
                       <Input
-                        label="Текуща цена (лв) *"
+                        label="Текуща цена (€) *"
                         type="number"
                         {...registerFuture('current_price', { valueAsNumber: true })}
                         error={errorsFuture.current_price?.message}
@@ -338,7 +338,7 @@ export function ValuationPage() {
                           <div className={styles.priceRow}>
                             <span className={styles.priceLabel}>Текуща цена:</span>
                             <span className={styles.priceValue}>
-                              {currentPrice.toLocaleString()} лв
+                              {currentPrice.toLocaleString()} €
                             </span>
                           </div>
                           <div className={styles.priceRow}>
@@ -346,7 +346,7 @@ export function ValuationPage() {
                               След {years} {years === 1 ? 'година' : 'години'}:
                             </span>
                             <span className={styles.futurePriceValue}>
-                              {previewPrice.toLocaleString()} лв
+                              {previewPrice.toLocaleString()} €
                             </span>
                           </div>
                           <div className={styles.growthInfo}>
@@ -374,7 +374,7 @@ export function ValuationPage() {
                             Прогнозната цена на имота след {years} {years === 1 ? 'година' : 'години'} е:
                           </p>
                           <p className={styles.resultPrice}>
-                            {futurePrice.toLocaleString()} лв
+                            {futurePrice.toLocaleString()} €
                           </p>
                         </div>
                       </motion.div>

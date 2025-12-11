@@ -13,7 +13,7 @@ import styles from './PropertyUpdateModal.module.scss';
 
 const updateSchema = z.object({
   price: z.number().min(0, 'Цената трябва да е положително число').optional(),
-  status: z.enum(['for-sale', 'for-rent', 'sold', 'rented']).optional(),
+  status: z.enum(['for-sale', 'for-rent']).optional(), // Note: 'sold' and 'rented' removed - status column removed from database
 });
 
 type UpdateFormData = z.infer<typeof updateSchema>;
@@ -133,8 +133,6 @@ export function PropertyUpdateModal({
                   >
                     <option value="for-sale">За продажба</option>
                     <option value="for-rent">Под наем</option>
-                    <option value="sold">Продаден</option>
-                    <option value="rented">Отдаден под наем</option>
                   </select>
                 </div>
               </div>

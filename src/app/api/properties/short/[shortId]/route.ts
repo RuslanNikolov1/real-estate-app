@@ -51,18 +51,18 @@ export async function GET(
       title: prop.title || '',
       description: prop.description || '',
       type: prop.type,
-      status: prop.status,
+      status: prop.sale_or_rent === 'sale' ? 'for-sale' : 'for-rent', // Map sale_or_rent to status for backward compatibility
       city: prop.city || '',
       neighborhood: prop.neighborhood || undefined,
       price: Number(prop.price) || 0,
-      currency: 'лв',
+      currency: '€',
       area: Number(prop.area_sqm) || 0,
       rooms: (prop as any).rooms || undefined,
       bathrooms: (prop as any).bathrooms || undefined,
       subtype: prop.subtype || undefined,
       construction_type: prop.construction_type || undefined,
       completion_degree: prop.completion_degree || undefined,
-      floor: prop.floor ? Number(prop.floor) : undefined,
+      floor: prop.floor ? String(prop.floor) : undefined,
       total_floors: prop.total_floors ? Number(prop.total_floors) : undefined,
       year_built: prop.build_year || undefined,
       images: (prop.image_urls || []).map((url: string, index: number) => ({
@@ -79,7 +79,7 @@ export async function GET(
       broker_position: prop.broker_position || undefined,
       broker_image: prop.broker_image || undefined,
       view_count: 0,
-      created_at: prop.created_at || prop.date_posted || new Date().toISOString(),
+      created_at: prop.created_at || new Date().toISOString(),
       updated_at: prop.updated_at || new Date().toISOString(),
     };
 

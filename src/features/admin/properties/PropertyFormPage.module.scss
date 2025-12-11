@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '@/styles/variables' as *;
 
 .propertyFormPage {
@@ -94,6 +95,7 @@
   gap: $spacing-md;
 }
 
+
 .label {
   display: block;
   font-size: 0.875rem;
@@ -124,6 +126,7 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-xs;
+  width: 100%;
 }
 
 .select {
@@ -135,6 +138,8 @@
   color: $black;
   background-color: $white;
   transition: border-color $transition-base;
+  width: 100%;
+  box-sizing: border-box;
 
   &:focus {
     outline: none;

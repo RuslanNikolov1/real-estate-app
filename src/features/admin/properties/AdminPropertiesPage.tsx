@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Property } from '@/types';
 import { PlusCircle, MagnifyingGlass } from '@phosphor-icons/react';
-import { mockProperties } from '@/features/properties/PropertiesListPage';
+import { mockProperties } from '@/features/properties/mockProperties';
 import styles from './AdminPropertiesPage.module.scss';
 
 export function AdminPropertiesPage() {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { Input } from '@/components/ui/Input';
 import { APARTMENT_FEATURE_FILTERS } from './constants';
 import type { FeatureFilter } from './types';
@@ -18,6 +18,13 @@ export function FeaturesFilter({ onFilterChange, initialSelected = [], features 
     const [showFeatureDropdown, setShowFeatureDropdown] = useState(false);
     const featureInputRef = useRef<HTMLInputElement>(null);
     const featureDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Sync state when initialSelected changes (e.g., when filterKey changes and component remounts)
+    // IMPORTANT: Do NOT call onFilterChange here - only sync internal state
+    // onFilterChange should only be called on user interaction
+    useEffect(() => {
+        setSelectedFeatures(initialSelected);
+    }, [initialSelected]);
 
     const featureFilters = useMemo<FeatureFilter[]>(() => {
         return features || APARTMENT_FEATURE_FILTERS;

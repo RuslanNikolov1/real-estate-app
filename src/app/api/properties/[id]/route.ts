@@ -136,18 +136,18 @@ export async function GET(
       title: prop.title || '',
       description: prop.description || '',
       type: prop.type,
-      status: prop.status,
+      status: prop.sale_or_rent === 'sale' ? 'for-sale' : 'for-rent', // Map sale_or_rent to status for backward compatibility
       city: prop.city || '',
       neighborhood: prop.neighborhood || undefined,
       price: Number(prop.price) || 0,
-      currency: 'лв',
+      currency: '€',
       area: Number(prop.area_sqm) || 0,
       rooms: (prop as any).rooms || undefined,
       bathrooms: (prop as any).bathrooms || undefined,
       subtype: prop.subtype || undefined,
       construction_type: prop.construction_type || undefined,
       completion_degree: prop.completion_degree || undefined,
-      floor: prop.floor ? Number(prop.floor) : undefined,
+      floor: prop.floor ? String(prop.floor) : undefined,
       total_floors: prop.total_floors ? Number(prop.total_floors) : undefined,
       year_built: prop.build_year || undefined,
       images: (prop.image_urls || []).map((url: string, index: number) => ({
@@ -164,7 +164,7 @@ export async function GET(
       broker_position: prop.broker_position || undefined,
       broker_image: prop.broker_image || undefined,
       view_count: 0,
-      created_at: prop.created_at || prop.date_posted || new Date().toISOString(),
+      created_at: prop.created_at || new Date().toISOString(),
       updated_at: prop.updated_at || new Date().toISOString(),
     };
 
@@ -474,8 +474,9 @@ export async function PUT(
       : area > 0 ? price / area : 0;
 
     // LANGUAGE-AGNOSTIC: Normalize subtype to English ID before updating database
+    // Handles subtypes in any language (Bulgarian, Russian, English, German) and converts to English IDs
     // Admin forms send English IDs (from option.id), but we normalize for safety and backward compatibility
-    // This ensures database always stores English IDs regardless of UI language
+    // This ensures database always stores English IDs regardless of UI language or input format
     const subtypeValue = textFields.subtype || existingProperty.subtype;
     const normalizedSubtype = subtypeValue 
       ? normalizeSubtypeToId(subtypeValue) 
@@ -483,14 +484,13 @@ export async function PUT(
 
     // Prepare update payload
     const updatePayload: any = {
-      status: textFields.status || existingProperty.status,
       sale_or_rent: textFields.sale_or_rent || existingProperty.sale_or_rent,
       type: textFields.type || existingProperty.type,
       subtype: normalizedSubtype,
       area_sqm: area,
       price: price,
       price_per_sqm: pricePerSqm,
-      floor: textFields.floor ? Number(textFields.floor) : existingProperty.floor || null,
+      floor: textFields.floor ? String(textFields.floor) : existingProperty.floor || null,
       total_floors: textFields.total_floors ? Number(textFields.total_floors) : existingProperty.total_floors || null,
       city: textFields.city || existingProperty.city,
       neighborhood: textFields.neighborhood || existingProperty.neighborhood || null,
@@ -577,18 +577,18 @@ export async function PUT(
       title: updatedProperty.title || '',
       description: updatedProperty.description || '',
       type: updatedProperty.type,
-      status: updatedProperty.status,
+      status: updatedProperty.sale_or_rent === 'sale' ? 'for-sale' : 'for-rent', // Map sale_or_rent to status for backward compatibility
       city: updatedProperty.city || '',
       neighborhood: updatedProperty.neighborhood || undefined,
       price: Number(updatedProperty.price) || 0,
-      currency: 'лв',
+      currency: '€',
       area: Number(updatedProperty.area_sqm) || 0,
       rooms: (updatedProperty as any).rooms || undefined,
       bathrooms: (updatedProperty as any).bathrooms || undefined,
       subtype: updatedProperty.subtype || undefined,
       construction_type: updatedProperty.construction_type || undefined,
       completion_degree: updatedProperty.completion_degree || undefined,
-      floor: updatedProperty.floor ? Number(updatedProperty.floor) : undefined,
+      floor: updatedProperty.floor ? String(updatedProperty.floor) : undefined,
       total_floors: updatedProperty.total_floors ? Number(updatedProperty.total_floors) : undefined,
       year_built: updatedProperty.build_year || undefined,
       images: ((updatedProperty.image_urls || []) as string[]).map((url: string, index: number) => ({
@@ -605,7 +605,7 @@ export async function PUT(
       broker_position: updatedProperty.broker_position || undefined,
       broker_image: updatedProperty.broker_image || undefined,
       view_count: 0,
-      created_at: updatedProperty.created_at || updatedProperty.date_posted || new Date().toISOString(),
+      created_at: updatedProperty.created_at || new Date().toISOString(),
       updated_at: updatedProperty.updated_at || new Date().toISOString(),
     };
 

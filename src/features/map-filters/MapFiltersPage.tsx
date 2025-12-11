@@ -289,6 +289,199 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         return false;
     });
 
+    // Clean filters by removing default/unchanged values before sending to API
+    const cleanFilters = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState | null) => {
+        if (!filters) return null;
+        
+        const cleaned: any = {};
+        
+        // Copy non-numeric, non-array fields that have actual values
+        if (filters.city && filters.city.trim()) {
+            cleaned.city = filters.city;
+        }
+        
+        if (filters.neighborhoods && Array.isArray(filters.neighborhoods) && filters.neighborhoods.length > 0) {
+            cleaned.neighborhoods = filters.neighborhoods;
+        }
+        
+        if ('propertyId' in filters && filters.propertyId && filters.propertyId.trim()) {
+            cleaned.propertyId = filters.propertyId.trim();
+        }
+        
+        // Subtype filters - only include if not empty
+        if ('apartmentSubtypes' in filters && Array.isArray(filters.apartmentSubtypes) && filters.apartmentSubtypes.length > 0) {
+            const validSubtypes = filters.apartmentSubtypes.filter(s => s && s !== 'all');
+            if (validSubtypes.length > 0) {
+                cleaned.apartmentSubtypes = validSubtypes;
+            }
+        }
+        
+        if ('houseTypes' in filters && Array.isArray(filters.houseTypes) && filters.houseTypes.length > 0) {
+            const validTypes = filters.houseTypes.filter(t => t && t !== 'all');
+            if (validTypes.length > 0) {
+                cleaned.houseTypes = validTypes;
+            }
+        }
+        
+        if ('propertyTypes' in filters && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0) {
+            const validTypes = filters.propertyTypes.filter(t => t && t !== 'all');
+            if (validTypes.length > 0) {
+                cleaned.propertyTypes = validTypes;
+            }
+        }
+        
+        // Area filters - only include if explicitly set (not undefined, null, 0, or default values)
+        // Defaults: apartments=20/100, houses=50/200, commercial=0/420, etc.
+        if ('areaFrom' in filters && filters.areaFrom !== undefined && filters.areaFrom !== null && filters.areaFrom > 0) {
+            // Exclude common default values
+            if (filters.areaFrom !== 20 && filters.areaFrom !== 50 && filters.areaFrom !== 0) {
+                cleaned.areaFrom = filters.areaFrom;
+            }
+        }
+        if ('areaTo' in filters && filters.areaTo !== undefined && filters.areaTo !== null) {
+            // Exclude common default max values (100 for apartments, 200 for houses, 420 for commercial, etc.)
+            if (filters.areaTo !== 100 && filters.areaTo !== 200 && filters.areaTo !== 420 && 
+                filters.areaTo !== 256 && filters.areaTo < 256) {
+                cleaned.areaTo = filters.areaTo;
+            }
+        }
+        
+        // House area filters (houseAreaFrom/houseAreaTo)
+        if ('houseAreaFrom' in filters && filters.houseAreaFrom !== undefined && filters.houseAreaFrom !== null && filters.houseAreaFrom > 0 && filters.houseAreaFrom !== 50) {
+            cleaned.houseAreaFrom = filters.houseAreaFrom;
+        }
+        if ('houseAreaTo' in filters && filters.houseAreaTo !== undefined && filters.houseAreaTo !== null && filters.houseAreaTo !== 200 && filters.houseAreaTo < 350) {
+            cleaned.houseAreaTo = filters.houseAreaTo;
+        }
+        
+        // Yard area filters (for houses/villas) - defaults: 100/500
+        if ('yardAreaFrom' in filters && filters.yardAreaFrom !== undefined && filters.yardAreaFrom !== null && filters.yardAreaFrom > 0 && filters.yardAreaFrom !== 100) {
+            cleaned.yardAreaFrom = filters.yardAreaFrom;
+        }
+        if ('yardAreaTo' in filters && filters.yardAreaTo !== undefined && filters.yardAreaTo !== null && filters.yardAreaTo !== 500 && filters.yardAreaTo < 1000) {
+            cleaned.yardAreaTo = filters.yardAreaTo;
+        }
+        
+        // Price filters - only include if not at default min (0) or max
+        // Different property types have different max values
+        if ('priceFrom' in filters && filters.priceFrom !== undefined && filters.priceFrom !== null && filters.priceFrom > 0) {
+            cleaned.priceFrom = filters.priceFrom;
+        }
+        if ('priceTo' in filters && filters.priceTo !== undefined && filters.priceTo !== null) {
+            // Exclude common default max values for different property types
+            // apartments=300000, houses=420000, commercial=560000, hotels=3200000, etc.
+            const isMaxValue = filters.priceTo >= 300000; // Most common max, but could be higher for other types
+            if (!isMaxValue) {
+                cleaned.priceTo = filters.priceTo;
+            }
+        }
+        
+        // Price per sqm filters
+        if ('pricePerSqmFrom' in filters && filters.pricePerSqmFrom !== undefined && filters.pricePerSqmFrom !== null && filters.pricePerSqmFrom > 0) {
+            cleaned.pricePerSqmFrom = filters.pricePerSqmFrom;
+        }
+        if ('pricePerSqmTo' in filters && filters.pricePerSqmTo !== undefined && filters.pricePerSqmTo !== null) {
+            const isMaxValue = filters.pricePerSqmTo >= 3000; // PRICE_PER_SQM_SLIDER_MAX
+            if (!isMaxValue) {
+                cleaned.pricePerSqmTo = filters.pricePerSqmTo;
+            }
+        }
+        
+        // Rent-specific filters - exclude default min/max values
+        // Different property types have different rent defaults
+        if ('monthlyRentFrom' in filters && filters.monthlyRentFrom !== undefined && filters.monthlyRentFrom !== null && filters.monthlyRentFrom > 0) {
+            // Exclude common default min values (20 for apartments, 25 for houses, 0 for garages, etc.)
+            if (filters.monthlyRentFrom !== 20 && filters.monthlyRentFrom !== 25 && filters.monthlyRentFrom !== 0 && filters.monthlyRentFrom !== 1 && filters.monthlyRentFrom !== 600) {
+                cleaned.monthlyRentFrom = filters.monthlyRentFrom;
+            }
+        }
+        if ('monthlyRentTo' in filters && filters.monthlyRentTo !== undefined && filters.monthlyRentTo !== null) {
+            // Exclude common default max values (1800 for apartments, 6300 for houses, 350 for garages, 42000 for hotels, etc.)
+            if (filters.monthlyRentTo !== 1800 && filters.monthlyRentTo !== 6300 && filters.monthlyRentTo !== 350 && 
+                filters.monthlyRentTo !== 42000 && filters.monthlyRentTo !== 5600) {
+                cleaned.monthlyRentTo = filters.monthlyRentTo;
+            }
+        }
+        if ('rentPerSqmFrom' in filters && filters.rentPerSqmFrom !== undefined && filters.rentPerSqmFrom !== null && filters.rentPerSqmFrom > 0) {
+            cleaned.rentPerSqmFrom = filters.rentPerSqmFrom;
+        }
+        if ('rentPerSqmTo' in filters && filters.rentPerSqmTo !== undefined && filters.rentPerSqmTo !== null) {
+            // Exclude common default max values (24 for apartments, 28 for houses, 32 for garages, 20 for hotels, etc.)
+            if (filters.rentPerSqmTo !== 24 && filters.rentPerSqmTo !== 28 && filters.rentPerSqmTo !== 32 && 
+                filters.rentPerSqmTo !== 20 && filters.rentPerSqmTo !== 6) {
+                cleaned.rentPerSqmTo = filters.rentPerSqmTo;
+            }
+        }
+        
+        // Year filters - only include if not at default min/max
+        if ('yearFrom' in filters && filters.yearFrom !== undefined && filters.yearFrom !== null && filters.yearFrom > 1900) {
+            cleaned.yearFrom = filters.yearFrom;
+        }
+        if ('yearTo' in filters && filters.yearTo !== undefined && filters.yearTo !== null && filters.yearTo < 2050) {
+            cleaned.yearTo = filters.yearTo;
+        }
+        if ('isYearNotProvided' in filters && filters.isYearNotProvided) {
+            cleaned.isYearNotProvided = filters.isYearNotProvided;
+        }
+        
+        // Floor filters
+        if ('floorFrom' in filters && filters.floorFrom !== undefined && filters.floorFrom !== null && filters.floorFrom > 0) {
+            cleaned.floorFrom = filters.floorFrom;
+        }
+        if ('floorTo' in filters && filters.floorTo !== undefined && filters.floorTo !== null && filters.floorTo < 20) {
+            cleaned.floorTo = filters.floorTo;
+        }
+        if ('selectedFloorOptions' in filters && Array.isArray(filters.selectedFloorOptions) && filters.selectedFloorOptions.length > 0) {
+            cleaned.selectedFloorOptions = filters.selectedFloorOptions;
+        }
+        if ('isFloorNotProvided' in filters && filters.isFloorNotProvided) {
+            cleaned.isFloorNotProvided = filters.isFloorNotProvided;
+        }
+        
+        // Array filters - only include if not empty
+        if ('selectedFeatures' in filters && Array.isArray(filters.selectedFeatures) && filters.selectedFeatures.length > 0) {
+            cleaned.selectedFeatures = filters.selectedFeatures;
+        }
+        if ('selectedConstructionTypes' in filters && Array.isArray(filters.selectedConstructionTypes) && filters.selectedConstructionTypes.length > 0) {
+            cleaned.selectedConstructionTypes = filters.selectedConstructionTypes;
+        }
+        if ('selectedCompletionStatuses' in filters && Array.isArray(filters.selectedCompletionStatuses) && filters.selectedCompletionStatuses.length > 0) {
+            cleaned.selectedCompletionStatuses = filters.selectedCompletionStatuses;
+        }
+        if ('selectedCategories' in filters && Array.isArray(filters.selectedCategories) && filters.selectedCategories.length > 0) {
+            cleaned.selectedCategories = filters.selectedCategories;
+        }
+        if ('selectedFurnishing' in filters && Array.isArray(filters.selectedFurnishing) && filters.selectedFurnishing.length > 0) {
+            cleaned.selectedFurnishing = filters.selectedFurnishing;
+        }
+        if ('selectedWorkingOptions' in filters && Array.isArray(filters.selectedWorkingOptions) && filters.selectedWorkingOptions.length > 0) {
+            cleaned.selectedWorkingOptions = filters.selectedWorkingOptions;
+        }
+        
+        // Bed base filters
+        if ('bedBaseFrom' in filters && filters.bedBaseFrom !== undefined && filters.bedBaseFrom !== null && filters.bedBaseFrom > 0) {
+            cleaned.bedBaseFrom = filters.bedBaseFrom;
+        }
+        if ('bedBaseTo' in filters && filters.bedBaseTo !== undefined && filters.bedBaseTo !== null && filters.bedBaseTo < 120) {
+            cleaned.bedBaseTo = filters.bedBaseTo;
+        }
+        
+        // Distance filter
+        if ('distance' in filters && filters.distance !== undefined && filters.distance !== null && filters.distance > 0) {
+            cleaned.distance = filters.distance;
+        }
+        
+        // Remove empty strings
+        if ('searchTerm' in filters && filters.searchTerm && filters.searchTerm.trim()) {
+            cleaned.searchTerm = filters.searchTerm.trim();
+        }
+        
+        // Remove false boolean values (they're only meaningful when true)
+        // Note: We don't include false values as they indicate "not set"
+        
+        return Object.keys(cleaned).length > 0 ? cleaned : null;
+    }, []);
+    
     // Serialize filters to URL query params
     const serializeFiltersToURL = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState | null) => {
         if (!filters) return '';
@@ -296,16 +489,19 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         const params = new URLSearchParams();
         params.set('search', '1');
         
+        // Clean filters before serializing
+        const cleanedFilters = cleanFilters(filters);
+        
         // Serialize filter state to JSON and encode it
         try {
-            const filtersJson = JSON.stringify(filters);
+            const filtersJson = JSON.stringify(cleanedFilters || filters);
             params.set('filters', encodeURIComponent(filtersJson));
         } catch (error) {
             console.error('Error serializing filters:', error);
         }
         
         return params.toString();
-    }, []);
+    }, [cleanFilters]);
 
     const handleSearch = useCallback(async () => {
         const filters = currentFiltersRef.current;
@@ -347,7 +543,11 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                     params.set('propertyTypeId', selectedPropertyType);
                 }
                 if (filters) {
-                    params.set('filters', encodeURIComponent(JSON.stringify(filters)));
+                    // Clean filters to remove default values before sending to API
+                    const cleanedFilters = cleanFilters(filters);
+                    if (cleanedFilters) {
+                        params.set('filters', encodeURIComponent(JSON.stringify(cleanedFilters)));
+                    }
                 }
                 
                 const response = await fetch(`/api/properties?${params.toString()}`);

@@ -121,6 +121,11 @@ export async function GET(request: NextRequest) {
 
     // Apply filters if provided
     if (filters) {
+      // Property ID filter (short_id)
+      if (filters.propertyId && filters.propertyId.trim()) {
+        query = query.eq('short_id', filters.propertyId.trim());
+      }
+      
       // Status filter (for-sale/for-rent)
       if (filters.city) {
         query = query.eq('city', filters.city);
@@ -154,34 +159,34 @@ export async function GET(request: NextRequest) {
         query = query.in('type', typeMapping[propertyTypeId]);
       }
       
-      // Status filter based on baseRoute
+      // Sale/Rent filter based on baseRoute (using sale_or_rent instead of status)
       if (baseRoute === '/sale/search') {
-        query = query.eq('status', 'for-sale');
+        query = query.eq('sale_or_rent', 'sale');
       } else if (baseRoute === '/rent/search') {
-        query = query.eq('status', 'for-rent');
+        query = query.eq('sale_or_rent', 'rent');
       }
       
-      // Area filters
-      if (filters.areaFrom !== undefined && filters.areaFrom > 0) {
+      // Area filters - only apply if explicitly set (not 0, null, or undefined)
+      if (filters.areaFrom !== undefined && filters.areaFrom !== null && filters.areaFrom > 0) {
         query = query.gte('area_sqm', filters.areaFrom);
       }
-      if (filters.areaTo !== undefined && filters.areaTo > 0) {
+      if (filters.areaTo !== undefined && filters.areaTo !== null && filters.areaTo > 0) {
         query = query.lte('area_sqm', filters.areaTo);
       }
       
-      // Price filters
-      if (filters.priceFrom !== undefined && filters.priceFrom > 0) {
+      // Price filters - only apply if explicitly set (not 0, null, or undefined)
+      if (filters.priceFrom !== undefined && filters.priceFrom !== null && filters.priceFrom > 0) {
         query = query.gte('price', filters.priceFrom);
       }
-      if (filters.priceTo !== undefined && filters.priceTo > 0) {
+      if (filters.priceTo !== undefined && filters.priceTo !== null && filters.priceTo > 0) {
         query = query.lte('price', filters.priceTo);
       }
       
-      // Price per sqm filters
-      if (filters.pricePerSqmFrom !== undefined && filters.pricePerSqmFrom > 0) {
+      // Price per sqm filters - only apply if explicitly set (not 0, null, or undefined)
+      if (filters.pricePerSqmFrom !== undefined && filters.pricePerSqmFrom !== null && filters.pricePerSqmFrom > 0) {
         query = query.gte('price_per_sqm', filters.pricePerSqmFrom);
       }
-      if (filters.pricePerSqmTo !== undefined && filters.pricePerSqmTo > 0) {
+      if (filters.pricePerSqmTo !== undefined && filters.pricePerSqmTo !== null && filters.pricePerSqmTo > 0) {
         query = query.lte('price_per_sqm', filters.pricePerSqmTo);
       }
       
@@ -239,8 +244,20 @@ export async function GET(request: NextRequest) {
             // Combined with type = 'apartment' filter, this ensures we only get apartment properties
             // Works regardless of site language because IDs are always English
             const finalSearchValues = Array.from(searchValues);
+            
+            // Debug logging to help diagnose filtering issues
+            console.log('Subtype filter debug:', {
+              inputSubtypes: validSubtypes,
+              normalizedSubtypes,
+              searchValues: finalSearchValues,
+              propertyTypeId,
+              baseRoute,
+            });
+            
             if (finalSearchValues.length > 0) {
               query = query.in('subtype', finalSearchValues);
+            } else {
+              console.warn('No valid search values for subtype filter after normalization');
             }
           }
         }
@@ -268,12 +285,12 @@ export async function GET(request: NextRequest) {
         query = query.in('completion_degree', filters.selectedCompletionStatuses);
       }
       
-      // Floor filters - floor is stored as text in database
-      if (filters.floorFrom !== undefined && filters.floorFrom > 0) {
+      // Floor filters - only apply if explicitly set (not 0, null, or undefined)
+      if (filters.floorFrom !== undefined && filters.floorFrom !== null && filters.floorFrom > 0) {
         // Convert to string for text comparison, or use numeric comparison if possible
         query = query.gte('floor', filters.floorFrom.toString());
       }
-      if (filters.floorTo !== undefined && filters.floorTo > 0) {
+      if (filters.floorTo !== undefined && filters.floorTo !== null && filters.floorTo > 0) {
         query = query.lte('floor', filters.floorTo.toString());
       }
       
@@ -282,11 +299,11 @@ export async function GET(request: NextRequest) {
         query = query.in('floor', filters.selectedFloorOptions);
       }
       
-      // Year built filters
-      if (filters.yearFrom !== undefined && filters.yearFrom > 0) {
+      // Year built filters - only apply if explicitly set (not 0, null, or undefined)
+      if (filters.yearFrom !== undefined && filters.yearFrom !== null && filters.yearFrom > 0) {
         query = query.gte('build_year', filters.yearFrom);
       }
-      if (filters.yearTo !== undefined && filters.yearTo > 0) {
+      if (filters.yearTo !== undefined && filters.yearTo !== null && filters.yearTo > 0) {
         query = query.lte('build_year', filters.yearTo);
       }
       
@@ -304,11 +321,11 @@ export async function GET(request: NextRequest) {
         }
       }
       
-      // Bed base for hotels
-      if (filters.bedBaseFrom !== undefined && filters.bedBaseFrom > 0) {
+      // Bed base for hotels - only apply if explicitly set (not 0, null, or undefined)
+      if (filters.bedBaseFrom !== undefined && filters.bedBaseFrom !== null && filters.bedBaseFrom > 0) {
         query = query.gte('bed_base', filters.bedBaseFrom);
       }
-      if (filters.bedBaseTo !== undefined && filters.bedBaseTo > 0) {
+      if (filters.bedBaseTo !== undefined && filters.bedBaseTo !== null && filters.bedBaseTo > 0) {
         query = query.lte('bed_base', filters.bedBaseTo);
       }
     }
@@ -326,6 +343,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Debug: Log query results for subtype filtering
+    if (filters?.apartmentSubtypes) {
+      console.log('Query results for subtype filter:', {
+        requestedSubtypes: filters.apartmentSubtypes,
+        foundProperties: properties?.length || 0,
+        propertyTypes: [...new Set((properties || []).map((p: any) => p.type))],
+        foundSubtypes: [...new Set((properties || []).map((p: any) => p.subtype).filter(Boolean))],
+      });
+    }
+
     // Transform database properties to match Property interface
     const transformedProperties = (properties || []).map((prop: any) => ({
       id: prop.id,
@@ -333,18 +360,18 @@ export async function GET(request: NextRequest) {
       title: prop.title || '',
       description: prop.description || '',
       type: prop.type,
-      status: prop.status,
+      status: prop.sale_or_rent === 'sale' ? 'for-sale' : 'for-rent', // Map sale_or_rent to status for backward compatibility
       city: prop.city || '',
       neighborhood: prop.neighborhood || undefined,
       price: Number(prop.price) || 0,
-      currency: 'лв',
+      currency: '€',
       area: Number(prop.area_sqm) || 0,
       rooms: prop.rooms || undefined,
       bathrooms: prop.bathrooms || undefined,
       subtype: prop.subtype || undefined,
       construction_type: prop.construction_type || undefined,
       completion_degree: prop.completion_degree || undefined,
-      floor: prop.floor ? Number(prop.floor) : undefined,
+      floor: prop.floor ? String(prop.floor) : undefined,
       total_floors: prop.total_floors ? Number(prop.total_floors) : undefined,
       year_built: prop.build_year || undefined,
       images: (prop.image_urls || []).map((url: string, index: number) => ({
@@ -361,7 +388,7 @@ export async function GET(request: NextRequest) {
       broker_position: prop.broker_position || undefined,
       broker_image: prop.broker_image || undefined,
       view_count: 0,
-      created_at: prop.created_at || prop.date_posted || new Date().toISOString(),
+      created_at: prop.created_at || new Date().toISOString(),
       updated_at: prop.updated_at || new Date().toISOString(),
     }));
 
@@ -546,15 +573,15 @@ export async function POST(request: NextRequest) {
       : validatedData.price / validatedData.area_sqm;
 
     // LANGUAGE-AGNOSTIC: Normalize subtype to English ID before saving to database
-    // Admin forms send English IDs (from option.id), but we normalize for safety
-    // This ensures database always stores English IDs regardless of UI language
+    // Handles subtypes in any language (Bulgarian, Russian, English, German) and converts to English IDs
+    // Admin forms send English IDs (from option.id), but we normalize for safety and backward compatibility
+    // This ensures database always stores English IDs regardless of UI language or input format
     const normalizedSubtype = validatedData.subtype 
       ? normalizeSubtypeToId(validatedData.subtype) 
       : null;
 
     // Prepare payload for Supabase
     const payload = {
-      status: validatedData.status,
       sale_or_rent: validatedData.sale_or_rent,
       type: validatedData.type,
       subtype: normalizedSubtype,

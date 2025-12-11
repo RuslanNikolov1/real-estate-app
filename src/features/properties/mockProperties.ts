@@ -1,17 +1,6 @@
-'use client';
+import { Property } from '@/types';
 
-import { useState, useMemo, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { PropertySearch } from '@/features/home/components/PropertySearch';
-import { PropertyCard } from './components/PropertyCard';
-import { Property, PropertySearchFilters } from '@/types';
-import { CaretLeft, CaretRight } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/Button';
-import styles from './PropertiesListPage.module.scss';
-
-// 10 изкуствени имота
+// Mock properties data for development/testing
 export const mockProperties: Property[] = [
   {
     id: '1',
@@ -23,7 +12,7 @@ export const mockProperties: Property[] = [
     city: 'Бургас',
     neighborhood: 'Център',
     price: 180000,
-    currency: 'лв',
+    currency: '€',
     area: 95,
     rooms: 3,
     bathrooms: 2,
@@ -54,7 +43,7 @@ export const mockProperties: Property[] = [
     city: 'Бургас',
     neighborhood: 'Славейков',
     price: 320000,
-    currency: 'лв',
+    currency: '€',
     area: 180,
     rooms: 5,
     bathrooms: 3,
@@ -85,7 +74,7 @@ export const mockProperties: Property[] = [
     city: 'Бургас',
     neighborhood: 'Морска градина',
     price: 600,
-    currency: 'лв',
+    currency: '€',
     area: 65,
     rooms: 2,
     bathrooms: 1,
@@ -116,7 +105,7 @@ export const mockProperties: Property[] = [
     city: 'Бургас',
     neighborhood: 'Сарафово',
     price: 850000,
-    currency: 'лв',
+    currency: '€',
     area: 350,
     rooms: 6,
     bathrooms: 4,
@@ -147,7 +136,7 @@ export const mockProperties: Property[] = [
     city: 'Бургас',
     neighborhood: 'Център',
     price: 1200,
-    currency: 'лв',
+    currency: '€',
     area: 120,
     rooms: 4,
     bathrooms: 1,
@@ -178,7 +167,7 @@ export const mockProperties: Property[] = [
     city: 'Бургас',
     neighborhood: 'Меден рудник',
     price: 800,
-    currency: 'лв',
+    currency: '€',
     area: 45,
     rooms: 1,
     bathrooms: 1,
@@ -209,7 +198,7 @@ export const mockProperties: Property[] = [
     city: 'Бургас',
     neighborhood: 'Изгрев',
     price: 280000,
-    currency: 'лв',
+    currency: '€',
     area: 160,
     rooms: 4,
     bathrooms: 2,
@@ -240,7 +229,7 @@ export const mockProperties: Property[] = [
     city: 'Бургас',
     neighborhood: 'Център',
     price: 350,
-    currency: 'лв',
+    currency: '€',
     area: 35,
     rooms: 1,
     bathrooms: 1,
@@ -271,7 +260,7 @@ export const mockProperties: Property[] = [
     city: 'Бургас',
     neighborhood: 'Индустриална зона',
     price: 1500,
-    currency: 'лв',
+    currency: '€',
     area: 500,
     rooms: 0,
     bathrooms: 1,
@@ -302,7 +291,7 @@ export const mockProperties: Property[] = [
     city: 'Бургас',
     neighborhood: 'Лозово',
     price: 220000,
-    currency: 'лв',
+    currency: '€',
     area: 125,
     rooms: 4,
     bathrooms: 2,
@@ -325,166 +314,4 @@ export const mockProperties: Property[] = [
   },
 ];
 
-const ITEMS_PER_PAGE = 5;
-
-function PropertiesListContent() {
-  const router = useRouter();
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const [filters, setFilters] = useState<PropertySearchFilters>({
-    type: [],
-    status: [],
-  });
-
-  const handleSearch = (searchFilters: PropertySearchFilters) => {
-    setFilters(searchFilters);
-    setCurrentPage(1);
-  };
-
-  const filteredProperties = useMemo(() => {
-    return mockProperties.filter((property) => {
-      if (filters.type && filters.type.length > 0) {
-        if (!filters.type.includes(property.type)) {
-          return false;
-        }
-      }
-      if (filters.status && filters.status.length > 0) {
-        if (!filters.status.includes(property.status)) {
-          return false;
-        }
-      }
-      if (filters.min_price && property.price < filters.min_price) {
-        return false;
-      }
-      if (filters.max_price && property.price > filters.max_price) {
-        return false;
-      }
-      if (filters.min_area && property.area < filters.min_area) {
-        return false;
-      }
-      if (filters.max_area && property.area > filters.max_area) {
-        return false;
-      }
-      if (filters.rooms && property.rooms !== filters.rooms) {
-        return false;
-      }
-      if (filters.bathrooms && property.bathrooms !== filters.bathrooms) {
-        return false;
-      }
-      return true;
-    });
-  }, [filters]);
-
-  const totalPages = Math.ceil(filteredProperties.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedProperties = filteredProperties.slice(startIndex, endIndex);
-
-  return (
-    <div className={styles.propertiesPage}>
-      <Header />
-      <main className={styles.main}>
-        <section className={styles.section}>
-          <div className={styles.container}>
-            <div className={styles.searchSection}>
-              <PropertySearch
-                onSearch={handleSearch}
-                isExpanded={isSearchExpanded}
-                onExpand={() => setIsSearchExpanded(!isSearchExpanded)}
-              />
-            </div>
-
-            <div className={styles.resultsHeader}>
-              <h1 className={styles.title}>
-                Намерени имоти: {filteredProperties.length}
-              </h1>
-            </div>
-
-            <div className={styles.propertiesList}>
-              {paginatedProperties.length > 0 ? (
-                paginatedProperties.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                  />
-                ))
-              ) : (
-                <div className={styles.emptyState}>
-                  <p>Няма намерени имоти, отговарящи на критериите.</p>
-                </div>
-              )}
-            </div>
-
-            {totalPages > 1 && (
-              <div className={styles.pagination}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <CaretLeft size={20} />
-                  Предишна
-                </Button>
-                <div className={styles.pageNumbers}>
-                  {[...Array(totalPages)].map((_, i) => {
-                    const page = i + 1;
-                    if (
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-                    ) {
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`${styles.pageButton} ${
-                            currentPage === page ? styles.active : ''
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
-                    } else if (
-                      page === currentPage - 2 ||
-                      page === currentPage + 2
-                    ) {
-                      return (
-                        <span key={page} className={styles.ellipsis}>
-                          ...
-                        </span>
-                      );
-                    }
-                    return null;
-                  })}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                  }
-                  disabled={currentPage === totalPages}
-                >
-                  Следваща
-                  <CaretRight size={20} />
-                </Button>
-              </div>
-            )}
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
-  );
-}
-
-export function PropertiesListPage() {
-  return (
-    <Suspense fallback={<div>Зареждане...</div>}>
-      <PropertiesListContent />
-    </Suspense>
-  );
-}
 

@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '@/styles/variables' as *;
 
 .page {
@@ -97,6 +98,7 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-sm;
+  width: 100%;
 
   label {
     font-weight: 600;
@@ -157,18 +159,39 @@
 }
 
 .filtersRow {
-  display: flex;
-  gap: $spacing-xl;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
   margin-bottom: $spacing-lg;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.selectWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  width: 100%;
 }
 
 .select {
-  width: 100%;
-  border-radius: 16px;
-  border: 1px solid $light-gray;
   padding: $spacing-sm $spacing-md;
+  border: 1px solid $light-gray;
+  border-radius: 12px;
   font-size: 1rem;
+  font-family: inherit;
+  color: $black;
+  background-color: $white;
+  transition: border-color $transition-base;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: $dark-red;
+  }
 }
 
 .featuresGrid {
@@ -194,6 +217,7 @@
     color: $dark-red;
   }
 }
+
 
 .inputsRow {
   display: grid;

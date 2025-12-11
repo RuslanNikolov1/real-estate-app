@@ -25,20 +25,26 @@ interface PriceFilterProps {
 
 export function PriceFilter({
     onFilterChange,
-    initialPriceFrom = 0,
-    initialPriceTo = PRICE_SLIDER_MAX,
-    initialPricePerSqmFrom = 0,
-    initialPricePerSqmTo = PRICE_PER_SQM_SLIDER_MAX,
+    initialPriceFrom,
+    initialPriceTo,
+    initialPricePerSqmFrom,
+    initialPricePerSqmTo,
     priceSliderMax = PRICE_SLIDER_MAX,
     pricePerSqmSliderMin = 0,
     pricePerSqmSliderMax = PRICE_PER_SQM_SLIDER_MAX,
     showPricePerSqm = true,
     priceTitle = 'Цена (€)'
 }: PriceFilterProps) {
-    const [priceFrom, setPriceFrom] = useState(initialPriceFrom);
-    const [priceTo, setPriceTo] = useState(initialPriceTo);
-    const [pricePerSqmFrom, setPricePerSqmFrom] = useState(initialPricePerSqmFrom);
-    const [pricePerSqmTo, setPricePerSqmTo] = useState(initialPricePerSqmTo);
+    // Use default values for UI display only
+    const defaultPriceFrom = 0;
+    const defaultPriceTo = PRICE_SLIDER_MAX;
+    const defaultPricePerSqmFrom = 0;
+    const defaultPricePerSqmTo = PRICE_PER_SQM_SLIDER_MAX;
+    
+    const [priceFrom, setPriceFrom] = useState(initialPriceFrom ?? defaultPriceFrom);
+    const [priceTo, setPriceTo] = useState(initialPriceTo ?? defaultPriceTo);
+    const [pricePerSqmFrom, setPricePerSqmFrom] = useState(initialPricePerSqmFrom ?? defaultPricePerSqmFrom);
+    const [pricePerSqmTo, setPricePerSqmTo] = useState(initialPricePerSqmTo ?? defaultPricePerSqmTo);
 
     const priceFromClamped = Math.max(0, Math.min(priceFrom, priceSliderMax));
     const priceToClamped = Math.max(0, Math.min(priceTo, priceSliderMax));

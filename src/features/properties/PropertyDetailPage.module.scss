@@ -392,8 +392,8 @@
   font-family: $font-headline;
 }
 
-// Inquiry Form
-.inquirySection {
+// Contact Buttons
+.contactSection {
   padding: $spacing-2xl;
   background: $white;
   border-radius: 20px;
@@ -401,38 +401,92 @@
   border: 1px solid rgba(128, 46, 46, 0.1);
 }
 
-.inquiryForm {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xl;
-}
-
-.formRow {
+.contactButtons {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: $spacing-lg;
 
   @media (max-width: $breakpoint-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: $breakpoint-sm) {
     grid-template-columns: 1fr;
   }
 }
 
-.messageTextarea {
+.contactButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
   padding: $spacing-lg;
-  border: 2px solid $light-gray;
-  border-radius: 14px;
+  border-radius: 16px;
+  border: 2px solid $dark-red;
+  background: $white;
+  color: $dark-red;
+  text-decoration: none;
+  font-weight: 600;
   font-size: 1rem;
-  font-family: $font-body;
-  color: $black;
-  background-color: $white;
-  resize: vertical;
   transition: all $transition-base;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 
-  &:focus {
-    outline: none;
-    border-color: $dark-red;
-    box-shadow: 0 0 0 4px rgba(128, 46, 46, 0.1);
+  svg {
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(128, 46, 46, 0.2));
+    transition: transform $transition-base;
+    color: $dark-red;
   }
+
+  > span:first-of-type {
+    position: relative;
+    z-index: 1;
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: $dark-red;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(128, 46, 46, 0.25);
+    background: $dark-red;
+    color: $white;
+
+    svg {
+      transform: scale(1.1);
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+      color: $white;
+    }
+
+    > span:first-of-type {
+      color: $white;
+    }
+  }
+
+  &:active {
+    transform: translateY(-2px);
+  }
+}
+
+.phoneButton {
+  // All buttons use dark red background
+}
+
+.viberButton {
+  // All buttons use dark red background
+}
+
+.whatsappButton {
+  // All buttons use dark red background
+}
+
+.emailButton {
+  // All buttons use dark red background
 }
 
 // Price History

@@ -52,7 +52,7 @@ export function NeighborhoodCard({ neighborhood, index, onSelect }: Neighborhood
           </div>
           <div className={styles.detailItem}>
             <TrendUp size={18} />
-            <span>От {salePriceFormatter.format(neighborhood.averagePrice.sale)} лв/м²</span>
+            <span>От {salePriceFormatter.format(neighborhood.averagePrice.sale)} €/м²</span>
           </div>
         </div>
 

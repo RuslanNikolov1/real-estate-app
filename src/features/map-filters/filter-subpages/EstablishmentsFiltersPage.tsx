@@ -113,28 +113,29 @@ export function EstablishmentsFiltersPage({
     const RENT_PER_SQM_SLIDER_MIN = 0;
     
     // Store current filter values - all establishments filter state managed here
+    // Use undefined for numeric filters so they're not sent unless user explicitly sets them
     const filterValuesRef = useRef<Partial<EstablishmentsFiltersState>>({
         searchTerm: '',
         propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0,
-        areaFrom: 0,
-        areaTo: ESTABLISHMENTS_AREA_SLIDER_MAX,
+        areaFrom: undefined,
+        areaTo: undefined,
         locationTypes: [],
         selectedConstructionTypes: [],
         selectedCompletionStatuses: [],
         selectedFeatures: [],
-        priceFrom: 0,
-        priceTo: ESTABLISHMENTS_PRICE_SLIDER_MAX,
-        pricePerSqmFrom: ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MIN,
-        pricePerSqmTo: ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MAX,
+        priceFrom: undefined,
+        priceTo: undefined,
+        pricePerSqmFrom: undefined,
+        pricePerSqmTo: undefined,
         // Rent-specific fields
         selectedFurnishing: [],
-        monthlyRentFrom: RENT_SLIDER_MIN,
-        monthlyRentTo: RENT_SLIDER_MAX,
-        rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
-        rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX,
+        monthlyRentFrom: undefined,
+        monthlyRentTo: undefined,
+        rentPerSqmFrom: undefined,
+        rentPerSqmTo: undefined,
         selectedWorkingOptions: []
     });
 
@@ -263,21 +264,21 @@ export function EstablishmentsFiltersPage({
             neighborhoods: [],
             distance: 0,
             propertyId: '',
-            areaFrom: 0,
-            areaTo: ESTABLISHMENTS_AREA_SLIDER_MAX,
+            areaFrom: undefined,
+            areaTo: undefined,
             locationTypes: [],
             selectedConstructionTypes: [],
             selectedCompletionStatuses: [],
             selectedFeatures: [],
-            priceFrom: 0,
-            priceTo: ESTABLISHMENTS_PRICE_SLIDER_MAX,
-            pricePerSqmFrom: ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MIN,
-            pricePerSqmTo: ESTABLISHMENTS_PRICE_PER_SQM_SLIDER_MAX,
+            priceFrom: undefined,
+            priceTo: undefined,
+            pricePerSqmFrom: undefined,
+            pricePerSqmTo: undefined,
             // Reset rent-specific fields
             selectedFurnishing: [],
-            monthlyRentFrom: RENT_SLIDER_MIN,
-            monthlyRentTo: RENT_SLIDER_MAX,
-            rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
+            monthlyRentFrom: undefined,
+            monthlyRentTo: undefined,
+            rentPerSqmFrom: undefined,
             rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX,
             selectedWorkingOptions: []
         };

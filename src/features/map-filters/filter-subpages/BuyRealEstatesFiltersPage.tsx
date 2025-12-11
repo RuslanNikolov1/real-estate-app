@@ -60,14 +60,15 @@ export function BuyRealEstatesFiltersPage({
         : setInternalLocationState;
     
     // Store current filter values
+    // Use undefined for numeric filters so they're not sent unless user explicitly sets them
     const filterValuesRef = useRef<Partial<BuyRealEstatesFiltersState>>({
         searchTerm: '',
         propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0,
-        priceFrom: 0,
-        priceTo: BUY_REAL_ESTATES_PRICE_SLIDER_MAX
+        priceFrom: undefined,
+        priceTo: undefined
     });
 
     // Use keys to reset components on clear
@@ -144,8 +145,8 @@ export function BuyRealEstatesFiltersPage({
             neighborhoods: [],
             distance: 0,
             propertyId: '',
-            priceFrom: 0,
-            priceTo: BUY_REAL_ESTATES_PRICE_SLIDER_MAX
+            priceFrom: undefined,
+            priceTo: undefined
         };
         
         // Reset components by changing key
@@ -222,7 +223,7 @@ export function BuyRealEstatesFiltersPage({
                 />
             </div>
 
-            {/* Price Filter (Цена в лв) */}
+            {/* Price Filter (Цена в €) */}
             <PriceFilter
                 key={`price-${filterKey}`}
                 onFilterChange={handlePriceChange}
@@ -230,7 +231,7 @@ export function BuyRealEstatesFiltersPage({
                 initialPriceTo={filterValuesRef.current.priceTo}
                 priceSliderMax={BUY_REAL_ESTATES_PRICE_SLIDER_MAX}
                 showPricePerSqm={false}
-                priceTitle="Цена в лв"
+                priceTitle="Цена в €"
             />
         </div>
     );

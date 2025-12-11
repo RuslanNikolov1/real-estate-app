@@ -69,19 +69,19 @@ const createInitialGaragesFilters = (): GaragesParkingFiltersState => ({
     neighborhoods: [],
     distance: 0,
     propertyTypes: [],
-    areaFrom: 0,
-    areaTo: GARAGES_AREA_SLIDER_MAX,
+    areaFrom: undefined,
+    areaTo: undefined,
     selectedConstructionTypes: [],
     selectedFeatures: [],
-    priceFrom: 0,
-    priceTo: GARAGES_PRICE_SLIDER_MAX,
-    pricePerSqmFrom: 0,
-    pricePerSqmTo: GARAGES_PRICE_PER_SQM_SLIDER_MAX,
+    priceFrom: undefined,
+    priceTo: undefined,
+    pricePerSqmFrom: undefined,
+    pricePerSqmTo: undefined,
     // Rent-specific fields
-    monthlyRentFrom: 0,
-    monthlyRentTo: 350,
-    rentPerSqmFrom: 0,
-    rentPerSqmTo: 32
+    monthlyRentFrom: undefined,
+    monthlyRentTo: undefined,
+    rentPerSqmFrom: undefined,
+    rentPerSqmTo: undefined
 });
 
 export function GaragesParkingFiltersPage({ 

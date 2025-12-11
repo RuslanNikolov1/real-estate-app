@@ -115,6 +115,7 @@ export function ApartmentsFiltersPage({
     const RENT_PER_SQM_SLIDER_MIN = 0;
 
     // Store current filter values - all apartment filter state managed here
+    // Use undefined for numeric filters so they're not sent unless user explicitly sets them
     const filterValuesRef = useRef<Partial<ApartmentFiltersState>>({
         searchTerm: '',
         propertyId: '',
@@ -122,28 +123,28 @@ export function ApartmentsFiltersPage({
         neighborhoods: [],
         distance: 0,
         apartmentSubtypes: [],
-        areaFrom: 20,
-        areaTo: 100,
-        priceFrom: 0,
-        priceTo: PRICE_SLIDER_MAX,
-        pricePerSqmFrom: 0,
-        pricePerSqmTo: PRICE_PER_SQM_SLIDER_MAX,
+        areaFrom: undefined,
+        areaTo: undefined,
+        priceFrom: undefined,
+        priceTo: undefined,
+        pricePerSqmFrom: undefined,
+        pricePerSqmTo: undefined,
         selectedFeatures: [],
         selectedConstructionTypes: [],
-        yearFrom: YEAR_SLIDER_MIN,
-        yearTo: YEAR_SLIDER_MAX,
+        yearFrom: undefined,
+        yearTo: undefined,
         isYearNotProvided: false,
-        floorFrom: FLOOR_SLIDER_MIN,
-        floorTo: FLOOR_SLIDER_MAX,
+        floorFrom: undefined,
+        floorTo: undefined,
         selectedFloorOptions: [],
         isFloorNotProvided: false,
         selectedCompletionStatuses: [],
         // Rent-specific fields
         selectedFurnishing: [],
-        monthlyRentFrom: RENT_SLIDER_MIN,
-        monthlyRentTo: RENT_SLIDER_MAX,
-        rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
-        rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX
+        monthlyRentFrom: undefined,
+        monthlyRentTo: undefined,
+        rentPerSqmFrom: undefined,
+        rentPerSqmTo: undefined
     });
 
     // State for right column filters (for controlled components)
@@ -153,8 +154,8 @@ export function ApartmentsFiltersPage({
         yearFrom: YEAR_SLIDER_MIN as number | undefined,
         yearTo: YEAR_SLIDER_MAX as number | undefined,
         isYearNotProvided: false,
-        floorFrom: FLOOR_SLIDER_MIN as number | undefined,
-        floorTo: FLOOR_SLIDER_MAX as number | undefined,
+        floorFrom: undefined as number | undefined,
+        floorTo: undefined as number | undefined,
         selectedFloorOptions: [] as string[],
         isFloorNotProvided: false,
         selectedCompletionStatuses: [] as string[]
@@ -302,28 +303,28 @@ export function ApartmentsFiltersPage({
             distance: 0,
             propertyId: '',
             apartmentSubtypes: [],
-            areaFrom: 20,
-            areaTo: 100,
-            priceFrom: 0,
-            priceTo: PRICE_SLIDER_MAX,
-            pricePerSqmFrom: 0,
-            pricePerSqmTo: PRICE_PER_SQM_SLIDER_MAX,
+            areaFrom: undefined,
+            areaTo: undefined,
+            priceFrom: undefined,
+            priceTo: undefined,
+            pricePerSqmFrom: undefined,
+            pricePerSqmTo: undefined,
             selectedFeatures: [],
             selectedConstructionTypes: [],
-            yearFrom: YEAR_SLIDER_MIN,
-            yearTo: YEAR_SLIDER_MAX,
+            yearFrom: undefined,
+            yearTo: undefined,
             isYearNotProvided: false,
-            floorFrom: FLOOR_SLIDER_MIN,
-            floorTo: FLOOR_SLIDER_MAX,
+            floorFrom: undefined,
+            floorTo: undefined,
             selectedFloorOptions: [],
             isFloorNotProvided: false,
             selectedCompletionStatuses: [],
             // Reset rent-specific fields
             selectedFurnishing: [],
-            monthlyRentFrom: RENT_SLIDER_MIN,
-            monthlyRentTo: RENT_SLIDER_MAX,
-            rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
-            rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX
+            monthlyRentFrom: undefined,
+            monthlyRentTo: undefined,
+            rentPerSqmFrom: undefined,
+            rentPerSqmTo: undefined
         };
         // Reset right column filter state
         setRightColumnFilterState({
@@ -332,8 +333,8 @@ export function ApartmentsFiltersPage({
             yearFrom: YEAR_SLIDER_MIN,
             yearTo: YEAR_SLIDER_MAX,
             isYearNotProvided: false,
-            floorFrom: FLOOR_SLIDER_MIN,
-            floorTo: FLOOR_SLIDER_MAX,
+            floorFrom: undefined,
+            floorTo: undefined,
             selectedFloorOptions: [],
             isFloorNotProvided: false,
             selectedCompletionStatuses: []
@@ -603,12 +604,18 @@ export function ApartmentsFiltersPage({
             ) : (
                 <PriceFilter
                     onFilterChange={handlePriceChange}
+                    initialPriceFrom={filterValuesRef.current.priceFrom}
+                    initialPriceTo={filterValuesRef.current.priceTo}
+                    initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
+                    initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
                 />
             )}
 
             {/* Area Filter */}
             <AreaFilter
                 onFilterChange={handleAreaChange}
+                initialAreaFrom={filterValuesRef.current.areaFrom}
+                initialAreaTo={filterValuesRef.current.areaTo}
             />
 
             {/* Features Filter */}

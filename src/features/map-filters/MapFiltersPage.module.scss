@@ -323,6 +323,10 @@
         display: flex;
         flex-direction: column;
         gap: $spacing-sm;
+
+        :global(input) {
+            border: 2px solid $dark-red !important;
+        }
     }
 
     .mapWrapper {

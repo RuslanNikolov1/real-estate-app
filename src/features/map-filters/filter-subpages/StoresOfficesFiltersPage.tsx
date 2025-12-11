@@ -106,6 +106,7 @@ export function StoresOfficesFiltersPage({
     const RENT_PER_SQM_SLIDER_MIN = 0;
 
     // Store current filter values - all commercial filter state managed here
+    // Use undefined for numeric filters so they're not sent unless user explicitly sets them
     const filterValuesRef = useRef<Partial<CommercialFiltersState>>({
         searchTerm: '',
         propertyId: '',
@@ -113,25 +114,25 @@ export function StoresOfficesFiltersPage({
         neighborhoods: [],
         distance: 0,
         propertyTypes: [],
-        areaFrom: 0,
-        areaTo: COMMERCIAL_AREA_SLIDER_MAX,
-        priceFrom: 0,
-        priceTo: COMMERCIAL_PRICE_SLIDER_MAX,
-        pricePerSqmFrom: 0,
-        pricePerSqmTo: COMMERCIAL_PRICE_PER_SQM_SLIDER_MAX,
+        areaFrom: undefined,
+        areaTo: undefined,
+        priceFrom: undefined,
+        priceTo: undefined,
+        pricePerSqmFrom: undefined,
+        pricePerSqmTo: undefined,
         selectedFeatures: [],
         selectedFloorOptions: [],
-        floorFrom: FLOOR_SLIDER_MIN,
-        floorTo: FLOOR_SLIDER_MAX,
+        floorFrom: undefined,
+        floorTo: undefined,
         isFloorNotProvided: false,
         selectedConstructionTypes: [],
         selectedCompletionStatuses: [],
         selectedBuildingTypes: [],
         // Rent-specific fields
-        monthlyRentFrom: RENT_SLIDER_MIN,
-        monthlyRentTo: RENT_SLIDER_MAX,
-        rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
-        rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX
+        monthlyRentFrom: undefined,
+        monthlyRentTo: undefined,
+        rentPerSqmFrom: undefined,
+        rentPerSqmTo: undefined
     });
 
     // Use keys to reset components on clear
@@ -263,16 +264,16 @@ export function StoresOfficesFiltersPage({
             neighborhoods: [],
             distance: 0,
             propertyTypes: [],
-            areaFrom: 0,
-            areaTo: COMMERCIAL_AREA_SLIDER_MAX,
-            priceFrom: 0,
-            priceTo: COMMERCIAL_PRICE_SLIDER_MAX,
-            pricePerSqmFrom: 0,
-            pricePerSqmTo: COMMERCIAL_PRICE_PER_SQM_SLIDER_MAX,
+            areaFrom: undefined,
+            areaTo: undefined,
+            priceFrom: undefined,
+            priceTo: undefined,
+            pricePerSqmFrom: undefined,
+            pricePerSqmTo: undefined,
             selectedFeatures: [],
             selectedFloorOptions: [],
-            floorFrom: FLOOR_SLIDER_MIN,
-            floorTo: FLOOR_SLIDER_MAX,
+            floorFrom: undefined,
+            floorTo: undefined,
             isFloorNotProvided: false,
             selectedConstructionTypes: [],
             selectedCompletionStatuses: [],

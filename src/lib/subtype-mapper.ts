@@ -13,8 +13,9 @@ const VALID_APARTMENT_SUBTYPE_IDS = [
 ] as const;
 
 /**
- * Maps apartment subtype labels (Bulgarian) to IDs (English)
- * This handles the case where admin forms may save labels instead of IDs
+ * Maps apartment subtype labels (all languages) to IDs (English)
+ * This handles the case where admin forms or database may save labels instead of IDs
+ * Supports: Bulgarian, Russian, English, German
  */
 const SUBTYPE_LABEL_TO_ID_MAP: Record<string, string> = {
   // Bulgarian labels to IDs
@@ -24,68 +25,185 @@ const SUBTYPE_LABEL_TO_ID_MAP: Record<string, string> = {
   'Многостаен': 'multi-bedroom',
   'Мезонет': 'maisonette',
   'Ателие/Студио': 'atelier',
+  'Ателие': 'atelier',
+  'Студио': 'atelier',
   'Таван': 'attic',
-  // Also include IDs as-is (in case they're already IDs)
+  
+  // Russian labels to IDs
+  'Однокомнатная': 'studio',
+  'Однокомнатная квартира': 'studio',
+  'Студия': 'studio',
+  'Студио': 'studio',
+  'Двухкомнатная': 'one-bedroom',
+  'Двухкомнатная квартира': 'one-bedroom',
+  'Трехкомнатная': 'two-bedroom',
+  'Трехкомнатная квартира': 'two-bedroom',
+  'Многокомнатная': 'multi-bedroom',
+  'Многокомнатная квартира': 'multi-bedroom',
+  'Мезонет': 'maisonette',
+  'Ателье': 'atelier',
+  'Студия/Ателье': 'atelier',
+  'Мансарда': 'attic',
+  'Чердак': 'attic',
+  
+  // English labels to IDs (case-insensitive handling)
+  'Studio': 'studio',
   'studio': 'studio',
+  'One Bedroom': 'one-bedroom',
   'one-bedroom': 'one-bedroom',
+  'one bedroom': 'one-bedroom',
+  '1-bedroom': 'one-bedroom',
+  '1 bedroom': 'one-bedroom',
+  'Two Bedroom': 'two-bedroom',
   'two-bedroom': 'two-bedroom',
+  'two bedroom': 'two-bedroom',
+  '2-bedroom': 'two-bedroom',
+  '2 bedroom': 'two-bedroom',
+  'Multi Bedroom': 'multi-bedroom',
   'multi-bedroom': 'multi-bedroom',
+  'multi bedroom': 'multi-bedroom',
+  'Maisonette': 'maisonette',
   'maisonette': 'maisonette',
+  'Atelier': 'atelier',
   'atelier': 'atelier',
+  'Attic': 'attic',
   'attic': 'attic',
+  
+  // German labels to IDs
+  'Einzimmerwohnung': 'studio',
+  'Studio': 'studio',
+  'Zweizimmerwohnung': 'one-bedroom',
+  '2-Zimmer-Wohnung': 'one-bedroom',
+  'Dreizimmerwohnung': 'two-bedroom',
+  '3-Zimmer-Wohnung': 'two-bedroom',
+  'Mehrzimmerwohnung': 'multi-bedroom',
+  'Maisonette': 'maisonette',
+  'Atelier': 'atelier',
+  'Dachgeschoss': 'attic',
+  'Dachwohnung': 'attic',
+  
+  // Common variations and aliases
+  '1-room': 'studio',
+  '1 room': 'studio',
+  '2-room': 'one-bedroom',
+  '2 room': 'one-bedroom',
+  '3-room': 'two-bedroom',
+  '3 room': 'two-bedroom',
+  '4+ room': 'multi-bedroom',
+  '4+room': 'multi-bedroom',
+  
+  // Common typos (for backward compatibility with existing database entries)
+  'one-bedrrom': 'one-bedroom', // typo: double 'r'
+  'one-bedrom': 'one-bedroom', // typo: missing 'o'
+  'one-bedromm': 'one-bedroom', // typo: double 'm'
+  'mult-bedroom': 'multi-bedroom', // typo: missing 'i'
+  'multi-bedrom': 'multi-bedroom', // typo: missing 'o'
+  'multi-bedrrom': 'multi-bedroom', // typo: double 'r'
 };
 
 /**
- * Maps English IDs to Bulgarian labels
- * Used for backward compatibility when searching database
+ * Maps English IDs to labels in all supported languages
+ * Used for displaying subtypes in the UI based on current language
  */
-const SUBTYPE_ID_TO_LABEL_MAP: Record<string, string> = {
-  'studio': 'Едностаен',
-  'one-bedroom': 'Двустаен',
-  'two-bedroom': 'Тристаен',
-  'multi-bedroom': 'Многостаен',
-  'maisonette': 'Мезонет',
-  'atelier': 'Ателие/Студио',
-  'attic': 'Таван',
+const SUBTYPE_ID_TO_LABEL_MAP: Record<string, Record<string, string>> = {
+  'studio': {
+    'bg': 'Едностаен',
+    'en': 'Studio',
+    'ru': 'Студия',
+    'de': 'Einzimmerwohnung',
+  },
+  'one-bedroom': {
+    'bg': 'Двустаен',
+    'en': 'One Bedroom',
+    'ru': 'Двухкомнатная',
+    'de': 'Zweizimmerwohnung',
+  },
+  'two-bedroom': {
+    'bg': 'Тристаен',
+    'en': 'Two Bedroom',
+    'ru': 'Трехкомнатная',
+    'de': 'Dreizimmerwohnung',
+  },
+  'multi-bedroom': {
+    'bg': 'Многостаен',
+    'en': 'Multi Bedroom',
+    'ru': 'Многокомнатная',
+    'de': 'Mehrzimmerwohnung',
+  },
+  'maisonette': {
+    'bg': 'Мезонет',
+    'en': 'Maisonette',
+    'ru': 'Мезонет',
+    'de': 'Maisonette',
+  },
+  'atelier': {
+    'bg': 'Ателие/Студио',
+    'en': 'Atelier',
+    'ru': 'Ателье',
+    'de': 'Atelier',
+  },
+  'attic': {
+    'bg': 'Таван',
+    'en': 'Attic',
+    'ru': 'Мансарда',
+    'de': 'Dachgeschoss',
+  },
 };
 
 /**
- * Converts subtype value (could be ID or Bulgarian label) to standardized English ID
+ * Converts subtype value (could be ID or label in any language) to standardized English ID
  * Always returns English IDs like 'studio', 'one-bedroom', 'two-bedroom', etc.
  * 
  * LANGUAGE-AGNOSTIC: This function ensures database consistency regardless of UI language.
  * - Filter components always send English IDs
  * - Admin forms send English IDs (from option.id)
- * - This function normalizes any Bulgarian labels (from old data) to English IDs
+ * - This function normalizes any labels (Bulgarian, Russian, English, German) to English IDs
  * - Database always stores English IDs for consistency
  * 
- * @param subtype - Subtype value from database or filter (could be ID or Bulgarian label)
+ * @param subtype - Subtype value from database or filter (could be ID or label in any language)
  * @returns Normalized subtype ID in English (e.g., 'studio', 'one-bedroom') or null
  * 
  * @example
- * normalizeSubtypeToId('Едностаен') // returns 'studio'
- * normalizeSubtypeToId('studio') // returns 'studio'
- * normalizeSubtypeToId('Двустаен') // returns 'one-bedroom'
+ * normalizeSubtypeToId('Едностаен') // returns 'studio' (Bulgarian)
+ * normalizeSubtypeToId('Однокомнатная') // returns 'studio' (Russian)
+ * normalizeSubtypeToId('studio') // returns 'studio' (English ID)
+ * normalizeSubtypeToId('Двустаен') // returns 'one-bedroom' (Bulgarian)
  */
 export function normalizeSubtypeToId(subtype: string | null | undefined): string | null {
   if (!subtype) return null;
   
-  // Check if it's already a valid English ID
-  const isValidId = VALID_APARTMENT_SUBTYPE_IDS.includes(subtype as any);
+  // Trim whitespace and normalize
+  const normalizedInput = subtype.trim();
+  
+  // Check if it's already a valid English ID (case-insensitive)
+  const lowerInput = normalizedInput.toLowerCase();
+  const isValidId = VALID_APARTMENT_SUBTYPE_IDS.some(id => id.toLowerCase() === lowerInput);
   if (isValidId) {
-    return subtype; // Already an English ID, return as-is
+    // Return the canonical English ID (preserve original casing format)
+    return VALID_APARTMENT_SUBTYPE_IDS.find(id => id.toLowerCase() === lowerInput) || normalizedInput;
   }
   
-  // Map Bulgarian label to English ID
-  const mappedId = SUBTYPE_LABEL_TO_ID_MAP[subtype];
-  if (mappedId) {
-    return mappedId; // Return the English ID
+  // Try exact match first (case-sensitive for proper language detection)
+  const exactMatch = SUBTYPE_LABEL_TO_ID_MAP[normalizedInput];
+  if (exactMatch) {
+    return exactMatch;
   }
   
-  // If no mapping found, return as-is (shouldn't happen in normal flow, but handles edge cases)
-  // In production, this should ideally log a warning
-  console.warn(`Unknown subtype value: "${subtype}". Expected English ID or Bulgarian label.`);
-  return subtype;
+  // Try case-insensitive match for English labels
+  const caseInsensitiveMatch = Object.entries(SUBTYPE_LABEL_TO_ID_MAP).find(
+    ([key]) => key.toLowerCase() === lowerInput
+  );
+  if (caseInsensitiveMatch) {
+    return caseInsensitiveMatch[1];
+  }
+  
+  // If no mapping found, log warning and return null
+  // This ensures we don't save invalid subtypes to the database
+  console.warn(
+    `Unknown subtype value: "${subtype}". Expected English ID or label in Bulgarian/Russian/English/German. ` +
+    `Valid IDs: ${VALID_APARTMENT_SUBTYPE_IDS.join(', ')}`
+  );
+  return null;
 }
 
 /**
@@ -105,20 +223,74 @@ export function normalizeSubtypesToIds(subtypes: string[]): string[] {
  * 
  * LANGUAGE-AGNOSTIC: Always receives English IDs, returns both English ID and Bulgarian label
  * for backward compatibility with old database entries that might have Bulgarian labels
+ * Also includes common typo variants to handle existing database entries with typos
  * 
  * @param normalizedId - Normalized subtype ID in English (e.g., 'one-bedroom')
- * @returns Array of possible values that should match in database (English ID + Bulgarian label if exists)
+ * @returns Array of possible values that should match in database (English ID + Bulgarian label + typo variants)
  */
 export function getSubtypeSearchValues(normalizedId: string): string[] {
-  const values = [normalizedId]; // Always include the ID itself
+  const values = new Set<string>();
+  
+  // Always include the normalized ID itself
+  values.add(normalizedId);
   
   // Add Bulgarian label if it exists (for backward compatibility)
-  const bulgarianLabel = SUBTYPE_ID_TO_LABEL_MAP[normalizedId];
-  if (bulgarianLabel) {
-    values.push(bulgarianLabel);
+  const labelMap = SUBTYPE_ID_TO_LABEL_MAP[normalizedId];
+  if (labelMap && labelMap['bg']) {
+    values.add(labelMap['bg']);
   }
   
-  return values;
+  // Add common typo variants for backward compatibility with existing database entries
+  // This handles cases where properties were saved with typos before normalization was implemented
+  const typoVariants: Record<string, string[]> = {
+    'one-bedroom': ['one-bedrrom', 'one-bedrom', 'one-bedromm'], // common typos
+    'multi-bedroom': ['mult-bedroom', 'multi-bedrom', 'multi-bedrrom'], // common typos
+    'two-bedroom': ['two-bedrom', 'two-bedrrom'], // common typos
+    'studio': ['studyo', 'studdio'], // common typos
+  };
+  
+  const typos = typoVariants[normalizedId];
+  if (typos) {
+    typos.forEach(typo => values.add(typo));
+  }
+  
+  return Array.from(values);
 }
+
+/**
+ * Converts an English subtype ID to a label in the specified language
+ * Used for displaying subtypes in the UI based on current language
+ * 
+ * @param subtypeId - English subtype ID (e.g., 'studio', 'one-bedroom')
+ * @param language - Language code ('bg', 'en', 'ru', 'de')
+ * @returns Translated label or the original ID if translation not found
+ * 
+ * @example
+ * getSubtypeLabel('studio', 'bg') // returns 'Едностаен'
+ * getSubtypeLabel('one-bedroom', 'ru') // returns 'Двухкомнатная'
+ * getSubtypeLabel('two-bedroom', 'en') // returns 'Two Bedroom'
+ */
+export function getSubtypeLabel(subtypeId: string | null | undefined, language: string = 'bg'): string {
+  if (!subtypeId) return '';
+  
+  // Normalize language code (handle 'en-US' -> 'en')
+  const lang = language.split('-')[0].toLowerCase();
+  
+  // Get label map for this subtype
+  const labelMap = SUBTYPE_ID_TO_LABEL_MAP[subtypeId];
+  if (labelMap && labelMap[lang]) {
+    return labelMap[lang];
+  }
+  
+  // Fallback to Bulgarian if language not found
+  if (labelMap && labelMap['bg']) {
+    return labelMap['bg'];
+  }
+  
+  // If no translation found, return the ID itself
+  return subtypeId;
+}
+
+
 
 

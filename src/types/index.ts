@@ -15,7 +15,10 @@ export type PropertyType =
   | 'buy-real-estates'
   | 'other-real-estates';
 
-export type PropertyStatus = 'for-sale' | 'for-rent' | 'sold' | 'rented';
+// PropertyStatus is kept for backward compatibility but is now derived from sale_or_rent
+// sale_or_rent: 'sale' -> status: 'for-sale'
+// sale_or_rent: 'rent' -> status: 'for-rent'
+export type PropertyStatus = 'for-sale' | 'for-rent';
 
 export type LocationType = 'urban' | 'mountain' | 'coastal';
 
@@ -47,7 +50,7 @@ export interface Property {
   rooms?: number;
   bathrooms?: number;
   subtype?: string;
-  floor?: number;
+  floor?: string;
   total_floors?: number;
   year_built?: number;
   images: PropertyImage[];

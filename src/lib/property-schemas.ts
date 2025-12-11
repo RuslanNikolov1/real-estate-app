@@ -29,6 +29,7 @@ import {
   ESTABLISHMENT_CONSTRUCTION_TYPES,
   ESTABLISHMENTS_LOCATION_TYPES,
   BUILDING_TYPES,
+  FLOOR_SPECIAL_OPTIONS,
 } from '@/features/map-filters/filters/constants';
 
 export type FieldType = 'text' | 'number' | 'select' | 'multi-select' | 'radio' | 'checkbox' | 'textarea';
@@ -626,6 +627,8 @@ export const BASE_PROPERTY_FIELDS: FieldConfig[] = [
       { id: 'for-sale', label: 'За продажба' },
       { id: 'for-rent', label: 'Под наем' },
     ],
+    // Note: This field is kept in the form for UI, but maps to sale_or_rent in the database
+    // sale_or_rent: 'sale' for 'for-sale', 'rent' for 'for-rent'
   },
   {
     key: 'price',
@@ -686,7 +689,7 @@ export function generatePropertySchema(type?: PropertyType) {
     title: z.string().min(1, 'errors.titleRequired'),
     description: z.string().min(1, 'errors.descriptionRequired'),
     type: z.enum(['apartment', 'house', 'villa', 'office', 'shop', 'warehouse', 'land', 'hotel', 'agricultural', 'garage', 'restaurant', 'replace-real-estates', 'buy-real-estates', 'other-real-estates']),
-    status: z.enum(['for-sale', 'for-rent']),
+    // status removed - using sale_or_rent instead (derived from status in forms)
     location_type: z.enum(['urban', 'mountain', 'coastal']),
     city: z.string().min(1, 'errors.cityRequired'),
     neighborhood: z.string().optional(),
@@ -695,7 +698,7 @@ export function generatePropertySchema(type?: PropertyType) {
     price_per_sqm: z.number().optional(),
     year_built: z.number().optional(),
     broker_name: z.string().optional(),
-    broker_title: z.string().optional(),
+    broker_title: z.string().min(1, 'Длъжността е задължителна'),
     broker_phone: z.string().optional(),
   });
 
@@ -703,7 +706,7 @@ export function generatePropertySchema(type?: PropertyType) {
     return baseSchema.extend({
       // Common optional fields
       rooms: z.number().optional(),
-      floor: z.number().optional(),
+      floor: z.enum(['basement', 'ground', 'first-residential', 'not-last', 'last', 'attic']).optional(),
       total_floors: z.number().optional(),
       construction_type: z.string().optional(),
       completion_status: z.string().optional(),
@@ -761,7 +764,7 @@ export function generatePropertySchema(type?: PropertyType) {
     extensions.rooms = z.number().optional();
   }
   if (!extensions.floor && (type === 'apartment' || type === 'office' || type === 'shop')) {
-    extensions.floor = z.number().optional();
+    extensions.floor = z.enum(['basement', 'ground', 'first-residential', 'not-last', 'last', 'attic']).optional();
   }
   if (!extensions.total_floors && type === 'apartment') {
     extensions.total_floors = z.number().optional();

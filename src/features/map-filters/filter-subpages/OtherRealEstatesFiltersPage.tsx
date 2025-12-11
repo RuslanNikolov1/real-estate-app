@@ -62,16 +62,17 @@ export function OtherRealEstatesFiltersPage({
         : setInternalLocationState;
     
     // Store current filter values
+    // Use undefined for numeric filters so they're not sent unless user explicitly sets them
     const filterValuesRef = useRef<Partial<OtherRealEstatesFiltersState>>({
         searchTerm: '',
         propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0,
-        priceFrom: 0,
-        priceTo: OTHER_REAL_ESTATES_PRICE_SLIDER_MAX,
-        pricePerSqmFrom: 0,
-        pricePerSqmTo: 0
+        priceFrom: undefined,
+        priceTo: undefined,
+        pricePerSqmFrom: undefined,
+        pricePerSqmTo: undefined
     });
 
     // Use keys to reset components on clear
@@ -150,10 +151,10 @@ export function OtherRealEstatesFiltersPage({
             neighborhoods: [],
             distance: 0,
             propertyId: '',
-            priceFrom: 0,
-            priceTo: OTHER_REAL_ESTATES_PRICE_SLIDER_MAX,
-            pricePerSqmFrom: 0,
-            pricePerSqmTo: 0
+            priceFrom: undefined,
+            priceTo: undefined,
+            pricePerSqmFrom: undefined,
+            pricePerSqmTo: undefined
         };
         
         // Reset components by changing key

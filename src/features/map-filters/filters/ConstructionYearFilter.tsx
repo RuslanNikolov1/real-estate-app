@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { CONSTRUCTION_FILTERS } from './constants';
 import { YEAR_SLIDER_MIN, YEAR_SLIDER_MAX } from './types';
 import type { ConstructionFilter } from './types';
@@ -23,18 +23,27 @@ export function ConstructionYearFilter({
     initialYearTo = YEAR_SLIDER_MAX,
     initialIsYearNotProvided = false
 }: ConstructionYearFilterProps) {
-    const [selectedTypes, setSelectedTypes] = useState<string[]>(initialSelectedTypes);
+    // For single selection, we only keep the first item or null
+    const [selectedType, setSelectedType] = useState<string | null>(initialSelectedTypes.length > 0 ? initialSelectedTypes[0] : null);
     const [yearFrom, setYearFrom] = useState(initialYearFrom);
     const [yearTo, setYearTo] = useState(initialYearTo);
     const [isYearNotProvided, setIsYearNotProvided] = useState(initialIsYearNotProvided);
 
+    // Sync state when initialSelectedTypes changes
+    useEffect(() => {
+        setSelectedType(initialSelectedTypes.length > 0 ? initialSelectedTypes[0] : null);
+    }, [initialSelectedTypes]);
+
     const handleConstructionToggle = useCallback((typeId: string) => {
-        setSelectedTypes((prev) => {
-            const updated = prev.includes(typeId)
-                ? prev.filter((id) => id !== typeId)
-                : [...prev, typeId];
-            onConstructionChange(updated);
-            return updated;
+        setSelectedType((prev) => {
+            // If clicking the same item, deselect it
+            if (prev === typeId) {
+                onConstructionChange([]);
+                return null;
+            }
+            // Otherwise, select the new item (single selection)
+            onConstructionChange([typeId]);
+            return typeId;
         });
     }, [onConstructionChange]);
 
@@ -70,7 +79,7 @@ export function ConstructionYearFilter({
                 <h4 className={styles.title}>Вид строителство</h4>
                 <div className={styles.constructionGrid}>
                     {CONSTRUCTION_FILTERS.map((type: ConstructionFilter) => {
-                        const isSelected = selectedTypes.includes(type.id);
+                        const isSelected = selectedType === type.id;
                         return (
                             <button
                                 key={type.id}

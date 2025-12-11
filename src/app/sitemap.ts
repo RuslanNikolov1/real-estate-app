@@ -131,7 +131,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // const properties = await getSupabaseAdminClient()
   //   .from('properties')
   //   .select('id, updated_at')
-  //   .eq('status', 'for-sale');
+  //   .eq('sale_or_rent', 'sale'); // Note: status column removed, using sale_or_rent instead
   //
   // const propertyRoutes: MetadataRoute.Sitemap = properties.data?.map((property) => ({
   //   url: `${baseUrl}/properties/${property.id}`,
