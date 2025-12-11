@@ -27,7 +27,7 @@ const mockFavoriteProperties: Property[] = [
     area: 95,
     rooms: 3,
     bathrooms: 2,
-    floor: 5,
+    floor: 'not-last',
     total_floors: 8,
     year_built: 2020,
     images: [
@@ -58,7 +58,7 @@ const mockFavoriteProperties: Property[] = [
     area: 350,
     rooms: 6,
     bathrooms: 4,
-    floor: 1,
+    floor: 'first-residential',
     total_floors: 2,
     year_built: 2019,
     images: [
@@ -89,7 +89,7 @@ const mockFavoriteProperties: Property[] = [
     area: 125,
     rooms: 4,
     bathrooms: 2,
-    floor: 6,
+    floor: 'not-last',
     total_floors: 10,
     year_built: 2022,
     images: [

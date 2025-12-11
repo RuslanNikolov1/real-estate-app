@@ -236,7 +236,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           area: 75,
           rooms: 2,
           bathrooms: 1,
-          floor: 4,
+          floor: 'not-last',
           total_floors: 6,
           images: [
             {
@@ -265,7 +265,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           area: 110,
           rooms: 3,
           bathrooms: 2,
-          floor: 2,
+          floor: 'not-last',
           total_floors: 5,
           images: [
             {
@@ -294,7 +294,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           area: 55,
           rooms: 1,
           bathrooms: 1,
-          floor: 1,
+          floor: 'ground',
           total_floors: 4,
           images: [
             {
@@ -323,7 +323,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           area: 130,
           rooms: 4,
           bathrooms: 3,
-          floor: 8,
+          floor: 'last',
           total_floors: 8,
           images: [
             {

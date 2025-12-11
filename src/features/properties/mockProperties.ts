@@ -16,7 +16,7 @@ export const mockProperties: Property[] = [
     area: 95,
     rooms: 3,
     bathrooms: 2,
-    floor: 5,
+    floor: 'not-last',
     total_floors: 8,
     year_built: 2020,
     images: [
@@ -47,7 +47,7 @@ export const mockProperties: Property[] = [
     area: 180,
     rooms: 5,
     bathrooms: 3,
-    floor: 1,
+    floor: 'first-residential',
     total_floors: 2,
     year_built: 2015,
     images: [
@@ -78,7 +78,7 @@ export const mockProperties: Property[] = [
     area: 65,
     rooms: 2,
     bathrooms: 1,
-    floor: 3,
+    floor: 'not-last',
     total_floors: 5,
     year_built: 2018,
     images: [
@@ -109,7 +109,7 @@ export const mockProperties: Property[] = [
     area: 350,
     rooms: 6,
     bathrooms: 4,
-    floor: 1,
+    floor: 'first-residential',
     total_floors: 2,
     year_built: 2019,
     images: [
@@ -140,7 +140,7 @@ export const mockProperties: Property[] = [
     area: 120,
     rooms: 4,
     bathrooms: 1,
-    floor: 2,
+    floor: 'not-last',
     total_floors: 6,
     year_built: 2021,
     images: [
@@ -171,7 +171,7 @@ export const mockProperties: Property[] = [
     area: 45,
     rooms: 1,
     bathrooms: 1,
-    floor: 1,
+    floor: 'ground',
     total_floors: 3,
     year_built: 2010,
     images: [
@@ -202,7 +202,7 @@ export const mockProperties: Property[] = [
     area: 160,
     rooms: 4,
     bathrooms: 2,
-    floor: 1,
+    floor: 'first-residential',
     total_floors: 2,
     year_built: 2012,
     images: [
@@ -233,7 +233,7 @@ export const mockProperties: Property[] = [
     area: 35,
     rooms: 1,
     bathrooms: 1,
-    floor: 2,
+    floor: 'not-last',
     total_floors: 4,
     year_built: 2015,
     images: [
@@ -264,7 +264,7 @@ export const mockProperties: Property[] = [
     area: 500,
     rooms: 0,
     bathrooms: 1,
-    floor: 1,
+    floor: 'ground',
     total_floors: 1,
     year_built: 2008,
     images: [
@@ -295,7 +295,7 @@ export const mockProperties: Property[] = [
     area: 125,
     rooms: 4,
     bathrooms: 2,
-    floor: 6,
+    floor: 'not-last',
     total_floors: 10,
     year_built: 2022,
     images: [
