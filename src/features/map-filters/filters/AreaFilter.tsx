@@ -81,7 +81,6 @@ export function AreaFilter({
         setAreaTo(preset.to);
         setSelectedPresetId(preset.id);
         setIsNotProvided(false);
-        setHasUserInteracted(true);
         onFilterChange(preset.from, preset.to, false);
         if (onPresetChange) {
             onPresetChange(preset.id);
