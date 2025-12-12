@@ -111,7 +111,12 @@
     "addAtLeastOneImage": "Bitte fügen Sie mindestens ein Bild hinzu",
     "neighborhoodRequired": "Bitte wählen Sie einen Stadtteil",
     "brokerNameAndPhoneRequired": "Maklername und Telefon sind erforderlich",
-    "firstImagePreviewNote": "Das erste Bild wird als Vorschau und Hauptbild auf der Immobilienseite verwendet."
+    "firstImagePreviewNote": "Das erste Bild wird als Vorschau und Hauptbild auf der Immobilienseite verwendet.",
+    "floorRequired": "Etage ist erforderlich",
+    "yearBuiltRequired": "Baujahr ist erforderlich",
+    "constructionRequired": "Konstruktion ist erforderlich",
+    "completionStatusRequired": "Fertigstellungsgrad ist erforderlich",
+    "atLeastOneFeatureRequired": "Bitte wählen Sie mindestens eine Funktion aus"
   }
 }
 

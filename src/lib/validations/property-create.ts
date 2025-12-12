@@ -31,6 +31,7 @@ export const createPropertySchema = z.object({
   price_per_sqm: z.coerce.number().optional(),
   floor: z.coerce.number().int().optional(),
   total_floors: z.coerce.number().int().optional(),
+  yard_area: z.coerce.number().optional(),
 
   // Локация
   city: z.string().min(1, 'Градът е задължителен'),

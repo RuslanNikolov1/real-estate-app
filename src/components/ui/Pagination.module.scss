@@ -1,0 +1,82 @@
+@use '@/styles/variables' as *;
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
+  padding: $spacing-lg 0;
+  flex-wrap: wrap;
+
+  @media (max-width: $breakpoint-md) {
+    gap: $spacing-sm;
+    padding: $spacing-md 0;
+  }
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-md;
+  font-size: 0.9rem;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-xs $spacing-sm;
+    font-size: 0.85rem;
+  }
+}
+
+.pageNumbers {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.pageButton {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 $spacing-sm;
+  border: 1px solid $light-gray;
+  background: $white;
+  color: $black;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all $transition-base;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover:not(.active) {
+    background: $light-gray;
+    border-color: $medium-gray;
+  }
+
+  &.active {
+    background: $dark-red;
+    color: $white;
+    border-color: $dark-red;
+    font-weight: 600;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    min-width: 36px;
+    height: 36px;
+    font-size: 0.85rem;
+    padding: 0 $spacing-xs;
+  }
+}
+
+.ellipsis {
+  padding: 0 $spacing-xs;
+  color: $medium-gray;
+  font-weight: 500;
+  user-select: none;
+}

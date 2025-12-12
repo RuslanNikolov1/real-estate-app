@@ -122,7 +122,7 @@ export const PROPERTY_SCHEMAS: Record<PropertyType, PropertyTypeSchema> = {
     fields: [
       {
         key: 'subtype',
-        label: 'Етажност',
+        label: 'Подтип',
         type: 'select',
         required: false,
         options: excludeAll(HOUSE_TYPES).map(t => ({ id: t.id, label: t.label })),
@@ -152,7 +152,7 @@ export const PROPERTY_SCHEMAS: Record<PropertyType, PropertyTypeSchema> = {
     fields: [
       {
         key: 'subtype',
-        label: 'Етажност',
+        label: 'Подтип',
         type: 'select',
         required: false,
         options: excludeAll(HOUSE_TYPES).map(t => ({ id: t.id, label: t.label })),
@@ -727,6 +727,11 @@ export function generatePropertySchema(type?: PropertyType) {
 
   // Add fields based on schema
   typeSchema.fields.forEach(field => {
+    // Skip floor field - it's handled separately below
+    if (field.key === 'floor') {
+      return;
+    }
+    
     switch (field.type) {
       case 'number':
         if (field.required) {
@@ -763,8 +768,17 @@ export function generatePropertySchema(type?: PropertyType) {
   if (!extensions.rooms && type !== 'warehouse' && type !== 'land') {
     extensions.rooms = z.number().optional();
   }
-  if (!extensions.floor && (type === 'apartment' || type === 'office' || type === 'shop')) {
-    extensions.floor = z.enum(['basement', 'ground', 'first-residential', 'not-last', 'last', 'attic']).optional();
+  // Always override floor field for apartment, office, shop to accept strings (from select dropdown)
+  if (type === 'apartment' || type === 'office' || type === 'shop') {
+    // Floor is optional - accept any value (string, empty string, undefined, null)
+    // Use union to explicitly allow all possible values
+    extensions.floor = z.union([
+      z.string(),
+      z.number(),
+      z.undefined(),
+      z.null(),
+      z.literal('')
+    ]).optional();
   }
   if (!extensions.total_floors && type === 'apartment') {
     extensions.total_floors = z.number().optional();

@@ -164,14 +164,20 @@
   font-style: italic;
   z-index: 5;
   padding: $spacing-md $spacing-xl $spacing-xs $spacing-xl;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  width: auto;
+  white-space: nowrap;
 
   // curved element behind the text
   &::after {
     content: '';
     position: absolute;
     bottom: -3px;
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%);
     width: 21vw;
     height: 50px;
     background: $black;

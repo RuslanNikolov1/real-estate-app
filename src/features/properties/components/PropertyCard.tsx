@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
 import { getSubtypeLabel } from '@/lib/subtype-mapper';
+import { getFloorLabel } from '@/lib/floor-options';
 import styles from './PropertyCard.module.scss';
 
 interface PropertyCardProps {
@@ -139,7 +140,7 @@ export function PropertyCard({ property, onClick, onDelete, onEdit }: PropertyCa
             {property.floor && (
               <div className={styles.detail}>
                 <span>
-                  {property.floor}/{property.total_floors} етаж
+                  {getFloorLabel(String(property.floor))}
                 </span>
               </div>
             )}

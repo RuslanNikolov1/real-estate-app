@@ -25,6 +25,7 @@ import { BuyRealEstatesFiltersPage, BuyRealEstatesFiltersState } from './filter-
 import { OtherRealEstatesFiltersPage, OtherRealEstatesFiltersState } from './filter-subpages/OtherRealEstatesFiltersPage';
 import { MapComponent } from './MapComponent';
 import { PropertyCard } from '@/features/properties/components/PropertyCard';
+import { Pagination } from '@/components/ui/Pagination';
 import { MapPin } from '@phosphor-icons/react';
 import type { Property } from '@/types';
 
@@ -140,6 +141,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                         })
                         .then((data: Property[]) => {
                             setFilteredProperties(data);
+                            setCurrentPage(1); // Reset to first page when restoring filters
                         })
                         .catch(error => {
                             console.error('Error fetching properties:', error);
@@ -278,6 +280,8 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
     const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
     const [isLoadingProperties, setIsLoadingProperties] = useState(false);
     const [propertiesError, setPropertiesError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     // State to track whether to show map or listings
     const [showListings, setShowListings] = useState(() => {
@@ -510,6 +514,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         setIsLoadingPropertyById(false);
         setFilteredProperties([]);
         setPropertiesError(null);
+        setCurrentPage(1); // Reset to first page when searching
 
         if (filters && 'propertyId' in filters && filters.propertyId && filters.propertyId.trim()) {
             const shortId = filters.propertyId.trim();
@@ -580,7 +585,30 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
             : baseRoute;
         router.push(currentPath);
         setShowListings(false);
+        setCurrentPage(1); // Reset to first page when going back to map
     }, [selectedPropertyType, router, baseRoute]);
+
+    // Calculate pagination for filtered properties
+    const totalPages = useMemo(() => {
+        if (selectedPropertyById) return 1;
+        return Math.ceil(filteredProperties.length / itemsPerPage);
+    }, [filteredProperties.length, selectedPropertyById, itemsPerPage]);
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedProperties = useMemo(() => {
+        if (selectedPropertyById) return [selectedPropertyById];
+        return filteredProperties.slice(startIndex, endIndex);
+    }, [filteredProperties, startIndex, endIndex, selectedPropertyById]);
+
+    const handlePageChange = useCallback((page: number) => {
+        setCurrentPage(page);
+        // Scroll to top of listings
+        const listingsElement = document.querySelector(`.${styles.propertyListings}`);
+        if (listingsElement) {
+            listingsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, []);
 
     // Filter property types for rent/search route
     const availablePropertyTypes = useMemo(() => {
@@ -715,7 +743,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                             ) : filteredProperties.length === 0 ? (
                                                 <p className={styles.noResults}>Няма намерени имоти с избраните филтри</p>
                                             ) : (
-                                                filteredProperties.map((property) => (
+                                                paginatedProperties.map((property) => (
                                                     <PropertyCard
                                                         key={property.id}
                                                         property={property}
@@ -723,6 +751,13 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                                                 ))
                                             )}
                                         </div>
+                                        {!selectedPropertyById && !isLoadingPropertyById && !propertyByIdError && !isLoadingProperties && !propertiesError && filteredProperties.length > 0 && totalPages > 1 && (
+                                            <Pagination
+                                                currentPage={currentPage}
+                                                totalPages={totalPages}
+                                                onPageChange={handlePageChange}
+                                            />
+                                        )}
                                     </div>
                                 ) : (
                                     <MapComponent

@@ -29,6 +29,7 @@ import { PropertyCard } from './components/PropertyCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { getSubtypeLabel as getSubtypeLabelTranslated } from '@/lib/subtype-mapper';
+import { getFloorLabel } from '@/lib/floor-options';
 import {
   APARTMENT_FEATURE_FILTERS,
   HOUSE_FEATURES,
@@ -477,14 +478,25 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   };
 
   const getSubtypeLabel = () => {
-    if (!property.subtype) return 'Не е посочено';
-
-    // For apartments, use the translation function
-    if (property.type === 'apartment') {
-      return getSubtypeLabelTranslated(property.subtype, currentLanguage) || property.subtype;
+    if (!property.subtype) {
+      // Translate "Not specified" based on language
+      const notSpecifiedMap: Record<string, string> = {
+        'bg': 'Не е посочено',
+        'en': 'Not Specified',
+        'ru': 'Не указано',
+        'de': 'Nicht angegeben',
+      };
+      return notSpecifiedMap[currentLanguage] || notSpecifiedMap['bg'];
     }
 
-    // For other property types, fall back to the original logic
+    // Use the translation function for all property types
+    const translated = getSubtypeLabelTranslated(property.subtype, currentLanguage);
+    // If translation found (and it's not just the ID itself), use it
+    if (translated && translated !== property.subtype && translated !== '') {
+      return translated;
+    }
+    
+    // If translation returned empty or the ID itself, try fallback to constants
     let options:
       | { id: string; label: string }[]
       | undefined;
@@ -744,7 +756,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     <div className={styles.detailBox}>
                       <Buildings size={24} />
                       <div className={styles.detailValue}>
-                        {property.total_floors ? `${property.floor}/${property.total_floors} етаж` : `${property.floor} етаж`}
+                        {getFloorLabel(String(property.floor))}
                       </div>
                     </div>
                   )}

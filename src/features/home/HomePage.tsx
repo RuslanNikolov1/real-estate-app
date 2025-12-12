@@ -1,11 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { AnimatePresence } from 'framer-motion';
 import { PropertySearch } from './components/PropertySearch';
-import { PropertiesListView } from './components/PropertiesListView';
 import { BurgasSlideshow } from './components/BurgasSlideshow';
 import { FeaturedProperties } from './components/FeaturedProperties';
 import { SellYourProperty } from './components/SellYourProperty';
@@ -19,11 +16,6 @@ import styles from './HomePage.module.scss';
 
 export function HomePage() {
   const { t } = useTranslation();
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [selectedPropertyView, setSelectedPropertyView] = useState<{
-    mode: 'sales' | 'rent';
-    typeId: string;
-  } | null>(null);
 
   // Mock data - replace with actual API calls
   const mockSlides = [
@@ -80,15 +72,6 @@ export function HomePage() {
 
   return (
     <div className={styles.homePage}>
-      <AnimatePresence>
-        {selectedPropertyView && (
-          <PropertiesListView
-            mode={selectedPropertyView.mode}
-            propertyTypeId={selectedPropertyView.typeId}
-            onClose={() => setSelectedPropertyView(null)}
-          />
-        )}
-      </AnimatePresence>
       <Header />
       <main>
         {/* Hero Section with Background Image */}
@@ -109,14 +92,7 @@ export function HomePage() {
               {t('home.subtitle')}
             </p>
             <div className={styles.searchWrapper}>
-              <PropertySearch
-                isExpanded={isSearchExpanded}
-                onExpand={() => setIsSearchExpanded(!isSearchExpanded)}
-                onPropertyTypeSelect={(mode, typeId) => {
-                  setSelectedPropertyView({ mode, typeId });
-                  setIsSearchExpanded(false);
-                }}
-              />
+              <PropertySearch />
             </div>
           </div>
           <div className={styles.tagline}>

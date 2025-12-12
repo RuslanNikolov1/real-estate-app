@@ -287,6 +287,36 @@ export function AddPropertyPage() {
       return;
     }
 
+    // Validate floor (required for apartments, offices, shops)
+    if (showFloor && !floor) {
+      setSubmitError(t('errors.floorRequired'));
+      return;
+    }
+
+    // Validate year built (required)
+    if (!yearBuilt || !yearBuilt.trim()) {
+      setSubmitError(t('errors.yearBuiltRequired'));
+      return;
+    }
+
+    // Validate construction type (required when shown)
+    if (showConstruction && (!selectedConstruction || selectedConstruction.trim() === '')) {
+      setSubmitError(t('errors.constructionRequired'));
+      return;
+    }
+
+    // Validate completion status (required when shown)
+    if (showCompletion && (!selectedCompletion || selectedCompletion.trim() === '')) {
+      setSubmitError(t('errors.completionStatusRequired'));
+      return;
+    }
+
+    // Validate features (at least one required)
+    if (selectedFeatures.length === 0) {
+      setSubmitError(t('errors.atLeastOneFeatureRequired'));
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -308,7 +338,8 @@ export function AddPropertyPage() {
         formData.append('price_per_sqm', resolvedPricePerSqm);
       }
 
-      if (floor) {
+      // Floor is required for apartments, offices, shops
+      if (showFloor) {
         formData.append('floor', floor);
       }
 
@@ -318,15 +349,16 @@ export function AddPropertyPage() {
       formData.append('title', trimmedTitle);
       formData.append('description', trimmedDescription);
 
-      if (yearBuilt) {
-        formData.append('build_year', yearBuilt);
-      }
+      // Year built is required
+      formData.append('build_year', yearBuilt);
 
-      if (selectedConstruction) {
+      // Construction type is required when shown
+      if (showConstruction && selectedConstruction) {
         formData.append('construction_type', selectedConstruction);
       }
 
-      if (selectedCompletion) {
+      // Completion status is required when shown
+      if (showCompletion && selectedCompletion) {
         formData.append('completion_degree', selectedCompletion);
       }
 
@@ -441,12 +473,13 @@ export function AddPropertyPage() {
     <div className={styles.page}>
       <Header />
       <main className={styles.main}>
-        <div className={styles.breadcrumbs}>
-          <Link href="/admin/properties">Имоти</Link>
-          <span>/</span>
-          <span>Конфигуратор</span>
-        </div>
-        <div className={styles.panel}>
+        <div className={styles.container}>
+          <div className={styles.breadcrumbs}>
+            <Link href="/admin/properties">Имоти</Link>
+            <span>/</span>
+            <span>Конфигуратор</span>
+          </div>
+          <div className={styles.panel}>
           <div className={styles.panelHeader}>
             <div>
               <h1 className={styles.title}>Добави имот</h1>
@@ -516,9 +549,7 @@ export function AddPropertyPage() {
                 {typeSchema.subtypeOptions.length > 0 && (
                   <div className={styles.selectWrapper}>
                     <label className={styles.label}>
-                      {selectedType === 'house'
-                        ? 'Етажност'
-                        : 'Подтип'} *
+                      Подтип *
                     </label>
                     <select
                       value={subtype}
@@ -574,11 +605,12 @@ export function AddPropertyPage() {
               {/* Floor Options - only for apartments, offices, shops */}
               {showFloor && (
                 <div className={styles.selectWrapper}>
-                  <label className={styles.label}>Етаж</label>
+                  <label className={styles.label}>Етаж *</label>
                   <select
                     value={floor}
                     onChange={(e) => setFloor(e.target.value)}
                     className={styles.select}
+                    required
                   >
                     <option value="">Изберете етаж</option>
                     {FLOOR_SPECIAL_OPTIONS.map((option) => (
@@ -700,22 +732,24 @@ export function AddPropertyPage() {
             <div className={styles.filtersRow}>
               {/* Year built - shown for all property types */}
               <div className={styles.control}>
-                <label>Година на строеж</label>
+                <label>Година на строеж *</label>
                 <Input
                   type="number"
                   placeholder="2024"
                   value={yearBuilt}
                   onChange={(event) => setYearBuilt(event.target.value)}
+                  required
                 />
               </div>
               {/* Construction Type - only if in schema */}
               {showConstruction && (
                 <div className={styles.control}>
-                  <label>Конструкция</label>
+                  <label>Конструкция *</label>
                   <select
                     value={selectedConstruction}
                     onChange={(e) => setSelectedConstruction(e.target.value)}
                     className={styles.select}
+                    required
                   >
                     <option value="">Изберете</option>
                     {(() => {
@@ -732,11 +766,12 @@ export function AddPropertyPage() {
               {/* Completion Status - only if in schema */}
               {showCompletion && (
                 <div className={styles.control}>
-                  <label>Степен на завършеност</label>
+                  <label>Степен на завършеност *</label>
                   <select
                     value={selectedCompletion}
                     onChange={(e) => setSelectedCompletion(e.target.value)}
                     className={styles.select}
+                    required
                   >
                     <option value="">Изберете</option>
                     {COMPLETION_STATUSES.map((status) => (
@@ -870,7 +905,7 @@ export function AddPropertyPage() {
           {/* Features section - dynamically rendered based on property type */}
           {featuresList.length > 0 && (
             <section className={styles.section}>
-              <h2>Особености</h2>
+              <h2>Особености <span className={styles.requiredMarker}>*</span></h2>
               <div className={styles.featuresGrid}>
                 {featuresList.map((feature) => (
                   <button
@@ -975,6 +1010,7 @@ export function AddPropertyPage() {
               Отказ
             </Link>
           </div>
+        </div>
         </div>
       </main>
       <Footer />

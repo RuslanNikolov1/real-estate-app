@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { COMPLETION_STATUSES } from './constants';
 import type { CompletionStatus } from './types';
 import styles from './CompletionStatusFilter.module.scss';
@@ -11,33 +11,42 @@ interface CompletionStatusFilterProps {
 }
 
 export function CompletionStatusFilter({ onFilterChange, initialSelected = [] }: CompletionStatusFilterProps) {
-    // For single selection, we only keep the first item or null
-    const [selectedStatus, setSelectedStatus] = useState<string | null>(initialSelected.length > 0 ? initialSelected[0] : null);
+    // For multiple selection, keep an array of selected statuses
+    const [selectedStatuses, setSelectedStatuses] = useState<string[]>(initialSelected);
 
     // Sync state when initialSelected changes
     useEffect(() => {
-        setSelectedStatus(initialSelected.length > 0 ? initialSelected[0] : null);
+        setSelectedStatuses(initialSelected);
     }, [initialSelected]);
 
+    // Sync filter changes to parent when selectedStatuses changes (but not on initial mount)
+    const isInitialMount = useRef(true);
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        // Update parent filter state when selection changes
+        onFilterChange(selectedStatuses);
+    }, [selectedStatuses, onFilterChange]);
+
     const handleToggle = useCallback((statusId: string) => {
-        setSelectedStatus((prev) => {
+        setSelectedStatuses((prev) => {
             // If clicking the same item, deselect it
-            if (prev === statusId) {
-                onFilterChange([]);
-                return null;
+            if (prev.includes(statusId)) {
+                return prev.filter(id => id !== statusId);
             }
-            // Otherwise, select the new item (single selection)
-            onFilterChange([statusId]);
-            return statusId;
+            // Otherwise, add the new item (multiple selection)
+            return [...prev, statusId];
         });
-    }, [onFilterChange]);
+    }, []);
 
     return (
         <div className={styles.completionFilter}>
             <h4 className={styles.featuresTitle}>Степен на завършеност</h4>
             <div className={styles.constructionGrid}>
                 {COMPLETION_STATUSES.map((status: CompletionStatus) => {
-                    const isSelected = selectedStatus === status.id;
+                    const isSelected = selectedStatuses.includes(status.id);
                     return (
                         <button
                             key={status.id}

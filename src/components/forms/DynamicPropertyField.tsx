@@ -63,6 +63,7 @@ export function DynamicPropertyField({
             className={styles.select}
             value={value || ''}
             onChange={(e) => setValue(field.key, e.target.value)}
+            required={field.required}
           >
             <option value="">Изберете</option>
             {field.options?.map((option) => (

@@ -111,7 +111,12 @@
     "addAtLeastOneImage": "Please add at least one image",
     "neighborhoodRequired": "Please select a neighborhood",
     "brokerNameAndPhoneRequired": "Broker name and phone are required",
-    "firstImagePreviewNote": "The first image will be used as a preview and main image on the property page."
+    "firstImagePreviewNote": "The first image will be used as a preview and main image on the property page.",
+    "floorRequired": "Floor is required",
+    "yearBuiltRequired": "Year built is required",
+    "constructionRequired": "Construction is required",
+    "completionStatusRequired": "Completion status is required",
+    "atLeastOneFeatureRequired": "Please select at least one feature"
   }
 }
 

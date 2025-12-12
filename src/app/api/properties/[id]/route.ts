@@ -477,9 +477,12 @@ export async function PUT(
     // Handles subtypes in any language (Bulgarian, Russian, English, German) and converts to English IDs
     // Admin forms send English IDs (from option.id), but we normalize for safety and backward compatibility
     // This ensures database always stores English IDs regardless of UI language or input format
+    // Note: normalizeSubtypeToId only works for apartment subtypes. For other types (house, villa, etc.),
+    // the subtype is already an English ID and should be passed through as-is.
     const subtypeValue = textFields.subtype || existingProperty.subtype;
+    const propertyType = textFields.type || existingProperty.type;
     const normalizedSubtype = subtypeValue 
-      ? normalizeSubtypeToId(subtypeValue) 
+      ? (propertyType === 'apartment' ? normalizeSubtypeToId(subtypeValue) : subtypeValue)
       : null;
 
     // Prepare update payload
@@ -490,7 +493,10 @@ export async function PUT(
       area_sqm: area,
       price: price,
       price_per_sqm: pricePerSqm,
-      floor: textFields.floor ? String(textFields.floor) : existingProperty.floor || null,
+      // Floor: if provided and not empty, use it; if empty string, clear it (set to null); otherwise keep existing
+      floor: textFields.floor !== undefined 
+        ? (textFields.floor === '' ? null : String(textFields.floor))
+        : (existingProperty.floor || null),
       total_floors: textFields.total_floors ? Number(textFields.total_floors) : existingProperty.total_floors || null,
       city: textFields.city || existingProperty.city,
       neighborhood: textFields.neighborhood || existingProperty.neighborhood || null,
@@ -510,10 +516,22 @@ export async function PUT(
     };
 
     // Add additional property-specific fields
+    // Map yard_area from form to yard_area_sqm in database
     if (textFields.yard_area !== undefined) {
-      updatePayload.yard_area = Number(textFields.yard_area);
-    } else if (existingProperty.yard_area !== undefined) {
-      updatePayload.yard_area = existingProperty.yard_area;
+      if (textFields.yard_area !== '' && textFields.yard_area !== null) {
+        const yardAreaValue = Number(textFields.yard_area);
+        if (!isNaN(yardAreaValue) && yardAreaValue > 0) {
+          updatePayload.yard_area_sqm = yardAreaValue;
+        } else {
+          updatePayload.yard_area_sqm = null;
+        }
+      } else {
+        // Empty string means clear the value
+        updatePayload.yard_area_sqm = null;
+      }
+    } else if (existingProperty.yard_area_sqm !== undefined && existingProperty.yard_area_sqm !== null) {
+      // If yard_area is not in textFields, keep existing value (don't modify)
+      updatePayload.yard_area_sqm = existingProperty.yard_area_sqm;
     }
     if (textFields.hotel_category) {
       updatePayload.hotel_category = textFields.hotel_category;
@@ -541,6 +559,16 @@ export async function PUT(
       updatePayload.bed_base = existingProperty.bed_base;
     }
 
+    // Ensure we never include yard_area (wrong column name) - only yard_area_sqm
+    // Also handle case where existingProperty might have yard_area (old column name)
+    if ('yard_area' in updatePayload) {
+      delete updatePayload.yard_area;
+    }
+    // If existingProperty has yard_area (old column), use it to set yard_area_sqm if not already set
+    if (existingProperty.yard_area && !updatePayload.yard_area_sqm && textFields.yard_area === undefined) {
+      updatePayload.yard_area_sqm = Number(existingProperty.yard_area) || null;
+    }
+
     // Update in Supabase
     const { data: updatedProperty, error: updateError } = await supabaseAdmin
       .from('properties')
@@ -552,6 +580,8 @@ export async function PUT(
     // If update fails, cleanup newly uploaded images
     if (updateError || !updatedProperty) {
       console.error('Supabase update error:', updateError);
+      console.error('Update payload:', JSON.stringify(updatePayload, null, 2));
+      console.error('Text fields:', textFields);
       
       // Cleanup newly uploaded images (not existing ones)
       if (newImagePublicIds.length > 0) {
@@ -561,10 +591,12 @@ export async function PUT(
         await deleteMultipleFromCloudinary([brokerImagePublicId]);
       }
 
+      const errorMessage = updateError?.message || updateError?.details || 'Unknown error';
       return NextResponse.json(
         {
           error: 'Failed to update property',
-          details: updateError?.message || 'Unknown error',
+          details: errorMessage,
+          supabaseError: updateError,
         },
         { status: 500 }
       );

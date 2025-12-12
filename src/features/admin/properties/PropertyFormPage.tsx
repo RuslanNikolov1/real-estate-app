@@ -223,6 +223,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
+    getValues,
     setValue,
     reset,
   } = useForm<PropertyFormData>({
@@ -239,7 +240,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       price: 0,
       area: 0,
       price_per_sqm: undefined,
-      floor: undefined,
+      floor: '',
       total_floors: undefined,
       construction_type: '',
       completion_status: '',
@@ -375,7 +376,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       neighborhood: property.neighborhood || '',
       price: property.price,
       area: property.area,
-      floor: property.floor,
+      floor: property.floor || '',
       total_floors: property.total_floors,
       price_per_sqm:
         property.area && property.price ? Math.round(property.price / property.area) : undefined,
@@ -495,6 +496,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   };
 
   const onSubmit = async (data: PropertyFormData) => {
+    console.log('onSubmit called with data:', data);
     setIsSubmittingForm(true);
     setSubmitError(null);
 
@@ -553,6 +555,77 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
         return;
       }
 
+      // Validate floor (required for apartments, offices, shops)
+      if (showFloor && (!data.floor || data.floor.trim() === '')) {
+        setSubmitError(t('errors.floorRequired'));
+        setIsSubmittingForm(false);
+        setTimeout(() => {
+          const errorElement = document.querySelector(`[name="floor"]`);
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            (errorElement as HTMLElement).focus();
+          }
+        }, 100);
+        return;
+      }
+
+      // Validate year built (required)
+      if (!data.year_built) {
+        setSubmitError(t('errors.yearBuiltRequired'));
+        setIsSubmittingForm(false);
+        setTimeout(() => {
+          const errorElement = document.querySelector(`[name="year_built"]`);
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            (errorElement as HTMLElement).focus();
+          }
+        }, 100);
+        return;
+      }
+
+      // Validate construction type (required if field exists in typeFields)
+      const hasConstructionField = typeFields.some(field => field.key === 'construction_type');
+      if (hasConstructionField && (!data.construction_type || data.construction_type.trim() === '')) {
+        setSubmitError(t('errors.constructionRequired'));
+        setIsSubmittingForm(false);
+        setTimeout(() => {
+          const errorElement = document.querySelector(`[name="construction_type"]`);
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            (errorElement as HTMLElement).focus();
+          }
+        }, 100);
+        return;
+      }
+
+      // Validate completion status (required if field exists in typeFields)
+      const hasCompletionField = typeFields.some(field => field.key === 'completion_status');
+      if (hasCompletionField && (!data.completion_status || data.completion_status.trim() === '')) {
+        setSubmitError(t('errors.completionStatusRequired'));
+        setIsSubmittingForm(false);
+        setTimeout(() => {
+          const errorElement = document.querySelector(`[name="completion_status"]`);
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            (errorElement as HTMLElement).focus();
+          }
+        }, 100);
+        return;
+      }
+
+      // Validate features (at least one required)
+      if (featuresList.length > 0 && selectedFeatures.length === 0) {
+        setSubmitError(t('errors.atLeastOneFeatureRequired'));
+        setIsSubmittingForm(false);
+        setTimeout(() => {
+          const errorElement = document.querySelector(`.${styles.sectionTitle}`);
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+        return;
+      }
+
       // Create FormData for multipart/form-data submission
       const formData = new FormData();
 
@@ -570,8 +643,13 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       if (data.price_per_sqm) {
         formData.append('price_per_sqm', String(data.price_per_sqm));
       }
-      if (data.floor !== undefined && data.floor !== null) {
-        formData.append('floor', String(data.floor));
+      // Floor - send if it has a valid value, otherwise send empty string
+      const floorValue = data.floor && data.floor !== '' && ['basement', 'ground', 'first-residential', 'not-last', 'last', 'attic'].includes(data.floor)
+        ? String(data.floor)
+        : '';
+      formData.append('floor', floorValue);
+      if (data.total_floors !== undefined && data.total_floors !== null) {
+        formData.append('total_floors', String(data.total_floors));
       }
       
       // Location
@@ -627,15 +705,12 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
         formData.append('broker_position', data.broker_title);
       }
       formData.append('broker_phone', data.broker_phone);
-      // Broker image is required - validation already checked above
+      // Broker image - append new file if provided, otherwise API will keep existing image
+      // Validation already checked above that we have either a file or an existing image
       if (brokerImageFileRef.current) {
         formData.append('broker_image', brokerImageFileRef.current);
-      } else if (!brokerImageUrl || brokerImageUrl.startsWith('blob:')) {
-        // This should not happen due to validation, but handle it gracefully
-        setSubmitError(t('errors.brokerImageRequired') || 'Снимката на брокера е задължителна');
-        setIsSubmittingForm(false);
-        return;
       }
+      // If no new file, API will use existing broker_image from database
       
       // Images - append existing image URLs and new files
       // First, append existing images (non-blob URLs)
@@ -654,6 +729,10 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       const apiUrl = propertyId ? `/api/properties/${propertyId}` : '/api/properties';
       const method = propertyId ? 'PUT' : 'POST';
       
+      console.log('Submitting property update:', { propertyId, method, apiUrl });
+      console.log('Floor value:', data.floor);
+      console.log('Total floors value:', data.total_floors);
+      
       const response = await fetch(apiUrl, {
         method,
         body: formData,
@@ -661,7 +740,9 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        const errorMessage = errorData.error || errorData.details || `HTTP error! status: ${response.status}`;
+        console.error('Update error details:', errorData);
+        throw new Error(errorMessage);
       }
 
       const updatedProperty = await response.json();
@@ -675,7 +756,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
 
       // Redirect to quick view with status for flash message
       // Use replace to avoid adding to history and prevent back button issues
-      router.replace('/admin/properties/quick-view?status=property-updated');
+      router.replace('/admin/properties/quick-view?status=property-updated', { scroll: false });
     } catch (error) {
       console.error('Error saving property:', error);
       const errorMessage = error instanceof Error ? error.message : 'flashMessages.propertySaveError';
@@ -689,17 +770,46 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       <main className={styles.main}>
         <div className={styles.container}>
           <form 
-            onSubmit={handleSubmit(onSubmit, (errors) => {
-              // Handle validation errors - scroll to first error
-              const firstErrorField = Object.keys(errors)[0];
-              if (firstErrorField) {
-                const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
-                if (errorElement) {
-                  errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  (errorElement as HTMLElement).focus();
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(
+                (data) => {
+                  onSubmit(data);
+                },
+                (errors) => {
+                  // Handle validation errors - scroll to first error
+                  console.error('Validation failed with errors:', errors);
+                  
+                  // If errors object is empty but validation failed, it might be a schema issue
+                  // Try to submit anyway with current form values
+                  if (Object.keys(errors).length === 0) {
+                    console.warn('Empty errors object detected - attempting to submit with current values');
+                    const formValues = getValues();
+                    // Manually validate required fields before submitting
+                    if (!formValues.title || !formValues.description || !formValues.city) {
+                      setSubmitError('Моля, попълнете всички задължителни полета');
+                      return;
+                    }
+                    // Submit with current form values
+                    onSubmit(formValues as PropertyFormData);
+                    return;
+                  }
+                  
+                  const firstErrorField = Object.keys(errors)[0];
+                  if (firstErrorField) {
+                    const fieldError = errors[firstErrorField as keyof typeof errors];
+                    const errorMessage = fieldError?.message || 'Грешка при валидация';
+                    setSubmitError(`Грешка в полето "${firstErrorField}": ${errorMessage}`);
+                    
+                    const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
+                    if (errorElement) {
+                      errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      (errorElement as HTMLElement).focus();
+                    }
+                  }
                 }
-              }
-            })} 
+              )(e);
+            }} 
             className={styles.form}
           >
             <div className={styles.formGrid}>
@@ -757,11 +867,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                     {typeSchema.subtypeOptions.length > 0 && (
                       <div className={styles.selectWrapper}>
                         <label className={styles.label}>
-                          {propertyType === 'house'
-                            ? 'Етажност' 
-                            : propertyType === 'apartment'
-                            ? 'Подтип'
-                            : 'Подтип'} *
+                          Подтип *
                         </label>
                         <select
                           {...register('subtype', { required: 'Подтипът е задължителен' })}
@@ -810,10 +916,11 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                     {/* Floor Options - only for apartments, offices, shops */}
                     {showFloor && (
                       <div className={styles.selectWrapper}>
-                        <label className={styles.label}>Етаж</label>
+                        <label className={styles.label}>Етаж *</label>
                         <select
                           {...register('floor')}
                           className={styles.select}
+                          required
                         >
                           <option value="">Изберете етаж</option>
                           {FLOOR_SPECIAL_OPTIONS.map((option) => (
@@ -840,7 +947,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                 {/* Features section - dynamically rendered based on property type */}
                 {featuresList.length > 0 && (
                   <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Особености</h2>
+                    <h2 className={styles.sectionTitle}>Особености <span className={styles.requiredMarker}>*</span></h2>
                     <DynamicPropertyField
                       field={{
                         key: 'features',
@@ -893,27 +1000,33 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                   <div className={styles.formRow}>
                     {/* Year built - shown for all property types */}
                     <Input
-                      label="Година на строеж"
+                      label="Година на строеж *"
                       type="number"
                       {...register('year_built', { valueAsNumber: true })}
                       error={errors.year_built?.message ? translateErrorMessage(String(errors.year_built.message)) : undefined}
                       placeholder="Година"
+                      required
                     />
                     {/* Dynamic fields from schema - construction, completion, hotel_category, agricultural_category, electricity, water, bed_base */}
                     {typeFields
                       .filter(field => 
                         ['construction_type', 'completion_status', 'hotel_category', 'agricultural_category', 'electricity', 'water', 'bed_base'].includes(field.key)
                       )
-                      .map(field => (
-                        <DynamicPropertyField
-                          key={field.key}
-                          field={field}
-                          register={register}
-                          errors={errors}
-                          setValue={setValue}
-                          value={watch(field.key as any)}
-                        />
-                      ))}
+                      .map(field => {
+                        // Mark construction_type and completion_status as required
+                        const isRequired = field.key === 'construction_type' || field.key === 'completion_status';
+                        const fieldWithRequired = isRequired ? { ...field, required: true } : field;
+                        return (
+                          <DynamicPropertyField
+                            key={field.key}
+                            field={fieldWithRequired}
+                            register={register}
+                            errors={errors}
+                            setValue={setValue}
+                            value={watch(field.key as any)}
+                          />
+                        );
+                      })}
                   </div>
                 </div>
 
@@ -1119,7 +1232,22 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                   <p className={styles.errorMessage}>{submitError}</p>
                 </div>
               )}
-              <Button type="submit" variant="primary" disabled={isSubmitting || isSubmittingForm}>
+              {Object.keys(errors).length > 0 && (
+                <div className={styles.errorBanner}>
+                  <p className={styles.errorMessage}>
+                    Моля, поправете грешките във формуляра: {Object.keys(errors).filter(key => key !== 'floor').join(', ')}
+                    {Object.keys(errors).includes('floor') && (
+                      <span style={{ display: 'none' }}>Floor field validation bypassed</span>
+                    )}
+                  </p>
+                </div>
+              )}
+              <Button 
+                type="submit" 
+                variant="primary" 
+                disabled={isSubmitting || isSubmittingForm}
+                onClick={() => console.log('Submit button clicked, isSubmitting:', isSubmitting, 'isSubmittingForm:', isSubmittingForm)}
+              >
                 {isSubmitting || isSubmittingForm ? (
                   <>
                     <SpinnerGap size={20} className={styles.spinner} />

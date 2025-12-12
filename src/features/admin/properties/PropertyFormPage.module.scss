@@ -14,9 +14,10 @@
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 80vw;
   margin: 0 auto;
   padding: 0 $spacing-lg;
+  position: relative;
 }
 
 .header {
@@ -47,8 +48,14 @@
 .form {
   background: $white;
   padding: $spacing-2xl;
+  padding-bottom: calc($spacing-2xl + 100px); // Extra padding for floating buttons
   border-radius: 24px; // Very rounded
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+
+  @media (max-width: $breakpoint-md) {
+    padding-bottom: calc($spacing-2xl + 120px); // More padding on mobile
+  }
 }
 
 .formGrid {
@@ -87,6 +94,12 @@
   font-family: $font-headline;
   padding-bottom: $spacing-md;
   border-bottom: 2px solid $light-gray;
+}
+
+.requiredMarker {
+  color: $dark-red;
+  margin-left: 0.125rem;
+  font-weight: 700;
 }
 
 .formRow {
@@ -224,15 +237,22 @@
 }
 
 .formActions {
+  position: fixed;
+  bottom: 1.5vw;
+  right: 15vw;
   display: flex;
-  justify-content: flex-end;
-  gap: $spacing-md;
-  margin-top: $spacing-2xl;
-  padding-top: $spacing-xl;
-  border-top: 2px solid $light-gray;
+  gap: $spacing-sm;
+  z-index: 1000;
+  background: $white;
+  padding: $spacing-sm $spacing-md;
+  border-radius: 24px;
   flex-wrap: wrap;
 
   @media (max-width: $breakpoint-md) {
+    bottom: 2vh;
+    right: 2vw;
+    left: 2vw;
+    width: auto;
     justify-content: stretch;
     
     button {

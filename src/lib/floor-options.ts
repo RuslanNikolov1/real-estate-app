@@ -10,7 +10,7 @@ export const FLOOR_OPTIONS: FloorOption[] = [
   { id: 'first-residential', label: 'Първи Жилищен', numericValue: 1 },
   { id: 'not-last', label: 'Непоследен', numericValue: 2 },
   { id: 'last', label: 'Последен', numericValue: 3 },
-  { id: 'attic', label: 'Мансарда/Таванско помещение', numericValue: 99 },
+  { id: 'attic', label: 'Таванско', numericValue: 99 },
 ];
 
 // Helper function to get floor option by ID

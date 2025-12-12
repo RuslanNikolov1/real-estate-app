@@ -159,6 +159,16 @@ export async function GET(request: NextRequest) {
         query = query.in('type', typeMapping[propertyTypeId]);
       }
       
+      // Also support direct type filter from filters object
+      if (filters.type && typeof filters.type === 'string') {
+        query = query.eq('type', filters.type);
+      }
+      
+      // Support types array filter
+      if (filters.types && Array.isArray(filters.types) && filters.types.length > 0) {
+        query = query.in('type', filters.types);
+      }
+      
       // Sale/Rent filter based on baseRoute (using sale_or_rent instead of status)
       if (baseRoute === '/sale/search') {
         query = query.eq('sale_or_rent', 'sale');
@@ -576,11 +586,14 @@ export async function POST(request: NextRequest) {
     // Handles subtypes in any language (Bulgarian, Russian, English, German) and converts to English IDs
     // Admin forms send English IDs (from option.id), but we normalize for safety and backward compatibility
     // This ensures database always stores English IDs regardless of UI language or input format
+    // Note: normalizeSubtypeToId only works for apartment subtypes. For other types (house, villa, etc.),
+    // the subtype is already an English ID and should be passed through as-is.
     const normalizedSubtype = validatedData.subtype 
-      ? normalizeSubtypeToId(validatedData.subtype) 
+      ? (validatedData.type === 'apartment' ? normalizeSubtypeToId(validatedData.subtype) : validatedData.subtype)
       : null;
 
     // Prepare payload for Supabase
+    // Map yard_area from form to yard_area_sqm in database
     const payload = {
       sale_or_rent: validatedData.sale_or_rent,
       type: validatedData.type,
@@ -590,6 +603,7 @@ export async function POST(request: NextRequest) {
       price_per_sqm: pricePerSqm,
       floor: validatedData.floor || null,
       total_floors: validatedData.total_floors || null,
+      yard_area_sqm: validatedData.yard_area || null,
       city: validatedData.city,
       neighborhood: validatedData.neighborhood,
       title: validatedData.title,

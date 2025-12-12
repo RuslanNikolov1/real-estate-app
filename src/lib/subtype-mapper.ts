@@ -101,6 +101,7 @@ const SUBTYPE_LABEL_TO_ID_MAP: Record<string, string> = {
  * Used for displaying subtypes in the UI based on current language
  */
 const SUBTYPE_ID_TO_LABEL_MAP: Record<string, Record<string, string>> = {
+  // Apartment subtypes
   'studio': {
     'bg': 'Едностаен',
     'en': 'Studio',
@@ -142,6 +143,222 @@ const SUBTYPE_ID_TO_LABEL_MAP: Record<string, Record<string, string>> = {
     'en': 'Attic',
     'ru': 'Мансарда',
     'de': 'Dachgeschoss',
+  },
+  // House/Villa subtypes (floor count)
+  'one-floor': {
+    'bg': 'Едноетажна',
+    'en': 'One Floor',
+    'ru': 'Одноэтажный',
+    'de': 'Ein Geschoss',
+  },
+  'two-floor': {
+    'bg': 'Двуетажна',
+    'en': 'Two Floor',
+    'ru': 'Двухэтажный',
+    'de': 'Zwei Geschosse',
+  },
+  'three-floor': {
+    'bg': 'Триетажна',
+    'en': 'Three Floor',
+    'ru': 'Трехэтажный',
+    'de': 'Drei Geschosse',
+  },
+  'four-plus-floor': {
+    'bg': 'Четириетажна+',
+    'en': 'Four+ Floor',
+    'ru': 'Четырехэтажный+',
+    'de': 'Vier+ Geschosse',
+  },
+  'house-floor': {
+    'bg': 'Етаж от сграда',
+    'en': 'Floor from Building',
+    'ru': 'Этаж здания',
+    'de': 'Geschoss aus Gebäude',
+  },
+  'not-specified': {
+    'bg': 'Не е посочено',
+    'en': 'Not Specified',
+    'ru': 'Не указано',
+    'de': 'Nicht angegeben',
+  },
+  // Commercial property types
+  'store': {
+    'bg': 'Магазин',
+    'en': 'Store',
+    'ru': 'Магазин',
+    'de': 'Geschäft',
+  },
+  'office': {
+    'bg': 'Офис',
+    'en': 'Office',
+    'ru': 'Офис',
+    'de': 'Büro',
+  },
+  'cabinet': {
+    'bg': 'Кабинет',
+    'en': 'Cabinet',
+    'ru': 'Кабинет',
+    'de': 'Praxis',
+  },
+  'beauty-salon': {
+    'bg': 'Салон за красота',
+    'en': 'Beauty Salon',
+    'ru': 'Салон красоты',
+    'de': 'Schönheitssalon',
+  },
+  'sport': {
+    'bg': 'Спорт',
+    'en': 'Sport',
+    'ru': 'Спорт',
+    'de': 'Sport',
+  },
+  'other': {
+    'bg': 'Друго',
+    'en': 'Other',
+    'ru': 'Другое',
+    'de': 'Andere',
+  },
+  // Hotel/Motel types
+  'hotel': {
+    'bg': 'Хотел',
+    'en': 'Hotel',
+    'ru': 'Отель',
+    'de': 'Hotel',
+  },
+  'family-hotel': {
+    'bg': 'Семеен хотел',
+    'en': 'Family Hotel',
+    'ru': 'Семейный отель',
+    'de': 'Familienhotel',
+  },
+  'resort': {
+    'bg': 'Почивна станция',
+    'en': 'Resort',
+    'ru': 'Курорт',
+    'de': 'Resort',
+  },
+  'hostel-pension': {
+    'bg': 'Хостел/Пансион',
+    'en': 'Hostel/Pension',
+    'ru': 'Хостел/Пансион',
+    'de': 'Hostel/Pension',
+  },
+  'motel': {
+    'bg': 'Мотели',
+    'en': 'Motel',
+    'ru': 'Мотель',
+    'de': 'Motel',
+  },
+  'lodge': {
+    'bg': 'Хижа',
+    'en': 'Lodge',
+    'ru': 'Хижина',
+    'de': 'Hütte',
+  },
+  'unspecified': {
+    'bg': 'Не е посочено',
+    'en': 'Unspecified',
+    'ru': 'Не указано',
+    'de': 'Nicht angegeben',
+  },
+  // Warehouse/Industrial types
+  'warehouse': {
+    'bg': 'Склад',
+    'en': 'Warehouse',
+    'ru': 'Склад',
+    'de': 'Lager',
+  },
+  'industrial-premise': {
+    'bg': 'Промишлено помещение',
+    'en': 'Industrial Premise',
+    'ru': 'Промышленное помещение',
+    'de': 'Industriegebäude',
+  },
+  'farm': {
+    'bg': 'Ферма',
+    'en': 'Farm',
+    'ru': 'Ферма',
+    'de': 'Bauernhof',
+  },
+  'factory': {
+    'bg': 'Фабрика',
+    'en': 'Factory',
+    'ru': 'Фабрика',
+    'de': 'Fabrik',
+  },
+  'service': {
+    'bg': 'Сервиз',
+    'en': 'Service',
+    'ru': 'Сервис',
+    'de': 'Service',
+  },
+  'car-wash': {
+    'bg': 'Автомивка',
+    'en': 'Car Wash',
+    'ru': 'Автомойка',
+    'de': 'Autowäsche',
+  },
+  'gas-station': {
+    'bg': 'Бензиностанция',
+    'en': 'Gas Station',
+    'ru': 'Заправка',
+    'de': 'Tankstelle',
+  },
+  'hall': {
+    'bg': 'Зала',
+    'en': 'Hall',
+    'ru': 'Зал',
+    'de': 'Halle',
+  },
+  // Garage types
+  'garage-standalone': {
+    'bg': 'Гараж (самостоятелен)',
+    'en': 'Garage (Standalone)',
+    'ru': 'Гараж (отдельный)',
+    'de': 'Garage (Eigenständig)',
+  },
+  'parking-space': {
+    'bg': 'Паркомясто',
+    'en': 'Parking Space',
+    'ru': 'Парковочное место',
+    'de': 'Parkplatz',
+  },
+  'whole-parking': {
+    'bg': 'Цял паркинг',
+    'en': 'Whole Parking',
+    'ru': 'Весь паркинг',
+    'de': 'Ganzer Parkplatz',
+  },
+  // Agricultural types
+  'forest': {
+    'bg': 'Гора',
+    'en': 'Forest',
+    'ru': 'Лес',
+    'de': 'Wald',
+  },
+  'agricultural-land': {
+    'bg': 'Земеделска земя',
+    'en': 'Agricultural Land',
+    'ru': 'Сельскохозяйственная земля',
+    'de': 'Landwirtschaftliche Fläche',
+  },
+  'vineyard': {
+    'bg': 'Лозе',
+    'en': 'Vineyard',
+    'ru': 'Виноградник',
+    'de': 'Weinberg',
+  },
+  'fruit-garden': {
+    'bg': 'Овощна градина',
+    'en': 'Fruit Garden',
+    'ru': 'Фруктовый сад',
+    'de': 'Obstgarten',
+  },
+  'pasture': {
+    'bg': 'Пасище',
+    'en': 'Pasture',
+    'ru': 'Пастбище',
+    'de': 'Weide',
   },
 };
 

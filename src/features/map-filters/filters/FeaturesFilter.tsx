@@ -30,19 +30,25 @@ export function FeaturesFilter({ onFilterChange, initialSelected = [], features 
         return features || APARTMENT_FEATURE_FILTERS;
     }, [features]);
 
+    // Sync filter changes to parent when selectedFeatures changes (but not on initial mount)
+    const isInitialMount = useRef(true);
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        // Update parent filter state when selection changes
+        onFilterChange(selectedFeatures);
+    }, [selectedFeatures, onFilterChange]);
+
     const handleFeatureToggle = useCallback((featureId: string) => {
         const nonAllFeatures = featureFilters.filter((feature) => feature.id !== 'all').map((feature) => feature.id);
 
         if (featureId === 'all') {
-            const hasAllSelected = nonAllFeatures.every((id) => selectedFeatures.includes(id));
-
-            if (hasAllSelected) {
-                setSelectedFeatures([]);
-                onFilterChange([]);
-            } else {
-                setSelectedFeatures(nonAllFeatures);
-                onFilterChange(nonAllFeatures);
-            }
+            setSelectedFeatures((prev) => {
+                const hasAllSelected = nonAllFeatures.every((id) => prev.includes(id));
+                return hasAllSelected ? [] : nonAllFeatures;
+            });
             return;
         }
 
@@ -53,14 +59,12 @@ export function FeaturesFilter({ onFilterChange, initialSelected = [], features 
             const hasAllSelected = nonAllFeatures.every((id) => updated.includes(id));
 
             if (hasAllSelected) {
-                onFilterChange(nonAllFeatures);
                 return nonAllFeatures;
             }
 
-            onFilterChange(updated);
             return updated;
         });
-    }, [featureFilters, selectedFeatures, onFilterChange]);
+    }, [featureFilters]);
 
     return (
         <div className={styles.featuresFilter}>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { FLOOR_SPECIAL_OPTIONS } from './constants';
 import type { FloorSpecialOption } from './types';
 import styles from './FloorFilter.module.scss';
@@ -27,37 +27,42 @@ export function FloorFilter({
         return floorOptions.filter(option => ALLOWED_FLOOR_OPTIONS.includes(option.id));
     }, [floorOptions]);
 
-    // For single selection, we only keep the first item or null
-    const [selectedOption, setSelectedOption] = useState<string | null>(
-        initialSpecialOptions.length > 0 ? initialSpecialOptions[0] : null
-    );
+    // For multiple selection, keep an array of selected options
+    const [selectedOptions, setSelectedOptions] = useState<string[]>(initialSpecialOptions);
 
     // Sync state when initialSpecialOptions changes
     useEffect(() => {
-        setSelectedOption(initialSpecialOptions.length > 0 ? initialSpecialOptions[0] : null);
+        setSelectedOptions(initialSpecialOptions);
     }, [initialSpecialOptions]);
 
+    // Sync filter changes to parent when selectedOptions changes (but not on initial mount)
+    const isInitialMount = useRef(true);
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        // Update parent filter state when selection changes
+        onFilterChange(0, 0, selectedOptions, false);
+    }, [selectedOptions, onFilterChange]);
+
     const handleToggle = useCallback((optionId: string) => {
-        setSelectedOption((prev) => {
+        setSelectedOptions((prev) => {
             // If clicking the same item, deselect it
-            if (prev === optionId) {
-                // Pass undefined for floorFrom/floorTo since we don't use sliders anymore
-                onFilterChange(0, 0, [], false);
-                return null;
+            if (prev.includes(optionId)) {
+                return prev.filter(id => id !== optionId);
             }
-            // Otherwise, select the new item (single selection)
-            // Pass undefined for floorFrom/floorTo since we don't use sliders anymore
-            onFilterChange(0, 0, [optionId], false);
-            return optionId;
+            // Otherwise, add the new item (multiple selection)
+            return [...prev, optionId];
         });
-    }, [onFilterChange]);
+    }, []);
 
     return (
         <div className={styles.floorFilter}>
             <h4 className={styles.featuresTitle}>Етаж</h4>
             <div className={styles.constructionGrid}>
                 {filteredFloorOptions.map((option: FloorSpecialOption) => {
-                    const isSelected = selectedOption === option.id;
+                    const isSelected = selectedOptions.includes(option.id);
                     return (
                         <button
                             key={option.id}

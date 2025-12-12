@@ -111,7 +111,12 @@
     "addAtLeastOneImage": "Добавете поне едно изображение",
     "neighborhoodRequired": "Моля, изберете квартал",
     "brokerNameAndPhoneRequired": "Името и телефонът на брокера са задължителни",
-    "firstImagePreviewNote": "Първото изображение ще се използва като преглед и основно изображение на страницата на имота."
+    "firstImagePreviewNote": "Първото изображение ще се използва като преглед и основно изображение на страницата на имота.",
+    "floorRequired": "Етажът е задължителен",
+    "yearBuiltRequired": "Година на строеж е задължителна",
+    "constructionRequired": "Конструкцията е задължителна",
+    "completionStatusRequired": "Степента на завършеност е задължителна",
+    "atLeastOneFeatureRequired": "Моля, изберете поне една особеност"
   }
 }
 
