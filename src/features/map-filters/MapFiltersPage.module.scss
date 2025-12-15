@@ -471,7 +471,7 @@
     .actionButtonsWrapper {
         position: fixed;
         bottom: 24px;
-        right: 1%;
+        right: 5%;
         transform: translateX(-50%);
         z-index: 1000;
         display: flex;
@@ -481,6 +481,7 @@
 
         @media (max-width: 768px) {
             bottom: 16px;
+            right: 3%;
             gap: 8px;
         }
     }

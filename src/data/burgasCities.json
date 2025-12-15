@@ -335,6 +335,30 @@
             "population": 1100,
             "description": "Село в община Айтос",
             "type": "small"
+        },
+        {
+            "id": "elenite",
+            "name": "Елените",
+            "nameEn": "Elenite",
+            "coordinates": [
+                42.7167,
+                27.8000
+            ],
+            "population": 1500,
+            "description": "Курортно селище",
+            "type": "small"
+        },
+        {
+            "id": "sinemorets",
+            "name": "Синеморец",
+            "nameEn": "Sinemorets",
+            "coordinates": [
+                42.0667,
+                27.9833
+            ],
+            "population": 200,
+            "description": "Малък морски курорт",
+            "type": "small"
         }
     ]
 }

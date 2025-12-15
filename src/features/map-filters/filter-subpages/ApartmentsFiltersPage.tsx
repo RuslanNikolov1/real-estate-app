@@ -198,9 +198,35 @@ export function ApartmentsFiltersPage({
             });
         }
 
+        // Format city name: first letter uppercase, rest lowercase for each word
+        const formatCityName = (cityName: string): string => {
+            if (!cityName || !cityName.trim()) return cityName;
+            return cityName
+                .trim()
+                .split(/\s+/)
+                .map(word => {
+                    if (word.length === 0) return word;
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                })
+                .join(' ');
+        };
+
+        // Format neighborhood names: first letter uppercase, rest lowercase for each word
+        const formatNeighborhoodName = (neighborhoodName: string): string => {
+            if (!neighborhoodName || !neighborhoodName.trim()) return neighborhoodName;
+            return neighborhoodName
+                .trim()
+                .split(/\s+/)
+                .map(word => {
+                    if (word.length === 0) return word;
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                })
+                .join(' ');
+        };
+
         filterValuesRef.current.searchTerm = searchTerm;
-        filterValuesRef.current.city = city;
-        filterValuesRef.current.neighborhoods = neighborhoods;
+        filterValuesRef.current.city = formatCityName(city);
+        filterValuesRef.current.neighborhoods = neighborhoods.map(formatNeighborhoodName);
         filterValuesRef.current.distance = distance;
         notifyFiltersChange();
     }, [externalOnLocationChange, notifyFiltersChange]);

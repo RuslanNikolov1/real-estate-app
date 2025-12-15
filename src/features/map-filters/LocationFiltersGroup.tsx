@@ -4,18 +4,9 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { Input } from '@/components/ui/Input';
 import { CrosshairSimple } from '@phosphor-icons/react';
 import burgasCities from '@/data/burgasCities.json';
-import { getNeighborhoodsByCity } from '@/lib/neighborhoods';
+import { CITY_OPTIONS, getNeighborhoodsByCity } from '@/lib/neighborhoods';
 import { NeighborhoodSelect } from '@/components/forms/NeighborhoodSelect';
 import styles from './LocationFiltersGroup.module.scss';
-
-type CityData = {
-    id: string;
-    name: string;
-    nameEn: string;
-    coordinates: number[];
-    type?: string;
-    [key: string]: unknown;
-};
 
 interface LocationFiltersGroupProps {
     onFilterChange: (searchTerm: string, city: string, neighborhoods: string[], distance: number) => void;
@@ -34,20 +25,31 @@ export function LocationFiltersGroup({
     initialDistance = 0,
     cityInputRef: externalCityInputRef
 }: LocationFiltersGroupProps) {
+    // Check if the city is a valid selected city from the list
+    const isValidCity = useCallback((cityName: string) => {
+        if (!cityName) return false;
+        return CITY_OPTIONS.some(
+            (c) => c.toLowerCase() === cityName.toLowerCase()
+        );
+    }, []);
+
     const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
     const [city, setCity] = useState(initialCity);
     const [neighborhoods, setNeighborhoods] = useState<string[]>(initialNeighborhoods);
     const [distance, setDistance] = useState(initialDistance);
     const [showCityDropdown, setShowCityDropdown] = useState(false);
     const [isDetectingLocation, setIsDetectingLocation] = useState(false);
-
-    // Sync internal state with initial props when they change (e.g., from map clicks)
-    useEffect(() => {
-        setSearchTerm(initialSearchTerm);
-        setCity(initialCity);
-        setNeighborhoods(initialNeighborhoods);
-        setDistance(initialDistance);
-    }, [initialSearchTerm, initialCity, initialNeighborhoods, initialDistance]);
+    
+    // Separate state for manual neighborhood input to prevent disappearing while typing
+    const [manualNeighborhoodInput, setManualNeighborhoodInput] = useState(() => {
+        const isInitialCityValid = initialCity && CITY_OPTIONS.some(
+            (c) => c.toLowerCase() === initialCity.toLowerCase()
+        );
+        return initialNeighborhoods.length > 0 && !isInitialCityValid ? initialNeighborhoods[0] : '';
+    });
+    // Track when user is actively editing the manual neighborhood field
+    const [isEditingManualNeighborhood, setIsEditingManualNeighborhood] = useState(false);
+    
     const internalCityInputRef = useRef<HTMLDivElement | null>(null);
     const cityInputRefForDropdown = useRef<HTMLInputElement>(null);
     const cityDropdownRef = useRef<HTMLDivElement>(null);
@@ -56,18 +58,28 @@ export function LocationFiltersGroup({
     const cityInputRef = externalCityInputRef || internalCityInputRef;
 
     const trimmedCity = city.trim();
-    
-    // Check if the city is a valid selected city from the list
-    const isValidCity = useCallback((cityName: string) => {
-        if (!cityName) return false;
-        return burgasCities.cities.some(
-            (c) => c.name.toLowerCase() === cityName.toLowerCase() ||
-                c.nameEn.toLowerCase() === cityName.toLowerCase()
-        );
-    }, []);
+
+    // Sync internal state with initial props when they change (e.g., from URL restore or map clicks)
+    // but avoid overriding the manual neighborhood while the user is actively typing in it
+    useEffect(() => {
+        setSearchTerm(initialSearchTerm);
+        setCity(initialCity);
+        setNeighborhoods(initialNeighborhoods);
+        setDistance(initialDistance);
+
+        if (!isEditingManualNeighborhood) {
+            // Update manual neighborhood input only if city is not in the list
+            if (initialNeighborhoods.length > 0 && !isValidCity(initialCity)) {
+                setManualNeighborhoodInput(initialNeighborhoods[0]);
+            } else if (!initialCity || !isValidCity(initialCity)) {
+                setManualNeighborhoodInput('');
+            }
+        }
+    }, [initialSearchTerm, initialCity, initialNeighborhoods, initialDistance, isValidCity, isEditingManualNeighborhood]);
 
     const isCitySelected = isValidCity(trimmedCity);
-    const showAdditionalFilters = isCitySelected;
+    // Show additional filters if there's any city value (manual input allowed)
+    const showAdditionalFilters = trimmedCity.length > 0;
 
     const handleCitySelect = useCallback((cityName: string, coordinates: [number, number]) => {
         setCity(cityName);
@@ -95,11 +107,14 @@ export function LocationFiltersGroup({
         [neighborhoods, searchTerm, city, distance, onFilterChange],
     );
 
-    // Clear neighborhood search and close dropdown when city changes or becomes invalid
+    // Handle neighborhood changes when city changes
+    // Allow manual neighborhoods for manually entered cities
     useEffect(() => {
-        if (!isCitySelected) {
+        if (!trimmedCity) {
+            // If city is cleared, clear neighborhoods and distance
             if (neighborhoods.length > 0) {
                 setNeighborhoods([]);
+                setManualNeighborhoodInput('');
                 onFilterChange(searchTerm, city, [], 0);
             }
             if (distance !== 0) {
@@ -108,14 +123,22 @@ export function LocationFiltersGroup({
             return;
         }
 
-        const validNeighborhoods = neighborhoods.filter((n) =>
-            getNeighborhoodsByCity(city).includes(n),
-        );
-        if (validNeighborhoods.length !== neighborhoods.length) {
-            setNeighborhoods(validNeighborhoods);
-            onFilterChange(searchTerm, city, validNeighborhoods, distance);
+        // If city is in the list, validate neighborhoods against available options
+        if (isCitySelected) {
+            const validNeighborhoods = neighborhoods.filter((n) =>
+                getNeighborhoodsByCity(city).includes(n),
+            );
+            if (validNeighborhoods.length !== neighborhoods.length) {
+                setNeighborhoods(validNeighborhoods);
+                onFilterChange(searchTerm, city, validNeighborhoods, distance);
+            }
+            // Clear manual input when switching to a city from the list
+            if (manualNeighborhoodInput) {
+                setManualNeighborhoodInput('');
+            }
         }
-    }, [isCitySelected, neighborhoods, city, distance, onFilterChange, searchTerm]);
+        // If city is not in the list, allow manual neighborhoods (no validation needed)
+    }, [isCitySelected, neighborhoods, city, distance, onFilterChange, searchTerm, trimmedCity, manualNeighborhoodInput]);
 
     // Reset distance when showAdditionalFilters becomes false
     useEffect(() => {
@@ -149,17 +172,24 @@ export function LocationFiltersGroup({
     }, []);
 
     // Find the closest city from the user's coordinates
-    const findClosestCity = useCallback((lat: number, lng: number): CityData | null => {
-        let closestCity: CityData | null = null;
+    const findClosestCity = useCallback((lat: number, lng: number): { name: string; coordinates: [number, number] } | null => {
+        let closestCity: { name: string; coordinates: [number, number] } | null = null;
         let shortestDistance = Infinity;
 
+        // Only check cities that are in CITY_OPTIONS
         burgasCities.cities.forEach((c) => {
+            // Only consider cities that are in our CITY_OPTIONS list
+            if (!CITY_OPTIONS.includes(c.name)) return;
+            
             const [cityLat, cityLng] = c.coordinates;
             if (typeof cityLat === 'number' && typeof cityLng === 'number') {
                 const distance = calculateDistanceKm(lat, lng, cityLat, cityLng);
                 if (distance < shortestDistance) {
                     shortestDistance = distance;
-                    closestCity = c as CityData;
+                    closestCity = {
+                        name: c.name,
+                        coordinates: [cityLat, cityLng]
+                    };
                 }
             }
         });
@@ -175,7 +205,7 @@ export function LocationFiltersGroup({
                     const { latitude, longitude } = position.coords;
                     const closestCity = findClosestCity(latitude, longitude);
                     if (closestCity) {
-                        handleCitySelect(closestCity.name, [closestCity.coordinates[0], closestCity.coordinates[1]]);
+                        handleCitySelect(closestCity.name, closestCity.coordinates);
                     } else {
                         console.warn('Could not find closest city for coordinates:', latitude, longitude);
                     }
@@ -213,15 +243,26 @@ export function LocationFiltersGroup({
                         <Input
                             id="filters-city"
                             label="Град"
-                            placeholder="Пр. Бургас"
+                            placeholder="Въведете или изберете град (пр. Бургас)"
                             value={city}
                             onChange={(event) => {
-                                setCity(event.target.value);
-                                setShowCityDropdown(true);
-                                onFilterChange(searchTerm, event.target.value, neighborhoods, distance);
+                                const value = event.target.value;
+                                setCity(value);
+                                // Show dropdown only when there is some input
+                                if (value.trim().length > 0) {
+                                    setShowCityDropdown(true);
+                                } else {
+                                    setShowCityDropdown(false);
+                                }
+                                onFilterChange(searchTerm, value, neighborhoods, distance);
                             }}
-                            onFocus={() => setShowCityDropdown(true)}
-                            onBlur={(e) => {
+                            onFocus={() => {
+                                // Show dropdown if there are matching options
+                                if (city.trim().length > 0 || CITY_OPTIONS.length > 0) {
+                                    setShowCityDropdown(true);
+                                }
+                            }}
+                            onBlur={() => {
                                 // Delay hiding dropdown to allow click on dropdown item
                                 setTimeout(() => {
                                     if (!cityDropdownRef.current?.contains(document.activeElement)) {
@@ -232,33 +273,44 @@ export function LocationFiltersGroup({
                             ref={cityInputRefForDropdown}
                             className={styles.filterInput}
                         />
-                        {showCityDropdown && (
+                        {showCityDropdown && CITY_OPTIONS.length > 0 && (
                             <div
                                 ref={cityDropdownRef}
                                 className={styles.cityDropdown}
                             >
-                                {burgasCities.cities
-                                    .filter((c) => {
+                                {CITY_OPTIONS
+                                    .filter((cityName) => {
                                         const searchTerm = city.toLowerCase().trim();
                                         if (!searchTerm) return true;
-                                        return c.name.toLowerCase().includes(searchTerm) ||
-                                            c.nameEn.toLowerCase().includes(searchTerm);
+                                        return cityName.toLowerCase().includes(searchTerm);
                                     })
-                                    .map((c) => (
-                                        <button
-                                            key={c.id}
-                                            type="button"
-                                            className={styles.cityDropdownItem}
-                                            onMouseDown={(e) => {
-                                                e.preventDefault(); // Prevent input blur
-                                            }}
-                                            onClick={() => {
-                                                handleCitySelect(c.name, [c.coordinates[0], c.coordinates[1]]);
-                                            }}
-                                        >
-                                            {c.name}
-                                        </button>
-                                    ))}
+                                    .slice(0, 10) // Limit to 10 results for better UX
+                                    .map((cityName) => {
+                                        // Find coordinates from burgasCities for map/distance calculations
+                                        const cityData = burgasCities.cities.find(
+                                            (c) => c.name.toLowerCase() === cityName.toLowerCase() ||
+                                                c.nameEn.toLowerCase() === cityName.toLowerCase()
+                                        );
+                                        const coordinates: [number, number] = cityData && cityData.coordinates && cityData.coordinates.length === 2
+                                            ? [cityData.coordinates[0], cityData.coordinates[1]]
+                                            : [0, 0]; // Fallback if coordinates not found
+                                        
+                                        return (
+                                            <button
+                                                key={cityName}
+                                                type="button"
+                                                className={styles.cityDropdownItem}
+                                                onMouseDown={(e) => {
+                                                    e.preventDefault(); // Prevent input blur
+                                                }}
+                                                onClick={() => {
+                                                    handleCitySelect(cityName, coordinates);
+                                                }}
+                                            >
+                                                {cityName}
+                                            </button>
+                                        );
+                                    })}
                             </div>
                         )}
                     </div>
@@ -272,39 +324,105 @@ export function LocationFiltersGroup({
                         <CrosshairSimple size={18} weight="bold" />
                     </button>
                 </div>
-                {showAdditionalFilters && (
+                {/* Neighborhood field: shown only after a city is entered */}
+                {trimmedCity && (
                     <div className={styles.neighborhoodFilter}>
-                        <NeighborhoodSelect
-                            city={isCitySelected ? city : ''}
-                            value={neighborhoods}
-                            onChange={handleNeighborhoodSelectChange}
-                            multiple
-                            disabled={!isCitySelected}
-                            label="Квартали"
-                        />
-                        {neighborhoods.length > 0 && (
+                        {isCitySelected ? (
+                            // City is in the list - show dropdown with available neighborhoods + chips
                             <>
-                                <div className={styles.selectedNeighborhoods}>
-                                    {neighborhoods.map((neighborhoodName) => (
-                                        <span
-                                            key={neighborhoodName}
-                                            className={styles.neighborhoodChip}
-                                        >
-                                            {neighborhoodName}
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveNeighborhood(neighborhoodName)}
-                                                className={styles.neighborhoodChipRemove}
-                                                aria-label={`Remove ${neighborhoodName}`}
+                                <NeighborhoodSelect
+                                    city={city}
+                                    value={neighborhoods}
+                                    onChange={handleNeighborhoodSelectChange}
+                                    multiple
+                                    disabled={!isCitySelected}
+                                    label="Квартали"
+                                />
+                                {neighborhoods.length > 0 && (
+                                    <>
+                                        <div className={styles.selectedNeighborhoods}>
+                                            {neighborhoods.map((neighborhoodName) => (
+                                                <span
+                                                    key={neighborhoodName}
+                                                    className={styles.neighborhoodChip}
+                                                >
+                                                    {neighborhoodName}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveNeighborhood(neighborhoodName)}
+                                                        className={styles.neighborhoodChipRemove}
+                                                        aria-label={`Remove ${neighborhoodName}`}
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <p className={styles.neighborhoodHint}>
+                                            {neighborhoods.length} квартал{neighborhoods.length > 1 ? 'а' : ''} избран{neighborhoods.length > 1 ? 'и' : ''}.
+                                        </p>
+                                    </>
+                                )}
+                            </>
+                        ) : (
+                            // City is manually entered - show text input for manual neighborhood entry
+                            <>
+                                <Input
+                                    id="filters-neighborhood-manual"
+                                    label="Квартал"
+                                    placeholder="Въведете квартал"
+                                    value={manualNeighborhoodInput}
+                                    onFocus={() => {
+                                        // Prevent external prop sync from resetting the field while typing
+                                        setIsEditingManualNeighborhood(true);
+                                    }}
+                                    onChange={(event) => {
+                                        const value = event.target.value;
+                                        setManualNeighborhoodInput(value);
+                                        // Update neighborhoods with the raw value (don't trim while typing)
+                                        if (value.trim()) {
+                                            handleNeighborhoodSelectChange([value.trim()]);
+                                        } else {
+                                            handleNeighborhoodSelectChange([]);
+                                        }
+                                    }}
+                                    onBlur={(event) => {
+                                        // Trim and format on blur
+                                        const trimmedValue = event.target.value.trim();
+                                        setManualNeighborhoodInput(trimmedValue);
+                                        if (trimmedValue) {
+                                            handleNeighborhoodSelectChange([trimmedValue]);
+                                        } else {
+                                            handleNeighborhoodSelectChange([]);
+                                        }
+                                        // Allow external prop sync again
+                                        setIsEditingManualNeighborhood(false);
+                                    }}
+                                    className={styles.filterInput}
+                                />
+                                {neighborhoods.length > 0 && (
+                                    <div className={styles.selectedNeighborhoods}>
+                                        {neighborhoods.map((neighborhoodName) => (
+                                            <span
+                                                key={neighborhoodName}
+                                                className={styles.neighborhoodChip}
                                             >
-                                                ×
-                                            </button>
-                                        </span>
-                                    ))}
-                                </div>
-                                <p className={styles.neighborhoodHint}>
-                                    {neighborhoods.length} квартал{neighborhoods.length > 1 ? 'а' : ''} избран{neighborhoods.length > 1 ? 'и' : ''}.
-                                </p>
+                                                {neighborhoodName}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        handleRemoveNeighborhood(neighborhoodName);
+                                                        setManualNeighborhoodInput('');
+                                                    }}
+                                                    className={styles.neighborhoodChipRemove}
+                                                    aria-label={`Remove ${neighborhoodName}`}
+                                                >
+                                                    ×
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </>
                         )}
                     </div>

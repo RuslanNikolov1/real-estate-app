@@ -230,11 +230,24 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         mapInstanceRef.current = map;
     }, []);
 
-    const handleFiltersChange = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState) => {
+    const handleFiltersChange = useCallback((
+        filters:
+          | ApartmentFiltersState
+          | HouseFiltersState
+          | CommercialFiltersState
+          | BuildingPlotsFiltersState
+          | AgriculturalLandFiltersState
+          | WarehousesIndustrialFiltersState
+          | GaragesParkingFiltersState
+          | HotelsMotelsFiltersState
+          | EstablishmentsFiltersState
+          | ReplaceRealEstatesFiltersState
+          | BuyRealEstatesFiltersState
+          | OtherRealEstatesFiltersState,
+      ) => {
         // Store filters in ref for URL serialization
         currentFiltersRef.current = filters;
-        console.log('Filters changed:', filters);
-    }, []);
+      }, []);
 
     // Get initial filters for the current property type
     const getInitialFilters = useCallback(() => {
@@ -294,6 +307,19 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
     });
 
     // Clean filters by removing default/unchanged values before sending to API
+    // Helper function to format city name: first letter uppercase, rest lowercase for each word
+    const formatCityName = useCallback((cityName: string): string => {
+        if (!cityName || !cityName.trim()) return cityName;
+        return cityName
+            .trim()
+            .split(/\s+/)
+            .map(word => {
+                if (word.length === 0) return word;
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            })
+            .join(' ');
+    }, []);
+
     const cleanFilters = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState | null) => {
         if (!filters) return null;
         
@@ -301,11 +327,22 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         
         // Copy non-numeric, non-array fields that have actual values
         if (filters.city && filters.city.trim()) {
-            cleaned.city = filters.city;
+            cleaned.city = formatCityName(filters.city);
         }
         
         if (filters.neighborhoods && Array.isArray(filters.neighborhoods) && filters.neighborhoods.length > 0) {
-            cleaned.neighborhoods = filters.neighborhoods;
+            // Format each neighborhood: first letter uppercase, rest lowercase for each word
+            cleaned.neighborhoods = filters.neighborhoods.map(neighborhood => {
+                if (!neighborhood || !neighborhood.trim()) return neighborhood;
+                return neighborhood
+                    .trim()
+                    .split(/\s+/)
+                    .map(word => {
+                        if (word.length === 0) return word;
+                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                    })
+                    .join(' ');
+            });
         }
         
         if ('propertyId' in filters && filters.propertyId && filters.propertyId.trim()) {
@@ -505,7 +542,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         }
         
         return params.toString();
-    }, [cleanFilters]);
+    }, [cleanFilters, formatCityName]);
 
     const handleSearch = useCallback(async () => {
         const filters = currentFiltersRef.current;
@@ -515,6 +552,20 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         setFilteredProperties([]);
         setPropertiesError(null);
         setCurrentPage(1); // Reset to first page when searching
+
+        // Format city name before search
+        if (locationState.city && locationState.city.trim()) {
+            const formattedCity = formatCityName(locationState.city);
+            if (formattedCity !== locationState.city) {
+                // Update location state with formatted city
+                handleLocationChange(
+                    locationState.searchTerm,
+                    formattedCity,
+                    locationState.neighborhoods,
+                    locationState.distance
+                );
+            }
+        }
 
         if (filters && 'propertyId' in filters && filters.propertyId && filters.propertyId.trim()) {
             const shortId = filters.propertyId.trim();
@@ -542,6 +593,9 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
             // Fetch properties based on filters
             setIsLoadingProperties(true);
             try {
+                // Use formatted city from locationState (already formatted above)
+                const cityToUse = locationState.city ? formatCityName(locationState.city) : '';
+                
                 const params = new URLSearchParams();
                 params.set('baseRoute', baseRoute);
                 if (selectedPropertyType) {
@@ -549,6 +603,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                 }
                 if (filters) {
                     // Clean filters to remove default values before sending to API
+                    // cleanFilters already formats the city
                     const cleanedFilters = cleanFilters(filters);
                     if (cleanedFilters) {
                         params.set('filters', encodeURIComponent(JSON.stringify(cleanedFilters)));
@@ -576,7 +631,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
             router.push(`${currentPath}?${queryString}`);
         }
         setShowListings(true);
-    }, [selectedPropertyType, router, serializeFiltersToURL, baseRoute]);
+    }, [selectedPropertyType, router, serializeFiltersToURL, baseRoute, locationState, formatCityName, handleLocationChange]);
 
     const handleBackToMap = useCallback(() => {
         // Remove search params from URL

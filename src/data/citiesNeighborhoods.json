@@ -373,6 +373,401 @@
                 "population": 3500
             }
         ]
+    },
+    "aheloy": {
+        "cityName": "Ахелой",
+        "neighborhoods": [
+            {
+                "id": "central-aheloy",
+                "name": "Централна част",
+                "nameEn": "Central Aheloy",
+                "coordinates": [
+                    42.6500,
+                    27.6500
+                ],
+                "population": 1000
+            },
+            {
+                "id": "beach-aheloy",
+                "name": "Плажна зона",
+                "nameEn": "Beach area",
+                "coordinates": [
+                    42.6450,
+                    27.6550
+                ],
+                "population": 500
+            },
+            {
+                "id": "residential-aheloy",
+                "name": "Жилищна зона",
+                "nameEn": "Residential area",
+                "coordinates": [
+                    42.6550,
+                    27.6450
+                ],
+                "population": 600
+            }
+        ]
+    },
+    "ravda": {
+        "cityName": "Равда",
+        "neighborhoods": [
+            {
+                "id": "central-ravda",
+                "name": "Централна част",
+                "nameEn": "Central Ravda",
+                "coordinates": [
+                    42.6500,
+                    27.6667
+                ],
+                "population": 1200
+            },
+            {
+                "id": "beach-ravda",
+                "name": "Плажна зона",
+                "nameEn": "Beach area",
+                "coordinates": [
+                    42.6450,
+                    27.6700
+                ],
+                "population": 800
+            },
+            {
+                "id": "north-ravda",
+                "name": "Северна част",
+                "nameEn": "North Ravda",
+                "coordinates": [
+                    42.6550,
+                    27.6600
+                ],
+                "population": 500
+            }
+        ]
+    },
+    "sunny-beach": {
+        "cityName": "Слънчев бряг",
+        "neighborhoods": [
+            {
+                "id": "central-sunny-beach",
+                "name": "Централна част",
+                "nameEn": "Central Sunny Beach",
+                "coordinates": [
+                    42.6944,
+                    27.7139
+                ],
+                "population": 300
+            },
+            {
+                "id": "north-sunny-beach",
+                "name": "Северна част",
+                "nameEn": "North Sunny Beach",
+                "coordinates": [
+                    42.7000,
+                    27.7100
+                ],
+                "population": 200
+            },
+            {
+                "id": "south-sunny-beach",
+                "name": "Южна част",
+                "nameEn": "South Sunny Beach",
+                "coordinates": [
+                    42.6900,
+                    27.7200
+                ],
+                "population": 300
+            }
+        ]
+    },
+    "sveti-vlas": {
+        "cityName": "Свети Влас",
+        "neighborhoods": [
+            {
+                "id": "central-sveti-vlas",
+                "name": "Централна част",
+                "nameEn": "Central Sveti Vlas",
+                "coordinates": [
+                    42.7167,
+                    27.7667
+                ],
+                "population": 1500
+            },
+            {
+                "id": "marina-sveti-vlas",
+                "name": "Марина",
+                "nameEn": "Marina",
+                "coordinates": [
+                    42.7200,
+                    27.7700
+                ],
+                "population": 1000
+            },
+            {
+                "id": "residential-sveti-vlas",
+                "name": "Жилищна зона",
+                "nameEn": "Residential area",
+                "coordinates": [
+                    42.7100,
+                    27.7600
+                ],
+                "population": 1000
+            }
+        ]
+    },
+    "elenite": {
+        "cityName": "Елените",
+        "neighborhoods": [
+            {
+                "id": "central-elenite",
+                "name": "Централна част",
+                "nameEn": "Central Elenite",
+                "coordinates": [
+                    42.7167,
+                    27.8000
+                ],
+                "population": 800
+            },
+            {
+                "id": "resort-elenite",
+                "name": "Курортна зона",
+                "nameEn": "Resort area",
+                "coordinates": [
+                    42.7200,
+                    27.8050
+                ],
+                "population": 500
+            },
+            {
+                "id": "beach-elenite",
+                "name": "Плажна зона",
+                "nameEn": "Beach area",
+                "coordinates": [
+                    42.7100,
+                    27.8000
+                ],
+                "population": 200
+            }
+        ]
+    },
+    "kosharitsa": {
+        "cityName": "Кошарица",
+        "neighborhoods": [
+            {
+                "id": "central-kosharitsa",
+                "name": "Централна част",
+                "nameEn": "Central Kosharitsa",
+                "coordinates": [
+                    42.7167,
+                    27.7333
+                ],
+                "population": 1000
+            },
+            {
+                "id": "residential-kosharitsa",
+                "name": "Жилищна зона",
+                "nameEn": "Residential area",
+                "coordinates": [
+                    42.7200,
+                    27.7300
+                ],
+                "population": 600
+            },
+            {
+                "id": "south-kosharitsa",
+                "name": "Южна част",
+                "nameEn": "South Kosharitsa",
+                "coordinates": [
+                    42.7100,
+                    27.7400
+                ],
+                "population": 400
+            }
+        ]
+    },
+    "chernomorets": {
+        "cityName": "Черноморец",
+        "neighborhoods": [
+            {
+                "id": "central-chernomorets",
+                "name": "Централна част",
+                "nameEn": "Central Chernomorets",
+                "coordinates": [
+                    42.4500,
+                    27.6333
+                ],
+                "population": 1200
+            },
+            {
+                "id": "beach-chernomorets",
+                "name": "Плажна зона",
+                "nameEn": "Beach area",
+                "coordinates": [
+                    42.4450,
+                    27.6400
+                ],
+                "population": 600
+            },
+            {
+                "id": "port-chernomorets",
+                "name": "Пристанищна зона",
+                "nameEn": "Port area",
+                "coordinates": [
+                    42.4550,
+                    27.6300
+                ],
+                "population": 500
+            }
+        ]
+    },
+    "tsarevo": {
+        "cityName": "Царево",
+        "neighborhoods": [
+            {
+                "id": "central-tsarevo",
+                "name": "Централна част",
+                "nameEn": "Central Tsarevo",
+                "coordinates": [
+                    42.1706,
+                    27.8461
+                ],
+                "population": 2500
+            },
+            {
+                "id": "beach-tsarevo",
+                "name": "Плажна зона",
+                "nameEn": "Beach area",
+                "coordinates": [
+                    42.1650,
+                    27.8500
+                ],
+                "population": 1500
+            },
+            {
+                "id": "port-tsarevo",
+                "name": "Пристанищна зона",
+                "nameEn": "Port area",
+                "coordinates": [
+                    42.1750,
+                    27.8400
+                ],
+                "population": 1000
+            },
+            {
+                "id": "residential-tsarevo",
+                "name": "Жилищна зона",
+                "nameEn": "Residential area",
+                "coordinates": [
+                    42.1800,
+                    27.8450
+                ],
+                "population": 884
+            }
+        ]
+    },
+    "kiten": {
+        "cityName": "Китен",
+        "neighborhoods": [
+            {
+                "id": "central-kiten",
+                "name": "Централна част",
+                "nameEn": "Central Kiten",
+                "coordinates": [
+                    42.2333,
+                    27.7667
+                ],
+                "population": 600
+            },
+            {
+                "id": "beach-kiten",
+                "name": "Плажна зона",
+                "nameEn": "Beach area",
+                "coordinates": [
+                    42.2300,
+                    27.7700
+                ],
+                "population": 400
+            },
+            {
+                "id": "north-kiten",
+                "name": "Северна част",
+                "nameEn": "North Kiten",
+                "coordinates": [
+                    42.2400,
+                    27.7600
+                ],
+                "population": 200
+            }
+        ]
+    },
+    "primorsko": {
+        "cityName": "Приморско",
+        "neighborhoods": [
+            {
+                "id": "central-primorsko",
+                "name": "Централна част",
+                "nameEn": "Central Primorsko",
+                "coordinates": [
+                    42.2689,
+                    27.7578
+                ],
+                "population": 1500
+            },
+            {
+                "id": "beach-primorsko",
+                "name": "Плажна зона",
+                "nameEn": "Beach area",
+                "coordinates": [
+                    42.2650,
+                    27.7600
+                ],
+                "population": 800
+            },
+            {
+                "id": "residential-primorsko",
+                "name": "Жилищна зона",
+                "nameEn": "Residential area",
+                "coordinates": [
+                    42.2750,
+                    27.7550
+                ],
+                "population": 528
+            }
+        ]
+    },
+    "sinemorets": {
+        "cityName": "Синеморец",
+        "neighborhoods": [
+            {
+                "id": "central-sinemorets",
+                "name": "Централна част",
+                "nameEn": "Central Sinemorets",
+                "coordinates": [
+                    42.0667,
+                    27.9833
+                ],
+                "population": 100
+            },
+            {
+                "id": "beach-sinemorets",
+                "name": "Плажна зона",
+                "nameEn": "Beach area",
+                "coordinates": [
+                    42.0650,
+                    27.9850
+                ],
+                "population": 50
+            },
+            {
+                "id": "residential-sinemorets",
+                "name": "Жилищна зона",
+                "nameEn": "Residential area",
+                "coordinates": [
+                    42.0700,
+                    27.9800
+                ],
+                "population": 50
+            }
+        ]
     }
 }
 

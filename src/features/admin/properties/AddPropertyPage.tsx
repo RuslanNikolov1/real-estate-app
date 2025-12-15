@@ -223,6 +223,18 @@ export function AddPropertyPage() {
     brokerImageInputRef.current?.click();
   };
 
+  // Helper to format city / neighborhood names: each word capitalized
+  const formatLocationName = (value: string) => {
+    if (!value) return value;
+    return value
+      .trim()
+      .split(/\s+/)
+      .map((word) =>
+        word.length ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : word,
+      )
+      .join(' ');
+  };
+
   const handleSubmit = async () => {
     if (isSubmitting) {
       return;
@@ -343,14 +355,17 @@ export function AddPropertyPage() {
         formData.append('floor', floor);
       }
 
-      formData.append('city', city);
-      formData.append('neighborhood', neighborhood);
+      const formattedCity = formatLocationName(city);
+      const formattedNeighborhood = formatLocationName(neighborhood);
+
+      formData.append('city', formattedCity);
+      formData.append('neighborhood', formattedNeighborhood);
 
       formData.append('title', trimmedTitle);
       formData.append('description', trimmedDescription);
 
       // Year built is required
-      formData.append('build_year', yearBuilt);
+        formData.append('build_year', yearBuilt);
 
       // Construction type is required when shown
       if (showConstruction && selectedConstruction) {
@@ -474,12 +489,12 @@ export function AddPropertyPage() {
       <Header />
       <main className={styles.main}>
         <div className={styles.container}>
-          <div className={styles.breadcrumbs}>
-            <Link href="/admin/properties">Имоти</Link>
-            <span>/</span>
-            <span>Конфигуратор</span>
-          </div>
-          <div className={styles.panel}>
+        <div className={styles.breadcrumbs}>
+          <Link href="/admin/properties">Имоти</Link>
+          <span>/</span>
+          <span>Конфигуратор</span>
+        </div>
+        <div className={styles.panel}>
           <div className={styles.panelHeader}>
             <div>
               <h1 className={styles.title}>Добави имот</h1>
@@ -1010,7 +1025,7 @@ export function AddPropertyPage() {
               Отказ
             </Link>
           </div>
-        </div>
+          </div>
         </div>
       </main>
       <Footer />

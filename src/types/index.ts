@@ -53,6 +53,7 @@ export interface Property {
   floor?: string;
   total_floors?: number;
   year_built?: number;
+  yard_area_sqm?: number;
   images: PropertyImage[];
   features?: string[];
   construction_type?: string;

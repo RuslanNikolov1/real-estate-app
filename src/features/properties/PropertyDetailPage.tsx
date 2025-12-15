@@ -751,6 +751,13 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     <Square size={24} />
                     <div className={styles.detailValue}>{property.area} м²</div>
                   </div>
+                  {/* Yard Area - only show for houses/villas */}
+                  {(property.type === 'house' && property.yard_area_sqm) && (
+                    <div className={styles.detailBox}>
+                      <Square size={24} />
+                      <div className={styles.detailValue}>Двор: {property.yard_area_sqm} м²</div>
+                    </div>
+                  )}
                   {/* Floor - only show for apartments, offices, shops, restaurants */}
                   {((property.type === 'apartment' || property.type === 'office' || property.type === 'shop' || property.type === 'restaurant') && property.floor) && (
                     <div className={styles.detailBox}>
@@ -831,7 +838,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   ((propType === 'office' || propType === 'shop' || propType === 'restaurant') && (prop.construction_type || prop.completion_degree || property.year_built || property.floor)) ||
                   (propType === 'hotel' && (prop.construction_type || prop.completion_degree || prop.hotel_category || prop.bed_base || property.year_built)) ||
                   (propType === 'garage' && (prop.construction_type || property.year_built)) ||
-                  ((propType === 'house' || propType === 'villa') && (property.year_built || prop.yard_area)) ||
+                  ((propType === 'house' || propType === 'villa') && (property.year_built || property.yard_area_sqm)) ||
                   (propType === 'agricultural' && prop.agricultural_category) ||
                   (propType === 'land' && (prop.electricity || prop.water));
                 return hasConstructionDetails;
@@ -885,10 +892,10 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     )}
 
                     {/* Yard Area - for houses/villas */}
-                    {((property.type === 'house' || property.type === 'villa') && (property as any).yard_area) && (
+                    {((property.type === 'house' || property.type === 'villa') && property.yard_area_sqm) && (
                       <div className={styles.constructionItem}>
                         <span className={styles.constructionLabel}>Площ на двора (м²)</span>
-                        <span className={styles.constructionValue}>{(property as any).yard_area}</span>
+                        <span className={styles.constructionValue}>{property.yard_area_sqm}</span>
                       </div>
                     )}
 

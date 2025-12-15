@@ -137,6 +137,12 @@ export function PropertyCard({ property, onClick, onDelete, onEdit }: PropertyCa
               <Square size={18} />
               <span>{property.area} м²</span>
             </div>
+            {(property.type === 'house' || property.type === 'villa') && property.yard_area_sqm && (
+              <div className={styles.detail}>
+                <Square size={18} />
+                <span>Двор: {property.yard_area_sqm} м²</span>
+              </div>
+            )}
             {property.floor && (
               <div className={styles.detail}>
                 <span>

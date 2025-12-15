@@ -495,6 +495,18 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     return errorMessage;
   };
 
+  // Helper to format city / neighborhood names: each word capitalized
+  const formatLocationName = (value: string) => {
+    if (!value) return value;
+    return value
+      .trim()
+      .split(/\s+/)
+      .map((word) =>
+        word.length ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : word,
+      )
+      .join(' ');
+  };
+
   const onSubmit = async (data: PropertyFormData) => {
     console.log('onSubmit called with data:', data);
     setIsSubmittingForm(true);
@@ -652,9 +664,14 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
         formData.append('total_floors', String(data.total_floors));
       }
       
-      // Location
-      formData.append('city', data.city);
-      formData.append('neighborhood', data.neighborhood);
+      // Location – format both city and neighborhood before sending
+      const formattedCity = formatLocationName(data.city);
+      const formattedNeighborhood = data.neighborhood
+        ? formatLocationName(data.neighborhood)
+        : data.neighborhood;
+
+      formData.append('city', formattedCity);
+      formData.append('neighborhood', formattedNeighborhood || '');
       // address field removed - not saving to database
       
       // Description
@@ -777,7 +794,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                   onSubmit(data);
                 },
                 (errors) => {
-                  // Handle validation errors - scroll to first error
+              // Handle validation errors - scroll to first error
                   console.error('Validation failed with errors:', errors);
                   
                   // If errors object is empty but validation failed, it might be a schema issue
@@ -795,18 +812,18 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                     return;
                   }
                   
-                  const firstErrorField = Object.keys(errors)[0];
-                  if (firstErrorField) {
+              const firstErrorField = Object.keys(errors)[0];
+              if (firstErrorField) {
                     const fieldError = errors[firstErrorField as keyof typeof errors];
                     const errorMessage = fieldError?.message || 'Грешка при валидация';
                     setSubmitError(`Грешка в полето "${firstErrorField}": ${errorMessage}`);
                     
-                    const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
-                    if (errorElement) {
-                      errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      (errorElement as HTMLElement).focus();
-                    }
-                  }
+                const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
+                if (errorElement) {
+                  errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  (errorElement as HTMLElement).focus();
+                }
+              }
                 }
               )(e);
             }} 
@@ -992,7 +1009,9 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                           setValue('neighborhood', Array.isArray(val) ? val[0] ?? '' : val)
                         }
                         disabled={!cityValue}
-                        error={errors.neighborhood?.message ? translateErrorMessage(String(errors.neighborhood.message)) : undefined}
+                        error={errors.neighborhood?.message
+                          ? translateErrorMessage(String(errors.neighborhood.message))
+                          : undefined}
                         required
                       />
                     </div>
@@ -1017,14 +1036,14 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                         const isRequired = field.key === 'construction_type' || field.key === 'completion_status';
                         const fieldWithRequired = isRequired ? { ...field, required: true } : field;
                         return (
-                          <DynamicPropertyField
-                            key={field.key}
+                        <DynamicPropertyField
+                          key={field.key}
                             field={fieldWithRequired}
-                            register={register}
-                            errors={errors}
-                            setValue={setValue}
-                            value={watch(field.key as any)}
-                          />
+                          register={register}
+                          errors={errors}
+                          setValue={setValue}
+                          value={watch(field.key as any)}
+                        />
                         );
                       })}
                   </div>

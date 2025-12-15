@@ -21,18 +21,18 @@ export function PropertySearch({}: PropertySearchProps) {
   };
 
   return (
-    <div className={styles.searchContainer}>
-      <div className={styles.buttonGroup}>
-        <Button variant="outline" onClick={handleSalesClick} className={styles.actionButton} size="lg">
-          <CheckCircle size={28} />
-          Продажби
-        </Button>
-        <Button variant="outline" onClick={handleRentClick} className={styles.actionButton} size="lg">
-          <Calendar size={28} />
-          Наеми
-        </Button>
+      <div className={styles.searchContainer}>
+        <div className={styles.buttonGroup}>
+          <Button variant="outline" onClick={handleSalesClick} className={styles.actionButton} size="lg">
+            <CheckCircle size={28} />
+            Продажби
+          </Button>
+          <Button variant="outline" onClick={handleRentClick} className={styles.actionButton} size="lg">
+            <Calendar size={28} />
+            Наеми
+          </Button>
+        </div>
       </div>
-    </div>
   );
 }
 

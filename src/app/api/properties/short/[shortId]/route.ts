@@ -65,6 +65,7 @@ export async function GET(
       floor: prop.floor ? String(prop.floor) : undefined,
       total_floors: prop.total_floors ? Number(prop.total_floors) : undefined,
       year_built: prop.build_year || undefined,
+      yard_area_sqm: prop.yard_area_sqm ? Number(prop.yard_area_sqm) : undefined,
       images: (prop.image_urls || []).map((url: string, index: number) => ({
         id: `${prop.id}-img-${index}`,
         url,
