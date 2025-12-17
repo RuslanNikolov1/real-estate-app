@@ -143,10 +143,12 @@ export async function GET(request: NextRequest) {
         
         // Check what city values actually exist in database (case-insensitive check)
         // #region agent log
-        const cityCheckQuery = supabaseAdmin.from('properties').select('city, neighborhood').ilike('city', `%${filters.city}%`).limit(10);
-        cityCheckQuery.then(({ data: cityCheckData }) => {
-          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:138',message:'Database city values check (case-insensitive)',data:{requestedCity:filters.city,foundCities:cityCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-        }).catch(() => {});
+        (async () => {
+          try {
+            const { data: cityCheckData } = await supabaseAdmin.from('properties').select('city, neighborhood').ilike('city', `%${filters.city}%`).limit(10);
+            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:138',message:'Database city values check (case-insensitive)',data:{requestedCity:filters.city,foundCities:cityCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+          } catch {}
+        })();
         // #endregion
         
         query = query.eq('city', filters.city);
@@ -161,9 +163,12 @@ export async function GET(request: NextRequest) {
         // #region agent log
         if (filters.city) {
           const neighborhoodCheckQuery = supabaseAdmin.from('properties').select('city, neighborhood').eq('city', filters.city).limit(20);
-          neighborhoodCheckQuery.then(({ data: neighborhoodCheckData }) => {
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:157',message:'Database neighborhood values for city',data:{requestedCity:filters.city,requestedNeighborhoods:filters.neighborhoods,foundNeighborhoods:neighborhoodCheckData?.map((p:any) => p.neighborhood).filter(Boolean) || [],allProperties:neighborhoodCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-          }).catch(() => {});
+          (async () => {
+            try {
+              const { data: neighborhoodCheckData } = await neighborhoodCheckQuery;
+              fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:157',message:'Database neighborhood values for city',data:{requestedCity:filters.city,requestedNeighborhoods:filters.neighborhoods,foundNeighborhoods:neighborhoodCheckData?.map((p:any) => p.neighborhood).filter(Boolean) || [],allProperties:neighborhoodCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+            } catch {}
+          })();
         }
         // #endregion
         
@@ -227,9 +232,12 @@ export async function GET(request: NextRequest) {
       // #region agent log
       if (filters.city && filters.neighborhoods) {
         const propertyCheckQuery = supabaseAdmin.from('properties').select('city, neighborhood, sale_or_rent, type').eq('city', filters.city).in('neighborhood', filters.neighborhoods).limit(5);
-        propertyCheckQuery.then(({ data: propertyCheckData }) => {
-          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:212',message:'Property sale_or_rent check',data:{requestedCity:filters.city,requestedNeighborhoods:filters.neighborhoods,baseRoute,properties:propertyCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood,sale_or_rent:p.sale_or_rent,type:p.type})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-        }).catch(() => {});
+        (async () => {
+          try {
+            const { data: propertyCheckData } = await propertyCheckQuery;
+            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:212',message:'Property sale_or_rent check',data:{requestedCity:filters.city,requestedNeighborhoods:filters.neighborhoods,baseRoute,properties:propertyCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood,sale_or_rent:p.sale_or_rent,type:p.type})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+          } catch {}
+        })();
       }
       // #endregion
       
