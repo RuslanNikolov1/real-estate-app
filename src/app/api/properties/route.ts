@@ -111,6 +111,9 @@ export async function GET(request: NextRequest) {
     if (filtersParam) {
       try {
         filters = JSON.parse(decodeURIComponent(filtersParam));
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:113',message:'API received filters',data:{filtersParam,filters},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+        // #endregion
       } catch (e) {
         console.error('Error parsing filters:', e);
       }
@@ -118,6 +121,12 @@ export async function GET(request: NextRequest) {
 
     // Build query
     let query = supabaseAdmin.from('properties').select('*');
+    
+    // #region agent log
+    const baseRoute = searchParams.get('baseRoute');
+    const propertyTypeId = searchParams.get('propertyTypeId');
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:120',message:'Query initialization',data:{baseRoute,propertyTypeId,hasFilters:!!filters},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+    // #endregion
 
     // Apply filters if provided
     if (filters) {
@@ -128,10 +137,36 @@ export async function GET(request: NextRequest) {
       
       // Status filter (for-sale/for-rent)
       if (filters.city) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:131',message:'Applying city filter',data:{city:filters.city,type:typeof filters.city},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
+        
+        // Check what city values actually exist in database (case-insensitive check)
+        // #region agent log
+        const cityCheckQuery = supabaseAdmin.from('properties').select('city, neighborhood').ilike('city', `%${filters.city}%`).limit(10);
+        cityCheckQuery.then(({ data: cityCheckData }) => {
+          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:138',message:'Database city values check (case-insensitive)',data:{requestedCity:filters.city,foundCities:cityCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+        }).catch(() => {});
+        // #endregion
+        
         query = query.eq('city', filters.city);
       }
       
       if (filters.neighborhoods && Array.isArray(filters.neighborhoods) && filters.neighborhoods.length > 0) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:150',message:'Applying neighborhood filter',data:{neighborhoods:filters.neighborhoods,city:filters.city,count:filters.neighborhoods.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
+        
+        // Check what neighborhood values actually exist in database for this city
+        // #region agent log
+        if (filters.city) {
+          const neighborhoodCheckQuery = supabaseAdmin.from('properties').select('city, neighborhood').eq('city', filters.city).limit(20);
+          neighborhoodCheckQuery.then(({ data: neighborhoodCheckData }) => {
+            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:157',message:'Database neighborhood values for city',data:{requestedCity:filters.city,requestedNeighborhoods:filters.neighborhoods,foundNeighborhoods:neighborhoodCheckData?.map((p:any) => p.neighborhood).filter(Boolean) || [],allProperties:neighborhoodCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+          }).catch(() => {});
+        }
+        // #endregion
+        
         query = query.in('neighborhood', filters.neighborhoods);
       }
       
@@ -152,29 +187,51 @@ export async function GET(request: NextRequest) {
       };
       
       // Determine property types from baseRoute or filters
-      const baseRoute = searchParams.get('baseRoute');
-      const propertyTypeId = searchParams.get('propertyTypeId');
-      
       if (propertyTypeId && typeMapping[propertyTypeId]) {
         query = query.in('type', typeMapping[propertyTypeId]);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:188',message:'Applied property type filter',data:{propertyTypeId,types:typeMapping[propertyTypeId]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+        // #endregion
       }
       
       // Also support direct type filter from filters object
       if (filters.type && typeof filters.type === 'string') {
         query = query.eq('type', filters.type);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:193',message:'Applied direct type filter',data:{type:filters.type},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+        // #endregion
       }
       
       // Support types array filter
       if (filters.types && Array.isArray(filters.types) && filters.types.length > 0) {
         query = query.in('type', filters.types);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:198',message:'Applied types array filter',data:{types:filters.types},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+        // #endregion
       }
       
       // Sale/Rent filter based on baseRoute (using sale_or_rent instead of status)
       if (baseRoute === '/sale/search') {
         query = query.eq('sale_or_rent', 'sale');
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:203',message:'Applied sale filter',data:{baseRoute,sale_or_rent:'sale'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+        // #endregion
       } else if (baseRoute === '/rent/search') {
         query = query.eq('sale_or_rent', 'rent');
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:205',message:'Applied rent filter',data:{baseRoute,sale_or_rent:'rent'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+        // #endregion
       }
+      
+      // Check what sale_or_rent value the property actually has
+      // #region agent log
+      if (filters.city && filters.neighborhoods) {
+        const propertyCheckQuery = supabaseAdmin.from('properties').select('city, neighborhood, sale_or_rent, type').eq('city', filters.city).in('neighborhood', filters.neighborhoods).limit(5);
+        propertyCheckQuery.then(({ data: propertyCheckData }) => {
+          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:212',message:'Property sale_or_rent check',data:{requestedCity:filters.city,requestedNeighborhoods:filters.neighborhoods,baseRoute,properties:propertyCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood,sale_or_rent:p.sale_or_rent,type:p.type})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+        }).catch(() => {});
+      }
+      // #endregion
       
       // Area filters - only apply if explicitly set (not 0, null, or undefined)
       if (filters.areaFrom !== undefined && filters.areaFrom !== null && filters.areaFrom > 0) {
@@ -342,16 +399,45 @@ export async function GET(request: NextRequest) {
 
     // Order and limit
     query = query.order('created_at', { ascending: false }).limit(limit);
+    
+    // #region agent log
+    // Log final query state before execution
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:375',message:'Query state before execution',data:{baseRoute,propertyTypeId,hasCityFilter:!!filters?.city,hasNeighborhoodFilter:!!(filters?.neighborhoods?.length),limit},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+    // #endregion
 
     const { data: properties, error } = await query;
 
     if (error) {
       console.error('Error fetching properties:', error);
       return NextResponse.json(
-        { error: 'Failed to fetch properties', details: error.message },
+        { error: 'Неуспешно зареждане на имоти', details: error.message },
         { status: 500 }
       );
     }
+    
+    // #region agent log
+    if (filters && (filters.city || filters.neighborhoods)) {
+      const sampleProperties = (properties || []).slice(0, 5).map((p: any) => ({
+        id: p.id,
+        city: p.city,
+        neighborhood: p.neighborhood,
+        title: p.title?.substring(0, 50)
+      }));
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:356',message:'Query results for city/neighborhood filter',data:{requestedCity:filters.city,requestedNeighborhoods:filters.neighborhoods,resultCount:properties?.length || 0,sampleProperties},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+    }
+    // #endregion
+
+    // #region agent log
+    if (filters?.neighborhoods && Array.isArray(filters.neighborhoods) && filters.neighborhoods.length > 0) {
+      console.log('API: Query results for neighborhood filter:', {
+        requestedNeighborhoods: filters.neighborhoods,
+        requestedCity: filters.city,
+        foundProperties: properties?.length || 0,
+        foundNeighborhoods: [...new Set((properties || []).map((p: any) => p.neighborhood).filter(Boolean))],
+        foundCities: [...new Set((properties || []).map((p: any) => p.city).filter(Boolean))],
+      });
+    }
+    // #endregion
 
     // Debug: Log query results for subtype filtering
     if (filters?.apartmentSubtypes) {
@@ -408,8 +494,8 @@ export async function GET(request: NextRequest) {
     console.error('Unexpected error in GET /api/properties:', error);
     return NextResponse.json(
       {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Вътрешна грешка на сървъра',
+        details: error instanceof Error ? error.message : 'Неизвестна грешка',
       },
       { status: 500 }
     );
@@ -448,7 +534,7 @@ export async function POST(request: NextRequest) {
     // Validate images exist
     if (!imageFiles || imageFiles.length === 0) {
       return NextResponse.json(
-        { error: 'At least one image is required' },
+        { error: 'Поне едно изображение е задължително' },
         { status: 400 }
       );
     }
@@ -457,13 +543,13 @@ export async function POST(request: NextRequest) {
     for (const file of imageFiles) {
       if (!(file instanceof File)) {
         return NextResponse.json(
-          { error: 'All image fields must be valid files' },
+          { error: 'Всички полета за изображения трябва да са валидни файлове' },
           { status: 400 }
         );
       }
       if (!file.type.startsWith('image/')) {
-        return NextResponse.json(
-          { error: `File ${file.name} is not an image` },
+          return NextResponse.json(
+          { error: `Файлът ${file.name} не е изображение` },
           { status: 400 }
         );
       }
@@ -479,13 +565,13 @@ export async function POST(request: NextRequest) {
     if (brokerImageFile) {
       if (!(brokerImageFile instanceof File)) {
         return NextResponse.json(
-          { error: 'Broker image must be a valid file' },
+          { error: 'Снимката на брокера трябва да е валиден файл' },
           { status: 400 }
         );
       }
       if (!brokerImageFile.type.startsWith('image/')) {
         return NextResponse.json(
-          { error: `Broker image must be an image file` },
+          { error: 'Снимката на брокера трябва да е файл с изображение' },
           { status: 400 }
         );
       }
@@ -507,11 +593,83 @@ export async function POST(request: NextRequest) {
     // Validate with Zod
     const validationResult = createPropertySchema.safeParse(validationData);
     
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:594',message:'Zod validation result',data:{success:validationResult.success,validationDataKeys:Object.keys(validationData),errors:validationResult.success ? null : validationResult.error.errors},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+    // #endregion
+    
     if (!validationResult.success) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:600',message:'Validation failed - returning error',data:{errors:validationResult.error.errors,formatted:validationResult.error.format()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      // #endregion
+      
+      // Field name mappings in Bulgarian
+      const fieldNames: Record<string, string> = {
+        'sale_or_rent': 'Статус',
+        'type': 'Тип имот',
+        'subtype': 'Подтип',
+        'area_sqm': 'Площ',
+        'price': 'Цена',
+        'price_per_sqm': 'Цена на м²',
+        'floor': 'Етаж',
+        'total_floors': 'Общо етажи',
+        'yard_area': 'Площ на двора',
+        'city': 'Град',
+        'neighborhood': 'Квартал',
+        'title': 'Заглавие',
+        'description': 'Описание',
+        'build_year': 'Година на строеж',
+        'construction_type': 'Конструкция',
+        'completion_degree': 'Степен на завършеност',
+        'features': 'Особености',
+        'broker_name': 'Име на брокера',
+        'broker_position': 'Длъжност',
+        'broker_phone': 'Телефон на брокера',
+        'images': 'Изображения',
+      };
+      
+      // Format validation errors in Bulgarian
+      const formattedErrors = validationResult.error.errors.map((err) => {
+        let message = err.message;
+        const fieldPath = err.path.join('.');
+        const fieldLabel = fieldNames[fieldPath] || fieldPath;
+        
+        // Translate common Zod error messages to Bulgarian
+        if (err.code === 'invalid_type') {
+          if (err.expected === 'string') {
+            message = `${fieldLabel} трябва да е текст`;
+          } else if (err.expected === 'number') {
+            message = `${fieldLabel} трябва да е число`;
+          } else if (err.expected === 'array') {
+            message = `${fieldLabel} трябва да е списък`;
+          }
+        } else if (err.code === 'invalid_enum_value') {
+          message = `Невалидна стойност за ${fieldLabel}. Очаква се една от следните: ${err.options?.join(', ') || ''}`;
+        } else if (err.code === 'too_small') {
+          if (err.type === 'string') {
+            message = `${fieldLabel} трябва да има поне ${err.minimum} символа`;
+          } else if (err.type === 'number') {
+            message = `${fieldLabel} трябва да е поне ${err.minimum}`;
+          }
+        } else if (err.code === 'too_big') {
+          if (err.type === 'number') {
+            message = `${fieldLabel} трябва да е най-много ${err.maximum}`;
+          }
+        } else if (err.code === 'invalid_string') {
+          message = `Невалиден формат за ${fieldLabel}`;
+        }
+        
+        // Use the custom message from schema if available, otherwise use translated message
+        return {
+          path: fieldPath,
+          fieldLabel: fieldLabel,
+          message: message,
+        };
+      });
+      
       return NextResponse.json(
         {
-          error: 'Validation failed',
-          details: validationResult.error.errors,
+          error: 'Валидацията не бе успешна',
+          details: formattedErrors,
         },
         { status: 400 }
       );
@@ -552,7 +710,7 @@ export async function POST(request: NextRequest) {
     if (successfulUploads.length === 0) {
       return NextResponse.json(
         {
-          error: 'All image uploads failed',
+          error: 'Всички качвания на изображения не са успешни',
           details: failedUploads.map((f) => f.error).filter(Boolean),
         },
         { status: 500 }
@@ -640,8 +798,8 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         {
-          error: 'Failed to create property',
-          details: insertError?.message || 'Unknown error',
+          error: 'Неуспешно създаване на имот',
+          details: insertError?.message || 'Неизвестна грешка',
         },
         { status: 500 }
       );
@@ -654,8 +812,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(
       {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Вътрешна грешка на сървъра',
+        details: error instanceof Error ? error.message : 'Неизвестна грешка',
       },
       { status: 500 }
     );

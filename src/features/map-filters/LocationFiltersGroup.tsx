@@ -40,15 +40,11 @@ export function LocationFiltersGroup({
     const [showCityDropdown, setShowCityDropdown] = useState(false);
     const [isDetectingLocation, setIsDetectingLocation] = useState(false);
     
-    // Separate state for manual neighborhood input to prevent disappearing while typing
-    const [manualNeighborhoodInput, setManualNeighborhoodInput] = useState(() => {
-        const isInitialCityValid = initialCity && CITY_OPTIONS.some(
-            (c) => c.toLowerCase() === initialCity.toLowerCase()
-        );
-        return initialNeighborhoods.length > 0 && !isInitialCityValid ? initialNeighborhoods[0] : '';
-    });
-    // Track when user is actively editing the manual neighborhood field
-    const [isEditingManualNeighborhood, setIsEditingManualNeighborhood] = useState(false);
+    // Separate state for manual neighborhood input
+    const [manualNeighborhoodInput, setManualNeighborhoodInput] = useState('');
+    
+    // Debounce ref for manual neighborhood changes
+    const neighborhoodDebounceRef = useRef<NodeJS.Timeout | null>(null);
     
     const internalCityInputRef = useRef<HTMLDivElement | null>(null);
     const cityInputRefForDropdown = useRef<HTMLInputElement>(null);
@@ -60,38 +56,106 @@ export function LocationFiltersGroup({
     const trimmedCity = city.trim();
 
     // Sync internal state with initial props when they change (e.g., from URL restore or map clicks)
-    // but avoid overriding the manual neighborhood while the user is actively typing in it
+    // NOTE: neighborhoods is NOT in dependencies to prevent overwriting user input while typing
     useEffect(() => {
+        // CRITICAL FIX: Don't clear city if user is actively typing in manual neighborhood input
+        // If we have a manual input value and the city is being cleared, preserve the city
+        const shouldPreserveCity = manualNeighborhoodInput.trim().length > 0 && !initialCity && city.trim().length > 0;
+        
+        if (shouldPreserveCity) {
+            // Don't update city - preserve it
+            setSearchTerm(initialSearchTerm);
+            setDistance(initialDistance);
+            return; // Exit early to prevent clearing
+        }
+        
         setSearchTerm(initialSearchTerm);
         setCity(initialCity);
-        setNeighborhoods(initialNeighborhoods);
         setDistance(initialDistance);
 
-        if (!isEditingManualNeighborhood) {
-            // Update manual neighborhood input only if city is not in the list
-            if (initialNeighborhoods.length > 0 && !isValidCity(initialCity)) {
+        // Only sync neighborhoods if city changed (not when neighborhoods change locally)
+        // This prevents overwriting user input while typing
+        if (initialCity !== city) {
+            setNeighborhoods(initialNeighborhoods);
+        }
+
+        // Sync manual input with neighborhoods when city is manually entered
+        // Only update if city changed, not when neighborhoods change
+        if (initialCity !== city) {
+            if (!isValidCity(initialCity) && initialNeighborhoods.length > 0) {
                 setManualNeighborhoodInput(initialNeighborhoods[0]);
-            } else if (!initialCity || !isValidCity(initialCity)) {
+            } else if (isValidCity(initialCity)) {
+                setManualNeighborhoodInput('');
+            } else if (!initialCity && !manualNeighborhoodInput.trim()) {
+                // Only clear if there's no manual input (user isn't typing)
                 setManualNeighborhoodInput('');
             }
         }
-    }, [initialSearchTerm, initialCity, initialNeighborhoods, initialDistance, isValidCity, isEditingManualNeighborhood]);
+    }, [initialSearchTerm, initialCity, initialDistance, isValidCity, city, manualNeighborhoodInput]);
+    
+    // Cleanup debounce timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (neighborhoodDebounceRef.current) {
+                clearTimeout(neighborhoodDebounceRef.current);
+            }
+        };
+    }, []);
 
     const isCitySelected = isValidCity(trimmedCity);
     // Show additional filters if there's any city value (manual input allowed)
     const showAdditionalFilters = trimmedCity.length > 0;
 
+    // Format city name: first letter uppercase, rest lowercase for each word
+    const formatCityName = useCallback((cityName: string): string => {
+        if (!cityName || !cityName.trim()) return cityName;
+        return cityName
+            .trim()
+            .split(/\s+/)
+            .map(word => {
+                if (word.length === 0) return word;
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            })
+            .join(' ');
+    }, []);
+
+    // Format neighborhood names: first letter uppercase, rest lowercase for each word
+    // Keeps abbreviations like "ж.к", "ул.", "бул." lowercase
+    const formatNeighborhoodName = useCallback((neighborhoodName: string): string => {
+        if (!neighborhoodName || !neighborhoodName.trim()) return neighborhoodName;
+        return neighborhoodName
+            .trim()
+            .split(/\s+/)
+            .map(word => {
+                if (word.length === 0) return word;
+                // Keep abbreviations like "ж.к", "ж.к.", "ул.", etc. lowercase
+                const lowerWord = word.toLowerCase();
+                if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.')) {
+                    return lowerWord;
+                }
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            })
+            .join(' ');
+    }, []);
+
     const handleCitySelect = useCallback((cityName: string, coordinates: [number, number]) => {
-        setCity(cityName);
+        const formattedCity = formatCityName(cityName);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LocationFiltersGroup.tsx:142',message:'City selected from dropdown',data:{original:cityName,formatted:formattedCity},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
+        setCity(formattedCity);
         setNeighborhoods([]);
         setDistance(0);
         setShowCityDropdown(false);
-        onFilterChange(searchTerm, cityName, [], 0);
-    }, [searchTerm, onFilterChange]);
+        onFilterChange(searchTerm, formattedCity, [], 0);
+    }, [searchTerm, onFilterChange, formatCityName]);
 
     const handleNeighborhoodSelectChange = useCallback(
         (value: string | string[]) => {
             const next = Array.isArray(value) ? value : value ? [value] : [];
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LocationFiltersGroup.tsx:120',message:'Neighborhood selected from dropdown',data:{value,next,city},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+            // #endregion
             setNeighborhoods(next);
             onFilterChange(searchTerm, city, next, distance);
         },
@@ -267,6 +331,15 @@ export function LocationFiltersGroup({
                                 setTimeout(() => {
                                     if (!cityDropdownRef.current?.contains(document.activeElement)) {
                                         setShowCityDropdown(false);
+                                        // Format city name on blur if manually entered
+                                        if (city.trim() && !isCitySelected) {
+                                            const formatted = formatCityName(city);
+                                            // #region agent log
+                                            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LocationFiltersGroup.tsx:330',message:'City formatted on blur (manual input)',data:{original:city,formatted,isCitySelected},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+                                            // #endregion
+                                            setCity(formatted);
+                                            onFilterChange(searchTerm, formatted, neighborhoods, distance);
+                                        }
                                     }
                                 }, 200);
                             }}
@@ -365,64 +438,60 @@ export function LocationFiltersGroup({
                                 )}
                             </>
                         ) : (
-                            // City is manually entered - show text input for manual neighborhood entry
+                            // City is manually entered - show lightweight text input that stores directly in state
                             <>
-                                <Input
-                                    id="filters-neighborhood-manual"
-                                    label="Квартал"
-                                    placeholder="Въведете квартал"
-                                    value={manualNeighborhoodInput}
-                                    onFocus={() => {
-                                        // Prevent external prop sync from resetting the field while typing
-                                        setIsEditingManualNeighborhood(true);
-                                    }}
-                                    onChange={(event) => {
-                                        const value = event.target.value;
-                                        setManualNeighborhoodInput(value);
-                                        // Update neighborhoods with the raw value (don't trim while typing)
-                                        if (value.trim()) {
-                                            handleNeighborhoodSelectChange([value.trim()]);
-                                        } else {
-                                            handleNeighborhoodSelectChange([]);
-                                        }
-                                    }}
-                                    onBlur={(event) => {
-                                        // Trim and format on blur
-                                        const trimmedValue = event.target.value.trim();
-                                        setManualNeighborhoodInput(trimmedValue);
-                                        if (trimmedValue) {
-                                            handleNeighborhoodSelectChange([trimmedValue]);
-                                        } else {
-                                            handleNeighborhoodSelectChange([]);
-                                        }
-                                        // Allow external prop sync again
-                                        setIsEditingManualNeighborhood(false);
-                                    }}
-                                    className={styles.filterInput}
-                                />
-                                {neighborhoods.length > 0 && (
-                                    <div className={styles.selectedNeighborhoods}>
-                                        {neighborhoods.map((neighborhoodName) => (
-                                            <span
-                                                key={neighborhoodName}
-                                                className={styles.neighborhoodChip}
-                                            >
-                                                {neighborhoodName}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        handleRemoveNeighborhood(neighborhoodName);
-                                                        setManualNeighborhoodInput('');
-                                                    }}
-                                                    className={styles.neighborhoodChipRemove}
-                                                    aria-label={`Remove ${neighborhoodName}`}
-                                                >
-                                                    ×
-                                                </button>
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
+                                <div className={styles.manualNeighborhoodInputWrapper}>
+                                    <label htmlFor="filters-neighborhood-manual" className={styles.manualNeighborhoodLabel}>
+                                        Квартал
+                                    </label>
+                                    <input
+                                        id="filters-neighborhood-manual"
+                                        type="text"
+                                        placeholder="Въведете квартал"
+                                        value={manualNeighborhoodInput}
+                                        onChange={(event) => {
+                                            const value = event.target.value;
+                                            setManualNeighborhoodInput(value);
+                                            
+                                            // Update local neighborhoods state immediately for responsive UI
+                                            const trimmedValue = value.trim();
+                                            const newNeighborhoods = trimmedValue ? [trimmedValue] : [];
+                                            setNeighborhoods(newNeighborhoods);
+                                            
+                                            // Debounce the parent callback to prevent excessive re-renders
+                                            if (neighborhoodDebounceRef.current) {
+                                                clearTimeout(neighborhoodDebounceRef.current);
+                                            }
+                                            
+                                            // Capture current values at the time of typing to avoid stale closures
+                                            const capturedSearchTerm = searchTerm;
+                                            const capturedCity = city;
+                                            const capturedDistance = distance;
+                                            
+                                            neighborhoodDebounceRef.current = setTimeout(() => {
+                                                // Use captured values to prevent stale closure issues
+                                                // Only call parent if city is still valid (not cleared)
+                                                if (capturedCity && capturedCity.trim()) {
+                                                    onFilterChange(capturedSearchTerm, capturedCity, newNeighborhoods, capturedDistance);
+                                                }
+                                            }, 300);
+                                        }}
+                                        onBlur={() => {
+                                            // Format neighborhood name on blur
+                                            if (manualNeighborhoodInput.trim()) {
+                                                const formatted = formatNeighborhoodName(manualNeighborhoodInput);
+                                                // #region agent log
+                                                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LocationFiltersGroup.tsx:473',message:'Neighborhood formatted on blur (manual input)',data:{original:manualNeighborhoodInput,formatted,city},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+                                                // #endregion
+                                                setManualNeighborhoodInput(formatted);
+                                                const newNeighborhoods = formatted ? [formatted] : [];
+                                                setNeighborhoods(newNeighborhoods);
+                                                onFilterChange(searchTerm, city, newNeighborhoods, distance);
+                                            }
+                                        }}
+                                        className={styles.manualNeighborhoodInputField}
+                                    />
+                                </div>
                             </>
                         )}
                     </div>

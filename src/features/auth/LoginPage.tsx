@@ -100,7 +100,7 @@ export function LoginPage() {
         setSuccess(t('flashMessages.loginSuccess'));
         // Redirect to admin panel or home
         setTimeout(() => {
-          router.push('/admin/properties');
+          router.push('/admin/properties/quick-view');
         }, 1000);
       }
     } catch (err) {

@@ -34,7 +34,7 @@ async function uploadImageWithLimit(
             secure_url: '',
             public_id: '',
             success: false,
-            error: `File ${file.name} is not an image`,
+            error: `Файлът ${file.name} не е изображение`,
           });
           semaphore.count--;
           if (semaphore.queue.length > 0) {
@@ -74,7 +74,7 @@ async function uploadImageWithLimit(
           secure_url: '',
           public_id: '',
           success: false,
-          error: error instanceof Error ? error.message : 'Upload failed',
+          error: error instanceof Error ? error.message : 'Неуспешно качване',
         });
       } finally {
         semaphore.count--;
@@ -102,7 +102,7 @@ export async function GET(
     const { id } = await params;
 
     if (!id) {
-      return NextResponse.json({ error: 'Missing id parameter' }, { status: 400 });
+      return NextResponse.json({ error: 'Липсва параметър id' }, { status: 400 });
     }
 
     const supabaseAdmin = getSupabaseAdminClient();
@@ -116,18 +116,18 @@ export async function GET(
     if (error) {
       if (error.code === 'PGRST116') {
         // row not found
-        return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Имотът не е намерен' }, { status: 404 });
       }
 
       console.error('Error fetching property by id:', error);
       return NextResponse.json(
-        { error: 'Failed to fetch property', details: error.message },
+        { error: 'Неуспешно зареждане на имот', details: error.message },
         { status: 500 },
       );
     }
 
     if (!prop) {
-      return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Имотът не е намерен' }, { status: 404 });
     }
 
     const transformedProperty = {
@@ -174,8 +174,8 @@ export async function GET(
     console.error('Unexpected error in GET /api/properties/[id]:', error);
     return NextResponse.json(
       {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Вътрешна грешка на сървъра',
+        details: error instanceof Error ? error.message : 'Неизвестна грешка',
       },
       { status: 500 },
     );
@@ -190,7 +190,7 @@ export async function DELETE(
     const { id } = await params;
 
     if (!id) {
-      return NextResponse.json({ error: 'Missing id parameter' }, { status: 400 });
+      return NextResponse.json({ error: 'Липсва параметър id' }, { status: 400 });
     }
 
     const supabaseAdmin = getSupabaseAdminClient();
@@ -204,7 +204,7 @@ export async function DELETE(
 
     if (fetchError || !existing) {
       if ((fetchError as any)?.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Имотът не е намерен' }, { status: 404 });
       }
       console.error('Error fetching property before delete:', fetchError);
       return NextResponse.json(
@@ -240,8 +240,8 @@ export async function DELETE(
     console.error('Unexpected error in DELETE /api/properties/[id]:', error);
     return NextResponse.json(
       {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Вътрешна грешка на сървъра',
+        details: error instanceof Error ? error.message : 'Неизвестна грешка',
       },
       { status: 500 },
     );
@@ -256,7 +256,7 @@ export async function PUT(
     const { id } = await params;
 
     if (!id) {
-      return NextResponse.json({ error: 'Missing id parameter' }, { status: 400 });
+      return NextResponse.json({ error: 'Липсва параметър id' }, { status: 400 });
     }
 
     const supabaseAdmin = getSupabaseAdminClient();
@@ -270,7 +270,7 @@ export async function PUT(
 
     if (fetchError || !existingProperty) {
       if ((fetchError as any)?.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Имотът не е намерен' }, { status: 404 });
       }
       console.error('Error fetching property before update:', fetchError);
       return NextResponse.json(
@@ -310,7 +310,7 @@ export async function PUT(
     for (const file of newImageFiles) {
       if (!(file instanceof File)) {
         return NextResponse.json(
-          { error: 'All image fields must be valid files' },
+          { error: 'Всички полета за изображения трябва да са валидни файлове' },
           { status: 400 }
         );
       }
@@ -332,7 +332,7 @@ export async function PUT(
     if (brokerImageFile) {
       if (!(brokerImageFile instanceof File)) {
         return NextResponse.json(
-          { error: 'Broker image must be a valid file' },
+          { error: 'Снимката на брокера трябва да е валиден файл' },
           { status: 400 }
         );
       }
@@ -389,7 +389,7 @@ export async function PUT(
             secure_url: '',
             public_id: '',
             success: false,
-            error: result.reason?.message || 'Upload failed',
+            error: result.reason?.message || 'Неуспешно качване',
           });
         }
       });
@@ -397,7 +397,7 @@ export async function PUT(
       if (failedUploads.length > 0 && successfulUploads.length === 0) {
         return NextResponse.json(
           {
-            error: 'All image uploads failed',
+            error: 'Всички качвания на изображения не са успешни',
             details: failedUploads.map((f) => f.error).filter(Boolean),
           },
           { status: 500 }
@@ -647,8 +647,8 @@ export async function PUT(
     console.error('Unexpected error in PUT /api/properties/[id]:', error);
     return NextResponse.json(
       {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Вътрешна грешка на сървъра',
+        details: error instanceof Error ? error.message : 'Неизвестна грешка',
       },
       { status: 500 },
     );

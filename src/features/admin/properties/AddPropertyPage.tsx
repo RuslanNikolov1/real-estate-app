@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, DragEvent, useId } from 'react';
+import { useEffect, useMemo, useRef, useState, DragEvent, useId, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -14,8 +14,9 @@ import {
   COMPLETION_STATUSES,
   FLOOR_SPECIAL_OPTIONS,
 } from '@/features/map-filters/filters/constants';
-import { CITY_OPTIONS, getNeighborhoodsByCity, getInitialCity } from '@/lib/neighborhoods';
+import { CITY_OPTIONS, getNeighborhoodsByCity } from '@/lib/neighborhoods';
 import { NeighborhoodSelect } from '@/components/forms/NeighborhoodSelect';
+import burgasCities from '@/data/burgasCities.json';
 import {
   getPropertyTypeSchema,
 } from '@/lib/property-schemas';
@@ -52,18 +53,51 @@ export function AddPropertyPage() {
   const [selectedCompletion, setSelectedCompletion] = useState(COMPLETION_STATUSES[0].id);
   const [selectedConstruction, setSelectedConstruction] = useState(CONSTRUCTION_FILTERS[0].id);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
-  const initialCity = getInitialCity();
-  const [city, setCity] = useState(initialCity);
-  const [neighborhood, setNeighborhood] = useState(() => {
-    const initialOptions = getNeighborhoodsByCity(initialCity);
-    return initialOptions[0] ?? '';
-  });
+  const [city, setCity] = useState('');
+  const [neighborhood, setNeighborhood] = useState('');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [manualNeighborhoodInput, setManualNeighborhoodInput] = useState('');
+  const cityInputRef = useRef<HTMLInputElement>(null);
+  const cityDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Check if the city is a valid selected city from the list
+  const isValidCity = useCallback((cityName: string) => {
+    if (!cityName) return false;
+    return CITY_OPTIONS.some(
+      (c) => c.toLowerCase() === cityName.toLowerCase()
+    );
+  }, []);
+  
+  const isCitySelected = isValidCity(city.trim());
   const [description, setDescription] = useState('');
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const [area, setArea] = useState('');
   const [pricePerSqm, setPricePerSqm] = useState('');
+  const [areaError, setAreaError] = useState<string | null>(null);
+  const [priceError, setPriceError] = useState<string | null>(null);
+  const [pricePerSqmError, setPricePerSqmError] = useState<string | null>(null);
+  const [yearBuiltError, setYearBuiltError] = useState<string | null>(null);
+  const [brokerPhoneError, setBrokerPhoneError] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
+  
+  // Helper to validate Bulgarian phone number
+  // Supports: +359XXXXXXXXX (10 digits after +359) or 0XXXXXXXXX (9 digits after 0)
+  // Allows spaces/dashes: +359 XXX XXX XXX or 0XXX XXX XXX
+  const validateBulgarianPhone = (phone: string): boolean => {
+    if (!phone || !phone.trim()) return false;
+    // Remove all spaces and dashes for validation
+    const cleaned = phone.replace(/[\s-]/g, '');
+    // Check +359 format: +359 followed by 9 digits (total 13 chars)
+    if (cleaned.startsWith('+359')) {
+      return /^\+359[0-9]{9}$/.test(cleaned);
+    }
+    // Check 0 format: 0 followed by 9 digits (total 10 chars)
+    if (cleaned.startsWith('0')) {
+      return /^0[0-9]{9}$/.test(cleaned);
+    }
+    return false;
+  };
   const createdObjectUrls = useRef<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const imageFilesRef = useRef<File[]>([]);
@@ -146,19 +180,40 @@ export function AddPropertyPage() {
     setHotelCategory('');
     setAgriculturalCategory('');
     setBedBase('');
+    // Clear validation errors
+    setAreaError(null);
+    setPriceError(null);
+    setPricePerSqmError(null);
+    setYearBuiltError(null);
+    setBrokerPhoneError(null);
   }, [selectedType, showConstruction, showCompletion]);
 
   const neighborhoodOptions = useMemo(() => getNeighborhoodsByCity(city), [city]);
 
   useEffect(() => {
-    if (!neighborhoodOptions.length) {
-      setNeighborhood('');
-      return;
+    // Only validate neighborhoods if city is in the list
+    if (isCitySelected) {
+      if (!neighborhoodOptions.length) {
+        setNeighborhood('');
+        setManualNeighborhoodInput('');
+        return;
+      }
+      if (!neighborhoodOptions.includes(neighborhood)) {
+        setNeighborhood(neighborhoodOptions[0]);
+      }
+      // Clear manual input when switching to a valid city
+      if (manualNeighborhoodInput) {
+        setManualNeighborhoodInput('');
+      }
+    } else {
+      // For manual cities, use manual neighborhood input
+      if (manualNeighborhoodInput.trim()) {
+        setNeighborhood(manualNeighborhoodInput.trim());
+      } else {
+        setNeighborhood('');
+      }
     }
-    if (!neighborhoodOptions.includes(neighborhood)) {
-      setNeighborhood(neighborhoodOptions[0]);
-    }
-  }, [neighborhoodOptions, neighborhood]);
+  }, [neighborhoodOptions, neighborhood, isCitySelected, manualNeighborhoodInput]);
 
   const calculatedPricePerSqm = useMemo(() => {
     if (!price || !area) {
@@ -224,14 +279,23 @@ export function AddPropertyPage() {
   };
 
   // Helper to format city / neighborhood names: each word capitalized
-  const formatLocationName = (value: string) => {
+  // For neighborhoods, keeps abbreviations like "ж.к", "ул.", "бул." lowercase
+  const formatLocationName = (value: string, isNeighborhood: boolean = false) => {
     if (!value) return value;
     return value
       .trim()
       .split(/\s+/)
-      .map((word) =>
-        word.length ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : word,
-      )
+      .map((word) => {
+        if (word.length === 0) return word;
+        // For neighborhoods, keep abbreviations lowercase
+        if (isNeighborhood) {
+          const lowerWord = word.toLowerCase();
+          if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.')) {
+            return lowerWord;
+          }
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      })
       .join(' ');
   };
 
@@ -259,13 +323,31 @@ export function AddPropertyPage() {
       return;
     }
 
-    if (!Number.isFinite(numericArea) || numericArea <= 0) {
+    // Validate area is a number
+    if (!area.trim() || isNaN(numericArea) || !Number.isFinite(numericArea) || numericArea <= 0) {
+      setAreaError(t('errors.areaMustBePositive'));
       setSubmitError(t('errors.areaMustBePositive'));
       return;
     }
 
-    if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+    // Validate price is a number
+    if (!price.trim() || isNaN(numericPrice) || !Number.isFinite(numericPrice) || numericPrice <= 0) {
+      setPriceError(t('errors.priceMustBePositive'));
       setSubmitError(t('errors.priceMustBePositive'));
+      return;
+    }
+    
+    // Validate price per sqm (required)
+    const resolvedPricePerSqm = pricePerSqm || calculatedPricePerSqm;
+    if (!resolvedPricePerSqm || !resolvedPricePerSqm.trim()) {
+      setPricePerSqmError(t('errors.pricePerSqmInvalid'));
+      setSubmitError(t('errors.pricePerSqmInvalid'));
+      return;
+    }
+    const numericPricePerSqm = parseFloat(resolvedPricePerSqm);
+    if (isNaN(numericPricePerSqm) || !Number.isFinite(numericPricePerSqm) || numericPricePerSqm < 0) {
+      setPricePerSqmError(t('errors.pricePerSqmInvalid'));
+      setSubmitError(t('errors.pricePerSqmInvalid'));
       return;
     }
 
@@ -275,17 +357,17 @@ export function AddPropertyPage() {
     }
 
     if (typeSchema.subtypeOptions.length > 0 && !subtype) {
-      setSubmitError(t('errors.subtypeRequired') || 'Подтипът е задължителен');
+      setSubmitError(t('errors.subtypeRequired'));
       return;
     }
 
     if (!broker.title.trim()) {
-      setSubmitError(t('errors.brokerPositionRequired') || 'Длъжността е задължителна');
+      setSubmitError(t('errors.brokerPositionRequired'));
       return;
     }
 
     if (!brokerImageFileRef.current && !brokerImagePreview) {
-      setSubmitError(t('errors.brokerImageRequired') || 'Снимката на брокера е задължителна');
+      setSubmitError(t('errors.brokerImageRequired'));
       return;
     }
 
@@ -295,7 +377,17 @@ export function AddPropertyPage() {
     }
 
     if (!trimmedBrokerName || !trimmedBrokerPhone) {
+      if (!trimmedBrokerPhone) {
+        setBrokerPhoneError(t('errors.brokerNameAndPhoneRequired'));
+      }
       setSubmitError(t('errors.brokerNameAndPhoneRequired'));
+      return;
+    }
+    
+    // Validate Bulgarian phone number format
+    if (!validateBulgarianPhone(trimmedBrokerPhone)) {
+      setBrokerPhoneError(t('errors.phoneInvalid'));
+      setSubmitError(t('errors.phoneInvalid'));
       return;
     }
 
@@ -305,9 +397,21 @@ export function AddPropertyPage() {
       return;
     }
 
-    // Validate year built (required)
+    // Validate year built (required and must be a number)
     if (!yearBuilt || !yearBuilt.trim()) {
+      setYearBuiltError(t('errors.yearBuiltRequired'));
       setSubmitError(t('errors.yearBuiltRequired'));
+      return;
+    }
+    const numericYearBuilt = parseInt(yearBuilt, 10);
+    if (isNaN(numericYearBuilt) || !Number.isFinite(numericYearBuilt)) {
+      setYearBuiltError(t('errors.yearBuiltInvalid'));
+      setSubmitError(t('errors.yearBuiltInvalid'));
+      return;
+    }
+    if (numericYearBuilt < 1000 || numericYearBuilt > new Date().getFullYear() + 10) {
+      setYearBuiltError(t('errors.yearBuiltInvalid'));
+      setSubmitError(t('errors.yearBuiltInvalid'));
       return;
     }
 
@@ -345,18 +449,17 @@ export function AddPropertyPage() {
       formData.append('area_sqm', numericArea.toString());
       formData.append('price', numericPrice.toString());
 
+      // Price per sqm is required - use provided value or calculated value
       const resolvedPricePerSqm = pricePerSqm || calculatedPricePerSqm;
-      if (resolvedPricePerSqm) {
-        formData.append('price_per_sqm', resolvedPricePerSqm);
-      }
+      formData.append('price_per_sqm', resolvedPricePerSqm);
 
       // Floor is required for apartments, offices, shops
       if (showFloor) {
         formData.append('floor', floor);
       }
 
-      const formattedCity = formatLocationName(city);
-      const formattedNeighborhood = formatLocationName(neighborhood);
+      const formattedCity = formatLocationName(city, false);
+      const formattedNeighborhood = formatLocationName(neighborhood, true);
 
       formData.append('city', formattedCity);
       formData.append('neighborhood', formattedNeighborhood);
@@ -416,7 +519,7 @@ export function AddPropertyPage() {
         formData.append('broker_image', brokerImageFileRef.current);
       } else {
         // This should not happen due to validation, but handle it gracefully
-        setSubmitError(t('errors.brokerImageRequired') || 'Снимката на брокера е задължителна');
+        setSubmitError(t('errors.brokerImageRequired'));
         return;
       }
 
@@ -431,7 +534,20 @@ export function AddPropertyPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        const errorMessage = errorData?.error || 'flashMessages.propertyAddError';
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:472',message:'API error response',data:{status:response.status,statusText:response.statusText,errorData,formDataKeys:Array.from(formData.keys())},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
+        
+        // Handle validation errors - format them in Bulgarian
+        if (errorData?.details && Array.isArray(errorData.details)) {
+          const validationErrors = errorData.details.map((err: any) => {
+            const fieldLabel = err.fieldLabel || err.path || 'поле';
+            return `${fieldLabel}: ${err.message}`;
+          }).join('\n');
+          throw new Error(`Грешки при валидация:\n${validationErrors}`);
+        }
+        
+        const errorMessage = errorData?.error || errorData?.details || 'flashMessages.propertyAddError';
         // Translate error message if it's a translation key
         const translatedError = errorMessage.startsWith('errors.') 
           ? t(errorMessage as any, { fileName: errorMessage.split(':')[1] || '' })
@@ -490,7 +606,7 @@ export function AddPropertyPage() {
       <main className={styles.main}>
         <div className={styles.container}>
         <div className={styles.breadcrumbs}>
-          <Link href="/admin/properties">Имоти</Link>
+          <Link href="/admin/properties/quick-view">Имоти</Link>
           <span>/</span>
           <span>Конфигуратор</span>
         </div>
@@ -591,22 +707,113 @@ export function AddPropertyPage() {
               <Input
                 label={`${selectedType === 'hotel' ? 'РЗП (м²)' : 'Площ (м²)'} *`}
                 placeholder="120"
+                type="number"
+                min="0"
+                step="0.01"
                 value={area}
-                onChange={(event) => setArea(event.target.value)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setArea(value);
+                  // Validate immediately
+                  if (value.trim() === '') {
+                    setAreaError(null);
+                  } else {
+                    const numValue = parseFloat(value);
+                    if (isNaN(numValue)) {
+                      setAreaError(t('errors.areaInvalid'));
+                    } else if (numValue <= 0) {
+                      setAreaError(t('errors.areaMustBePositive'));
+                    } else {
+                      setAreaError(null);
+                    }
+                  }
+                }}
+                onBlur={() => {
+                  if (area.trim() && !areaError) {
+                    const numValue = parseFloat(area);
+                    if (isNaN(numValue) || numValue <= 0) {
+                      setAreaError('Площта трябва да е положително число');
+                    }
+                  }
+                }}
+                error={areaError || undefined}
                 required
               />
               <Input
                 label="Цена *"
                 placeholder="250 000"
+                type="number"
+                min="0"
+                step="0.01"
                 value={price}
-                onChange={(event) => setPrice(event.target.value)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setPrice(value);
+                  // Validate immediately
+                  if (value.trim() === '') {
+                    setPriceError(null);
+                  } else {
+                    const numValue = parseFloat(value);
+                    if (isNaN(numValue)) {
+                      setPriceError(t('errors.priceInvalid'));
+                    } else if (numValue <= 0) {
+                      setPriceError(t('errors.priceMustBePositive'));
+                    } else {
+                      setPriceError(null);
+                    }
+                  }
+                }}
+                onBlur={() => {
+                  if (price.trim() && !priceError) {
+                    const numValue = parseFloat(price);
+                    if (isNaN(numValue) || numValue <= 0) {
+                      setPriceError('Цената трябва да е положително число');
+                    }
+                  }
+                }}
+                error={priceError || undefined}
                 required
               />
               <Input
-                label="Цена на м²"
+                label="Цена на м² *"
                 placeholder="изчислява се"
+                type="number"
+                min="0"
+                step="0.01"
                 value={pricePerSqm || calculatedPricePerSqm}
-                onChange={(event) => setPricePerSqm(event.target.value)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setPricePerSqm(value);
+                  // Validate immediately
+                  const resolvedValue = value || calculatedPricePerSqm;
+                  if (!resolvedValue || !resolvedValue.trim()) {
+                    setPricePerSqmError(t('errors.pricePerSqmInvalid'));
+                  } else {
+                    const numValue = parseFloat(resolvedValue);
+                    if (isNaN(numValue)) {
+                      setPricePerSqmError(t('errors.pricePerSqmInvalid'));
+                    } else if (numValue < 0) {
+                      setPricePerSqmError(t('errors.pricePerSqmInvalid'));
+                    } else {
+                      setPricePerSqmError(null);
+                    }
+                  }
+                }}
+                onBlur={() => {
+                  const resolvedValue = pricePerSqm || calculatedPricePerSqm;
+                  if (!resolvedValue || !resolvedValue.trim()) {
+                    setPricePerSqmError(t('errors.pricePerSqmInvalid'));
+                  } else {
+                    const numValue = parseFloat(resolvedValue);
+                    if (isNaN(numValue) || numValue < 0) {
+                      setPricePerSqmError(t('errors.pricePerSqmInvalid'));
+                    } else {
+                      setPricePerSqmError(null);
+                    }
+                  }
+                }}
+                error={pricePerSqmError || undefined}
+                required
               />
               {/* Yard area - only for houses and villas */}
               {showYardArea && (
@@ -644,29 +851,133 @@ export function AddPropertyPage() {
             <div className={styles.inputsRow}>
               <div className={styles.control}>
                 <label>Град *</label>
-                <select
-                  value={city}
-                  onChange={(event) => setCity(event.target.value)}
-                  className={styles.select}
-                  required
-                >
-                  {CITY_OPTIONS.map((cityName) => (
-                    <option key={cityName} value={cityName}>
-                      {cityName}
-                    </option>
-                  ))}
-                </select>
+                <div className={styles.autocompleteWrapper}>
+                  <Input
+                    placeholder="Въведете или изберете град (пр. Бургас)"
+                        value={city}
+                            onChange={(event) => {
+                      const value = event.target.value;
+                      setCity(value);
+                      // Show dropdown only when there is some input
+                      if (value.trim().length > 0) {
+                        setShowCityDropdown(true);
+                      } else {
+                        setShowCityDropdown(false);
+                      }
+                    }}
+                    onFocus={() => {
+                      // Show dropdown if there are matching options
+                      if (city.trim().length > 0 || CITY_OPTIONS.length > 0) {
+                        setShowCityDropdown(true);
+                      }
+                    }}
+                    onBlur={() => {
+                      // Delay hiding dropdown to allow click on dropdown item
+                      setTimeout(() => {
+                        if (!cityDropdownRef.current?.contains(document.activeElement)) {
+                          setShowCityDropdown(false);
+                          // Format city name on blur if manually entered
+                          if (city.trim() && !isCitySelected) {
+                            const formatted = formatLocationName(city, false);
+                            setCity(formatted);
+                          }
+                        }
+                      }, 200);
+                    }}
+                    ref={cityInputRef}
+                    required
+                  />
+                  {showCityDropdown && CITY_OPTIONS.length > 0 && (
+                    <div
+                      ref={cityDropdownRef}
+                      className={styles.cityDropdown}
+                    >
+                      {CITY_OPTIONS
+                        .filter((cityName) => {
+                          const searchTerm = city.toLowerCase().trim();
+                          if (!searchTerm) return true;
+                          return cityName.toLowerCase().includes(searchTerm);
+                        })
+                        .slice(0, 10) // Limit to 10 results for better UX
+                        .map((cityName) => {
+                          // Find coordinates from burgasCities for map/distance calculations
+                          const cityData = burgasCities.cities.find(
+                            (c) => c.name.toLowerCase() === cityName.toLowerCase() ||
+                              c.nameEn.toLowerCase() === cityName.toLowerCase()
+                          );
+                          const coordinates: [number, number] = cityData && cityData.coordinates && cityData.coordinates.length === 2
+                            ? [cityData.coordinates[0], cityData.coordinates[1]]
+                            : [0, 0]; // Fallback if coordinates not found
+                          
+                          return (
+                            <button
+                              key={cityName}
+                              type="button"
+                              className={styles.cityDropdownItem}
+                              onMouseDown={(e) => {
+                                e.preventDefault(); // Prevent input blur
+                              }}
+                                    onClick={() => {
+                                const formattedCityName = formatLocationName(cityName, false);
+                                setCity(formattedCityName);
+                                setShowCityDropdown(false);
+                                // Reset neighborhood when city changes
+                                const newOptions = getNeighborhoodsByCity(formattedCityName);
+                                setNeighborhood(newOptions[0] ?? '');
+                                setManualNeighborhoodInput('');
+                              }}
+                            >
+                              {cityName}
+                            </button>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className={styles.control}>
-                <NeighborhoodSelect
-                  city={city}
-                  value={neighborhood}
-                  onChange={(val) => setNeighborhood(Array.isArray(val) ? val[0] ?? '' : val)}
-                  disabled={!city}
-                  label="Квартал"
-                  required
-                />
-              </div>
+              {city.trim() && (
+                <div className={styles.control}>
+                  {isCitySelected ? (
+                    <NeighborhoodSelect
+                      city={city}
+                      value={neighborhood}
+                      onChange={(val) => setNeighborhood(Array.isArray(val) ? val[0] ?? '' : val)}
+                      disabled={!isCitySelected}
+                      label="Квартал"
+                      required
+                    />
+                  ) : (
+                    <div className={styles.manualNeighborhoodInputWrapper}>
+                      <label htmlFor="neighborhood-manual" className={styles.manualNeighborhoodLabel}>
+                        Квартал *
+                      </label>
+                      <input
+                        id="neighborhood-manual"
+                        type="text"
+                        placeholder="Въведете квартал"
+                        value={manualNeighborhoodInput}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setManualNeighborhoodInput(value);
+                          // Update neighborhood state immediately
+                          const trimmedValue = value.trim();
+                          setNeighborhood(trimmedValue);
+                        }}
+                        onBlur={() => {
+                          // Format neighborhood name on blur
+                          if (manualNeighborhoodInput.trim()) {
+                            const formatted = formatLocationName(manualNeighborhoodInput, true);
+                            setManualNeighborhoodInput(formatted);
+                            setNeighborhood(formatted);
+                          }
+                        }}
+                        className={styles.manualNeighborhoodInputField}
+                        required
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </section>
 
@@ -751,8 +1062,16 @@ export function AddPropertyPage() {
                 <Input
                   type="number"
                   placeholder="2024"
+                  min="1000"
+                  max={new Date().getFullYear() + 10}
+                  step="1"
                   value={yearBuilt}
-                  onChange={(event) => setYearBuilt(event.target.value)}
+                  onChange={(event) => {
+                    setYearBuilt(event.target.value);
+                    // Clear error when user types
+                    setYearBuiltError(null);
+                  }}
+                  error={yearBuiltError || undefined}
                   required
                 />
               </div>
@@ -957,9 +1276,14 @@ export function AddPropertyPage() {
               />
               <Input
                 label="Телефон *"
-                placeholder="+359 888 123 456"
+                placeholder="+359 888 123 456 или 0888 123 456"
                 value={broker.phone}
-                onChange={(event) => setBroker((prev) => ({ ...prev, phone: event.target.value }))}
+                onChange={(event) => {
+                  setBroker((prev) => ({ ...prev, phone: event.target.value }));
+                  // Clear error when user types
+                  setBrokerPhoneError(null);
+                }}
+                error={brokerPhoneError || undefined}
                 required
               />
             </div>

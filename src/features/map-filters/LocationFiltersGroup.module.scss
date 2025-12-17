@@ -231,6 +231,89 @@
     font-style: italic;
 }
 
+.manualNeighborhoodInputWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+}
+
+.manualNeighborhoodLabel {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: $dark-gray;
+}
+
+.manualNeighborhoodInputField {
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    border: 2px solid $dark-red;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    background-color: $white;
+    color: $black;
+    transition: border-color $transition-base, box-shadow $transition-base;
+    outline: none;
+
+    &::placeholder {
+        color: rgba($dark-gray, 0.6);
+    }
+
+    &:focus {
+        border-color: $dark-red;
+        box-shadow: 0 0 0 3px rgba(140, 28, 28, 0.1);
+    }
+
+    &:disabled {
+        background: $light-gray;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+}
+
+.manualNeighborhoodInputContainer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-sm;
+    border: 2px solid $dark-red;
+    border-radius: 14px;
+    background: $white;
+    min-height: 48px;
+    transition: all $transition-base;
+
+    &:focus-within {
+        box-shadow: 0 0 0 3px rgba(140, 28, 28, 0.1);
+    }
+
+    .selectedNeighborhoods {
+        margin-bottom: 0;
+        flex-wrap: wrap;
+    }
+}
+
+.manualNeighborhoodInput {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1rem;
+    font-family: inherit;
+    color: $black;
+    padding: $spacing-xs 0;
+    flex: 1;
+
+    &::placeholder {
+        color: rgba($dark-gray, 0.6);
+        font-style: italic;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
 .distanceFilter {
     display: flex;
     flex-direction: column;

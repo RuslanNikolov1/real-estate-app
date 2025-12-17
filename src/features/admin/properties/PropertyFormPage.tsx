@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, DragEvent } from 'react';
+import { useState, useEffect, useMemo, useRef, DragEvent, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +14,7 @@ import { PlateEditor, Value } from '@/lib/plate-editor';
 import { translateProperty } from '@/lib/translator';
 import { CITY_OPTIONS, getNeighborhoodsByCity } from '@/lib/neighborhoods';
 import { NeighborhoodSelect } from '@/components/forms/NeighborhoodSelect';
+import burgasCities from '@/data/burgasCities.json';
 import type { Property, PropertyType } from '@/types';
 import { FloppyDisk, X, Globe, SpinnerGap } from '@phosphor-icons/react';
 import {
@@ -65,6 +67,18 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   const [brokerImageUrl, setBrokerImageUrl] = useState<string | null>(
     null,
   );
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [manualNeighborhoodInput, setManualNeighborhoodInput] = useState('');
+  const cityInputRef = useRef<HTMLInputElement>(null);
+  const cityDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Check if the city is a valid selected city from the list
+  const isValidCity = useCallback((cityName: string) => {
+    if (!cityName) return false;
+    return CITY_OPTIONS.some(
+      (c) => c.toLowerCase() === cityName.toLowerCase()
+    );
+  }, []);
 
   useEffect(() => {
     if (!propertyId) {
@@ -81,7 +95,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
 
         const response = await fetch(`/api/properties/${propertyId}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch property');
+          throw new Error('Неуспешно зареждане на имот');
         }
 
         const data: Property = await response.json();
@@ -228,6 +242,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     reset,
   } = useForm<PropertyFormData>({
     resolver: zodResolver(propertySchema),
+    mode: 'onSubmit', // Only validate on submit, not on blur or change
+    reValidateMode: 'onSubmit', // Only re-validate on submit after first submission
     shouldFocusError: false, // Prevent automatic scroll to error
     defaultValues: {
       title: '',
@@ -235,7 +251,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       type: 'apartment',
       status: 'for-sale',
       location_type: 'urban',
-      city: CITY_OPTIONS[0] ?? 'Бургас',
+      city: '',
       neighborhood: '',
       price: 0,
       area: 0,
@@ -256,6 +272,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   const cityValue = watch('city');
   const neighborhoodValue = watch('neighborhood');
   const watchedType = watch('type') as PropertyType;
+  const isCitySelected = isValidCity(cityValue?.trim() || '');
 
   // Update property type when it changes and reset type-specific fields
   useEffect(() => {
@@ -327,14 +344,29 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   }, [propertyType]);
 
   useEffect(() => {
-    if (!neighborhoodOptions.length) {
-      setValue('neighborhood', '');
-      return;
+    // Only validate neighborhoods if city is in the list
+    if (isCitySelected) {
+      if (!neighborhoodOptions.length) {
+        setValue('neighborhood', '');
+        setManualNeighborhoodInput('');
+        return;
+      }
+      if (!neighborhoodValue || !neighborhoodOptions.includes(neighborhoodValue)) {
+        setValue('neighborhood', neighborhoodOptions[0]);
+      }
+      // Clear manual input when switching to a valid city
+      if (manualNeighborhoodInput) {
+        setManualNeighborhoodInput('');
+      }
+    } else {
+      // For manual cities, use manual neighborhood input
+      if (manualNeighborhoodInput.trim()) {
+        setValue('neighborhood', manualNeighborhoodInput.trim());
+      } else if (!cityValue?.trim()) {
+        setValue('neighborhood', '');
+      }
     }
-    if (!neighborhoodValue || !neighborhoodOptions.includes(neighborhoodValue)) {
-      setValue('neighborhood', neighborhoodOptions[0]);
-    }
-  }, [neighborhoodOptions, neighborhoodValue, setValue]);
+  }, [neighborhoodOptions, neighborhoodValue, setValue, isCitySelected, manualNeighborhoodInput, cityValue]);
 
   useEffect(() => {
     if (!cityValue && cityOptions.length) {
@@ -428,7 +460,14 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     if ((property as any)?.broker_image) {
       setBrokerImageUrl((property as any).broker_image || null);
     }
-  }, [property, reset]);
+    
+    // Set manual neighborhood input if city is not in the list
+    if (property?.city && !isValidCity(property.city)) {
+      setManualNeighborhoodInput(property.neighborhood || '');
+    } else {
+      setManualNeighborhoodInput('');
+    }
+  }, [property, reset, isValidCity]);
 
   const handleAutoTranslate = async () => {
     const formData = watch();
@@ -496,14 +535,23 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   };
 
   // Helper to format city / neighborhood names: each word capitalized
-  const formatLocationName = (value: string) => {
+  // For neighborhoods, keeps abbreviations like "ж.к", "ул.", "бул." lowercase
+  const formatLocationName = (value: string, isNeighborhood: boolean = false) => {
     if (!value) return value;
     return value
       .trim()
       .split(/\s+/)
-      .map((word) =>
-        word.length ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : word,
-      )
+      .map((word) => {
+        if (word.length === 0) return word;
+        // For neighborhoods, keep abbreviations lowercase
+        if (isNeighborhood) {
+          const lowerWord = word.toLowerCase();
+          if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.')) {
+            return lowerWord;
+          }
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      })
       .join(' ');
   };
 
@@ -652,9 +700,11 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       // Map area -> area_sqm
       formData.append('area_sqm', String(data.area));
       formData.append('price', String(data.price));
-      if (data.price_per_sqm) {
-        formData.append('price_per_sqm', String(data.price_per_sqm));
-      }
+      // Price per sqm is required - use provided value or calculate from price/area
+      const pricePerSqmValue = data.price_per_sqm !== undefined && data.price_per_sqm !== null 
+        ? data.price_per_sqm 
+        : (data.area && data.price ? Math.round(data.price / data.area) : 0);
+      formData.append('price_per_sqm', String(pricePerSqmValue));
       // Floor - send if it has a valid value, otherwise send empty string
       const floorValue = data.floor && data.floor !== '' && ['basement', 'ground', 'first-residential', 'not-last', 'last', 'attic'].includes(data.floor)
         ? String(data.floor)
@@ -665,9 +715,9 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       }
       
       // Location – format both city and neighborhood before sending
-      const formattedCity = formatLocationName(data.city);
+      const formattedCity = formatLocationName(data.city, false);
       const formattedNeighborhood = data.neighborhood
-        ? formatLocationName(data.neighborhood)
+        ? formatLocationName(data.neighborhood, true)
         : data.neighborhood;
 
       formData.append('city', formattedCity);
@@ -786,6 +836,11 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     <div className={styles.propertyFormPage}>
       <main className={styles.main}>
         <div className={styles.container}>
+          <div className={styles.breadcrumbs}>
+            <Link href="/admin/properties/quick-view">Имоти</Link>
+            <span>/</span>
+            <span>{propertyId ? 'Редактиране' : 'Добавяне'}</span>
+          </div>
           <form 
             onSubmit={(e) => {
               e.preventDefault();
@@ -922,10 +977,15 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       error={errors.price?.message ? translateErrorMessage(String(errors.price.message)) : undefined}
                     />
                     <Input
-                      label="Цена на м²"
+                      label="Цена на м² *"
                       type="number"
-                      {...register('price_per_sqm', { valueAsNumber: true })}
+                      {...register('price_per_sqm', { 
+                        valueAsNumber: true,
+                        required: 'Цената на м² е задължителна',
+                        min: { value: 0, message: 'Цената на м² трябва да е положително число' }
+                      })}
                       error={errors.price_per_sqm?.message ? translateErrorMessage(String(errors.price_per_sqm.message)) : undefined}
+                      required
                     />
                   </div>
                   {/* Dynamic fields based on property type - conditionally shown */}
@@ -935,7 +995,9 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       <div className={styles.selectWrapper}>
                         <label className={styles.label}>Етаж *</label>
                         <select
-                          {...register('floor')}
+                          {...register('floor', {
+                            required: 'Етажът е задължителен'
+                          })}
                           className={styles.select}
                           required
                         >
@@ -986,35 +1048,145 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                   <h2 className={styles.sectionTitle}>Локация</h2>
                   <div className={styles.formRow}>
                     <div className={styles.selectWrapper}>
-                      <label className={styles.label}>Град *</label>
-                      <select
-                        {...register('city')}
-                        className={styles.select}
-                      >
-                        {cityOptions.map((cityName) => (
-                          <option key={cityName} value={cityName}>
-                            {cityName}
-                          </option>
-                        ))}
-                      </select>
+                      <label htmlFor="property-city-input" className={styles.label}>Град *</label>
+                      <div className={styles.autocompleteWrapper}>
+                        <Input
+                          id="property-city-input"
+                          placeholder="Въведете или изберете град (пр. Бургас)"
+                          value={cityValue || ''}
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            setValue('city', value);
+                            // Show dropdown only when there is some input
+                            if (value.trim().length > 0) {
+                              setShowCityDropdown(true);
+                            } else {
+                              setShowCityDropdown(false);
+                            }
+                          }}
+                          onFocus={() => {
+                            // Show dropdown if there are matching options
+                            if ((cityValue?.trim().length || 0) > 0 || CITY_OPTIONS.length > 0) {
+                              setShowCityDropdown(true);
+                            }
+                          }}
+                          onBlur={() => {
+                            // Delay hiding dropdown to allow click on dropdown item
+                            setTimeout(() => {
+                              if (!cityDropdownRef.current?.contains(document.activeElement)) {
+                                setShowCityDropdown(false);
+                                // Format city name on blur if manually entered
+                                if (cityValue?.trim() && !isCitySelected) {
+                                  const formatted = formatLocationName(cityValue, false);
+                                  setValue('city', formatted);
+                                }
+                              }
+                            }, 200);
+                          }}
+                          ref={cityInputRef}
+                          error={errors.city?.message ? translateErrorMessage(String(errors.city.message)) : undefined}
+                        />
+                        {showCityDropdown && CITY_OPTIONS.length > 0 && (
+                          <div
+                            ref={cityDropdownRef}
+                            className={styles.cityDropdown}
+                          >
+                            {CITY_OPTIONS
+                              .filter((cityName) => {
+                                const searchTerm = (cityValue || '').toLowerCase().trim();
+                                if (!searchTerm) return true;
+                                return cityName.toLowerCase().includes(searchTerm);
+                              })
+                              .slice(0, 10) // Limit to 10 results for better UX
+                              .map((cityName) => {
+                                // Find coordinates from burgasCities for map/distance calculations
+                                const cityData = burgasCities.cities.find(
+                                  (c) => c.name.toLowerCase() === cityName.toLowerCase() ||
+                                    c.nameEn.toLowerCase() === cityName.toLowerCase()
+                                );
+                                const coordinates: [number, number] = cityData && cityData.coordinates && cityData.coordinates.length === 2
+                                  ? [cityData.coordinates[0], cityData.coordinates[1]]
+                                  : [0, 0]; // Fallback if coordinates not found
+                                
+                                return (
+                                  <button
+                                    key={cityName}
+                                    type="button"
+                                    className={styles.cityDropdownItem}
+                                    onMouseDown={(e) => {
+                                      e.preventDefault(); // Prevent input blur
+                                    }}
+                                    onClick={() => {
+                                      const formattedCityName = formatLocationName(cityName, false);
+                                      setValue('city', formattedCityName);
+                                      setShowCityDropdown(false);
+                                      // Reset neighborhood when city changes
+                                      const newOptions = getNeighborhoodsByCity(formattedCityName);
+                                      setValue('neighborhood', newOptions[0] || '');
+                                      setManualNeighborhoodInput('');
+                                    }}
+                                  >
+                                    {cityName}
+                                  </button>
+                                );
+                              })}
+                          </div>
+                        )}
+                      </div>
                       {errors.city?.message && (
                         <p className={styles.errorMessage}>{translateErrorMessage(String(errors.city.message))}</p>
                       )}
                     </div>
-                    <div className={styles.selectWrapper}>
-                      <NeighborhoodSelect
-                        city={cityValue}
-                        value={neighborhoodValue || ''}
-                        onChange={(val) =>
-                          setValue('neighborhood', Array.isArray(val) ? val[0] ?? '' : val)
-                        }
-                        disabled={!cityValue}
-                        error={errors.neighborhood?.message
-                          ? translateErrorMessage(String(errors.neighborhood.message))
-                          : undefined}
-                        required
-                      />
-                    </div>
+                    {cityValue?.trim() && (
+                      <div className={styles.selectWrapper}>
+                        {isCitySelected ? (
+                          <NeighborhoodSelect
+                            city={cityValue}
+                            value={neighborhoodValue || ''}
+                            onChange={(val) =>
+                              setValue('neighborhood', Array.isArray(val) ? val[0] ?? '' : val)
+                            }
+                            disabled={!isCitySelected}
+                            error={errors.neighborhood?.message
+                              ? translateErrorMessage(String(errors.neighborhood.message))
+                              : undefined}
+                            required
+                          />
+                        ) : (
+                          <div className={styles.manualNeighborhoodInputWrapper}>
+                            <label htmlFor="neighborhood-manual" className={styles.manualNeighborhoodLabel}>
+                              Квартал *
+                            </label>
+                            <input
+                              id="neighborhood-manual"
+                              type="text"
+                              placeholder="Въведете квартал"
+                              value={manualNeighborhoodInput}
+                              onChange={(event) => {
+                                const value = event.target.value;
+                                setManualNeighborhoodInput(value);
+                                // Update neighborhood state immediately
+                                const trimmedValue = value.trim();
+                                setValue('neighborhood', trimmedValue);
+                              }}
+                              onBlur={() => {
+                                // Format neighborhood name on blur
+                                if (manualNeighborhoodInput.trim()) {
+                                  const formatted = formatLocationName(manualNeighborhoodInput, true);
+                                  setManualNeighborhoodInput(formatted);
+                                  setValue('neighborhood', formatted);
+                                }
+                              }}
+                              className={styles.manualNeighborhoodInputField}
+                              required
+                            />
+                            {errors.neighborhood?.message && (
+                              <p className={styles.errorMessage}>{translateErrorMessage(String(errors.neighborhood.message))}</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className={styles.formRow}>
                     {/* Year built - shown for all property types */}

@@ -328,21 +328,40 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         // Copy non-numeric, non-array fields that have actual values
         if (filters.city && filters.city.trim()) {
             cleaned.city = formatCityName(filters.city);
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:330',message:'City formatted in cleanFilters',data:{original:filters.city,formatted:cleaned.city},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+            // #endregion
         }
         
         if (filters.neighborhoods && Array.isArray(filters.neighborhoods) && filters.neighborhoods.length > 0) {
             // Format each neighborhood: first letter uppercase, rest lowercase for each word
+            // Exception: keep abbreviations like "ж.к" lowercase
             cleaned.neighborhoods = filters.neighborhoods.map(neighborhood => {
                 if (!neighborhood || !neighborhood.trim()) return neighborhood;
-                return neighborhood
+                const formatted = neighborhood
                     .trim()
                     .split(/\s+/)
                     .map(word => {
                         if (word.length === 0) return word;
+                        // Keep abbreviations like "ж.к", "ж.к.", "ул.", etc. lowercase
+                        const lowerWord = word.toLowerCase();
+                        if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.')) {
+                            return lowerWord;
+                        }
                         return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
                     })
                     .join(' ');
+                
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:345',message:'Formatting neighborhood in cleanFilters',data:{original:neighborhood,formatted},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+                // #endregion
+                
+                return formatted;
             });
+            
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:356',message:'Cleaned neighborhoods array',data:{neighborhoods:cleaned.neighborhoods,city:cleaned.city},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+            // #endregion
         }
         
         if ('propertyId' in filters && filters.propertyId && filters.propertyId.trim()) {
@@ -606,6 +625,9 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                     // cleanFilters already formats the city
                     const cleanedFilters = cleanFilters(filters);
                     if (cleanedFilters) {
+                        // #region agent log
+                        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:625',message:'Sending filters to API',data:{cleanedFilters,serialized:encodeURIComponent(JSON.stringify(cleanedFilters))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+                        // #endregion
                         params.set('filters', encodeURIComponent(JSON.stringify(cleanedFilters)));
                     }
                 }
@@ -714,7 +736,14 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                             <div className={styles.headerText}>
                         <Button
                             variant="outline"
-                            onClick={() => router.back()}
+                            onClick={() => {
+                                setShowListings(false);
+                                // Clear search params from URL to reset state
+                                const currentPath = selectedPropertyType 
+                                    ? `${baseRoute}/${selectedPropertyType}` 
+                                    : baseRoute;
+                                router.push(currentPath);
+                            }}
                             className={styles.backButton}
                         >
                             <ArrowLeft size={20} />

@@ -95,7 +95,7 @@ export interface PropertySearchFilters {
   type?: PropertyType[];
   status?: PropertyStatus[];
   city?: string;
-  neighborhood?: string;
+  neighborhoods?: string[];
   min_price?: number;
   max_price?: number;
   min_area?: number;

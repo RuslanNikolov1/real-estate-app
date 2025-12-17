@@ -116,7 +116,15 @@
     "yearBuiltRequired": "Година на строеж е задължителна",
     "constructionRequired": "Конструкцията е задължителна",
     "completionStatusRequired": "Степента на завършеност е задължителна",
-    "atLeastOneFeatureRequired": "Моля, изберете поне една особеност"
+    "atLeastOneFeatureRequired": "Моля, изберете поне една особеност",
+    "subtypeRequired": "Подтипът е задължителен",
+    "brokerPositionRequired": "Длъжността е задължителна",
+    "brokerImageRequired": "Снимката на брокера е задължителна",
+    "pricePerSqmInvalid": "Цената на м² трябва да е валидно число",
+    "phoneInvalid": "Телефонът трябва да е в формат +359 XXX XXX XXX или 0XXX XXX XXX",
+    "yearBuiltInvalid": "Година на строеж трябва да е валидна година",
+    "areaInvalid": "Площта трябва да е число",
+    "priceInvalid": "Цената трябва да е число"
   }
 }
 

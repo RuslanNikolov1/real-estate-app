@@ -128,6 +128,20 @@ export const PROPERTY_SCHEMAS: Record<PropertyType, PropertyTypeSchema> = {
         options: excludeAll(HOUSE_TYPES).map(t => ({ id: t.id, label: t.label })),
       },
       {
+        key: 'construction_type',
+        label: 'Конструкция',
+        type: 'select',
+        required: false,
+        options: CONSTRUCTION_FILTERS.map(f => ({ id: f.id, label: f.label })),
+      },
+      {
+        key: 'completion_status',
+        label: 'Степен на завършеност',
+        type: 'select',
+        required: false,
+        options: COMPLETION_STATUSES.map(s => ({ id: s.id, label: s.label })),
+      },
+      {
         key: 'yard_area',
         label: 'Площ на двора (м²)',
         type: 'number',
@@ -156,6 +170,20 @@ export const PROPERTY_SCHEMAS: Record<PropertyType, PropertyTypeSchema> = {
         type: 'select',
         required: false,
         options: excludeAll(HOUSE_TYPES).map(t => ({ id: t.id, label: t.label })),
+      },
+      {
+        key: 'construction_type',
+        label: 'Конструкция',
+        type: 'select',
+        required: false,
+        options: CONSTRUCTION_FILTERS.map(f => ({ id: f.id, label: f.label })),
+      },
+      {
+        key: 'completion_status',
+        label: 'Степен на завършеност',
+        type: 'select',
+        required: false,
+        options: COMPLETION_STATUSES.map(s => ({ id: s.id, label: s.label })),
       },
       {
         key: 'yard_area',
@@ -695,11 +723,30 @@ export function generatePropertySchema(type?: PropertyType) {
     neighborhood: z.string().optional(),
     price: z.number().min(0, 'errors.priceMustBePositive'),
     area: z.number().min(0, 'errors.areaMustBePositive'),
-    price_per_sqm: z.number().optional(),
+    price_per_sqm: z.number().min(0, 'errors.pricePerSqmInvalid'),
     year_built: z.number().optional(),
     broker_name: z.string().optional(),
     broker_title: z.string().min(1, 'Длъжността е задължителна'),
-    broker_phone: z.string().optional(),
+    broker_phone: z.string()
+      .optional()
+      .refine(
+        (phone) => {
+          // If phone is provided, validate it; if empty/undefined, allow it (optional field)
+          if (!phone || !phone.trim()) return true;
+          // Remove all spaces and dashes for validation
+          const cleaned = phone.replace(/[\s-]/g, '');
+          // Check +359 format: +359 followed by 9 digits (total 13 chars)
+          if (cleaned.startsWith('+359')) {
+            return /^\+359[0-9]{9}$/.test(cleaned);
+          }
+          // Check 0 format: 0 followed by 9 digits (total 10 chars)
+          if (cleaned.startsWith('0')) {
+            return /^0[0-9]{9}$/.test(cleaned);
+          }
+          return false;
+        },
+        { message: 'Телефонът трябва да е в формат +359 XXX XXX XXX или 0XXX XXX XXX' }
+      ),
   });
 
   if (!type) {
@@ -770,15 +817,10 @@ export function generatePropertySchema(type?: PropertyType) {
   }
   // Always override floor field for apartment, office, shop to accept strings (from select dropdown)
   if (type === 'apartment' || type === 'office' || type === 'shop') {
-    // Floor is optional - accept any value (string, empty string, undefined, null)
-    // Use union to explicitly allow all possible values
-    extensions.floor = z.union([
-      z.string(),
-      z.number(),
-      z.undefined(),
-      z.null(),
-      z.literal('')
-    ]).optional();
+    // Floor is required - must be a string from the enum options
+    extensions.floor = z.enum(['basement', 'ground', 'first-residential', 'not-last', 'last', 'attic'], {
+      errorMap: () => ({ message: 'errors.floorRequired' })
+    });
   }
   if (!extensions.total_floors && type === 'apartment') {
     extensions.total_floors = z.number().optional();
