@@ -195,7 +195,15 @@ export async function GET(request: NextRequest) {
       if (propertyTypeId && typeMapping[propertyTypeId]) {
         query = query.in('type', typeMapping[propertyTypeId]);
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:188',message:'Applied property type filter',data:{propertyTypeId,types:typeMapping[propertyTypeId]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:195',message:'Applied property type filter',data:{propertyTypeId,types:typeMapping[propertyTypeId],mappedTypes:typeMapping[propertyTypeId]},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H3'})}).catch(()=>{});
+        // #endregion
+      } else if (propertyTypeId) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:201',message:'WARNING: propertyTypeId not in typeMapping',data:{propertyTypeId,availableKeys:Object.keys(typeMapping)},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H3'})}).catch(()=>{});
+        // #endregion
+      } else {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:205',message:'No propertyTypeId provided',data:{baseRoute,hasFilters:!!filters},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H1'})}).catch(()=>{});
         // #endregion
       }
       
@@ -353,7 +361,7 @@ export async function GET(request: NextRequest) {
       // Agricultural property types filter (vineyard, forest, agricultural-land, etc.)
       if (filters.propertyTypes && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0 && propertyTypeId === 'agricultural-land') {
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:352',message:'Processing agricultural propertyTypes filter',data:{propertyTypes:filters.propertyTypes,propertyTypeId,willFilter:true},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H2'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:352',message:'Processing agricultural propertyTypes filter',data:{propertyTypes:filters.propertyTypes,propertyTypeId,willFilter:true},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H2'})}).catch(()=>{});
         // #endregion
         const validPropertyTypes = filters.propertyTypes.filter(
           (propType: string) => propType && propType !== 'all'
@@ -363,8 +371,38 @@ export async function GET(request: NextRequest) {
           // Filter by subtype for agricultural properties
           query = query.in('subtype', validPropertyTypes);
           // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:361',message:'Applied agricultural subtype filter',data:{subtypes:validPropertyTypes,queryApplied:true},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H2'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:361',message:'Applied agricultural subtype filter',data:{subtypes:validPropertyTypes,queryApplied:true},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H2'})}).catch(()=>{});
           // #endregion
+        }
+      }
+      
+      // Warehouse/Industrial property types filter (warehouse, factory, farm, etc.)
+      if (filters.propertyTypes && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0 && propertyTypeId === 'warehouses-industrial') {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:369',message:'Processing warehouse propertyTypes filter',data:{propertyTypes:filters.propertyTypes,propertyTypeId,willFilter:true},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H2'})}).catch(()=>{});
+        // #endregion
+        const validPropertyTypes = filters.propertyTypes.filter(
+          (propType: string) => propType && propType !== 'all'
+        );
+        
+        if (validPropertyTypes.length > 0) {
+          // Filter by subtype for warehouse properties
+          query = query.in('subtype', validPropertyTypes);
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:377',message:'Applied warehouse subtype filter',data:{subtypes:validPropertyTypes,queryApplied:true},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H2'})}).catch(()=>{});
+          // #endregion
+        }
+      }
+      
+      // Stores/Offices property types filter (store, office, cabinet, beauty-salon, sport, other)
+      if (filters.propertyTypes && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0 && propertyTypeId === 'stores-offices') {
+        const validPropertyTypes = filters.propertyTypes.filter(
+          (propType: string) => propType && propType !== 'all'
+        );
+        
+        if (validPropertyTypes.length > 0) {
+          // Filter by subtype for stores/offices properties
+          query = query.in('subtype', validPropertyTypes);
         }
       }
       
@@ -378,37 +416,13 @@ export async function GET(request: NextRequest) {
         query = query.in('building_type', filters.buildingTypes);
       }
       
-      // Commercial subtypes filter (for office/shop properties: store, office, cabinet, beauty-salon, sport, other)
-      // This filters by the subtype field when propertyTypes is selected in the stores/offices filter page
-      if (filters.commercialSubtypes && Array.isArray(filters.commercialSubtypes) && filters.commercialSubtypes.length > 0) {
-        // Only apply to office and shop property types
-        const validSubtypes = filters.commercialSubtypes.filter((subtype: string) => subtype && subtype !== 'all');
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:commercialSubtypes-filter',message:'Processing commercialSubtypes filter',data:{commercialSubtypes:filters.commercialSubtypes,validSubtypes,propertyTypeId,baseRoute},timestamp:Date.now(),sessionId:'debug-session',runId:'subtype-filter-debug',hypothesisId:'H2'})}).catch(()=>{});
-        // #endregion
-        if (validSubtypes.length > 0) {
-          // Ensure we only filter office/shop types when using commercial subtypes
-          // When propertyTypeId is 'stores-offices', the type filter should already be applied earlier
-          // But we still need to filter by subtype
-          const existingTypeFilter = filters.type || filters.types;
+      // Location types filter for restaurants (maps to subtype)
+      if (filters.locationTypes && Array.isArray(filters.locationTypes) && filters.locationTypes.length > 0 && propertyTypeId === 'restaurants') {
+        const validLocationTypes = filters.locationTypes.filter((type: string) => type && type !== 'all');
+        if (validLocationTypes.length > 0) {
+          query = query.in('subtype', validLocationTypes);
           // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:commercialSubtypes-filter',message:'Checking type filter before applying subtype filter',data:{propertyTypeId,existingTypeFilter,willApplyTypeFilter:!propertyTypeId || (propertyTypeId !== 'stores-offices' && propertyTypeId !== 'office' && propertyTypeId !== 'shop')},timestamp:Date.now(),sessionId:'debug-session',runId:'subtype-filter-debug',hypothesisId:'H3'})}).catch(()=>{});
-          // #endregion
-          if (!propertyTypeId || (propertyTypeId !== 'stores-offices' && propertyTypeId !== 'office' && propertyTypeId !== 'shop')) {
-            // If propertyTypeId is not set or is not stores-offices, we need to ensure we're filtering office/shop types
-            // Check if type filter is already applied
-            if (!existingTypeFilter || (Array.isArray(existingTypeFilter) && !existingTypeFilter.includes('office') && !existingTypeFilter.includes('shop'))) {
-              // Apply type filter to only office and shop
-              query = query.in('type', ['office', 'shop']);
-              // #region agent log
-              fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:commercialSubtypes-filter',message:'Applied type filter for office/shop',data:{appliedTypes:['office','shop']},timestamp:Date.now(),sessionId:'debug-session',runId:'subtype-filter-debug',hypothesisId:'H3'})}).catch(()=>{});
-              // #endregion
-            }
-          }
-          // Filter by subtype
-          query = query.in('subtype', validSubtypes);
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:commercialSubtypes-filter',message:'Applied subtype filter',data:{subtypes:validSubtypes},timestamp:Date.now(),sessionId:'debug-session',runId:'subtype-filter-debug',hypothesisId:'H4'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:420',message:'Applied restaurant locationTypes filter',data:{locationTypes:validLocationTypes,propertyTypeId},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H3'})}).catch(()=>{});
           // #endregion
         }
       }
@@ -482,11 +496,14 @@ export async function GET(request: NextRequest) {
     // #endregion
 
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:466',message:'Executing query',data:{propertyTypeId,hasFilters:!!filters,filtersKeys:filters ? Object.keys(filters) : [],filtersPropertyTypes:filters?.propertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H3'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:480',message:'Executing query',data:{propertyTypeId,hasFilters:!!filters,filtersKeys:filters ? Object.keys(filters) : [],filtersPropertyTypes:filters?.propertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H5'})}).catch(()=>{});
     // #endregion
     const { data: properties, error } = await query;
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:470',message:'Query results',data:{propertyCount:properties?.length || 0,error:error?.message,propertyTypes:properties?.map((p:any) => ({id:p.id,type:p.type,subtype:p.subtype,title:p.title?.substring(0,50)})) || [],hasVineyard:properties?.some((p:any) => p.subtype === 'vineyard') || false},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H3'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:490',message:'Query executed - results',data:{propertyTypeId,propertyCount:properties?.length || 0,error:error?.message,propertyTypes:properties?.slice(0,5).map((p:any) => ({id:p.id,type:p.type,title:p.title?.substring(0,50)})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H3'})}).catch(()=>{});
+    // #endregion
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:507',message:'Query results',data:{propertyCount:properties?.length || 0,error:error?.message,propertyTypes:properties?.map((p:any) => ({id:p.id,type:p.type,subtype:p.subtype,title:p.title?.substring(0,50)})) || [],warehouseSubtypes:properties?.filter((p:any) => p.type === 'warehouse').map((p:any) => p.subtype) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H5'})}).catch(()=>{});
     // #endregion
 
     if (error) {
@@ -531,13 +548,6 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // #region agent log
-    // Log results for commercial subtypes filter
-    if (filters?.commercialSubtypes) {
-      const resultSubtypes = (properties || []).map((p: any) => ({ id: p.id, type: p.type, subtype: p.subtype }));
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:query-results',message:'Query results for commercialSubtypes filter',data:{requestedSubtypes:filters.commercialSubtypes,propertyTypeId,baseRoute,totalResults:(properties || []).length,resultSubtypes,foundSubtypes:[...new Set((properties || []).map((p: any) => p.subtype).filter(Boolean))]},timestamp:Date.now(),sessionId:'debug-session',runId:'subtype-filter-debug',hypothesisId:'H5'})}).catch(()=>{});
-    }
-    // #endregion
 
     // Transform database properties to match Property interface
     const transformedProperties = (properties || []).map((prop: any) => ({

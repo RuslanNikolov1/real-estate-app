@@ -4,8 +4,8 @@ import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
-import { PriceFilter } from '../filters';
-import { BUY_REAL_ESTATES_PRICE_SLIDER_MAX } from '../filters/types';
+import { PriceFilter, AreaFilter } from '../filters';
+import { BUY_REAL_ESTATES_PRICE_SLIDER_MAX, COMMERCIAL_AREA_SLIDER_MAX, PRICE_PER_SQM_SLIDER_MAX } from '../filters/types';
 import styles from '../MapFiltersPage.module.scss';
 
 interface BuyRealEstatesFiltersPageProps {
@@ -29,8 +29,12 @@ export interface BuyRealEstatesFiltersState {
     city: string;
     neighborhoods: string[];
     distance: number;
-    priceFrom: number;
-    priceTo: number;
+    areaFrom?: number;
+    areaTo?: number;
+    priceFrom?: number;
+    priceTo?: number;
+    pricePerSqmFrom?: number;
+    pricePerSqmTo?: number;
 }
 
 export function BuyRealEstatesFiltersPage({ 
@@ -67,8 +71,12 @@ export function BuyRealEstatesFiltersPage({
         city: '',
         neighborhoods: [],
         distance: 0,
+        areaFrom: undefined,
+        areaTo: undefined,
         priceFrom: undefined,
-        priceTo: undefined
+        priceTo: undefined,
+        pricePerSqmFrom: undefined,
+        pricePerSqmTo: undefined
     });
 
     // Use keys to reset components on clear
@@ -155,6 +163,14 @@ export function BuyRealEstatesFiltersPage({
     const handlePriceChange = useCallback((priceFrom: number, priceTo: number, pricePerSqmFrom: number, pricePerSqmTo: number) => {
         filterValuesRef.current.priceFrom = priceFrom;
         filterValuesRef.current.priceTo = priceTo;
+        filterValuesRef.current.pricePerSqmFrom = pricePerSqmFrom;
+        filterValuesRef.current.pricePerSqmTo = pricePerSqmTo;
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
+
+    const handleAreaChange = useCallback((areaFrom: number, areaTo: number, isNotProvided?: boolean) => {
+        filterValuesRef.current.areaFrom = areaFrom;
+        filterValuesRef.current.areaTo = areaTo;
         notifyFiltersChange();
     }, [notifyFiltersChange]);
 
@@ -176,8 +192,12 @@ export function BuyRealEstatesFiltersPage({
             neighborhoods: [],
             distance: 0,
             propertyId: '',
+            areaFrom: undefined,
+            areaTo: undefined,
             priceFrom: undefined,
-            priceTo: undefined
+            priceTo: undefined,
+            pricePerSqmFrom: undefined,
+            pricePerSqmTo: undefined
         };
         
         // Reset components by changing key
@@ -254,15 +274,27 @@ export function BuyRealEstatesFiltersPage({
                 />
             </div>
 
-            {/* Price Filter (Цена в €) */}
+            {/* Price Filter */}
             <PriceFilter
                 key={`price-${filterKey}`}
                 onFilterChange={handlePriceChange}
                 initialPriceFrom={filterValuesRef.current.priceFrom}
                 initialPriceTo={filterValuesRef.current.priceTo}
+                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
+                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
                 priceSliderMax={BUY_REAL_ESTATES_PRICE_SLIDER_MAX}
-                showPricePerSqm={false}
-                priceTitle="Цена в €"
+                pricePerSqmSliderMax={PRICE_PER_SQM_SLIDER_MAX}
+            />
+
+            {/* Area Filter */}
+            <AreaFilter
+                key={`area-${filterKey}`}
+                onFilterChange={handleAreaChange}
+                initialAreaFrom={filterValuesRef.current.areaFrom}
+                initialAreaTo={filterValuesRef.current.areaTo}
+                sliderMax={COMMERCIAL_AREA_SLIDER_MAX}
+                areaCap={COMMERCIAL_AREA_SLIDER_MAX}
+                title="Площ в кв.м"
             />
         </div>
     );

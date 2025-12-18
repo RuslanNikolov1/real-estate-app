@@ -390,22 +390,24 @@ export function AddPropertyPage() {
       return;
     }
 
-    // Validate year built (required and must be a number)
-    if (!yearBuilt || !yearBuilt.trim()) {
-      setYearBuiltError(t('errors.yearBuiltRequired'));
-      setSubmitError(t('errors.yearBuiltRequired'));
-      return;
-    }
-    const numericYearBuilt = parseInt(yearBuilt, 10);
-    if (isNaN(numericYearBuilt) || !Number.isFinite(numericYearBuilt)) {
-      setYearBuiltError(t('errors.yearBuiltInvalid'));
-      setSubmitError(t('errors.yearBuiltInvalid'));
-      return;
-    }
-    if (numericYearBuilt < 1000 || numericYearBuilt > new Date().getFullYear() + 10) {
-      setYearBuiltError(t('errors.yearBuiltInvalid'));
-      setSubmitError(t('errors.yearBuiltInvalid'));
-      return;
+    // Validate year built (required and must be a number) - skip for land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates
+    if (selectedType !== 'land' && selectedType !== 'agricultural' && selectedType !== 'warehouse' && selectedType !== 'garage' && selectedType !== 'hotel' && selectedType !== 'restaurant' && selectedType !== 'replace-real-estates' && selectedType !== 'buy-real-estates') {
+      if (!yearBuilt || !yearBuilt.trim()) {
+        setYearBuiltError(t('errors.yearBuiltRequired'));
+        setSubmitError(t('errors.yearBuiltRequired'));
+        return;
+      }
+      const numericYearBuilt = parseInt(yearBuilt, 10);
+      if (isNaN(numericYearBuilt) || !Number.isFinite(numericYearBuilt)) {
+        setYearBuiltError(t('errors.yearBuiltInvalid'));
+        setSubmitError(t('errors.yearBuiltInvalid'));
+        return;
+      }
+      if (numericYearBuilt < 1000 || numericYearBuilt > new Date().getFullYear() + 10) {
+        setYearBuiltError(t('errors.yearBuiltInvalid'));
+        setSubmitError(t('errors.yearBuiltInvalid'));
+        return;
+      }
     }
 
     // Validate construction type (required when shown)
@@ -420,8 +422,8 @@ export function AddPropertyPage() {
       return;
     }
 
-    // Validate features (at least one required)
-    if (selectedFeatures.length === 0) {
+    // Validate features (at least one required only if features section is displayed)
+    if (featuresList.length > 0 && selectedFeatures.length === 0) {
       setSubmitError(t('errors.atLeastOneFeatureRequired'));
       return;
     }
@@ -463,8 +465,10 @@ export function AddPropertyPage() {
       formData.append('title', trimmedTitle);
       formData.append('description', trimmedDescription);
 
-      // Year built is required
+      // Year built is required (except for land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates)
+      if (selectedType !== 'land' && selectedType !== 'agricultural' && selectedType !== 'warehouse' && selectedType !== 'garage' && selectedType !== 'hotel' && selectedType !== 'restaurant' && selectedType !== 'replace-real-estates' && selectedType !== 'buy-real-estates') {
         formData.append('build_year', yearBuilt);
+      }
 
       // Construction type is required when shown
       if (showConstruction && selectedConstruction) {
@@ -658,6 +662,144 @@ export function AddPropertyPage() {
                   ))}
                 </div>
               </div>
+            </div>
+          </section>
+
+          <section className={styles.section}>
+            <h2>Локация</h2>
+            <div className={styles.inputsRow}>
+              <div className={styles.control}>
+                <label>Град *</label>
+                <div className={styles.autocompleteWrapper}>
+                  <Input
+                    placeholder="Въведете или изберете град (пр. Бургас)"
+                        value={city}
+                            onChange={(event) => {
+                      const value = event.target.value;
+                      setCity(value);
+                      // Show dropdown only when there is some input
+                      if (value.trim().length > 0) {
+                        setShowCityDropdown(true);
+                      } else {
+                        setShowCityDropdown(false);
+                      }
+                    }}
+                    onFocus={() => {
+                      // Show dropdown if there are matching options
+                      if (city.trim().length > 0 || CITY_OPTIONS.length > 0) {
+                        setShowCityDropdown(true);
+                      }
+                    }}
+                    onBlur={() => {
+                      // Delay hiding dropdown to allow click on dropdown item
+                      setTimeout(() => {
+                        if (!cityDropdownRef.current?.contains(document.activeElement)) {
+                          setShowCityDropdown(false);
+                          // Format city name on blur if manually entered
+                          if (city.trim() && !isCitySelected) {
+                            const formatted = formatLocationName(city, false);
+                            setCity(formatted);
+                          }
+                        }
+                      }, 200);
+                    }}
+                    ref={cityInputRef}
+                    required
+                  />
+                  {showCityDropdown && CITY_OPTIONS.length > 0 && (
+                    <div
+                      ref={cityDropdownRef}
+                      className={styles.cityDropdown}
+                    >
+                      {CITY_OPTIONS
+                        .filter((cityName) => {
+                          const searchTerm = city.toLowerCase().trim();
+                          if (!searchTerm) return true;
+                          return cityName.toLowerCase().includes(searchTerm);
+                        })
+                        .map((cityName) => {
+                          // Find coordinates from burgasCities for map/distance calculations
+                          const cityData = burgasCities.cities.find(
+                            (c) => c.name.toLowerCase() === cityName.toLowerCase() ||
+                              c.nameEn.toLowerCase() === cityName.toLowerCase()
+                          );
+                          const coordinates: [number, number] = cityData && cityData.coordinates && cityData.coordinates.length === 2
+                            ? [cityData.coordinates[0], cityData.coordinates[1]]
+                            : [0, 0]; // Fallback if coordinates not found
+                          
+                          return (
+                            <button
+                              key={cityName}
+                              type="button"
+                              className={styles.cityDropdownItem}
+                              onMouseDown={(e) => {
+                                e.preventDefault(); // Prevent input blur
+                              }}
+                                    onClick={() => {
+                                const formattedCityName = formatLocationName(cityName, false);
+                                setCity(formattedCityName);
+                                setShowCityDropdown(false);
+                                // Reset neighborhood when city changes
+                                const newOptions = getNeighborhoodsByCity(formattedCityName);
+                                setNeighborhood(newOptions[0] ?? '');
+                                setManualNeighborhoodInput('');
+                              }}
+                            >
+                              {cityName}
+                            </button>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+              </div>
+              {city.trim() && (
+                <div className={styles.control}>
+                  {isCitySelected ? (
+                    <NeighborhoodSelect
+                      city={city}
+                      value={neighborhood}
+                      onChange={(val) => setNeighborhood(Array.isArray(val) ? val[0] ?? '' : val)}
+                      disabled={!isCitySelected}
+                      label="Квартал"
+                    />
+                  ) : (
+                    <div className={styles.manualNeighborhoodInputWrapper}>
+                      <label htmlFor="neighborhood-manual" className={styles.manualNeighborhoodLabel}>
+                        Квартал
+                      </label>
+                      <input
+                        id="neighborhood-manual"
+                        type="text"
+                        placeholder="Въведете квартал"
+                        value={manualNeighborhoodInput}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setManualNeighborhoodInput(value);
+                          // Update neighborhood state immediately
+                          const trimmedValue = value.trim();
+                          setNeighborhood(trimmedValue);
+                        }}
+                        onBlur={() => {
+                          // Format neighborhood name on blur
+                          if (manualNeighborhoodInput.trim()) {
+                            const formatted = formatLocationName(manualNeighborhoodInput, true);
+                            setManualNeighborhoodInput(formatted);
+                            setNeighborhood(formatted);
+                          }
+                        }}
+                        className={styles.manualNeighborhoodInputField}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className={styles.section}>
+            <h2>Основна информация</h2>
+            <div className={styles.optionGrid}>
               <div className={styles.inputsRow}>
                 <div className={styles.selectWrapper}>
                   <label className={styles.label}>Тип имот *</label>
@@ -860,138 +1002,6 @@ export function AddPropertyPage() {
           </section>
 
           <section className={styles.section}>
-            <h2>Локация</h2>
-            <div className={styles.inputsRow}>
-              <div className={styles.control}>
-                <label>Град *</label>
-                <div className={styles.autocompleteWrapper}>
-                  <Input
-                    placeholder="Въведете или изберете град (пр. Бургас)"
-                        value={city}
-                            onChange={(event) => {
-                      const value = event.target.value;
-                      setCity(value);
-                      // Show dropdown only when there is some input
-                      if (value.trim().length > 0) {
-                        setShowCityDropdown(true);
-                      } else {
-                        setShowCityDropdown(false);
-                      }
-                    }}
-                    onFocus={() => {
-                      // Show dropdown if there are matching options
-                      if (city.trim().length > 0 || CITY_OPTIONS.length > 0) {
-                        setShowCityDropdown(true);
-                      }
-                    }}
-                    onBlur={() => {
-                      // Delay hiding dropdown to allow click on dropdown item
-                      setTimeout(() => {
-                        if (!cityDropdownRef.current?.contains(document.activeElement)) {
-                          setShowCityDropdown(false);
-                          // Format city name on blur if manually entered
-                          if (city.trim() && !isCitySelected) {
-                            const formatted = formatLocationName(city, false);
-                            setCity(formatted);
-                          }
-                        }
-                      }, 200);
-                    }}
-                    ref={cityInputRef}
-                    required
-                  />
-                  {showCityDropdown && CITY_OPTIONS.length > 0 && (
-                    <div
-                      ref={cityDropdownRef}
-                      className={styles.cityDropdown}
-                    >
-                      {CITY_OPTIONS
-                        .filter((cityName) => {
-                          const searchTerm = city.toLowerCase().trim();
-                          if (!searchTerm) return true;
-                          return cityName.toLowerCase().includes(searchTerm);
-                        })
-                        .map((cityName) => {
-                          // Find coordinates from burgasCities for map/distance calculations
-                          const cityData = burgasCities.cities.find(
-                            (c) => c.name.toLowerCase() === cityName.toLowerCase() ||
-                              c.nameEn.toLowerCase() === cityName.toLowerCase()
-                          );
-                          const coordinates: [number, number] = cityData && cityData.coordinates && cityData.coordinates.length === 2
-                            ? [cityData.coordinates[0], cityData.coordinates[1]]
-                            : [0, 0]; // Fallback if coordinates not found
-                          
-                          return (
-                            <button
-                              key={cityName}
-                              type="button"
-                              className={styles.cityDropdownItem}
-                              onMouseDown={(e) => {
-                                e.preventDefault(); // Prevent input blur
-                              }}
-                                    onClick={() => {
-                                const formattedCityName = formatLocationName(cityName, false);
-                                setCity(formattedCityName);
-                                setShowCityDropdown(false);
-                                // Reset neighborhood when city changes
-                                const newOptions = getNeighborhoodsByCity(formattedCityName);
-                                setNeighborhood(newOptions[0] ?? '');
-                                setManualNeighborhoodInput('');
-                              }}
-                            >
-                              {cityName}
-                            </button>
-                          );
-                        })}
-                    </div>
-                  )}
-                </div>
-              </div>
-              {city.trim() && (
-                <div className={styles.control}>
-                  {isCitySelected ? (
-                    <NeighborhoodSelect
-                      city={city}
-                      value={neighborhood}
-                      onChange={(val) => setNeighborhood(Array.isArray(val) ? val[0] ?? '' : val)}
-                      disabled={!isCitySelected}
-                      label="Квартал"
-                    />
-                  ) : (
-                    <div className={styles.manualNeighborhoodInputWrapper}>
-                      <label htmlFor="neighborhood-manual" className={styles.manualNeighborhoodLabel}>
-                        Квартал
-                      </label>
-                      <input
-                        id="neighborhood-manual"
-                        type="text"
-                        placeholder="Въведете квартал"
-                        value={manualNeighborhoodInput}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          setManualNeighborhoodInput(value);
-                          // Update neighborhood state immediately
-                          const trimmedValue = value.trim();
-                          setNeighborhood(trimmedValue);
-                        }}
-                        onBlur={() => {
-                          // Format neighborhood name on blur
-                          if (manualNeighborhoodInput.trim()) {
-                            const formatted = formatLocationName(manualNeighborhoodInput, true);
-                            setManualNeighborhoodInput(formatted);
-                            setNeighborhood(formatted);
-                          }
-                        }}
-                        className={styles.manualNeighborhoodInputField}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </section>
-
-          <section className={styles.section}>
             <h2>
               Изображения <span className={styles.requiredMarker}>*</span>
             </h2>
@@ -1063,28 +1073,32 @@ export function AddPropertyPage() {
             />
           </section>
 
+          {/* Parameters section - hidden for warehouse, replace-real-estates, and buy-real-estates types */}
+          {selectedType !== 'warehouse' && selectedType !== 'replace-real-estates' && selectedType !== 'buy-real-estates' && (
           <section className={styles.section}>
             <h2>Параметри</h2>
             <div className={styles.filtersRow}>
-              {/* Year built - shown for all property types */}
-              <div className={styles.control}>
-                <label>Година на строеж *</label>
-                <Input
-                  type="number"
-                  placeholder="2024"
-                  min="1000"
-                  max={new Date().getFullYear() + 10}
-                  step="1"
-                  value={yearBuilt}
-                  onChange={(event) => {
-                    setYearBuilt(event.target.value);
-                    // Clear error when user types
-                    setYearBuiltError(null);
-                  }}
-                  error={yearBuiltError || undefined}
-                  required
-                />
-              </div>
+              {/* Year built - shown for all property types except land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates */}
+              {selectedType !== 'land' && selectedType !== 'agricultural' && selectedType !== 'warehouse' && selectedType !== 'garage' && selectedType !== 'hotel' && selectedType !== 'restaurant' && selectedType !== 'replace-real-estates' && selectedType !== 'buy-real-estates' && (
+                <div className={styles.control}>
+                  <label>Година на строеж *</label>
+                  <Input
+                    type="number"
+                    placeholder="2024"
+                    min="1000"
+                    max={new Date().getFullYear() + 10}
+                    step="1"
+                    value={yearBuilt}
+                    onChange={(event) => {
+                      setYearBuilt(event.target.value);
+                      // Clear error when user types
+                      setYearBuiltError(null);
+                    }}
+                    error={yearBuiltError || undefined}
+                    required
+                  />
+                </div>
+              )}
               {/* Construction Type - only if in schema */}
               {showConstruction && (
                 <div className={styles.control}>
@@ -1126,8 +1140,8 @@ export function AddPropertyPage() {
                   </select>
                 </div>
               )}
-              {/* Building Type - for offices/shops */}
-              {typeSchema.fields.find(f => f.key === 'building_type') && (
+              {/* Building Type - for offices/shops (not for restaurant) */}
+              {typeSchema.fields.find(f => f.key === 'building_type') && selectedType !== 'restaurant' && (
                 <div className={styles.control}>
                   <label>Вид сграда</label>
                   <select
@@ -1245,6 +1259,7 @@ export function AddPropertyPage() {
               )}
             </div>
           </section>
+          )}
 
           {/* Features section - dynamically rendered based on property type */}
           {featuresList.length > 0 && (

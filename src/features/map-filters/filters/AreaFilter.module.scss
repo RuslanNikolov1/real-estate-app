@@ -48,7 +48,7 @@
     appearance: none;
     cursor: grab;
     background: transparent;
-    pointer-events: none;
+    pointer-events: auto;
 
     &:active {
         cursor: grabbing;

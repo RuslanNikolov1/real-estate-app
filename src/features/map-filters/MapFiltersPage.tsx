@@ -97,11 +97,6 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                 const filtersJson = decodeURIComponent(params.get('filters') || '');
                 let restoredFilters = JSON.parse(filtersJson) as ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState;
                 
-                // Map commercialSubtypes back to propertyTypes for stores/offices filters
-                if (restoredFilters && 'commercialSubtypes' in restoredFilters && !('propertyTypes' in restoredFilters)) {
-                    (restoredFilters as any).propertyTypes = (restoredFilters as any).commercialSubtypes || [];
-                    delete (restoredFilters as any).commercialSubtypes;
-                }
                 
                 setRestoredFilters(restoredFilters);
                 currentFiltersRef.current = restoredFilters;
@@ -180,6 +175,9 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
     const handlePropertyTypeClick = (typeId: string) => {
         const isSelecting = selectedPropertyType !== typeId;
         const newSelectedType = isSelecting ? typeId : null;
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:175',message:'Property type clicked',data:{typeId,currentSelectedPropertyType:selectedPropertyType,newSelectedType,isSelecting},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
 
         setSelectedPropertyType(newSelectedType);
 
@@ -254,7 +252,10 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
       ) => {
         // Store filters in ref for URL serialization
         currentFiltersRef.current = filters;
-      }, []);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:254',message:'Filters changed',data:{selectedPropertyType,hasFilters:!!filters,filtersKeys:filters ? Object.keys(filters) : []},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H5'})}).catch(()=>{});
+        // #endregion
+      }, [selectedPropertyType]);
 
     // Get initial filters for the current property type
     const getInitialFilters = useCallback(() => {
@@ -521,25 +522,13 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         }
         if ('propertyTypes' in filters && Array.isArray((filters as any).propertyTypes) && (filters as any).propertyTypes.length > 0) {
             // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:522',message:'Processing propertyTypes in cleanFilters',data:{propertyTypes:(filters as any).propertyTypes,propertyTypeId:selectedPropertyType,isCommercial:selectedPropertyType === 'stores-offices',isAgricultural:selectedPropertyType === 'agricultural-land'},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H1'})}).catch(()=>{});
+            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:522',message:'Processing propertyTypes in cleanFilters',data:{propertyTypes:(filters as any).propertyTypes,propertyTypeId:selectedPropertyType,isCommercial:selectedPropertyType === 'stores-offices',isAgricultural:selectedPropertyType === 'agricultural-land',isWarehouse:selectedPropertyType === 'warehouses-industrial'},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H1'})}).catch(()=>{});
             // #endregion
-            // For commercial properties (stores/offices) - subtype filter (store, office, cabinet, beauty-salon, etc.)
+            // Property types filter - used for agricultural, warehouse, and stores/offices subtypes
             const validPropertyTypes = (filters as any).propertyTypes.filter((type: string) => type && type !== 'all');
             if (validPropertyTypes.length > 0) {
-                // Check if this is for agricultural land or commercial
-                if (selectedPropertyType === 'agricultural-land') {
-                    // For agricultural land, keep as propertyTypes (will be handled as agricultural subtypes in API)
-                    cleaned.propertyTypes = validPropertyTypes;
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:530',message:'Agricultural propertyTypes kept as-is',data:{validPropertyTypes,cleanedPropertyTypes:cleaned.propertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H1'})}).catch(()=>{});
-                    // #endregion
-                } else {
-                    // For commercial properties, convert to commercialSubtypes
-                    cleaned.commercialSubtypes = validPropertyTypes;
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:536',message:'Converting propertyTypes to commercialSubtypes',data:{originalPropertyTypes:(filters as any).propertyTypes,validPropertyTypes,cleanedCommercialSubtypes:cleaned.commercialSubtypes},timestamp:Date.now(),sessionId:'debug-session',runId:'subtype-filter-debug',hypothesisId:'H1'})}).catch(()=>{});
-                    // #endregion
-                }
+                // Keep as propertyTypes for all property types (handled in API by propertyTypeId)
+                cleaned.propertyTypes = validPropertyTypes;
             }
         }
         if ('selectedCategories' in filters && Array.isArray(filters.selectedCategories) && filters.selectedCategories.length > 0) {
@@ -550,6 +539,10 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         }
         if ('selectedWorkingOptions' in filters && Array.isArray(filters.selectedWorkingOptions) && filters.selectedWorkingOptions.length > 0) {
             cleaned.selectedWorkingOptions = filters.selectedWorkingOptions;
+        }
+        if ('locationTypes' in filters && Array.isArray(filters.locationTypes) && filters.locationTypes.length > 0) {
+            // For restaurants/establishments - location types filter (maps to subtype)
+            cleaned.locationTypes = filters.locationTypes;
         }
         if ('selectedElectricityOptions' in filters && Array.isArray(filters.selectedElectricityOptions) && filters.selectedElectricityOptions.length > 0) {
             // For building plots - electricity filter
@@ -607,6 +600,9 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
 
     const handleSearch = useCallback(async () => {
         const filters = currentFiltersRef.current;
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:594',message:'handleSearch called',data:{selectedPropertyType,hasFilters:!!filters,filtersKeys:filters ? Object.keys(filters) : []},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H5'})}).catch(()=>{});
+        // #endregion
         setSelectedPropertyById(null);
         setPropertyByIdError(null);
         setIsLoadingPropertyById(false);
@@ -661,20 +657,42 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                 params.set('baseRoute', baseRoute);
                 if (selectedPropertyType) {
                     params.set('propertyTypeId', selectedPropertyType);
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:645',message:'Setting propertyTypeId in API params',data:{selectedPropertyType,baseRoute},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H2'})}).catch(()=>{});
+                    // #endregion
+                } else {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:650',message:'WARNING: propertyTypeId is missing',data:{selectedPropertyType,baseRoute,hasFilters:!!filters},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H1'})}).catch(()=>{});
+                    // #endregion
                 }
                 if (filters) {
                     // Clean filters to remove default values before sending to API
                     // cleanFilters already formats the city
                     const cleanedFilters = cleanFilters(filters);
-                    if (cleanedFilters) {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:667',message:'cleanFilters result',data:{hasFilters:!!filters,cleanedFilters,cleanedFiltersKeys:cleanedFilters ? Object.keys(cleanedFilters) : [],cleanedFiltersLength:cleanedFilters ? Object.keys(cleanedFilters).length : 0,selectedPropertyType},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H4'})}).catch(()=>{});
+                    // #endregion
+                    if (cleanedFilters && Object.keys(cleanedFilters).length > 0) {
                         // #region agent log
-                        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:625',message:'Sending filters to API',data:{cleanedFilters,serialized:encodeURIComponent(JSON.stringify(cleanedFilters))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+                        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:672',message:'Sending filters to API',data:{cleanedFilters,selectedPropertyType,serialized:encodeURIComponent(JSON.stringify(cleanedFilters))},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H4'})}).catch(()=>{});
                         // #endregion
                         params.set('filters', encodeURIComponent(JSON.stringify(cleanedFilters)));
+                    } else {
+                        // #region agent log
+                        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:677',message:'WARNING: cleanedFilters is empty or null',data:{hasFilters:!!filters,filtersKeys:filters ? Object.keys(filters) : [],cleanedFilters,selectedPropertyType},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H4'})}).catch(()=>{});
+                        // #endregion
                     }
+                } else {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:681',message:'WARNING: filters is null/undefined',data:{selectedPropertyType},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H4'})}).catch(()=>{});
+                    // #endregion
                 }
                 
-                const response = await fetch(`/api/properties?${params.toString()}`);
+                const apiUrl = `/api/properties?${params.toString()}`;
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:665',message:'Fetching properties from API',data:{apiUrl,params:Object.fromEntries(params),selectedPropertyType},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H2'})}).catch(()=>{});
+                // #endregion
+                const response = await fetch(apiUrl);
                 if (!response.ok) {
                     throw new Error('Failed to fetch properties');
                 }

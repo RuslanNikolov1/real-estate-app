@@ -197,6 +197,9 @@ export function WarehousesIndustrialFiltersPage({
 
     const handlePropertyTypeChange = useCallback((selectedTypes: string[]) => {
         filterValuesRef.current.propertyTypes = selectedTypes;
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WarehousesIndustrialFiltersPage.tsx:198',message:'Property type changed',data:{selectedTypes,filterValues:filterValuesRef.current.propertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
         notifyFiltersChange();
     }, [notifyFiltersChange]);
 

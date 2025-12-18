@@ -847,8 +847,8 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   (propType === 'hotel' && (prop.construction_type || prop.completion_degree || prop.hotel_category || prop.bed_base || property.year_built)) ||
                   (propType === 'garage' && (prop.construction_type || property.year_built)) ||
                   ((propType === 'house' || propType === 'villa') && (property.year_built || property.yard_area_sqm)) ||
-                  (propType === 'agricultural' && (prop.agricultural_category || property.year_built)) ||
-                  (propType === 'land' && (prop.electricity || prop.water || property.year_built));
+                  (propType === 'agricultural' && prop.agricultural_category) ||
+                  (propType === 'land' && (prop.electricity || prop.water));
                 return hasConstructionDetails;
               })() && (
                 <div className={styles.constructionSection}>
@@ -899,8 +899,8 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       </div>
                     )}
 
-                    {/* Year Built - for all types that have it */}
-                    {property.year_built && (
+                    {/* Year Built - for all types that have it (except land and agricultural) */}
+                    {property.year_built && property.type !== 'land' && property.type !== 'agricultural' && (
                       <div className={styles.constructionItem}>
                         <span className={styles.constructionLabel}>Година на строителство</span>
                         <span className={styles.constructionValue}>{property.year_built}</span>

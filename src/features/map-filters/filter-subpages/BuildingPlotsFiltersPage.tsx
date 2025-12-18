@@ -11,7 +11,6 @@ import {
     FeaturesFilter,
     ElectricityFilter,
     WaterFilter,
-    YearFilter,
     BUILDING_PLOTS_FEATURES
 } from '../filters';
 import {
@@ -224,9 +223,6 @@ export function BuildingPlotsFiltersPage({
         updateFilters({ selectedWaterOptions: selectedOptions });
     }, [updateFilters]);
 
-    const handleYearChange = useCallback((yearFrom: number, yearTo: number, isNotProvided: boolean) => {
-        updateFilters({ yearFrom, yearTo, isYearNotProvided: isNotProvided });
-    }, [updateFilters]);
 
     const handlePropertyIdChange = useCallback((value: string) => {
         updateFilters({ propertyId: value });
@@ -550,17 +546,6 @@ export function BuildingPlotsFiltersPage({
                         initialSelected={filters.selectedWaterOptions}
                     />
                 </div>
-            )}
-
-            {/* Year Filter (Година на строителство) - Only for sale mode */}
-            {!isRentMode && (
-                <YearFilter
-                    key={`year-${filterKey}`}
-                    onFilterChange={handleYearChange}
-                    initialYearFrom={filters.yearFrom}
-                    initialYearTo={filters.yearTo}
-                    initialIsNotProvided={filters.isYearNotProvided}
-                />
             )}
 
             {/* Features Filter (Особености) */}

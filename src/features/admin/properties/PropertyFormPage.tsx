@@ -629,8 +629,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
         return;
       }
 
-      // Validate year built (required)
-      if (!data.year_built) {
+      // Validate year built (required) - skip for land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates
+      if (propertyType !== 'land' && propertyType !== 'agricultural' && propertyType !== 'warehouse' && propertyType !== 'garage' && propertyType !== 'hotel' && propertyType !== 'restaurant' && propertyType !== 'replace-real-estates' && propertyType !== 'buy-real-estates' && !data.year_built) {
         setSubmitError(t('errors.yearBuiltRequired'));
         setIsSubmittingForm(false);
         setTimeout(() => {
@@ -728,8 +728,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       formData.append('title', data.title);
       formData.append('description', descriptionText);
       
-      // Map year_built -> build_year
-      if (data.year_built) {
+      // Map year_built -> build_year (skip for land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates)
+      if (propertyType !== 'land' && propertyType !== 'agricultural' && propertyType !== 'warehouse' && propertyType !== 'garage' && propertyType !== 'hotel' && propertyType !== 'restaurant' && propertyType !== 'replace-real-estates' && propertyType !== 'buy-real-estates' && data.year_built) {
         formData.append('build_year', String(data.year_built));
       }
       if (data.construction_type) {
@@ -750,7 +750,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       if (data.agricultural_category) {
         formData.append('agricultural_category', data.agricultural_category);
       }
-      if (data.building_type) {
+      // Building type - skip for restaurant type
+      if (data.building_type && propertyType !== 'restaurant') {
         formData.append('building_type', data.building_type);
       }
       if (data.electricity) {
@@ -902,145 +903,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       </select>
                     </div>
                   </div>
-                  <div className={styles.formRow}>
-                    <div className={styles.selectWrapper}>
-                      <label className={styles.label}>Тип имот *</label>
-                      <select
-                        {...register('type')}
-                        className={styles.select}
-                        onChange={(e) => {
-                          setValue('type', e.target.value);
-                          setPropertyType(e.target.value as PropertyType);
-                        }}
-                      >
-                        <option value="apartment">Апартамент</option>
-                        <option value="house">Къща/Вила</option>
-                        <option value="office">Магазин/Офис/Кабинет/Салон</option>
-                        <option value="land">Строителен парцел/Инвестиционен проект</option>
-                        <option value="agricultural">Земеделска земя/Лозя/Гори</option>
-                        <option value="warehouse">Складове/Индустриални и стопански имоти</option>
-                        <option value="garage">Гараж/Паркоместа</option>
-                        <option value="hotel">Хотели/Мотели</option>
-                        <option value="restaurant">Ресторант</option>
-                        <option value="replace-real-estates">Замяна на недвижими имоти</option>
-                        <option value="buy-real-estates">Купуване на недвижими имоти</option>
-                      </select>
-                    </div>
-                    {/* Subtype field - shown based on property type */}
-                    {typeSchema.subtypeOptions.length > 0 && (
-                      <div className={styles.selectWrapper}>
-                        <label className={styles.label}>
-                          Подтип *
-                        </label>
-                        <select
-                          {...register('subtype', { required: 'Подтипът е задължителен' })}
-                          className={styles.select}
-                          value={watch('subtype') || ''}
-                          onChange={(e) => setValue('subtype', e.target.value)}
-                          required
-                        >
-                          <option value="">Изберете</option>
-                          {typeSchema.subtypeOptions.map((option) => (
-                            <option key={option.id} value={option.id}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.subtype?.message && (
-                          <p className={styles.errorMessage}>
-                            {translateErrorMessage(String(errors.subtype.message))}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className={`${styles.formRow} ${styles.titleRow}`}>
-                    <Input
-                      label="Заглавие *"
-                      {...register('title')}
-                      error={errors.title?.message ? translateErrorMessage(String(errors.title.message)) : undefined}
-                    />
-                  </div>
-                  <div className={styles.formRow}>
-                    <Input
-                      label={propertyType === 'hotel' ? "РЗП (м²) *" : "Площ (м²) *"}
-                      type="number"
-                      {...register('area', { valueAsNumber: true })}
-                      error={errors.area?.message ? translateErrorMessage(String(errors.area.message)) : undefined}
-                    />
-                    <Input
-                      label="Цена *"
-                      type="number"
-                      {...register('price', { valueAsNumber: true })}
-                      error={errors.price?.message ? translateErrorMessage(String(errors.price.message)) : undefined}
-                    />
-                    <Input
-                      label="Цена на м² *"
-                      type="number"
-                      {...register('price_per_sqm', { 
-                        valueAsNumber: true,
-                        required: 'Цената на м² е задължителна',
-                        min: { value: 0, message: 'Цената на м² трябва да е положително число' }
-                      })}
-                      error={errors.price_per_sqm?.message ? translateErrorMessage(String(errors.price_per_sqm.message)) : undefined}
-                      required
-                    />
-                  </div>
-                  {/* Dynamic fields based on property type - conditionally shown */}
-                  <div className={styles.formRow}>
-                    {/* Floor Options - only for apartments, offices, shops */}
-                    {showFloor && (
-                      <div className={styles.selectWrapper}>
-                        <label className={styles.label}>Етаж *</label>
-                        <select
-                          {...register('floor', {
-                            required: 'Етажът е задължителен'
-                          })}
-                          className={styles.select}
-                          required
-                        >
-                          <option value="">Изберете етаж</option>
-                          {FLOOR_SPECIAL_OPTIONS.map((option) => (
-                            <option key={option.id} value={option.id}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                    {/* Yard area - only for houses */}
-                    {showYardArea && (
-                      <Input
-                        label="Площ на двора (м²)"
-                        type="number"
-                        {...register('yard_area' as any, { valueAsNumber: true })}
-                        error={errors.yard_area?.message ? translateErrorMessage(String(errors.yard_area.message)) : undefined}
-                        placeholder="Площ на двора"
-                      />
-                    )}
-                  </div>
                 </div>
-
-                {/* Features section - dynamically rendered based on property type */}
-                {featuresList.length > 0 && (
-                  <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Особености <span className={styles.requiredMarker}>*</span></h2>
-                    <DynamicPropertyField
-                      field={{
-                        key: 'features',
-                        label: 'Особености',
-                        type: 'multi-select',
-                        required: false,
-                        options: featuresList,
-                      }}
-                      register={register}
-                      errors={errors}
-                      setValue={setValue}
-                      onFeaturesChange={setSelectedFeatures}
-                      selectedFeatures={selectedFeatures}
-                    />
-                  </div>
-                )}
 
                 <div className={styles.section}>
                   <h2 className={styles.sectionTitle}>Локация</h2>
@@ -1183,16 +1046,164 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       </div>
                     )}
                   </div>
+                </div>
+
+                <div className={styles.section}>
+                  <h2 className={styles.sectionTitle}>Детайли</h2>
                   <div className={styles.formRow}>
-                    {/* Year built - shown for all property types */}
+                    <div className={styles.selectWrapper}>
+                      <label className={styles.label}>Тип имот *</label>
+                      <select
+                        {...register('type')}
+                        className={styles.select}
+                        onChange={(e) => {
+                          setValue('type', e.target.value);
+                          setPropertyType(e.target.value as PropertyType);
+                        }}
+                      >
+                        <option value="apartment">Апартамент</option>
+                        <option value="house">Къща/Вила</option>
+                        <option value="office">Магазин/Офис/Кабинет/Салон</option>
+                        <option value="land">Строителен парцел/Инвестиционен проект</option>
+                        <option value="agricultural">Земеделска земя/Лозя/Гори</option>
+                        <option value="warehouse">Складове/Индустриални и стопански имоти</option>
+                        <option value="garage">Гараж/Паркоместа</option>
+                        <option value="hotel">Хотели/Мотели</option>
+                        <option value="restaurant">Ресторант</option>
+                        <option value="replace-real-estates">Замяна на недвижими имоти</option>
+                        <option value="buy-real-estates">Купуване на недвижими имоти</option>
+                      </select>
+                    </div>
+                    {/* Subtype field - shown based on property type */}
+                    {typeSchema.subtypeOptions.length > 0 && (
+                      <div className={styles.selectWrapper}>
+                        <label className={styles.label}>
+                          Подтип *
+                        </label>
+                        <select
+                          {...register('subtype', { required: 'Подтипът е задължителен' })}
+                          className={styles.select}
+                          value={watch('subtype') || ''}
+                          onChange={(e) => setValue('subtype', e.target.value)}
+                          required
+                        >
+                          <option value="">Изберете</option>
+                          {typeSchema.subtypeOptions.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.subtype?.message && (
+                          <p className={styles.errorMessage}>
+                            {translateErrorMessage(String(errors.subtype.message))}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className={`${styles.formRow} ${styles.titleRow}`}>
                     <Input
-                      label="Година на строеж *"
+                      label="Заглавие *"
+                      {...register('title')}
+                      error={errors.title?.message ? translateErrorMessage(String(errors.title.message)) : undefined}
+                    />
+                  </div>
+                  <div className={styles.formRow}>
+                    <Input
+                      label={propertyType === 'hotel' ? "РЗП (м²) *" : "Площ (м²) *"}
                       type="number"
-                      {...register('year_built', { valueAsNumber: true })}
-                      error={errors.year_built?.message ? translateErrorMessage(String(errors.year_built.message)) : undefined}
-                      placeholder="Година"
+                      {...register('area', { valueAsNumber: true })}
+                      error={errors.area?.message ? translateErrorMessage(String(errors.area.message)) : undefined}
+                    />
+                    <Input
+                      label="Цена *"
+                      type="number"
+                      {...register('price', { valueAsNumber: true })}
+                      error={errors.price?.message ? translateErrorMessage(String(errors.price.message)) : undefined}
+                    />
+                    <Input
+                      label="Цена на м² *"
+                      type="number"
+                      {...register('price_per_sqm', { 
+                        valueAsNumber: true,
+                        required: 'Цената на м² е задължителна',
+                        min: { value: 0, message: 'Цената на м² трябва да е положително число' }
+                      })}
+                      error={errors.price_per_sqm?.message ? translateErrorMessage(String(errors.price_per_sqm.message)) : undefined}
                       required
                     />
+                  </div>
+                  {/* Dynamic fields based on property type - conditionally shown */}
+                  <div className={styles.formRow}>
+                    {/* Floor Options - only for apartments, offices, shops */}
+                    {showFloor && (
+                      <div className={styles.selectWrapper}>
+                        <label className={styles.label}>Етаж *</label>
+                        <select
+                          {...register('floor', {
+                            required: 'Етажът е задължителен'
+                          })}
+                          className={styles.select}
+                          required
+                        >
+                          <option value="">Изберете етаж</option>
+                          {FLOOR_SPECIAL_OPTIONS.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                    {/* Yard area - only for houses */}
+                    {showYardArea && (
+                      <Input
+                        label="Площ на двора (м²)"
+                        type="number"
+                        {...register('yard_area' as any, { valueAsNumber: true })}
+                        error={errors.yard_area?.message ? translateErrorMessage(String(errors.yard_area.message)) : undefined}
+                        placeholder="Площ на двора"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Features section - dynamically rendered based on property type */}
+                {featuresList.length > 0 && (
+                  <div className={styles.section}>
+                    <h2 className={styles.sectionTitle}>Особености <span className={styles.requiredMarker}>*</span></h2>
+                    <DynamicPropertyField
+                      field={{
+                        key: 'features',
+                        label: 'Особености',
+                        type: 'multi-select',
+                        required: false,
+                        options: featuresList,
+                      }}
+                      register={register}
+                      errors={errors}
+                      setValue={setValue}
+                      onFeaturesChange={setSelectedFeatures}
+                      selectedFeatures={selectedFeatures}
+                    />
+                  </div>
+                )}
+
+                {/* Parameters section - hidden for warehouse, replace-real-estates, and buy-real-estates types */}
+                {propertyType !== 'warehouse' && propertyType !== 'replace-real-estates' && propertyType !== 'buy-real-estates' && (
+                  <div className={styles.formRow}>
+                    {/* Year built - shown for all property types except land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates */}
+                    {propertyType !== 'land' && propertyType !== 'agricultural' && propertyType !== 'warehouse' && propertyType !== 'garage' && propertyType !== 'hotel' && propertyType !== 'restaurant' && propertyType !== 'replace-real-estates' && propertyType !== 'buy-real-estates' && (
+                      <Input
+                        label="Година на строеж *"
+                        type="number"
+                        {...register('year_built', { valueAsNumber: true })}
+                        error={errors.year_built?.message ? translateErrorMessage(String(errors.year_built.message)) : undefined}
+                        placeholder="Година"
+                        required
+                      />
+                    )}
                     {/* Dynamic fields from schema - construction, completion, hotel_category, agricultural_category, electricity, water, bed_base */}
                     {typeFields
                       .filter(field => 
@@ -1214,6 +1225,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                         );
                       })}
                   </div>
+                  )}
                 </div>
 
                 <div className={styles.section}>

@@ -276,7 +276,17 @@ export function LocationFiltersGroup({
                     setIsDetectingLocation(false);
                 },
                 (error) => {
-                    console.error('Error getting location:', error);
+                    // Extract meaningful error information from GeolocationPositionError
+                    const errorInfo = {
+                        code: error.code,
+                        message: error.message,
+                        codeName: 
+                            error.code === 1 ? 'PERMISSION_DENIED' :
+                            error.code === 2 ? 'POSITION_UNAVAILABLE' :
+                            error.code === 3 ? 'TIMEOUT' :
+                            'UNKNOWN'
+                    };
+                    console.error('Error getting location:', errorInfo);
                     setIsDetectingLocation(false);
                 },
                 {

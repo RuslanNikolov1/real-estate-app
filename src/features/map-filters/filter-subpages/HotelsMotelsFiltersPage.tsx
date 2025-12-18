@@ -245,7 +245,7 @@ export function HotelsMotelsFiltersPage({
     const handleBedBaseChange = useCallback((bedBaseFrom: number, bedBaseTo: number, isNotProvided: boolean) => {
         filterValuesRef.current.bedBaseFrom = bedBaseFrom;
         filterValuesRef.current.bedBaseTo = bedBaseTo;
-        filterValuesRef.current.isBedBaseNotProvided = isNotProvided;
+        filterValuesRef.current.isBedBaseNotProvided = false; // Always false since we removed the "not provided" option
         notifyFiltersChange();
     }, [notifyFiltersChange]);
 

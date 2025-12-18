@@ -11,7 +11,7 @@ const propertyTypeLabels: Record<string, string> = {
   'building-plots': 'Строителни парцели/Инвестиционни проекти',
   'agricultural-land': 'Земеделска земя/Лозя/Гори',
   'warehouses-industrial': 'Складове/Индустриални и стопански имоти',
-  'garages-parking': 'Гаражове/Паркоместа',
+  'garages-parking': 'Гаражи/Паркоместа',
   'hotels-motels': 'Хотели/Мотели',
   restaurants: 'Ресторанти',
   'replace-real-estates': 'Замяна на недвижими имоти',

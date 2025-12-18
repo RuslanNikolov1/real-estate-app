@@ -27,7 +27,7 @@ export const propertyTypes: PropertyTypeOption[] = [
   { id: 'building-plots', label: 'Строителни парцели/Инвестиционни проекти', icon: MapPin },
   { id: 'agricultural-land', label: 'Земеделска земя/Лозя/Гори', icon: TreeEvergreen },
   { id: 'warehouses-industrial', label: 'Складове/Индустриални и стопански имоти', icon: Warehouse },
-  { id: 'garages-parking', label: 'Гаражове/Паркоместа', icon: Car },
+  { id: 'garages-parking', label: 'Гаражи/Паркоместа', icon: Car },
   { id: 'hotels-motels', label: 'Хотели/Мотели', icon: Bed },
   { id: 'restaurants', label: 'Ресторанти', icon: ForkKnife },
   { id: 'replace-real-estates', label: 'Замяна на недвижими имоти', icon: ArrowsClockwise },
