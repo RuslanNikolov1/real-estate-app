@@ -1194,7 +1194,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                 {propertyType !== 'warehouse' && propertyType !== 'replace-real-estates' && propertyType !== 'buy-real-estates' && (
                   <div className={styles.formRow}>
                     {/* Year built - shown for all property types except land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates */}
-                    {propertyType !== 'land' && propertyType !== 'agricultural' && propertyType !== 'warehouse' && propertyType !== 'garage' && propertyType !== 'hotel' && propertyType !== 'restaurant' && propertyType !== 'replace-real-estates' && propertyType !== 'buy-real-estates' && (
+                    {propertyType !== 'land' && propertyType !== 'agricultural' && propertyType !== 'garage' && propertyType !== 'hotel' && propertyType !== 'restaurant' && (
                       <Input
                         label="Година на строеж *"
                         type="number"
@@ -1422,9 +1422,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className={styles.formActions}>
+              <div className={styles.formActions}>
               {submitError && (
                 <div className={styles.errorBanner}>
                   <p className={styles.errorMessage}>{submitError}</p>
