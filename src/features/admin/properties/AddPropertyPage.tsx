@@ -28,9 +28,10 @@ const PROPERTY_TYPES = [
   { id: 'house', label: 'Къща/Вила' },
   { id: 'office', label: 'Магазин/Офис/Кабинет/Салон' },
   { id: 'land', label: 'Строителен парцел/Инвестиционен проект' },
+  { id: 'agricultural', label: 'Земеделска земя/Лозя/Гори' },
   { id: 'warehouse', label: 'Складове/Индустриални и стопански имоти' },
-  { id: 'hotel', label: 'Хотели/Мотели' },
   { id: 'garage', label: 'Гараж/Паркоместа' },
+  { id: 'hotel', label: 'Хотели/Мотели' },
   { id: 'restaurant', label: 'Ресторант' },
   { id: 'replace-real-estates', label: 'Замяна на недвижими имоти' },
   { id: 'buy-real-estates', label: 'Купуване на недвижими имоти' },
@@ -670,10 +671,10 @@ export function AddPropertyPage() {
                     <option value="house">Къща/Вила</option>
                     <option value="office">Магазин/Офис/Кабинет/Салон</option>
                     <option value="land">Строителен парцел/Инвестиционен проект</option>
+                    <option value="agricultural">Земеделска земя/Лозя/Гори</option>
                     <option value="warehouse">Складове/Индустриални и стопански имоти</option>
-                    <option value="land">Земеделска земя/Лозя/Гори</option>
-                    <option value="hotel">Хотели/Мотели</option>
                     <option value="garage">Гараж/Паркоместа</option>
+                    <option value="hotel">Хотели/Мотели</option>
                     <option value="restaurant">Ресторант</option>
                     <option value="replace-real-estates">Замяна на недвижими имоти</option>
                     <option value="buy-real-estates">Купуване на недвижими имоти</option>

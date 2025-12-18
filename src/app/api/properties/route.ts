@@ -350,6 +350,24 @@ export async function GET(request: NextRequest) {
         }
       }
       
+      // Agricultural property types filter (vineyard, forest, agricultural-land, etc.)
+      if (filters.propertyTypes && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0 && propertyTypeId === 'agricultural-land') {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:352',message:'Processing agricultural propertyTypes filter',data:{propertyTypes:filters.propertyTypes,propertyTypeId,willFilter:true},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H2'})}).catch(()=>{});
+        // #endregion
+        const validPropertyTypes = filters.propertyTypes.filter(
+          (propType: string) => propType && propType !== 'all'
+        );
+        
+        if (validPropertyTypes.length > 0) {
+          // Filter by subtype for agricultural properties
+          query = query.in('subtype', validPropertyTypes);
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:361',message:'Applied agricultural subtype filter',data:{subtypes:validPropertyTypes,queryApplied:true},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H2'})}).catch(()=>{});
+          // #endregion
+        }
+      }
+      
       // Construction type
       if (filters.selectedConstructionTypes && Array.isArray(filters.selectedConstructionTypes) && filters.selectedConstructionTypes.length > 0) {
         query = query.in('construction_type', filters.selectedConstructionTypes);
@@ -437,7 +455,7 @@ export async function GET(request: NextRequest) {
         query = query.in('water', filters.waterOptions);
       }
       
-      // Hotel category
+      // Category filter - maps to hotel_category for hotels or agricultural_category for agricultural land
       if (filters.selectedCategories && Array.isArray(filters.selectedCategories) && filters.selectedCategories.length > 0) {
         if (propertyTypeId === 'hotels-motels') {
           query = query.in('hotel_category', filters.selectedCategories);
@@ -463,7 +481,13 @@ export async function GET(request: NextRequest) {
     fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:375',message:'Query state before execution',data:{baseRoute,propertyTypeId,hasCityFilter:!!filters?.city,hasNeighborhoodFilter:!!(filters?.neighborhoods?.length),limit},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
     // #endregion
 
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:466',message:'Executing query',data:{propertyTypeId,hasFilters:!!filters,filtersKeys:filters ? Object.keys(filters) : [],filtersPropertyTypes:filters?.propertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H3'})}).catch(()=>{});
+    // #endregion
     const { data: properties, error } = await query;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:470',message:'Query results',data:{propertyCount:properties?.length || 0,error:error?.message,propertyTypes:properties?.map((p:any) => ({id:p.id,type:p.type,subtype:p.subtype,title:p.title?.substring(0,50)})) || [],hasVineyard:properties?.some((p:any) => p.subtype === 'vineyard') || false},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H3'})}).catch(()=>{});
+    // #endregion
 
     if (error) {
       console.error('Error fetching properties:', error);
@@ -538,6 +562,11 @@ export async function GET(request: NextRequest) {
       total_floors: prop.total_floors ? Number(prop.total_floors) : undefined,
       year_built: prop.build_year || undefined,
       yard_area_sqm: prop.yard_area_sqm ? Number(prop.yard_area_sqm) : undefined,
+      electricity: prop.electricity || undefined,
+      water: prop.water || undefined,
+      hotel_category: prop.hotel_category || undefined,
+      agricultural_category: prop.agricultural_category || undefined,
+      bed_base: prop.bed_base || undefined,
       images: (prop.image_urls || []).map((url: string, index: number) => ({
         id: `${prop.id}-img-${index}`,
         url,
@@ -844,6 +873,9 @@ export async function POST(request: NextRequest) {
       building_type: validatedData.building_type || null,
       electricity: validatedData.electricity || null,
       water: validatedData.water || null,
+      hotel_category: validatedData.hotel_category || null,
+      agricultural_category: validatedData.agricultural_category || null,
+      bed_base: validatedData.bed_base || null,
       features: validatedData.features || [],
       broker_name: validatedData.broker_name,
       broker_position: validatedData.broker_position || null,

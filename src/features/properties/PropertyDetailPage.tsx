@@ -847,13 +847,13 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   (propType === 'hotel' && (prop.construction_type || prop.completion_degree || prop.hotel_category || prop.bed_base || property.year_built)) ||
                   (propType === 'garage' && (prop.construction_type || property.year_built)) ||
                   ((propType === 'house' || propType === 'villa') && (property.year_built || property.yard_area_sqm)) ||
-                  (propType === 'agricultural' && prop.agricultural_category) ||
+                  (propType === 'agricultural' && (prop.agricultural_category || property.year_built)) ||
                   (propType === 'land' && (prop.electricity || prop.water || property.year_built));
                 return hasConstructionDetails;
               })() && (
                 <div className={styles.constructionSection}>
                   <h2 className={styles.sectionTitle}>
-                    {property.type === 'land' || property.type === 'agricultural' 
+                    {property.type === 'land' 
                       ? 'Допълнителни параметри' 
                       : 'Детайли за строителството'}
                   </h2>

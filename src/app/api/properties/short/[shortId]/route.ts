@@ -73,6 +73,9 @@ export async function GET(
       yard_area_sqm: prop.yard_area_sqm ? Number(prop.yard_area_sqm) : undefined,
       electricity: (prop as any).electricity || undefined,
       water: (prop as any).water || undefined,
+      hotel_category: (prop as any).hotel_category || undefined,
+      agricultural_category: (prop as any).agricultural_category || undefined,
+      bed_base: (prop as any).bed_base || undefined,
       images: (prop.image_urls || []).map((url: string, index: number) => ({
         id: `${prop.id}-img-${index}`,
         url,

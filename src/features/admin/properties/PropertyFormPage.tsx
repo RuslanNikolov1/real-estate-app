@@ -917,10 +917,10 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                         <option value="house">Къща/Вила</option>
                         <option value="office">Магазин/Офис/Кабинет/Салон</option>
                         <option value="land">Строителен парцел/Инвестиционен проект</option>
+                        <option value="agricultural">Земеделска земя/Лозя/Гори</option>
                         <option value="warehouse">Складове/Индустриални и стопански имоти</option>
-                        <option value="land">Земеделска земя/Лозя/Гори</option>
-                        <option value="hotel">Хотели/Мотели</option>
                         <option value="garage">Гараж/Паркоместа</option>
+                        <option value="hotel">Хотели/Мотели</option>
                         <option value="restaurant">Ресторант</option>
                         <option value="replace-real-estates">Замяна на недвижими имоти</option>
                         <option value="buy-real-estates">Купуване на недвижими имоти</option>

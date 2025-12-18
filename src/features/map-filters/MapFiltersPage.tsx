@@ -520,13 +520,26 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
             cleaned.buildingTypes = (filters as any).selectedBuildingTypes;
         }
         if ('propertyTypes' in filters && Array.isArray((filters as any).propertyTypes) && (filters as any).propertyTypes.length > 0) {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:522',message:'Processing propertyTypes in cleanFilters',data:{propertyTypes:(filters as any).propertyTypes,propertyTypeId:selectedPropertyType,isCommercial:selectedPropertyType === 'stores-offices',isAgricultural:selectedPropertyType === 'agricultural-land'},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H1'})}).catch(()=>{});
+            // #endregion
             // For commercial properties (stores/offices) - subtype filter (store, office, cabinet, beauty-salon, etc.)
             const validPropertyTypes = (filters as any).propertyTypes.filter((type: string) => type && type !== 'all');
             if (validPropertyTypes.length > 0) {
-                cleaned.commercialSubtypes = validPropertyTypes;
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:cleanFilters',message:'Converting propertyTypes to commercialSubtypes',data:{originalPropertyTypes:(filters as any).propertyTypes,validPropertyTypes,cleanedCommercialSubtypes:cleaned.commercialSubtypes},timestamp:Date.now(),sessionId:'debug-session',runId:'subtype-filter-debug',hypothesisId:'H1'})}).catch(()=>{});
-                // #endregion
+                // Check if this is for agricultural land or commercial
+                if (selectedPropertyType === 'agricultural-land') {
+                    // For agricultural land, keep as propertyTypes (will be handled as agricultural subtypes in API)
+                    cleaned.propertyTypes = validPropertyTypes;
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:530',message:'Agricultural propertyTypes kept as-is',data:{validPropertyTypes,cleanedPropertyTypes:cleaned.propertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'vineyard-search-debug',hypothesisId:'H1'})}).catch(()=>{});
+                    // #endregion
+                } else {
+                    // For commercial properties, convert to commercialSubtypes
+                    cleaned.commercialSubtypes = validPropertyTypes;
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:536',message:'Converting propertyTypes to commercialSubtypes',data:{originalPropertyTypes:(filters as any).propertyTypes,validPropertyTypes,cleanedCommercialSubtypes:cleaned.commercialSubtypes},timestamp:Date.now(),sessionId:'debug-session',runId:'subtype-filter-debug',hypothesisId:'H1'})}).catch(()=>{});
+                    // #endregion
+                }
             }
         }
         if ('selectedCategories' in filters && Array.isArray(filters.selectedCategories) && filters.selectedCategories.length > 0) {
@@ -569,7 +582,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         // Note: We don't include false values as they indicate "not set"
         
         return Object.keys(cleaned).length > 0 ? cleaned : null;
-    }, []);
+    }, [selectedPropertyType]);
     
     // Serialize filters to URL query params
     const serializeFiltersToURL = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState | null) => {

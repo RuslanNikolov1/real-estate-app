@@ -49,6 +49,9 @@ export const createPropertySchema = z.object({
   building_type: z.string().optional(),
   electricity: z.string().optional(),
   water: z.string().optional(),
+  hotel_category: z.string().optional(),
+  agricultural_category: z.string().optional(),
+  bed_base: z.coerce.number().int().optional(),
 
   // Особености
   features: z.array(z.string()).optional().default([]),
