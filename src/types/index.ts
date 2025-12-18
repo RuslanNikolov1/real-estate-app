@@ -58,6 +58,9 @@ export interface Property {
   features?: string[];
   construction_type?: string;
   completion_degree?: string;
+  building_type?: string;
+  electricity?: string;
+  water?: string;
   coordinates?: {
     lat: number;
     lng: number;

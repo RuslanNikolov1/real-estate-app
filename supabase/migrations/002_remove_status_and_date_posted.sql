@@ -19,3 +19,5 @@ alter table public.properties drop column if exists date_posted;
 
 
 
+
+

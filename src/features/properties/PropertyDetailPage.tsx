@@ -536,6 +536,14 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
     return construction?.label || 'Не е посочено';
   };
 
+  // Get building type label (Вид сграда)
+  const getBuildingTypeLabel = () => {
+    const buildingTypeId = (property as any).building_type as string | undefined;
+    if (!buildingTypeId) return 'Не е посочено';
+    const match = BUILDING_TYPES.find((b) => b.id === buildingTypeId);
+    return match?.label || 'Не е посочено';
+  };
+
   // Get completion status label
   const getCompletionLabel = () => {
     const completion = COMPLETION_STATUSES.find((c) => c.id === (property as any).completion_degree);
@@ -840,7 +848,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   (propType === 'garage' && (prop.construction_type || property.year_built)) ||
                   ((propType === 'house' || propType === 'villa') && (property.year_built || property.yard_area_sqm)) ||
                   (propType === 'agricultural' && prop.agricultural_category) ||
-                  (propType === 'land' && (prop.electricity || prop.water));
+                  (propType === 'land' && (prop.electricity || prop.water || property.year_built));
                 return hasConstructionDetails;
               })() && (
                 <div className={styles.constructionSection}>
@@ -850,6 +858,14 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       : 'Детайли за строителството'}
                   </h2>
                   <div className={styles.constructionGrid}>
+                    {/* Building Type (Вид сграда) - for offices, shops, restaurants */}
+                    {(property.type === 'office' || property.type === 'shop' || property.type === 'restaurant') && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Вид сграда</span>
+                        <span className={styles.constructionValue}>{getBuildingTypeLabel()}</span>
+                      </div>
+                    )}
+                    
                     {/* Construction Type - for apartments, offices, shops, hotels, restaurants */}
                     {((property.type === 'apartment' || property.type === 'office' || property.type === 'shop' || property.type === 'hotel' || property.type === 'restaurant') && (property as any).construction_type) && (
                       <div className={styles.constructionItem}>

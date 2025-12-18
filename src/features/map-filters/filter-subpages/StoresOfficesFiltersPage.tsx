@@ -14,6 +14,7 @@ import {
     ConstructionTypeFilter,
     CompletionStatusFilter,
     BuildingTypeFilter,
+    YearFilter,
     COMMERCIAL_PROPERTY_TYPES,
     COMMERCIAL_FEATURES,
     COMMERCIAL_FLOOR_OPTIONS
@@ -65,6 +66,9 @@ export interface CommercialFiltersState {
     selectedConstructionTypes?: string[];
     selectedCompletionStatuses?: string[];
     selectedBuildingTypes: string[];
+    yearFrom?: number;
+    yearTo?: number;
+    isYearNotProvided?: boolean;
     // Rent-specific fields
     monthlyRentFrom?: number;
     monthlyRentTo?: number;
@@ -128,6 +132,9 @@ export function StoresOfficesFiltersPage({
         selectedConstructionTypes: [],
         selectedCompletionStatuses: [],
         selectedBuildingTypes: [],
+        yearFrom: undefined,
+        yearTo: undefined,
+        isYearNotProvided: false,
         // Rent-specific fields
         monthlyRentFrom: undefined,
         monthlyRentTo: undefined,
@@ -258,6 +265,13 @@ export function StoresOfficesFiltersPage({
         notifyFiltersChange();
     }, [notifyFiltersChange]);
 
+    const handleYearChange = useCallback((yearFrom: number, yearTo: number, isNotProvided: boolean) => {
+        filterValuesRef.current.yearFrom = yearFrom;
+        filterValuesRef.current.yearTo = yearTo;
+        filterValuesRef.current.isYearNotProvided = isNotProvided;
+        notifyFiltersChange();
+    }, [notifyFiltersChange]);
+
     const handleBuildingTypeChange = useCallback((selectedTypes: string[]) => {
         filterValuesRef.current.selectedBuildingTypes = selectedTypes;
         notifyFiltersChange();
@@ -309,6 +323,9 @@ export function StoresOfficesFiltersPage({
             selectedConstructionTypes: [],
             selectedCompletionStatuses: [],
             selectedBuildingTypes: [],
+            yearFrom: undefined,
+            yearTo: undefined,
+            isYearNotProvided: false,
             // Reset rent-specific fields
             monthlyRentFrom: RENT_SLIDER_MIN,
             monthlyRentTo: RENT_SLIDER_MAX,
@@ -627,6 +644,16 @@ export function StoresOfficesFiltersPage({
                         initialSelected={filterValuesRef.current.selectedConstructionTypes}
                     />
                 </div>
+            )}
+            {/* Year Filter (Година на строителство) - Only for sale mode */}
+            {!isRentMode && (
+                <YearFilter
+                    key={`year-${filterKey}`}
+                    onFilterChange={handleYearChange}
+                    initialYearFrom={filterValuesRef.current.yearFrom}
+                    initialYearTo={filterValuesRef.current.yearTo}
+                    initialIsNotProvided={filterValuesRef.current.isYearNotProvided}
+                />
             )}
             {/* Completion Status Filter (Степен на завършеност) - Only for sale mode */}
             {!isRentMode && (

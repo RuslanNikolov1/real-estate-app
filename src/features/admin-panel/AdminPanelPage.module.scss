@@ -16,6 +16,7 @@
   background: $white;
   border-radius: 16px;
   padding: $spacing-xl;
+  padding-bottom: 10vh;
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
 
   @media (max-width: $breakpoint-sm) {

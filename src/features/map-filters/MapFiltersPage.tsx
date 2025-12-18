@@ -95,7 +95,14 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         if (params.has('filters')) {
             try {
                 const filtersJson = decodeURIComponent(params.get('filters') || '');
-                const restoredFilters = JSON.parse(filtersJson) as ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState;
+                let restoredFilters = JSON.parse(filtersJson) as ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState;
+                
+                // Map commercialSubtypes back to propertyTypes for stores/offices filters
+                if (restoredFilters && 'commercialSubtypes' in restoredFilters && !('propertyTypes' in restoredFilters)) {
+                    (restoredFilters as any).propertyTypes = (restoredFilters as any).commercialSubtypes || [];
+                    delete (restoredFilters as any).commercialSubtypes;
+                }
+                
                 setRestoredFilters(restoredFilters);
                 currentFiltersRef.current = restoredFilters;
                 
@@ -508,6 +515,20 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         if ('selectedCompletionStatuses' in filters && Array.isArray(filters.selectedCompletionStatuses) && filters.selectedCompletionStatuses.length > 0) {
             cleaned.selectedCompletionStatuses = filters.selectedCompletionStatuses;
         }
+        if ('selectedBuildingTypes' in filters && Array.isArray((filters as any).selectedBuildingTypes) && (filters as any).selectedBuildingTypes.length > 0) {
+            // For commercial properties (stores/offices) - building types filter
+            cleaned.buildingTypes = (filters as any).selectedBuildingTypes;
+        }
+        if ('propertyTypes' in filters && Array.isArray((filters as any).propertyTypes) && (filters as any).propertyTypes.length > 0) {
+            // For commercial properties (stores/offices) - subtype filter (store, office, cabinet, beauty-salon, etc.)
+            const validPropertyTypes = (filters as any).propertyTypes.filter((type: string) => type && type !== 'all');
+            if (validPropertyTypes.length > 0) {
+                cleaned.commercialSubtypes = validPropertyTypes;
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:cleanFilters',message:'Converting propertyTypes to commercialSubtypes',data:{originalPropertyTypes:(filters as any).propertyTypes,validPropertyTypes,cleanedCommercialSubtypes:cleaned.commercialSubtypes},timestamp:Date.now(),sessionId:'debug-session',runId:'subtype-filter-debug',hypothesisId:'H1'})}).catch(()=>{});
+                // #endregion
+            }
+        }
         if ('selectedCategories' in filters && Array.isArray(filters.selectedCategories) && filters.selectedCategories.length > 0) {
             cleaned.selectedCategories = filters.selectedCategories;
         }
@@ -516,6 +537,14 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         }
         if ('selectedWorkingOptions' in filters && Array.isArray(filters.selectedWorkingOptions) && filters.selectedWorkingOptions.length > 0) {
             cleaned.selectedWorkingOptions = filters.selectedWorkingOptions;
+        }
+        if ('selectedElectricityOptions' in filters && Array.isArray(filters.selectedElectricityOptions) && filters.selectedElectricityOptions.length > 0) {
+            // For building plots - electricity filter
+            cleaned.electricityOptions = filters.selectedElectricityOptions;
+        }
+        if ('selectedWaterOptions' in filters && Array.isArray(filters.selectedWaterOptions) && filters.selectedWaterOptions.length > 0) {
+            // For building plots - water filter
+            cleaned.waterOptions = filters.selectedWaterOptions;
         }
         
         // Bed base filters
@@ -656,10 +685,29 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
     }, [selectedPropertyType, router, serializeFiltersToURL, baseRoute, locationState, formatCityName, handleLocationChange]);
 
     const handleBackToMap = useCallback(() => {
-        // Remove search params from URL
-        const currentPath = selectedPropertyType 
-            ? `${baseRoute}/${selectedPropertyType}` 
-            : baseRoute;
+        // For sale search: go back to /sale/search when a type is selected
+        // For rent search: go back to /rent/search when a type is selected
+        // For sale/rent search without a type, go back to root
+        const isSaleSearch = baseRoute === '/sale/search';
+        const isRentSearch = baseRoute === '/rent/search';
+        const isSearchRoute = isSaleSearch || isRentSearch;
+        
+        let currentPath: string;
+        if (isSaleSearch && selectedPropertyType) {
+            // /sale/search/[type] → back to /sale/search
+            currentPath = baseRoute;
+        } else if (isRentSearch && selectedPropertyType) {
+            // /rent/search/[type] → back to /rent/search
+            currentPath = baseRoute;
+        } else if (isSearchRoute && !selectedPropertyType) {
+            // /sale/search or /rent/search (no type) → back to root
+            currentPath = '/';
+        } else {
+            // Other routes (e.g., /map-filters)
+            currentPath = selectedPropertyType ? `${baseRoute}/${selectedPropertyType}` : baseRoute;
+        }
+
+        // Remove search params from URL and reset state
         router.push(currentPath);
         setShowListings(false);
         setCurrentPage(1); // Reset to first page when going back to map
@@ -687,7 +735,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         }
     }, []);
 
-    // Filter property types for rent/search route
+    // Filter property types for rent/search and sale/search routes
     const availablePropertyTypes = useMemo(() => {
         if (baseRoute === '/rent/search') {
             // Only show specific property types for rent with custom labels
@@ -718,6 +766,10 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                     label: rentLabels[type.id] || type.label
                 }));
         }
+        if (baseRoute === '/sale/search') {
+            // Filter out 'other-real-estates' from sale/search
+            return propertyTypes.filter(type => type.id !== 'other-real-estates');
+        }
         return propertyTypes;
     }, [baseRoute]);
 
@@ -737,12 +789,32 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                         <Button
                             variant="outline"
                             onClick={() => {
+                                const isSaleSearch = baseRoute === '/sale/search';
+                                const isRentSearch = baseRoute === '/rent/search';
+                                const isSearchRoute = isSaleSearch || isRentSearch;
+
+                                // Check for query parameters
+                                const params = new URLSearchParams(window.location.search);
+                                const hasQueryParams = params.has('search') || params.has('filters');
+
+                                let targetPath: string;
+                                
+                                if (hasQueryParams && selectedPropertyType) {
+                                    // Case 3: /sale/search/[subtype]?search=... → /sale/search/[subtype]
+                                    targetPath = `${baseRoute}/${selectedPropertyType}`;
+                                } else if (selectedPropertyType && isSearchRoute) {
+                                    // Case 2: /sale/search/[subtype] → /sale/search
+                                    targetPath = baseRoute;
+                                } else if (isSearchRoute && !selectedPropertyType) {
+                                    // Case 1: /sale/search → /
+                                    targetPath = '/';
+                                } else {
+                                    // Other routes (e.g., /map-filters)
+                                    targetPath = selectedPropertyType ? `${baseRoute}/${selectedPropertyType}` : baseRoute;
+                                }
+                                
                                 setShowListings(false);
-                                // Clear search params from URL to reset state
-                                const currentPath = selectedPropertyType 
-                                    ? `${baseRoute}/${selectedPropertyType}` 
-                                    : baseRoute;
-                                router.push(currentPath);
+                                router.push(targetPath);
                             }}
                             className={styles.backButton}
                         >

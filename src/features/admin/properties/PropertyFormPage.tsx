@@ -750,7 +750,9 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       if (data.agricultural_category) {
         formData.append('agricultural_category', data.agricultural_category);
       }
-      // building_type field removed - not saving to database
+      if (data.building_type) {
+        formData.append('building_type', data.building_type);
+      }
       if (data.electricity) {
         formData.append('electricity', data.electricity);
       }
@@ -887,15 +889,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
             <div className={styles.formGrid}>
               <div className={styles.formMain}>
                 <div className={styles.section}>
-                  <h2 className={styles.sectionTitle}>Основни данни</h2>
-                  <Input
-                    label="Заглавие *"
-                    {...register('title')}
-                    error={errors.title?.message ? translateErrorMessage(String(errors.title.message)) : undefined}
-                  />
-                </div>
-
-                <div className={styles.section}>
                   <h2 className={styles.sectionTitle}>Детайли</h2>
                   <div className={styles.formRow}>
                     <div className={styles.selectWrapper}>
@@ -922,17 +915,15 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       >
                         <option value="apartment">Апартамент</option>
                         <option value="house">Къща/Вила</option>
-                        <option value="office">Офис</option>
-                        <option value="shop">Магазин</option>
-                        <option value="warehouse">Склад</option>
-                        <option value="land">Земя</option>
-                        <option value="hotel">Хотел</option>
-                        <option value="agricultural">Земеделска земя</option>
+                        <option value="office">Магазин/Офис/Кабинет/Салон</option>
+                        <option value="land">Строителен парцел/Инвестиционен проект</option>
+                        <option value="warehouse">Складове/Индустриални и стопански имоти</option>
+                        <option value="land">Земеделска земя/Лозя/Гори</option>
+                        <option value="hotel">Хотели/Мотели</option>
                         <option value="garage">Гараж/Паркоместа</option>
                         <option value="restaurant">Ресторант</option>
                         <option value="replace-real-estates">Замяна на недвижими имоти</option>
                         <option value="buy-real-estates">Купуване на недвижими имоти</option>
-                        <option value="other-real-estates">Други недвижими имоти</option>
                       </select>
                     </div>
                     {/* Subtype field - shown based on property type */}
@@ -962,6 +953,13 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                         )}
                       </div>
                     )}
+                  </div>
+                  <div className={`${styles.formRow} ${styles.titleRow}`}>
+                    <Input
+                      label="Заглавие *"
+                      {...register('title')}
+                      error={errors.title?.message ? translateErrorMessage(String(errors.title.message)) : undefined}
+                    />
                   </div>
                   <div className={styles.formRow}>
                     <Input
@@ -1097,7 +1095,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                                 if (!searchTerm) return true;
                                 return cityName.toLowerCase().includes(searchTerm);
                               })
-                              .slice(0, 10) // Limit to 10 results for better UX
                               .map((cityName) => {
                                 // Find coordinates from burgasCities for map/distance calculations
                                 const cityData = burgasCities.cities.find(
@@ -1150,12 +1147,11 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                             error={errors.neighborhood?.message
                               ? translateErrorMessage(String(errors.neighborhood.message))
                               : undefined}
-                            required
                           />
                         ) : (
                           <div className={styles.manualNeighborhoodInputWrapper}>
                             <label htmlFor="neighborhood-manual" className={styles.manualNeighborhoodLabel}>
-                              Квартал *
+                              Квартал
                             </label>
                             <input
                               id="neighborhood-manual"
@@ -1178,7 +1174,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                                 }
                               }}
                               className={styles.manualNeighborhoodInputField}
-                              required
                             />
                             {errors.neighborhood?.message && (
                               <p className={styles.errorMessage}>{translateErrorMessage(String(errors.neighborhood.message))}</p>

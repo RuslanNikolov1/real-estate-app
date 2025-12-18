@@ -1,11 +1,9 @@
 'use client';
 
-'use client';
-
 import Link from 'next/link';
 import type { ComponentType } from 'react';
 import type { IconProps } from '@phosphor-icons/react';
-import { House, ChatCircleText, Certificate, GearSix } from '@phosphor-icons/react';
+import { House, ChatCircleText, GearSix } from '@phosphor-icons/react';
 import { Header } from '@/components/layout/Header';
 import styles from './AdminPanelPage.module.scss';
 
@@ -28,12 +26,6 @@ const adminActions: AdminAction[] = [
     description: 'Преглеждайте, публикувайте или скривайте клиентски отзиви и препоръки.',
     href: '/admin/reviews',
     icon: ChatCircleText,
-  },
-  {
-    label: 'Сертификати',
-    description: 'Управлявайте сертификати, членства и документи за съответствие.',
-    href: '/admin/certificates',
-    icon: Certificate,
   },
 ];
 

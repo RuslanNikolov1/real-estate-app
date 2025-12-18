@@ -13,9 +13,24 @@ const CITY_ENTRIES: CityRecord[] = Object.values(
   citiesNeighborhoods as Record<string, CityRecord>,
 );
 
-export const CITY_OPTIONS: string[] = CITY_ENTRIES.map((entry) => entry.cityName).sort((a, b) =>
-  a.localeCompare(b, 'bg'),
-);
+// Define the specific order of cities for the dropdown
+export const CITY_OPTIONS: string[] = [
+  'Бургас',
+  'Поморие',
+  'Ахелой',
+  'Равда',
+  'Несебър',
+  'Слънчев бряг',
+  'Свети Влас',
+  'Елените',
+  'Кошарица',
+  'Черноморец',
+  'Царево',
+  'Китен',
+  'Созопол',
+  'Приморско',
+  'Синеморец'
+];
 
 export const getNeighborhoodsByCity = (cityName?: string): string[] => {
   if (!cityName) {
@@ -29,6 +44,8 @@ export const getNeighborhoodsByCity = (cityName?: string): string[] => {
 };
 
 export const getInitialCity = () => CITY_OPTIONS[0] ?? '';
+
+
 
 
 

@@ -357,7 +357,6 @@ export function LocationFiltersGroup({
                                         if (!searchTerm) return true;
                                         return cityName.toLowerCase().includes(searchTerm);
                                     })
-                                    .slice(0, 10) // Limit to 10 results for better UX
                                     .map((cityName) => {
                                         // Find coordinates from burgasCities for map/distance calculations
                                         const cityData = burgasCities.cities.find(

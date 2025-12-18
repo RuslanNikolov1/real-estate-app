@@ -35,7 +35,8 @@ export const createPropertySchema = z.object({
 
   // Локация
   city: z.string().min(1, 'Градът е задължителен'),
-  neighborhood: z.string().min(1, 'Кварталът е задължителен'),
+  // Neighborhood is optional – can be empty or omitted
+  neighborhood: z.string().optional(),
 
   // Описание
   title: z.string().min(1, 'Заглавието е задължително'),
@@ -45,6 +46,9 @@ export const createPropertySchema = z.object({
   build_year: z.coerce.number().int().optional(),
   construction_type: z.string().optional(),
   completion_degree: z.string().optional(),
+  building_type: z.string().optional(),
+  electricity: z.string().optional(),
+  water: z.string().optional(),
 
   // Особености
   features: z.array(z.string()).optional().default([]),

@@ -26,17 +26,14 @@ import styles from './AddPropertyPage.module.scss';
 const PROPERTY_TYPES = [
   { id: 'apartment', label: 'Апартамент' },
   { id: 'house', label: 'Къща/Вила' },
-  { id: 'office', label: 'Офис' },
-  { id: 'shop', label: 'Магазин' },
-  { id: 'warehouse', label: 'Склад' },
-  { id: 'land', label: 'Парцел' },
-  { id: 'hotel', label: 'Хотел' },
-  { id: 'agricultural', label: 'Земеделска земя' },
+  { id: 'office', label: 'Магазин/Офис/Кабинет/Салон' },
+  { id: 'land', label: 'Строителен парцел/Инвестиционен проект' },
+  { id: 'warehouse', label: 'Складове/Индустриални и стопански имоти' },
+  { id: 'hotel', label: 'Хотели/Мотели' },
   { id: 'garage', label: 'Гараж/Паркоместа' },
   { id: 'restaurant', label: 'Ресторант' },
   { id: 'replace-real-estates', label: 'Замяна на недвижими имоти' },
   { id: 'buy-real-estates', label: 'Купуване на недвижими имоти' },
-  { id: 'other-real-estates', label: 'Други недвижими имоти' },
 ];
 
 const PROPERTY_STATUSES = [
@@ -351,11 +348,6 @@ export function AddPropertyPage() {
       return;
     }
 
-    if (!neighborhood) {
-      setSubmitError(t('errors.neighborhoodRequired'));
-      return;
-    }
-
     if (typeSchema.subtypeOptions.length > 0 && !subtype) {
       setSubmitError(t('errors.subtypeRequired'));
       return;
@@ -444,6 +436,9 @@ export function AddPropertyPage() {
 
       if (typeSchema.subtypeOptions.length > 0) {
         formData.append('subtype', subtype);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:subtype',message:'Submitting property with subtype',data:{selectedType,subtype},timestamp:Date.now(),sessionId:'debug-session',runId:'subtype-debug',hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
       }
 
       formData.append('area_sqm', numericArea.toString());
@@ -480,7 +475,10 @@ export function AddPropertyPage() {
         formData.append('completion_degree', selectedCompletion);
       }
 
-      // building_type field removed - not saving to database
+      // Building type (вид сграда) - optional, when available in schema
+      if (buildingType) {
+        formData.append('building_type', buildingType);
+      }
 
       if (hotelCategory) {
         formData.append('hotel_category', hotelCategory);
@@ -494,12 +492,29 @@ export function AddPropertyPage() {
         formData.append('bed_base', bedBase);
       }
 
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:494',message:'Electricity and water values before formData append',data:{electricity,electricityType:typeof electricity,electricityTruthy:!!electricity,water,waterType:typeof water,waterTruthy:!!water,selectedType},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H1'})}).catch(()=>{});
+      // #endregion
       if (electricity) {
         formData.append('electricity', electricity);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:496',message:'Electricity appended to formData',data:{electricity},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
+      } else {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:497',message:'Electricity NOT appended (falsy value)',data:{electricity},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H3'})}).catch(()=>{});
+        // #endregion
       }
 
       if (water) {
         formData.append('water', water);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:500',message:'Water appended to formData',data:{water},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
+      } else {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:501',message:'Water NOT appended (falsy value)',data:{water},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H3'})}).catch(()=>{});
+        // #endregion
       }
 
       if (yardArea) {
@@ -622,16 +637,6 @@ export function AddPropertyPage() {
           </div>
 
           <section className={styles.section}>
-            <Input
-              label="Заглавие *"
-              placeholder="Луксозен апартамент в центъра"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              required
-            />
-          </section>
-
-          <section className={styles.section}>
             <h2>Основна информация</h2>
             <div className={styles.optionGrid}>
               <div className={styles.control}>
@@ -663,17 +668,15 @@ export function AddPropertyPage() {
                   >
                     <option value="apartment">Апартамент</option>
                     <option value="house">Къща/Вила</option>
-                    <option value="office">Офис</option>
-                    <option value="shop">Магазин</option>
-                    <option value="warehouse">Склад</option>
-                    <option value="land">Земя</option>
-                    <option value="hotel">Хотел</option>
-                    <option value="agricultural">Земеделска земя</option>
+                    <option value="office">Магазин/Офис/Кабинет/Салон</option>
+                    <option value="land">Строителен парцел/Инвестиционен проект</option>
+                    <option value="warehouse">Складове/Индустриални и стопански имоти</option>
+                    <option value="land">Земеделска земя/Лозя/Гори</option>
+                    <option value="hotel">Хотели/Мотели</option>
                     <option value="garage">Гараж/Паркоместа</option>
                     <option value="restaurant">Ресторант</option>
                     <option value="replace-real-estates">Замяна на недвижими имоти</option>
                     <option value="buy-real-estates">Купуване на недвижими имоти</option>
-                    <option value="other-real-estates">Други недвижими имоти</option>
                   </select>
                 </div>
                 {/* Subtype field - shown based on property type */}
@@ -698,6 +701,15 @@ export function AddPropertyPage() {
                   </div>
                 )}
               </div>
+            </div>
+            <div className={`${styles.inputsRow} ${styles.titleRow}`}>
+              <Input
+                label="Заглавие *"
+                placeholder="Луксозен апартамент в центъра"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                required
+              />
             </div>
           </section>
 
@@ -898,7 +910,6 @@ export function AddPropertyPage() {
                           if (!searchTerm) return true;
                           return cityName.toLowerCase().includes(searchTerm);
                         })
-                        .slice(0, 10) // Limit to 10 results for better UX
                         .map((cityName) => {
                           // Find coordinates from burgasCities for map/distance calculations
                           const cityData = burgasCities.cities.find(
@@ -944,12 +955,11 @@ export function AddPropertyPage() {
                       onChange={(val) => setNeighborhood(Array.isArray(val) ? val[0] ?? '' : val)}
                       disabled={!isCitySelected}
                       label="Квартал"
-                      required
                     />
                   ) : (
                     <div className={styles.manualNeighborhoodInputWrapper}>
                       <label htmlFor="neighborhood-manual" className={styles.manualNeighborhoodLabel}>
-                        Квартал *
+                        Квартал
                       </label>
                       <input
                         id="neighborhood-manual"
@@ -972,7 +982,6 @@ export function AddPropertyPage() {
                           }
                         }}
                         className={styles.manualNeighborhoodInputField}
-                        required
                       />
                     </div>
                   )}
@@ -1078,7 +1087,7 @@ export function AddPropertyPage() {
               {/* Construction Type - only if in schema */}
               {showConstruction && (
                 <div className={styles.control}>
-                  <label>Конструкция *</label>
+                  <label>Вид строителство *</label>
                   <select
                     value={selectedConstruction}
                     onChange={(e) => setSelectedConstruction(e.target.value)}

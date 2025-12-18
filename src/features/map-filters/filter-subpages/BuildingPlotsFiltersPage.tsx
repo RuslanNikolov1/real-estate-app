@@ -11,6 +11,7 @@ import {
     FeaturesFilter,
     ElectricityFilter,
     WaterFilter,
+    YearFilter,
     BUILDING_PLOTS_FEATURES
 } from '../filters';
 import {
@@ -54,6 +55,9 @@ export interface BuildingPlotsFiltersState {
     selectedFeatures: string[];
     selectedElectricityOptions?: string[];
     selectedWaterOptions?: string[];
+    yearFrom?: number;
+    yearTo?: number;
+    isYearNotProvided?: boolean;
     // Rent-specific fields
     monthlyRentFrom?: number;
     monthlyRentTo?: number;
@@ -76,6 +80,9 @@ const createInitialBuildingPlotFilters = (): BuildingPlotsFiltersState => ({
     selectedFeatures: [],
     selectedElectricityOptions: [],
     selectedWaterOptions: [],
+    yearFrom: undefined,
+    yearTo: undefined,
+    isYearNotProvided: false,
     // Rent-specific fields
     monthlyRentFrom: 1,
     monthlyRentTo: 5600,
@@ -215,6 +222,10 @@ export function BuildingPlotsFiltersPage({
 
     const handleWaterChange = useCallback((selectedOptions: string[]) => {
         updateFilters({ selectedWaterOptions: selectedOptions });
+    }, [updateFilters]);
+
+    const handleYearChange = useCallback((yearFrom: number, yearTo: number, isNotProvided: boolean) => {
+        updateFilters({ yearFrom, yearTo, isYearNotProvided: isNotProvided });
     }, [updateFilters]);
 
     const handlePropertyIdChange = useCallback((value: string) => {
@@ -539,6 +550,17 @@ export function BuildingPlotsFiltersPage({
                         initialSelected={filters.selectedWaterOptions}
                     />
                 </div>
+            )}
+
+            {/* Year Filter (Година на строителство) - Only for sale mode */}
+            {!isRentMode && (
+                <YearFilter
+                    key={`year-${filterKey}`}
+                    onFilterChange={handleYearChange}
+                    initialYearFrom={filters.yearFrom}
+                    initialYearTo={filters.yearTo}
+                    initialIsNotProvided={filters.isYearNotProvided}
+                />
             )}
 
             {/* Features Filter (Особености) */}
