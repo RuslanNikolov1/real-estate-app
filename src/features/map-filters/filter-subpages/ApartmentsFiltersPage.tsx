@@ -16,6 +16,7 @@ import {
     CompletionStatusFilter,
     APARTMENT_SUBTYPES
 } from '../filters';
+import { RENT_APARTMENT_FEATURES } from '../filters/constants';
 import {
     PRICE_SLIDER_MAX,
     PRICE_PER_SQM_SLIDER_MAX,
@@ -613,7 +614,7 @@ export function ApartmentsFiltersPage({
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
                         title="Месечен наем"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
                         from={filterValuesRef.current.monthlyRentFrom || RENT_SLIDER_MIN}
@@ -624,7 +625,7 @@ export function ApartmentsFiltersPage({
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
                         title="Цена за кв.м"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
                         from={filterValuesRef.current.rentPerSqmFrom || RENT_PER_SQM_SLIDER_MIN}
@@ -654,6 +655,7 @@ export function ApartmentsFiltersPage({
                 key={`features-${filterKey}`}
                 onFilterChange={handleFeaturesChange}
                 initialSelected={rightColumnFilterState.selectedFeatures}
+                features={isRentMode ? RENT_APARTMENT_FEATURES : undefined}
             />
 
             {/* Construction & Year Filter - Only for sale mode */}

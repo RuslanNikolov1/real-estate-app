@@ -5,6 +5,7 @@ import {
     ArrowsLeftRight,
     Bed,
     Buildings,
+    Bus,
     Car,
     CheckCircle,
     Cube,
@@ -12,6 +13,7 @@ import {
     Factory,
     Fire,
     FireSimple,
+    GraduationCap,
     Hammer,
     Handshake,
     House,
@@ -19,13 +21,18 @@ import {
     Infinity,
     Palette,
     PaintRoller,
+    Phone,
     Question,
     ShieldCheck,
+    Snowflake,
     SolarPanel,
+    Star,
     Storefront,
     SunHorizon,
+    Television,
     Thermometer,
     TreeEvergreen,
+    WifiHigh,
 } from '@phosphor-icons/react';
 import type { FeatureFilter, ConstructionFilter, ApartmentSubtype, FloorSpecialOption, CompletionStatus, HouseType } from './types';
 
@@ -78,6 +85,28 @@ export const APARTMENT_FEATURE_FILTERS: FeatureFilter[] = [
     { id: 'renovated-insulated', label: 'Саниран', icon: <Hammer size={18} weight="bold" /> },
     { id: 'recently-renovated', label: 'След ремонт', icon: <PaintRoller size={18} weight="bold" /> },
     { id: 'district-heating', label: 'ТЕЦ', icon: <Factory size={18} weight="bold" /> },
+];
+
+// Rent Apartment Features (for rent mode only)
+export const RENT_APARTMENT_FEATURES: FeatureFilter[] = [
+    { id: 'all', label: 'Всички', icon: null },
+    { id: 'elevator', label: 'Асансьор', icon: <ArrowFatLinesUp size={18} weight="bold" /> },
+    { id: 'near-kindergarten', label: 'Близо до детска градина', icon: <GraduationCap size={18} weight="bold" /> },
+    { id: 'near-stop', label: 'Близо до спирка/станция', icon: <Bus size={18} weight="bold" /> },
+    { id: 'near-school', label: 'Близо до училище', icon: <GraduationCap size={18} weight="bold" /> },
+    { id: 'security', label: 'Портиер/охрана', icon: <ShieldCheck size={18} weight="bold" /> },
+    { id: 'internet', label: 'Интернет', icon: <WifiHigh size={18} weight="bold" /> },
+    { id: 'cable-tv', label: 'Кабелна/Сателитна TV', icon: <Television size={18} weight="bold" /> },
+    { id: 'air-conditioning', label: 'Климатик', icon: <Snowflake size={18} weight="bold" /> },
+    { id: 'local-heating', label: 'Локално отопление', icon: <Thermometer size={18} weight="bold" /> },
+    { id: 'luxury', label: 'Лукс', icon: <Star size={18} weight="bold" /> },
+    { id: 'garage', label: 'С гараж', icon: <Car size={18} weight="bold" /> },
+    { id: 'own-parking', label: 'Собствено паркомясто', icon: <Car size={18} weight="bold" /> },
+    { id: 'cot', label: 'COT', icon: <ShieldCheck size={18} weight="bold" /> },
+    { id: 'recently-renovated', label: 'След ремонт', icon: <PaintRoller size={18} weight="bold" /> },
+    { id: 'district-heating', label: 'ТЕЦ', icon: <Factory size={18} weight="bold" /> },
+    { id: 'telephone', label: 'Телефон', icon: <Phone size={18} weight="bold" /> },
+    { id: 'telephone-exchange', label: 'Телефонна централа', icon: <Buildings size={18} weight="bold" /> },
 ];
 
 export const CONSTRUCTION_FILTERS: ConstructionFilter[] = [
@@ -153,6 +182,20 @@ export const HOUSE_FEATURES: FeatureFilter[] = [
     { id: 'mountain-view', label: 'Панорама планина', icon: <TreeEvergreen size={18} weight="bold" /> },
 ];
 
+// Rent House Features - specific features for houses in rent mode
+export const RENT_HOUSE_FEATURES: FeatureFilter[] = [
+    { id: 'garage', label: 'С гараж/и', icon: <Car size={18} weight="bold" /> },
+    { id: 'fireplace', label: 'Камина', icon: <FireSimple size={18} weight="bold" /> },
+    { id: 'barbecue-gazebo', label: 'Барбекю/Беседка', icon: <Fire size={18} weight="bold" /> },
+    { id: 'additional-buildings', label: 'Допълнителни постройки', icon: <Buildings size={18} weight="bold" /> },
+    { id: 'pool', label: 'Басейн', icon: <SunHorizon size={18} weight="bold" /> },
+    { id: 'renovated', label: 'След ремонт', icon: <PaintRoller size={18} weight="bold" /> },
+    { id: 'internet', label: 'Интернет', icon: <WifiHigh size={18} weight="bold" /> },
+    { id: 'telephone', label: 'Телефон', icon: <Phone size={18} weight="bold" /> },
+    { id: 'air-conditioning', label: 'Климатик', icon: <Snowflake size={18} weight="bold" /> },
+    { id: 'local-heating', label: 'Локално отопление', icon: <Thermometer size={18} weight="bold" /> },
+];
+
 export const HOUSE_PRICE_PRESETS = [
     { id: '1-60000', label: '1 - 60 000', from: 1, to: 60000 },
     { id: '60000-120000', label: '60 000 - 120 000', from: 60000, to: 120000 },
@@ -194,6 +237,27 @@ export const COMMERCIAL_FEATURES: FeatureFilter[] = [
     { id: 'toilet', label: 'Тоалетна', icon: <CheckCircle size={18} weight="bold" /> },
 ];
 
+// Rent Commercial Features (for stores/offices in rent mode)
+export const RENT_COMMERCIAL_FEATURES: FeatureFilter[] = [
+    { id: 'all', label: 'Всички', icon: null },
+    { id: 'elevator', label: 'Асансьор', icon: <ArrowFatLinesUp size={18} weight="bold" /> },
+    { id: 'luxury', label: 'Лукс', icon: <Star size={18} weight="bold" /> },
+    { id: 'secured', label: 'Обезопасен', icon: <ShieldCheck size={18} weight="bold" /> },
+    { id: 'parking', label: 'Паркинг', icon: <Car size={18} weight="bold" /> },
+    { id: 'security', label: 'Охрана', icon: <ShieldCheck size={18} weight="bold" /> },
+    { id: 'working', label: 'Работещ', icon: <CheckCircle size={18} weight="bold" /> },
+    { id: 'furnished', label: 'Обзаведен/Оборудван', icon: <Armchair size={18} weight="bold" /> },
+    { id: 'recently-renovated', label: 'След ремонт', icon: <PaintRoller size={18} weight="bold" /> },
+    { id: 'toilet', label: 'Тоалетна', icon: <CheckCircle size={18} weight="bold" /> },
+    { id: 'loading-entrance', label: 'Товарен вход', icon: <Factory size={18} weight="bold" /> },
+    { id: 'three-phase-power', label: 'Трифазен ток', icon: <CheckCircle size={18} weight="bold" /> },
+    { id: 'corner', label: 'Ъглов', icon: <Cube size={18} weight="bold" /> },
+    { id: 'garage', label: 'С гараж', icon: <Car size={18} weight="bold" /> },
+    { id: 'warehouse', label: 'Склад', icon: <Factory size={18} weight="bold" /> },
+    { id: 'internet', label: 'Интернет', icon: <WifiHigh size={18} weight="bold" /> },
+    { id: 'air-conditioning', label: 'Климатик', icon: <Snowflake size={18} weight="bold" /> },
+];
+
 // Building Types (Вид сграда)
 export type BuildingType = {
     id: string;
@@ -214,6 +278,17 @@ export const COMMERCIAL_FLOOR_OPTIONS: FloorSpecialOption[] = [
     { id: 'basement', label: 'Сутерен' },
     { id: 'first-floor', label: 'Първи етаж' },
     { id: 'intermediate-floor', label: 'Междинен етаж' },
+    { id: 'last-floor', label: 'Последен етаж' },
+    { id: 'unspecified', label: 'Не е посочено' },
+];
+
+// Rent Commercial Floor Options (for stores/offices in rent mode)
+export const RENT_COMMERCIAL_FLOOR_OPTIONS: FloorSpecialOption[] = [
+    { id: 'ground', label: 'Партер' },
+    { id: 'second-floor', label: 'Втори етаж' },
+    { id: 'basement', label: 'Сутерен' },
+    { id: 'intermediate-floor', label: 'Междинен етаж' },
+    { id: 'first-floor', label: 'Първи етаж' },
     { id: 'last-floor', label: 'Последен етаж' },
     { id: 'unspecified', label: 'Не е посочено' },
 ];
@@ -262,6 +337,18 @@ export const BUILDING_PLOTS_FEATURES: FeatureFilter[] = [
     { id: 'panoramic-view', label: 'Панорамна гледка', icon: <SunHorizon size={18} weight="bold" /> },
     { id: 'sea-front', label: 'Първа линия море', icon: <SunHorizon size={18} weight="bold" /> },
     { id: 'flat', label: 'Равен', icon: <Cube size={18} weight="bold" /> },
+];
+
+// Rent Building Plots Features (for rent mode only)
+export const RENT_BUILDING_PLOTS_FEATURES: FeatureFilter[] = [
+    { id: 'all', label: 'Всички', icon: null },
+    { id: 'regulation', label: 'В регулация', icon: <CheckCircle size={18} weight="bold" /> },
+    { id: 'electricity', label: 'Ток', icon: <CheckCircle size={18} weight="bold" /> },
+    { id: 'water', label: 'Вода', icon: <SunHorizon size={18} weight="bold" /> },
+    { id: 'with-water', label: 'Водопровод', icon: <CheckCircle size={18} weight="bold" /> },
+    { id: 'own-water-source', label: 'Собствен водоизточник', icon: <TreeEvergreen size={18} weight="bold" /> },
+    { id: 'asphalt-road', label: 'Асфалтов път', icon: <Car size={18} weight="bold" /> },
+    { id: 'main-road', label: 'До главен път', icon: <Car size={18} weight="bold" /> },
 ];
 
 // Agricultural Property Types (Земеделска земя, градини, лозя, гора)
@@ -355,6 +442,20 @@ export const WAREHOUSES_FEATURES: FeatureFilter[] = [
     { id: 'water', label: 'Вода', icon: <SunHorizon size={18} weight="bold" /> },
 ];
 
+// Rent Warehouse/Industrial Features (Особености) - for rent mode only
+export const RENT_WAREHOUSE_FEATURES: FeatureFilter[] = [
+    { id: 'all', label: 'Всички', icon: null },
+    { id: 'wc', label: 'WC', icon: <CheckCircle size={18} weight="bold" /> },
+    { id: 'elevator', label: 'Асансьор', icon: <ArrowFatLinesUp size={18} weight="bold" /> },
+    { id: 'warehouse-base', label: 'В складова база', icon: <Factory size={18} weight="bold" /> },
+    { id: 'yard', label: 'Двор', icon: <HouseLine size={18} weight="bold" /> },
+    { id: 'local-heating', label: 'Локално отопление', icon: <Thermometer size={18} weight="bold" /> },
+    { id: 'equipment', label: 'Оборудване', icon: <Factory size={18} weight="bold" /> },
+    { id: 'loading-entrance', label: 'Товарен вход', icon: <Factory size={18} weight="bold" /> },
+    { id: 'three-phase-power', label: 'Трифазен ток', icon: <CheckCircle size={18} weight="bold" /> },
+    { id: 'water', label: 'Вода', icon: <SunHorizon size={18} weight="bold" /> },
+];
+
 // Garage/Parking Property Types (Гаражи, Паркоместа)
 export const GARAGES_PROPERTY_TYPES: ApartmentSubtype[] = [
     { id: 'all', label: 'Всички' },
@@ -394,6 +495,20 @@ export const GARAGES_FEATURES: FeatureFilter[] = [
     { id: 'heated', label: 'Отопляем', icon: <Thermometer size={18} weight="bold" /> },
     { id: 'security', label: 'Охрана', icon: <ShieldCheck size={18} weight="bold" /> },
     { id: 'front', label: 'Преден', icon: <Car size={18} weight="bold" /> },
+    { id: 'electricity', label: 'Ток', icon: <CheckCircle size={18} weight="bold" /> },
+];
+
+// Rent Garage/Parking Features (Особености) - for rent mode only
+export const RENT_GARAGE_FEATURES: FeatureFilter[] = [
+    { id: 'all', label: 'Всички', icon: null },
+    { id: 'automatic-door', label: 'Автоматична врата', icon: <ArrowFatLinesUp size={18} weight="bold" /> },
+    { id: 'separate-meter', label: 'Отделен електромер', icon: <CheckCircle size={18} weight="bold" /> },
+    { id: 'security', label: 'Охрана', icon: <ShieldCheck size={18} weight="bold" /> },
+    { id: 'lighted', label: 'Осветен', icon: <SunHorizon size={18} weight="bold" /> },
+    { id: 'heated', label: 'Отопляем', icon: <Thermometer size={18} weight="bold" /> },
+    { id: 'repair-channel', label: 'Канал за ремонт', icon: <Factory size={18} weight="bold" /> },
+    { id: 'water', label: 'Вода', icon: <SunHorizon size={18} weight="bold" /> },
+    { id: 'elevator', label: 'Асансьор', icon: <ArrowFatLinesUp size={18} weight="bold" /> },
     { id: 'electricity', label: 'Ток', icon: <CheckCircle size={18} weight="bold" /> },
 ];
 
@@ -482,6 +597,24 @@ export const HOTELS_FEATURES: FeatureFilter[] = [
     { id: 'leasing', label: 'Лизинг', icon: <Handshake size={18} weight="bold" /> },
     { id: 'mortgaged', label: 'Ипотекиран', icon: <CurrencyCircleDollar size={18} weight="bold" /> },
     { id: 'barter', label: 'Бартер', icon: <ArrowsLeftRight size={18} weight="bold" /> },
+];
+
+// Rent Hotel/Motel Features (Особености) - for rent mode only
+export const RENT_HOTEL_FEATURES: FeatureFilter[] = [
+    { id: 'all', label: 'Всички', icon: null },
+    { id: 'elevator', label: 'Асансьор', icon: <ArrowFatLinesUp size={18} weight="bold" /> },
+    { id: 'pool', label: 'Басейн', icon: <SunHorizon size={18} weight="bold" /> },
+    { id: 'garage', label: 'Гараж', icon: <Car size={18} weight="bold" /> },
+    { id: 'conference-hall', label: 'Конферентна зала', icon: <Buildings size={18} weight="bold" /> },
+    { id: 'local-heating', label: 'Локално отопление', icon: <Thermometer size={18} weight="bold" /> },
+    { id: 'furnished', label: 'Обзаведен', icon: <Armchair size={18} weight="bold" /> },
+    { id: 'panoramic-view', label: 'Панорамна гледка', icon: <SunHorizon size={18} weight="bold" /> },
+    { id: 'park-garden', label: 'Парк/Градина', icon: <TreeEvergreen size={18} weight="bold" /> },
+    { id: 'parking', label: 'Паркинг', icon: <Car size={18} weight="bold" /> },
+    { id: 'working', label: 'Работещ', icon: <CheckCircle size={18} weight="bold" /> },
+    { id: 'restaurant', label: 'Ресторант', icon: <Storefront size={18} weight="bold" /> },
+    { id: 'recently-renovated', label: 'След ремонт', icon: <PaintRoller size={18} weight="bold" /> },
+    { id: 'fitness', label: 'Фитнес', icon: <CheckCircle size={18} weight="bold" /> },
 ];
 
 // Establishment Location Types (Разположение)

@@ -95,9 +95,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         if (params.has('filters')) {
             try {
                 const filtersJson = decodeURIComponent(params.get('filters') || '');
-                let restoredFilters = JSON.parse(filtersJson) as ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState;
-                
-                
+                const restoredFilters = JSON.parse(filtersJson) as ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState;
                 setRestoredFilters(restoredFilters);
                 currentFiltersRef.current = restoredFilters;
                 
@@ -175,9 +173,6 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
     const handlePropertyTypeClick = (typeId: string) => {
         const isSelecting = selectedPropertyType !== typeId;
         const newSelectedType = isSelecting ? typeId : null;
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:175',message:'Property type clicked',data:{typeId,currentSelectedPropertyType:selectedPropertyType,newSelectedType,isSelecting},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
 
         setSelectedPropertyType(newSelectedType);
 
@@ -235,27 +230,11 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         mapInstanceRef.current = map;
     }, []);
 
-    const handleFiltersChange = useCallback((
-        filters:
-          | ApartmentFiltersState
-          | HouseFiltersState
-          | CommercialFiltersState
-          | BuildingPlotsFiltersState
-          | AgriculturalLandFiltersState
-          | WarehousesIndustrialFiltersState
-          | GaragesParkingFiltersState
-          | HotelsMotelsFiltersState
-          | EstablishmentsFiltersState
-          | ReplaceRealEstatesFiltersState
-          | BuyRealEstatesFiltersState
-          | OtherRealEstatesFiltersState,
-      ) => {
+    const handleFiltersChange = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState) => {
         // Store filters in ref for URL serialization
         currentFiltersRef.current = filters;
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:254',message:'Filters changed',data:{selectedPropertyType,hasFilters:!!filters,filtersKeys:filters ? Object.keys(filters) : []},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H5'})}).catch(()=>{});
-        // #endregion
-      }, [selectedPropertyType]);
+        console.log('Filters changed:', filters);
+    }, []);
 
     // Get initial filters for the current property type
     const getInitialFilters = useCallback(() => {
@@ -315,19 +294,6 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
     });
 
     // Clean filters by removing default/unchanged values before sending to API
-    // Helper function to format city name: first letter uppercase, rest lowercase for each word
-    const formatCityName = useCallback((cityName: string): string => {
-        if (!cityName || !cityName.trim()) return cityName;
-        return cityName
-            .trim()
-            .split(/\s+/)
-            .map(word => {
-                if (word.length === 0) return word;
-                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-            })
-            .join(' ');
-    }, []);
-
     const cleanFilters = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState | null) => {
         if (!filters) return null;
         
@@ -335,41 +301,11 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         
         // Copy non-numeric, non-array fields that have actual values
         if (filters.city && filters.city.trim()) {
-            cleaned.city = formatCityName(filters.city);
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:330',message:'City formatted in cleanFilters',data:{original:filters.city,formatted:cleaned.city},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
-            // #endregion
+            cleaned.city = filters.city;
         }
         
         if (filters.neighborhoods && Array.isArray(filters.neighborhoods) && filters.neighborhoods.length > 0) {
-            // Format each neighborhood: first letter uppercase, rest lowercase for each word
-            // Exception: keep abbreviations like "ж.к" lowercase
-            cleaned.neighborhoods = filters.neighborhoods.map(neighborhood => {
-                if (!neighborhood || !neighborhood.trim()) return neighborhood;
-                const formatted = neighborhood
-                    .trim()
-                    .split(/\s+/)
-                    .map(word => {
-                        if (word.length === 0) return word;
-                        // Keep abbreviations like "ж.к", "ж.к.", "ул.", etc. lowercase
-                        const lowerWord = word.toLowerCase();
-                        if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.')) {
-                            return lowerWord;
-                        }
-                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                    })
-                    .join(' ');
-                
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:345',message:'Formatting neighborhood in cleanFilters',data:{original:neighborhood,formatted},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
-                // #endregion
-                
-                return formatted;
-            });
-            
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:356',message:'Cleaned neighborhoods array',data:{neighborhoods:cleaned.neighborhoods,city:cleaned.city},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
-            // #endregion
+            cleaned.neighborhoods = filters.neighborhoods;
         }
         
         if ('propertyId' in filters && filters.propertyId && filters.propertyId.trim()) {
@@ -516,21 +452,6 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         if ('selectedCompletionStatuses' in filters && Array.isArray(filters.selectedCompletionStatuses) && filters.selectedCompletionStatuses.length > 0) {
             cleaned.selectedCompletionStatuses = filters.selectedCompletionStatuses;
         }
-        if ('selectedBuildingTypes' in filters && Array.isArray((filters as any).selectedBuildingTypes) && (filters as any).selectedBuildingTypes.length > 0) {
-            // For commercial properties (stores/offices) - building types filter
-            cleaned.buildingTypes = (filters as any).selectedBuildingTypes;
-        }
-        if ('propertyTypes' in filters && Array.isArray((filters as any).propertyTypes) && (filters as any).propertyTypes.length > 0) {
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:522',message:'Processing propertyTypes in cleanFilters',data:{propertyTypes:(filters as any).propertyTypes,propertyTypeId:selectedPropertyType,isCommercial:selectedPropertyType === 'stores-offices',isAgricultural:selectedPropertyType === 'agricultural-land',isWarehouse:selectedPropertyType === 'warehouses-industrial'},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H1'})}).catch(()=>{});
-            // #endregion
-            // Property types filter - used for agricultural, warehouse, and stores/offices subtypes
-            const validPropertyTypes = (filters as any).propertyTypes.filter((type: string) => type && type !== 'all');
-            if (validPropertyTypes.length > 0) {
-                // Keep as propertyTypes for all property types (handled in API by propertyTypeId)
-                cleaned.propertyTypes = validPropertyTypes;
-            }
-        }
         if ('selectedCategories' in filters && Array.isArray(filters.selectedCategories) && filters.selectedCategories.length > 0) {
             cleaned.selectedCategories = filters.selectedCategories;
         }
@@ -539,18 +460,6 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         }
         if ('selectedWorkingOptions' in filters && Array.isArray(filters.selectedWorkingOptions) && filters.selectedWorkingOptions.length > 0) {
             cleaned.selectedWorkingOptions = filters.selectedWorkingOptions;
-        }
-        if ('locationTypes' in filters && Array.isArray(filters.locationTypes) && filters.locationTypes.length > 0) {
-            // For restaurants/establishments - location types filter (maps to subtype)
-            cleaned.locationTypes = filters.locationTypes;
-        }
-        if ('selectedElectricityOptions' in filters && Array.isArray(filters.selectedElectricityOptions) && filters.selectedElectricityOptions.length > 0) {
-            // For building plots - electricity filter
-            cleaned.electricityOptions = filters.selectedElectricityOptions;
-        }
-        if ('selectedWaterOptions' in filters && Array.isArray(filters.selectedWaterOptions) && filters.selectedWaterOptions.length > 0) {
-            // For building plots - water filter
-            cleaned.waterOptions = filters.selectedWaterOptions;
         }
         
         // Bed base filters
@@ -575,7 +484,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         // Note: We don't include false values as they indicate "not set"
         
         return Object.keys(cleaned).length > 0 ? cleaned : null;
-    }, [selectedPropertyType]);
+    }, []);
     
     // Serialize filters to URL query params
     const serializeFiltersToURL = useCallback((filters: ApartmentFiltersState | HouseFiltersState | CommercialFiltersState | BuildingPlotsFiltersState | AgriculturalLandFiltersState | WarehousesIndustrialFiltersState | GaragesParkingFiltersState | HotelsMotelsFiltersState | EstablishmentsFiltersState | ReplaceRealEstatesFiltersState | BuyRealEstatesFiltersState | OtherRealEstatesFiltersState | null) => {
@@ -596,33 +505,16 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         }
         
         return params.toString();
-    }, [cleanFilters, formatCityName]);
+    }, [cleanFilters]);
 
     const handleSearch = useCallback(async () => {
         const filters = currentFiltersRef.current;
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:594',message:'handleSearch called',data:{selectedPropertyType,hasFilters:!!filters,filtersKeys:filters ? Object.keys(filters) : []},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H5'})}).catch(()=>{});
-        // #endregion
         setSelectedPropertyById(null);
         setPropertyByIdError(null);
         setIsLoadingPropertyById(false);
         setFilteredProperties([]);
         setPropertiesError(null);
         setCurrentPage(1); // Reset to first page when searching
-
-        // Format city name before search
-        if (locationState.city && locationState.city.trim()) {
-            const formattedCity = formatCityName(locationState.city);
-            if (formattedCity !== locationState.city) {
-                // Update location state with formatted city
-                handleLocationChange(
-                    locationState.searchTerm,
-                    formattedCity,
-                    locationState.neighborhoods,
-                    locationState.distance
-                );
-            }
-        }
 
         if (filters && 'propertyId' in filters && filters.propertyId && filters.propertyId.trim()) {
             const shortId = filters.propertyId.trim();
@@ -650,49 +542,20 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
             // Fetch properties based on filters
             setIsLoadingProperties(true);
             try {
-                // Use formatted city from locationState (already formatted above)
-                const cityToUse = locationState.city ? formatCityName(locationState.city) : '';
-                
                 const params = new URLSearchParams();
                 params.set('baseRoute', baseRoute);
                 if (selectedPropertyType) {
                     params.set('propertyTypeId', selectedPropertyType);
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:645',message:'Setting propertyTypeId in API params',data:{selectedPropertyType,baseRoute},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H2'})}).catch(()=>{});
-                    // #endregion
-                } else {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:650',message:'WARNING: propertyTypeId is missing',data:{selectedPropertyType,baseRoute,hasFilters:!!filters},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H1'})}).catch(()=>{});
-                    // #endregion
                 }
                 if (filters) {
                     // Clean filters to remove default values before sending to API
-                    // cleanFilters already formats the city
                     const cleanedFilters = cleanFilters(filters);
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:667',message:'cleanFilters result',data:{hasFilters:!!filters,cleanedFilters,cleanedFiltersKeys:cleanedFilters ? Object.keys(cleanedFilters) : [],cleanedFiltersLength:cleanedFilters ? Object.keys(cleanedFilters).length : 0,selectedPropertyType},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H4'})}).catch(()=>{});
-                    // #endregion
-                    if (cleanedFilters && Object.keys(cleanedFilters).length > 0) {
-                        // #region agent log
-                        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:672',message:'Sending filters to API',data:{cleanedFilters,selectedPropertyType,serialized:encodeURIComponent(JSON.stringify(cleanedFilters))},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H4'})}).catch(()=>{});
-                        // #endregion
+                    if (cleanedFilters) {
                         params.set('filters', encodeURIComponent(JSON.stringify(cleanedFilters)));
-                    } else {
-                        // #region agent log
-                        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:677',message:'WARNING: cleanedFilters is empty or null',data:{hasFilters:!!filters,filtersKeys:filters ? Object.keys(filters) : [],cleanedFilters,selectedPropertyType},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H4'})}).catch(()=>{});
-                        // #endregion
                     }
-                } else {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:681',message:'WARNING: filters is null/undefined',data:{selectedPropertyType},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H4'})}).catch(()=>{});
-                    // #endregion
                 }
                 
-                const apiUrl = `/api/properties?${params.toString()}`;
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:665',message:'Fetching properties from API',data:{apiUrl,params:Object.fromEntries(params),selectedPropertyType},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H2'})}).catch(()=>{});
-                // #endregion
-                const response = await fetch(apiUrl);
+                const response = await fetch(`/api/properties?${params.toString()}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch properties');
                 }
@@ -713,32 +576,13 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
             router.push(`${currentPath}?${queryString}`);
         }
         setShowListings(true);
-    }, [selectedPropertyType, router, serializeFiltersToURL, baseRoute, locationState, formatCityName, handleLocationChange]);
+    }, [selectedPropertyType, router, serializeFiltersToURL, baseRoute]);
 
     const handleBackToMap = useCallback(() => {
-        // For sale search: go back to /sale/search when a type is selected
-        // For rent search: go back to /rent/search when a type is selected
-        // For sale/rent search without a type, go back to root
-        const isSaleSearch = baseRoute === '/sale/search';
-        const isRentSearch = baseRoute === '/rent/search';
-        const isSearchRoute = isSaleSearch || isRentSearch;
-        
-        let currentPath: string;
-        if (isSaleSearch && selectedPropertyType) {
-            // /sale/search/[type] → back to /sale/search
-            currentPath = baseRoute;
-        } else if (isRentSearch && selectedPropertyType) {
-            // /rent/search/[type] → back to /rent/search
-            currentPath = baseRoute;
-        } else if (isSearchRoute && !selectedPropertyType) {
-            // /sale/search or /rent/search (no type) → back to root
-            currentPath = '/';
-        } else {
-            // Other routes (e.g., /map-filters)
-            currentPath = selectedPropertyType ? `${baseRoute}/${selectedPropertyType}` : baseRoute;
-        }
-
-        // Remove search params from URL and reset state
+        // Remove search params from URL
+        const currentPath = selectedPropertyType 
+            ? `${baseRoute}/${selectedPropertyType}` 
+            : baseRoute;
         router.push(currentPath);
         setShowListings(false);
         setCurrentPage(1); // Reset to first page when going back to map
@@ -766,7 +610,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         }
     }, []);
 
-    // Filter property types for rent/search and sale/search routes
+    // Filter property types for rent/search route
     const availablePropertyTypes = useMemo(() => {
         if (baseRoute === '/rent/search') {
             // Only show specific property types for rent with custom labels
@@ -797,10 +641,6 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                     label: rentLabels[type.id] || type.label
                 }));
         }
-        if (baseRoute === '/sale/search') {
-            // Filter out 'other-real-estates' from sale/search
-            return propertyTypes.filter(type => type.id !== 'other-real-estates');
-        }
         return propertyTypes;
     }, [baseRoute]);
 
@@ -819,34 +659,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                             <div className={styles.headerText}>
                         <Button
                             variant="outline"
-                            onClick={() => {
-                                const isSaleSearch = baseRoute === '/sale/search';
-                                const isRentSearch = baseRoute === '/rent/search';
-                                const isSearchRoute = isSaleSearch || isRentSearch;
-
-                                // Check for query parameters
-                                const params = new URLSearchParams(window.location.search);
-                                const hasQueryParams = params.has('search') || params.has('filters');
-
-                                let targetPath: string;
-                                
-                                if (hasQueryParams && selectedPropertyType) {
-                                    // Case 3: /sale/search/[subtype]?search=... → /sale/search/[subtype]
-                                    targetPath = `${baseRoute}/${selectedPropertyType}`;
-                                } else if (selectedPropertyType && isSearchRoute) {
-                                    // Case 2: /sale/search/[subtype] → /sale/search
-                                    targetPath = baseRoute;
-                                } else if (isSearchRoute && !selectedPropertyType) {
-                                    // Case 1: /sale/search → /
-                                    targetPath = '/';
-                                } else {
-                                    // Other routes (e.g., /map-filters)
-                                    targetPath = selectedPropertyType ? `${baseRoute}/${selectedPropertyType}` : baseRoute;
-                                }
-                                
-                                setShowListings(false);
-                                router.push(targetPath);
-                            }}
+                            onClick={() => router.back()}
                             className={styles.backButton}
                         >
                             <ArrowLeft size={20} />

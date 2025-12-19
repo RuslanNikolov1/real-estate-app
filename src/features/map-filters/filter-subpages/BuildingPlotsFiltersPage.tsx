@@ -13,6 +13,7 @@ import {
     WaterFilter,
     BUILDING_PLOTS_FEATURES
 } from '../filters';
+import { RENT_BUILDING_PLOTS_FEATURES } from '../filters/constants';
 import {
     BUILDING_PLOTS_AREA_SLIDER_MAX,
     BUILDING_PLOTS_PRICE_SLIDER_MAX,
@@ -486,7 +487,7 @@ export function BuildingPlotsFiltersPage({
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
                         title="Месечен наем"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
                         from={filters.monthlyRentFrom || RENT_SLIDER_MIN}
@@ -497,7 +498,7 @@ export function BuildingPlotsFiltersPage({
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
                         title="Цена за кв.м"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
                         from={filters.rentPerSqmFrom || RENT_PER_SQM_SLIDER_MIN}
@@ -553,7 +554,7 @@ export function BuildingPlotsFiltersPage({
                 key={`features-${filterKey}`}
                 initialSelected={filters.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
-                features={BUILDING_PLOTS_FEATURES}
+                features={isRentMode ? RENT_BUILDING_PLOTS_FEATURES : BUILDING_PLOTS_FEATURES}
             />
         </div>
     );

@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, DragEvent, useCallback } from 'react';
-import Link from 'next/link';
+import { useState, useEffect, useMemo, useRef, DragEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,7 +13,6 @@ import { PlateEditor, Value } from '@/lib/plate-editor';
 import { translateProperty } from '@/lib/translator';
 import { CITY_OPTIONS, getNeighborhoodsByCity } from '@/lib/neighborhoods';
 import { NeighborhoodSelect } from '@/components/forms/NeighborhoodSelect';
-import burgasCities from '@/data/burgasCities.json';
 import type { Property, PropertyType } from '@/types';
 import { FloppyDisk, X, Globe, SpinnerGap } from '@phosphor-icons/react';
 import {
@@ -25,7 +23,7 @@ import {
 import { DynamicPropertyField } from '@/components/forms/DynamicPropertyField';
 import { plateValueToPlainText } from '@/lib/plate-utils';
 import { normalizeSubtypeToId } from '@/lib/subtype-mapper';
-import { FLOOR_SPECIAL_OPTIONS } from '@/features/map-filters/filters/constants';
+import { FLOOR_SPECIAL_OPTIONS, RENT_HOUSE_FEATURES, RENT_COMMERCIAL_FEATURES, RENT_GARAGE_FEATURES, RENT_WAREHOUSE_FEATURES, RENT_BUILDING_PLOTS_FEATURES, RENT_APARTMENT_FEATURES, RENT_HOTEL_FEATURES, RENT_COMMERCIAL_FLOOR_OPTIONS } from '@/features/map-filters/filters/constants';
 import styles from './PropertyFormPage.module.scss';
 
 type PropertyFormData = z.infer<ReturnType<typeof generatePropertySchema>>;
@@ -67,18 +65,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   const [brokerImageUrl, setBrokerImageUrl] = useState<string | null>(
     null,
   );
-  const [showCityDropdown, setShowCityDropdown] = useState(false);
-  const [manualNeighborhoodInput, setManualNeighborhoodInput] = useState('');
-  const cityInputRef = useRef<HTMLInputElement>(null);
-  const cityDropdownRef = useRef<HTMLDivElement>(null);
-  
-  // Check if the city is a valid selected city from the list
-  const isValidCity = useCallback((cityName: string) => {
-    if (!cityName) return false;
-    return CITY_OPTIONS.some(
-      (c) => c.toLowerCase() === cityName.toLowerCase()
-    );
-  }, []);
 
   useEffect(() => {
     if (!propertyId) {
@@ -95,7 +81,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
 
         const response = await fetch(`/api/properties/${propertyId}`);
         if (!response.ok) {
-          throw new Error('Неуспешно зареждане на имот');
+          throw new Error('Failed to fetch property');
         }
 
         const data: Property = await response.json();
@@ -242,8 +228,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     reset,
   } = useForm<PropertyFormData>({
     resolver: zodResolver(propertySchema),
-    mode: 'onSubmit', // Only validate on submit, not on blur or change
-    reValidateMode: 'onSubmit', // Only re-validate on submit after first submission
     shouldFocusError: false, // Prevent automatic scroll to error
     defaultValues: {
       title: '',
@@ -251,7 +235,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       type: 'apartment',
       status: 'for-sale',
       location_type: 'urban',
-      city: '',
+      city: CITY_OPTIONS[0] ?? 'Бургас',
       neighborhood: '',
       price: 0,
       area: 0,
@@ -272,7 +256,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   const cityValue = watch('city');
   const neighborhoodValue = watch('neighborhood');
   const watchedType = watch('type') as PropertyType;
-  const isCitySelected = isValidCity(cityValue?.trim() || '');
+  const statusValue = watch('status');
+  const isRentMode = statusValue === 'for-rent';
 
   // Update property type when it changes and reset type-specific fields
   useEffect(() => {
@@ -328,9 +313,47 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   
   // Get features list for current property type
   const featuresList = useMemo(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyFormPage.tsx:315',message:'featuresList computation start',data:{isRentMode,propertyType,statusValue,rentApartmentFeaturesLength:RENT_APARTMENT_FEATURES.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    // For rent apartments, use RENT_APARTMENT_FEATURES instead of schema features
+    if (isRentMode && propertyType === 'apartment') {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyFormPage.tsx:318',message:'Rent apartment condition matched',data:{rentApartmentFeaturesLength:RENT_APARTMENT_FEATURES.length,filteredLength:RENT_APARTMENT_FEATURES.filter(f => f.id !== 'all').length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      return RENT_APARTMENT_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent houses, use RENT_HOUSE_FEATURES instead of schema features
+    if (isRentMode && propertyType === 'house') {
+      return RENT_HOUSE_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent offices/shops, use RENT_COMMERCIAL_FEATURES instead of schema features
+    if (isRentMode && (propertyType === 'office' || propertyType === 'shop')) {
+      return RENT_COMMERCIAL_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent garages, use RENT_GARAGE_FEATURES instead of schema features
+    if (isRentMode && propertyType === 'garage') {
+      return RENT_GARAGE_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent warehouses, use RENT_WAREHOUSE_FEATURES instead of schema features
+    if (isRentMode && propertyType === 'warehouse') {
+      return RENT_WAREHOUSE_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent building plots (land), use RENT_BUILDING_PLOTS_FEATURES instead of schema features
+    if (isRentMode && propertyType === 'land') {
+      return RENT_BUILDING_PLOTS_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent hotels, use RENT_HOTEL_FEATURES instead of schema features
+    if (isRentMode && propertyType === 'hotel') {
+      return RENT_HOTEL_FEATURES.filter(f => f.id !== 'all');
+    }
     const featuresField = typeSchema.fields.find(f => f.key === 'features');
-    return featuresField?.options || [];
-  }, [typeSchema]);
+    const defaultFeatures = featuresField?.options || [];
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyFormPage.tsx:341',message:'featuresList computation end',data:{isRentMode,propertyType,statusValue,returnedFeaturesLength:defaultFeatures.length,conditionMatched:isRentMode && propertyType === 'apartment'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    return defaultFeatures;
+  }, [typeSchema, isRentMode, propertyType]);
   
   // Check which fields should be shown based on property type
   
@@ -344,29 +367,14 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   }, [propertyType]);
 
   useEffect(() => {
-    // Only validate neighborhoods if city is in the list
-    if (isCitySelected) {
-      if (!neighborhoodOptions.length) {
-        setValue('neighborhood', '');
-        setManualNeighborhoodInput('');
-        return;
-      }
-      if (!neighborhoodValue || !neighborhoodOptions.includes(neighborhoodValue)) {
-        setValue('neighborhood', neighborhoodOptions[0]);
-      }
-      // Clear manual input when switching to a valid city
-      if (manualNeighborhoodInput) {
-        setManualNeighborhoodInput('');
-      }
-    } else {
-      // For manual cities, use manual neighborhood input
-      if (manualNeighborhoodInput.trim()) {
-        setValue('neighborhood', manualNeighborhoodInput.trim());
-      } else if (!cityValue?.trim()) {
-        setValue('neighborhood', '');
-      }
+    if (!neighborhoodOptions.length) {
+      setValue('neighborhood', '');
+      return;
     }
-  }, [neighborhoodOptions, neighborhoodValue, setValue, isCitySelected, manualNeighborhoodInput, cityValue]);
+    if (!neighborhoodValue || !neighborhoodOptions.includes(neighborhoodValue)) {
+      setValue('neighborhood', neighborhoodOptions[0]);
+    }
+  }, [neighborhoodOptions, neighborhoodValue, setValue]);
 
   useEffect(() => {
     if (!cityValue && cityOptions.length) {
@@ -423,6 +431,17 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       bed_base: (property as any).bed_base || undefined,
       electricity: (property as any).electricity || '',
       water: (property as any).water || '',
+      // Map furniture from database to UI furnishing values (for rent apartments)
+      furnishing: (() => {
+        const furniture = (property as any).furniture as string | undefined;
+        if (!furniture) return '';
+        const furnitureToUI: Record<string, string> = {
+          'full': 'furnished',
+          'partial': 'partially-furnished',
+          'none': 'unfurnished',
+        };
+        return furnitureToUI[furniture] || '';
+      })(),
       broker_name: (property as any)?.broker_name || '',
       broker_title: (property as any)?.broker_position || '', // Redirect broker_position to broker_title input
       broker_phone: (property as any)?.broker_phone || '',
@@ -460,14 +479,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     if ((property as any)?.broker_image) {
       setBrokerImageUrl((property as any).broker_image || null);
     }
-    
-    // Set manual neighborhood input if city is not in the list
-    if (property?.city && !isValidCity(property.city)) {
-      setManualNeighborhoodInput(property.neighborhood || '');
-    } else {
-      setManualNeighborhoodInput('');
-    }
-  }, [property, reset, isValidCity]);
+  }, [property, reset]);
 
   const handleAutoTranslate = async () => {
     const formData = watch();
@@ -532,27 +544,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     }
     
     return errorMessage;
-  };
-
-  // Helper to format city / neighborhood names: each word capitalized
-  // For neighborhoods, keeps abbreviations like "ж.к", "ул.", "бул." lowercase
-  const formatLocationName = (value: string, isNeighborhood: boolean = false) => {
-    if (!value) return value;
-    return value
-      .trim()
-      .split(/\s+/)
-      .map((word) => {
-        if (word.length === 0) return word;
-        // For neighborhoods, keep abbreviations lowercase
-        if (isNeighborhood) {
-          const lowerWord = word.toLowerCase();
-          if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.')) {
-            return lowerWord;
-          }
-        }
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-      })
-      .join(' ');
   };
 
   const onSubmit = async (data: PropertyFormData) => {
@@ -629,8 +620,11 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
         return;
       }
 
-      // Validate year built (required) - skip for land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates
-      if (propertyType !== 'land' && propertyType !== 'agricultural' && propertyType !== 'warehouse' && propertyType !== 'garage' && propertyType !== 'hotel' && propertyType !== 'restaurant' && propertyType !== 'replace-real-estates' && propertyType !== 'buy-real-estates' && !data.year_built) {
+      // Check if in rent mode
+      const isRent = data.status === 'for-rent';
+
+      // Validate year built (required, but not for rent mode)
+      if (!isRent && !data.year_built) {
         setSubmitError(t('errors.yearBuiltRequired'));
         setIsSubmittingForm(false);
         setTimeout(() => {
@@ -643,9 +637,9 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
         return;
       }
 
-      // Validate construction type (required if field exists in typeFields)
+      // Validate construction type (required if field exists in typeFields, but not for rent mode)
       const hasConstructionField = typeFields.some(field => field.key === 'construction_type');
-      if (hasConstructionField && (!data.construction_type || data.construction_type.trim() === '')) {
+      if (!isRent && hasConstructionField && (!data.construction_type || data.construction_type.trim() === '')) {
         setSubmitError(t('errors.constructionRequired'));
         setIsSubmittingForm(false);
         setTimeout(() => {
@@ -658,9 +652,9 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
         return;
       }
 
-      // Validate completion status (required if field exists in typeFields)
+      // Validate completion status (required if field exists in typeFields, but not for rent mode)
       const hasCompletionField = typeFields.some(field => field.key === 'completion_status');
-      if (hasCompletionField && (!data.completion_status || data.completion_status.trim() === '')) {
+      if (!isRent && hasCompletionField && (!data.completion_status || data.completion_status.trim() === '')) {
         setSubmitError(t('errors.completionStatusRequired'));
         setIsSubmittingForm(false);
         setTimeout(() => {
@@ -700,11 +694,9 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       // Map area -> area_sqm
       formData.append('area_sqm', String(data.area));
       formData.append('price', String(data.price));
-      // Price per sqm is required - use provided value or calculate from price/area
-      const pricePerSqmValue = data.price_per_sqm !== undefined && data.price_per_sqm !== null 
-        ? data.price_per_sqm 
-        : (data.area && data.price ? Math.round(data.price / data.area) : 0);
-      formData.append('price_per_sqm', String(pricePerSqmValue));
+      if (data.price_per_sqm) {
+        formData.append('price_per_sqm', String(data.price_per_sqm));
+      }
       // Floor - send if it has a valid value, otherwise send empty string
       const floorValue = data.floor && data.floor !== '' && ['basement', 'ground', 'first-residential', 'not-last', 'last', 'attic'].includes(data.floor)
         ? String(data.floor)
@@ -714,29 +706,25 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
         formData.append('total_floors', String(data.total_floors));
       }
       
-      // Location – format both city and neighborhood before sending
-      const formattedCity = formatLocationName(data.city, false);
-      const formattedNeighborhood = data.neighborhood
-        ? formatLocationName(data.neighborhood, true)
-        : data.neighborhood;
-
-      formData.append('city', formattedCity);
-      formData.append('neighborhood', formattedNeighborhood || '');
+      // Location
+      formData.append('city', data.city);
+      formData.append('neighborhood', data.neighborhood);
       // address field removed - not saving to database
       
       // Description
       formData.append('title', data.title);
       formData.append('description', descriptionText);
       
-      // Map year_built -> build_year (skip for land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates)
-      if (propertyType !== 'land' && propertyType !== 'agricultural' && propertyType !== 'warehouse' && propertyType !== 'garage' && propertyType !== 'hotel' && propertyType !== 'restaurant' && propertyType !== 'replace-real-estates' && propertyType !== 'buy-real-estates' && data.year_built) {
+      // Map year_built -> build_year (but not for rent mode)
+      const isRent = data.status === 'for-rent';
+      if (!isRent && data.year_built) {
         formData.append('build_year', String(data.year_built));
       }
-      if (data.construction_type) {
+      if (!isRent && data.construction_type) {
         formData.append('construction_type', data.construction_type);
       }
-      // Map completion_status -> completion_degree (redirect from form input)
-      if (data.completion_status) {
+      // Map completion_status -> completion_degree (redirect from form input, but not for rent mode)
+      if (!isRent && data.completion_status) {
         formData.append('completion_degree', data.completion_status);
       }
       
@@ -750,10 +738,7 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       if (data.agricultural_category) {
         formData.append('agricultural_category', data.agricultural_category);
       }
-      // Building type - skip for restaurant type
-      if (data.building_type && propertyType !== 'restaurant') {
-        formData.append('building_type', data.building_type);
-      }
+      // building_type field removed - not saving to database
       if (data.electricity) {
         formData.append('electricity', data.electricity);
       }
@@ -768,6 +753,19 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       selectedFeatures.forEach((feature) => {
         formData.append('features', feature);
       });
+      
+      // Furnishing for rent apartments - map to furniture field
+      if (isRent && data.type === 'apartment' && (data as any).furnishing) {
+        const furnitureMap: Record<string, string> = {
+          'furnished': 'full',
+          'partially-furnished': 'partial',
+          'unfurnished': 'none',
+        };
+        const furnitureValue = furnitureMap[(data as any).furnishing];
+        if (furnitureValue) {
+          formData.append('furniture', furnitureValue);
+        }
+      }
       
       // Broker
       formData.append('broker_name', data.broker_name);
@@ -839,11 +837,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     <div className={styles.propertyFormPage}>
       <main className={styles.main}>
         <div className={styles.container}>
-          <div className={styles.breadcrumbs}>
-            <Link href="/admin/properties/quick-view">Имоти</Link>
-            <span>/</span>
-            <span>{propertyId ? 'Редактиране' : 'Добавяне'}</span>
-          </div>
           <form 
             onSubmit={(e) => {
               e.preventDefault();
@@ -890,6 +883,10 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
             <div className={styles.formGrid}>
               <div className={styles.formMain}>
                 <div className={styles.section}>
+                  <h2 className={styles.sectionTitle}>Основни данни</h2>
+                </div>
+
+                <div className={styles.section}>
                   <h2 className={styles.sectionTitle}>Детайли</h2>
                   <div className={styles.formRow}>
                     <div className={styles.selectWrapper}>
@@ -903,153 +900,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       </select>
                     </div>
                   </div>
-                </div>
-
-                <div className={styles.section}>
-                  <h2 className={styles.sectionTitle}>Локация</h2>
-                  <div className={styles.formRow}>
-                    <div className={styles.selectWrapper}>
-                      <label htmlFor="property-city-input" className={styles.label}>Град *</label>
-                      <div className={styles.autocompleteWrapper}>
-                        <Input
-                          id="property-city-input"
-                          placeholder="Въведете или изберете град (пр. Бургас)"
-                          value={cityValue || ''}
-                          onChange={(event) => {
-                            const value = event.target.value;
-                            setValue('city', value);
-                            // Show dropdown only when there is some input
-                            if (value.trim().length > 0) {
-                              setShowCityDropdown(true);
-                            } else {
-                              setShowCityDropdown(false);
-                            }
-                          }}
-                          onFocus={() => {
-                            // Show dropdown if there are matching options
-                            if ((cityValue?.trim().length || 0) > 0 || CITY_OPTIONS.length > 0) {
-                              setShowCityDropdown(true);
-                            }
-                          }}
-                          onBlur={() => {
-                            // Delay hiding dropdown to allow click on dropdown item
-                            setTimeout(() => {
-                              if (!cityDropdownRef.current?.contains(document.activeElement)) {
-                                setShowCityDropdown(false);
-                                // Format city name on blur if manually entered
-                                if (cityValue?.trim() && !isCitySelected) {
-                                  const formatted = formatLocationName(cityValue, false);
-                                  setValue('city', formatted);
-                                }
-                              }
-                            }, 200);
-                          }}
-                          ref={cityInputRef}
-                          error={errors.city?.message ? translateErrorMessage(String(errors.city.message)) : undefined}
-                        />
-                        {showCityDropdown && CITY_OPTIONS.length > 0 && (
-                          <div
-                            ref={cityDropdownRef}
-                            className={styles.cityDropdown}
-                          >
-                            {CITY_OPTIONS
-                              .filter((cityName) => {
-                                const searchTerm = (cityValue || '').toLowerCase().trim();
-                                if (!searchTerm) return true;
-                                return cityName.toLowerCase().includes(searchTerm);
-                              })
-                              .map((cityName) => {
-                                // Find coordinates from burgasCities for map/distance calculations
-                                const cityData = burgasCities.cities.find(
-                                  (c) => c.name.toLowerCase() === cityName.toLowerCase() ||
-                                    c.nameEn.toLowerCase() === cityName.toLowerCase()
-                                );
-                                const coordinates: [number, number] = cityData && cityData.coordinates && cityData.coordinates.length === 2
-                                  ? [cityData.coordinates[0], cityData.coordinates[1]]
-                                  : [0, 0]; // Fallback if coordinates not found
-                                
-                                return (
-                                  <button
-                                    key={cityName}
-                                    type="button"
-                                    className={styles.cityDropdownItem}
-                                    onMouseDown={(e) => {
-                                      e.preventDefault(); // Prevent input blur
-                                    }}
-                                    onClick={() => {
-                                      const formattedCityName = formatLocationName(cityName, false);
-                                      setValue('city', formattedCityName);
-                                      setShowCityDropdown(false);
-                                      // Reset neighborhood when city changes
-                                      const newOptions = getNeighborhoodsByCity(formattedCityName);
-                                      setValue('neighborhood', newOptions[0] || '');
-                                      setManualNeighborhoodInput('');
-                                    }}
-                                  >
-                                    {cityName}
-                                  </button>
-                                );
-                              })}
-                          </div>
-                        )}
-                      </div>
-                      {errors.city?.message && (
-                        <p className={styles.errorMessage}>{translateErrorMessage(String(errors.city.message))}</p>
-                      )}
-                    </div>
-                    {cityValue?.trim() && (
-                      <div className={styles.selectWrapper}>
-                        {isCitySelected ? (
-                          <NeighborhoodSelect
-                            city={cityValue}
-                            value={neighborhoodValue || ''}
-                            onChange={(val) =>
-                              setValue('neighborhood', Array.isArray(val) ? val[0] ?? '' : val)
-                            }
-                            disabled={!isCitySelected}
-                            error={errors.neighborhood?.message
-                              ? translateErrorMessage(String(errors.neighborhood.message))
-                              : undefined}
-                          />
-                        ) : (
-                          <div className={styles.manualNeighborhoodInputWrapper}>
-                            <label htmlFor="neighborhood-manual" className={styles.manualNeighborhoodLabel}>
-                              Квартал
-                            </label>
-                            <input
-                              id="neighborhood-manual"
-                              type="text"
-                              placeholder="Въведете квартал"
-                              value={manualNeighborhoodInput}
-                              onChange={(event) => {
-                                const value = event.target.value;
-                                setManualNeighborhoodInput(value);
-                                // Update neighborhood state immediately
-                                const trimmedValue = value.trim();
-                                setValue('neighborhood', trimmedValue);
-                              }}
-                              onBlur={() => {
-                                // Format neighborhood name on blur
-                                if (manualNeighborhoodInput.trim()) {
-                                  const formatted = formatLocationName(manualNeighborhoodInput, true);
-                                  setManualNeighborhoodInput(formatted);
-                                  setValue('neighborhood', formatted);
-                                }
-                              }}
-                              className={styles.manualNeighborhoodInputField}
-                            />
-                            {errors.neighborhood?.message && (
-                              <p className={styles.errorMessage}>{translateErrorMessage(String(errors.neighborhood.message))}</p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className={styles.section}>
-                  <h2 className={styles.sectionTitle}>Детайли</h2>
                   <div className={styles.formRow}>
                     <div className={styles.selectWrapper}>
                       <label className={styles.label}>Тип имот *</label>
@@ -1063,15 +913,17 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       >
                         <option value="apartment">Апартамент</option>
                         <option value="house">Къща/Вила</option>
-                        <option value="office">Магазин/Офис/Кабинет/Салон</option>
-                        <option value="land">Строителен парцел/Инвестиционен проект</option>
-                        <option value="agricultural">Земеделска земя/Лозя/Гори</option>
-                        <option value="warehouse">Складове/Индустриални и стопански имоти</option>
+                        <option value="office">Офис</option>
+                        <option value="shop">Магазин</option>
+                        <option value="warehouse">Склад</option>
+                        <option value="land">Земя</option>
+                        <option value="hotel">Хотел</option>
+                        <option value="agricultural">Земеделска земя</option>
                         <option value="garage">Гараж/Паркоместа</option>
-                        <option value="hotel">Хотели/Мотели</option>
                         <option value="restaurant">Ресторант</option>
                         <option value="replace-real-estates">Замяна на недвижими имоти</option>
                         <option value="buy-real-estates">Купуване на недвижими имоти</option>
+                        <option value="other-real-estates">Други недвижими имоти</option>
                       </select>
                     </div>
                     {/* Subtype field - shown based on property type */}
@@ -1102,13 +954,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       </div>
                     )}
                   </div>
-                  <div className={`${styles.formRow} ${styles.titleRow}`}>
-                    <Input
-                      label="Заглавие *"
-                      {...register('title')}
-                      error={errors.title?.message ? translateErrorMessage(String(errors.title.message)) : undefined}
-                    />
-                  </div>
                   <div className={styles.formRow}>
                     <Input
                       label={propertyType === 'hotel' ? "РЗП (м²) *" : "Площ (м²) *"}
@@ -1117,21 +962,16 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       error={errors.area?.message ? translateErrorMessage(String(errors.area.message)) : undefined}
                     />
                     <Input
-                      label="Цена *"
+                      label={isRentMode ? "Месечен наем (евро) *" : "Цена *"}
                       type="number"
                       {...register('price', { valueAsNumber: true })}
                       error={errors.price?.message ? translateErrorMessage(String(errors.price.message)) : undefined}
                     />
                     <Input
-                      label="Цена на м² *"
+                      label={isRentMode ? "Наем на м² (евро)" : "Цена на м²"}
                       type="number"
-                      {...register('price_per_sqm', { 
-                        valueAsNumber: true,
-                        required: 'Цената на м² е задължителна',
-                        min: { value: 0, message: 'Цената на м² трябва да е положително число' }
-                      })}
+                      {...register('price_per_sqm', { valueAsNumber: true })}
                       error={errors.price_per_sqm?.message ? translateErrorMessage(String(errors.price_per_sqm.message)) : undefined}
-                      required
                     />
                   </div>
                   {/* Dynamic fields based on property type - conditionally shown */}
@@ -1141,18 +981,23 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                       <div className={styles.selectWrapper}>
                         <label className={styles.label}>Етаж *</label>
                         <select
-                          {...register('floor', {
-                            required: 'Етажът е задължителен'
-                          })}
+                          {...register('floor')}
                           className={styles.select}
                           required
                         >
                           <option value="">Изберете етаж</option>
-                          {FLOOR_SPECIAL_OPTIONS.map((option) => (
-                            <option key={option.id} value={option.id}>
-                              {option.label}
-                            </option>
-                          ))}
+                          {(isRentMode && (propertyType === 'office' || propertyType === 'shop'))
+                            ? RENT_COMMERCIAL_FLOOR_OPTIONS.map((option) => (
+                                <option key={option.id} value={option.id}>
+                                  {option.label}
+                                </option>
+                              ))
+                            : FLOOR_SPECIAL_OPTIONS.map((option) => (
+                                <option key={option.id} value={option.id}>
+                                  {option.label}
+                                </option>
+                              ))
+                          }
                         </select>
                       </div>
                     )}
@@ -1190,20 +1035,81 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                   </div>
                 )}
 
-                {/* Parameters section - hidden for warehouse, replace-real-estates, and buy-real-estates types */}
-                {propertyType !== 'warehouse' && propertyType !== 'replace-real-estates' && propertyType !== 'buy-real-estates' && (
+                {/* Rent-specific filters */}
+                {isRentMode && (
+                  <div className={styles.section}>
+                    <h2 className={styles.sectionTitle}>Допълнителни параметри за наем</h2>
+                    <div className={styles.formRow}>
+                      {/* Furnishing - for apartments */}
+                      {isRentMode && propertyType === 'apartment' && (
+                        <div className={styles.selectWrapper}>
+                          <label className={styles.label}>Обзавеждане</label>
+                          <select
+                            {...register('furnishing' as any)}
+                            className={styles.select}
+                          >
+                            <option value="">Изберете</option>
+                            <option value="furnished">Обзаведен</option>
+                            <option value="partially-furnished">Частично обзаведен</option>
+                            <option value="unfurnished">Необзаведен</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className={styles.section}>
+                  <h2 className={styles.sectionTitle}>Локация</h2>
                   <div className={styles.formRow}>
-                    {/* Year built - shown for all property types except land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates */}
-                    {propertyType !== 'land' && propertyType !== 'agricultural' && propertyType !== 'garage' && propertyType !== 'hotel' && propertyType !== 'restaurant' && (
-                      <Input
-                        label="Година на строеж *"
-                        type="number"
-                        {...register('year_built', { valueAsNumber: true })}
-                        error={errors.year_built?.message ? translateErrorMessage(String(errors.year_built.message)) : undefined}
-                        placeholder="Година"
+                    <div className={styles.selectWrapper}>
+                      <label className={styles.label}>Град *</label>
+                      <select
+                        {...register('city')}
+                        className={styles.select}
+                      >
+                        {cityOptions.map((cityName) => (
+                          <option key={cityName} value={cityName}>
+                            {cityName}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.city?.message && (
+                        <p className={styles.errorMessage}>{translateErrorMessage(String(errors.city.message))}</p>
+                      )}
+                    </div>
+                    <div className={styles.selectWrapper}>
+                      <NeighborhoodSelect
+                        city={cityValue}
+                        value={neighborhoodValue || ''}
+                        onChange={(val) =>
+                          setValue('neighborhood', Array.isArray(val) ? val[0] ?? '' : val)
+                        }
+                        disabled={!cityValue}
+                        error={errors.neighborhood?.message ? translateErrorMessage(String(errors.neighborhood.message)) : undefined}
                         required
                       />
-                    )}
+                    </div>
+                  </div>
+                  <div className={styles.formRow}>
+                    <Input
+                      label="Заглавие *"
+                      {...register('title')}
+                      error={errors.title?.message ? translateErrorMessage(String(errors.title.message)) : undefined}
+                    />
+                  </div>
+                  {/* Параметри section - hidden for all rent types */}
+                  {!isRentMode && (
+                  <div className={styles.formRow}>
+                    {/* Year built - shown for all property types */}
+                    <Input
+                      label="Година на строеж *"
+                      type="number"
+                      {...register('year_built', { valueAsNumber: true })}
+                      error={errors.year_built?.message ? translateErrorMessage(String(errors.year_built.message)) : undefined}
+                      placeholder="Година"
+                      required
+                    />
                     {/* Dynamic fields from schema - construction, completion, hotel_category, agricultural_category, electricity, water, bed_base */}
                     {typeFields
                       .filter(field => 
@@ -1422,8 +1328,9 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className={styles.formActions}>
+            <div className={styles.formActions}>
               {submitError && (
                 <div className={styles.errorBanner}>
                   <p className={styles.errorMessage}>{submitError}</p>

@@ -17,7 +17,9 @@ import {
     YearFilter,
     COMMERCIAL_PROPERTY_TYPES,
     COMMERCIAL_FEATURES,
-    COMMERCIAL_FLOOR_OPTIONS
+    COMMERCIAL_FLOOR_OPTIONS,
+    RENT_COMMERCIAL_FEATURES,
+    RENT_COMMERCIAL_FLOOR_OPTIONS
 } from '../filters';
 import {
     COMMERCIAL_AREA_SLIDER_MAX,
@@ -582,7 +584,7 @@ export function StoresOfficesFiltersPage({
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
                         title="Месечен наем"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
                         from={filterValuesRef.current.monthlyRentFrom || RENT_SLIDER_MIN}
@@ -593,7 +595,7 @@ export function StoresOfficesFiltersPage({
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
                         title="Цена за кв.м"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
                         from={filterValuesRef.current.rentPerSqmFrom || RENT_PER_SQM_SLIDER_MIN}
@@ -632,7 +634,7 @@ export function StoresOfficesFiltersPage({
                 initialFloorTo={filterValuesRef.current.floorTo}
                 initialSpecialOptions={filterValuesRef.current.selectedFloorOptions}
                 initialIsNotProvided={filterValuesRef.current.isFloorNotProvided}
-                floorOptions={COMMERCIAL_FLOOR_OPTIONS}
+                floorOptions={isRentMode ? RENT_COMMERCIAL_FLOOR_OPTIONS : COMMERCIAL_FLOOR_OPTIONS}
             />
 
             {/* Construction Type Filter (Тип строителство) - Only for sale mode */}
@@ -677,7 +679,7 @@ export function StoresOfficesFiltersPage({
                 key={`features-${filterKey}`}
                 initialSelected={filterValuesRef.current.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
-                features={COMMERCIAL_FEATURES}
+                features={isRentMode ? RENT_COMMERCIAL_FEATURES : COMMERCIAL_FEATURES}
             />
         </div>
     );

@@ -85,6 +85,7 @@ export async function GET(
         is_primary: index === 0,
       })),
       features: prop.features || [],
+      furniture: (prop as any).furniture || undefined,
       broker_name: prop.broker_name || undefined,
       broker_phone: prop.broker_phone || undefined,
       broker_position: prop.broker_position || undefined,

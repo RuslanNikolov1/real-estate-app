@@ -586,6 +586,20 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
     return construction?.label || 'Не е посочено';
   };
 
+  // Get furniture label (for rent apartments)
+  const getFurnitureLabel = () => {
+    const furniture = (property as any).furniture as string | undefined;
+    if (!furniture) return 'Не е посочено';
+    
+    const furnitureMap: Record<string, string> = {
+      'full': 'Обзаведен',
+      'partial': 'Частично обзаведен',
+      'none': 'Необзаведен',
+    };
+    
+    return furnitureMap[furniture] || 'Не е посочено';
+  };
+
 
   const handleImageClick = () => {
     if (property.images && property.images.length > 0) {
@@ -841,14 +855,25 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
               {(() => {
                 const propType = property.type;
                 const prop = property as any;
-                const hasConstructionDetails = 
-                  (propType === 'apartment' && (prop.construction_type || prop.completion_degree || property.year_built)) ||
+
+                // For rent offices/shops, hide the construction details section entirely
+                const isRentOfficeOrShop =
+                  property.status === 'for-rent' &&
+                  (propType === 'office' || propType === 'shop');
+
+                if (isRentOfficeOrShop) {
+                  return false;
+                }
+
+                const hasConstructionDetails =
+                  (propType === 'apartment' && (prop.construction_type || prop.completion_degree || property.year_built || (property.status === 'for-rent' && prop.furniture))) ||
                   ((propType === 'office' || propType === 'shop' || propType === 'restaurant') && (prop.construction_type || prop.completion_degree || property.year_built || property.floor)) ||
                   (propType === 'hotel' && (prop.construction_type || prop.completion_degree || prop.hotel_category || prop.bed_base || property.year_built)) ||
                   (propType === 'garage' && (prop.construction_type || property.year_built)) ||
                   ((propType === 'house' || propType === 'villa') && (property.year_built || property.yard_area_sqm)) ||
                   (propType === 'agricultural' && prop.agricultural_category) ||
                   (propType === 'land' && (prop.electricity || prop.water));
+
                 return hasConstructionDetails;
               })() && (
                 <div className={styles.constructionSection}>
@@ -891,11 +916,27 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     )}
 
 
-                    {/* Completion Status - for apartments, offices, shops, hotels, restaurants */}
-                    {(property.type === 'apartment' || property.type === 'office' || property.type === 'shop' || property.type === 'hotel' || property.type === 'restaurant') && (
+                    {/* Completion Status - for apartments (sale only), offices, shops, hotels, restaurants */}
+                    {(
+                      // Apartments: show only for sale mode
+                      (property.type === 'apartment' && property.status === 'for-sale') ||
+                      // Other supported types: always show when present
+                      property.type === 'office' ||
+                      property.type === 'shop' ||
+                      property.type === 'hotel' ||
+                      property.type === 'restaurant'
+                    ) && (
                       <div className={styles.constructionItem}>
                         <span className={styles.constructionLabel}>Степен на завършеност</span>
                         <span className={styles.constructionValue}>{getCompletionLabel()}</span>
+                      </div>
+                    )}
+
+                    {/* Furniture - for rent apartments */}
+                    {property.type === 'apartment' && property.status === 'for-rent' && (property as any).furniture && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Обзавеждане</span>
+                        <span className={styles.constructionValue}>{getFurnitureLabel()}</span>
                       </div>
                     )}
 

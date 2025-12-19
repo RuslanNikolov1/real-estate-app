@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, DragEvent, useId, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState, DragEvent, useId } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -13,29 +13,30 @@ import {
   CONSTRUCTION_FILTERS,
   COMPLETION_STATUSES,
   FLOOR_SPECIAL_OPTIONS,
+  HOUSE_TYPES,
+  BUILDING_TYPES,
+  GARAGE_CONSTRUCTION_TYPES,
+  ESTABLISHMENTS_LOCATION_TYPES,
+  ESTABLISHMENT_CONSTRUCTION_TYPES,
+  HOTEL_CATEGORIES,
+  HOTEL_CONSTRUCTION_TYPES,
+  RENT_HOUSE_FEATURES,
+  RENT_COMMERCIAL_FEATURES,
+  RENT_GARAGE_FEATURES,
+  RENT_WAREHOUSE_FEATURES,
+  RENT_BUILDING_PLOTS_FEATURES,
+  RENT_APARTMENT_FEATURES,
+  RENT_HOTEL_FEATURES,
+  RENT_COMMERCIAL_FLOOR_OPTIONS,
 } from '@/features/map-filters/filters/constants';
-import { CITY_OPTIONS, getNeighborhoodsByCity } from '@/lib/neighborhoods';
+import { CITY_OPTIONS, getNeighborhoodsByCity, getInitialCity } from '@/lib/neighborhoods';
 import { NeighborhoodSelect } from '@/components/forms/NeighborhoodSelect';
-import burgasCities from '@/data/burgasCities.json';
 import {
   getPropertyTypeSchema,
 } from '@/lib/property-schemas';
+import { getAvailablePropertyTypesForAddPage } from '@/lib/property-type-mapper';
 import type { PropertyType } from '@/types';
 import styles from './AddPropertyPage.module.scss';
-
-const PROPERTY_TYPES = [
-  { id: 'apartment', label: 'Апартамент' },
-  { id: 'house', label: 'Къща/Вила' },
-  { id: 'office', label: 'Магазин/Офис/Кабинет/Салон' },
-  { id: 'land', label: 'Строителен парцел/Инвестиционен проект' },
-  { id: 'agricultural', label: 'Земеделска земя/Лозя/Гори' },
-  { id: 'warehouse', label: 'Складове/Индустриални и стопански имоти' },
-  { id: 'garage', label: 'Гараж/Паркоместа' },
-  { id: 'hotel', label: 'Хотели/Мотели' },
-  { id: 'restaurant', label: 'Ресторант' },
-  { id: 'replace-real-estates', label: 'Замяна на недвижими имоти' },
-  { id: 'buy-real-estates', label: 'Купуване на недвижими имоти' },
-];
 
 const PROPERTY_STATUSES = [
   { id: 'for-sale', label: 'За продажба' },
@@ -46,56 +47,34 @@ const PROPERTY_STATUSES = [
 export function AddPropertyPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [selectedType, setSelectedType] = useState(PROPERTY_TYPES[0].id);
   const [selectedStatus, setSelectedStatus] = useState(PROPERTY_STATUSES[0].id);
+  
+  // Get available property types based on sale/rent status
+  const availablePropertyTypes = useMemo(() => {
+    const isRent = selectedStatus === 'for-rent';
+    return getAvailablePropertyTypesForAddPage(isRent);
+  }, [selectedStatus]);
+  
+  const [selectedType, setSelectedType] = useState(() => {
+    const isRent = PROPERTY_STATUSES[0].id === 'for-rent';
+    const initialTypes = getAvailablePropertyTypesForAddPage(isRent);
+    return initialTypes[0]?.id || 'apartment';
+  });
   const [selectedCompletion, setSelectedCompletion] = useState(COMPLETION_STATUSES[0].id);
   const [selectedConstruction, setSelectedConstruction] = useState(CONSTRUCTION_FILTERS[0].id);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
-  const [city, setCity] = useState('');
-  const [neighborhood, setNeighborhood] = useState('');
-  const [showCityDropdown, setShowCityDropdown] = useState(false);
-  const [manualNeighborhoodInput, setManualNeighborhoodInput] = useState('');
-  const cityInputRef = useRef<HTMLInputElement>(null);
-  const cityDropdownRef = useRef<HTMLDivElement>(null);
-  
-  // Check if the city is a valid selected city from the list
-  const isValidCity = useCallback((cityName: string) => {
-    if (!cityName) return false;
-    return CITY_OPTIONS.some(
-      (c) => c.toLowerCase() === cityName.toLowerCase()
-    );
-  }, []);
-  
-  const isCitySelected = isValidCity(city.trim());
+  const initialCity = getInitialCity();
+  const [city, setCity] = useState(initialCity);
+  const [neighborhood, setNeighborhood] = useState(() => {
+    const initialOptions = getNeighborhoodsByCity(initialCity);
+    return initialOptions[0] ?? '';
+  });
   const [description, setDescription] = useState('');
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const [area, setArea] = useState('');
   const [pricePerSqm, setPricePerSqm] = useState('');
-  const [areaError, setAreaError] = useState<string | null>(null);
-  const [priceError, setPriceError] = useState<string | null>(null);
-  const [pricePerSqmError, setPricePerSqmError] = useState<string | null>(null);
-  const [yearBuiltError, setYearBuiltError] = useState<string | null>(null);
-  const [brokerPhoneError, setBrokerPhoneError] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
-  
-  // Helper to validate Bulgarian phone number
-  // Supports: +359XXXXXXXXX (10 digits after +359) or 0XXXXXXXXX (9 digits after 0)
-  // Allows spaces/dashes: +359 XXX XXX XXX or 0XXX XXX XXX
-  const validateBulgarianPhone = (phone: string): boolean => {
-    if (!phone || !phone.trim()) return false;
-    // Remove all spaces and dashes for validation
-    const cleaned = phone.replace(/[\s-]/g, '');
-    // Check +359 format: +359 followed by 9 digits (total 13 chars)
-    if (cleaned.startsWith('+359')) {
-      return /^\+359[0-9]{9}$/.test(cleaned);
-    }
-    // Check 0 format: 0 followed by 9 digits (total 10 chars)
-    if (cleaned.startsWith('0')) {
-      return /^0[0-9]{9}$/.test(cleaned);
-    }
-    return false;
-  };
   const createdObjectUrls = useRef<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const imageFilesRef = useRef<File[]>([]);
@@ -117,18 +96,77 @@ export function AddPropertyPage() {
   const [hotelCategory, setHotelCategory] = useState('');
   const [agriculturalCategory, setAgriculturalCategory] = useState('');
   const [bedBase, setBedBase] = useState('');
+  // Rent-specific fields
+  const [furnishing, setFurnishing] = useState<string>('');
+  const [houseTypes, setHouseTypes] = useState<string[]>([]);
+  const [workingOptions, setWorkingOptions] = useState<string[]>([]);
+  const [locationType, setLocationType] = useState('');
   const descriptionFieldId = useId();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  
+  // Furnishing options for rent
+  const FURNISHING_OPTIONS = [
+    { id: 'furnished', label: 'Обзаведен' },
+    { id: 'partially-furnished', label: 'Частично обзаведен' },
+    { id: 'unfurnished', label: 'Необзаведен' }
+  ];
+  
+  // Working options for hotels in rent mode
+  const WORKING_OPTIONS = [
+    { id: 'seasonal', label: 'Работи сезонно' },
+    { id: 'year-round', label: 'Работи целогодишно' }
+  ];
 
   // Get schema for current property type
   const typeSchema = useMemo(() => getPropertyTypeSchema(selectedType as PropertyType), [selectedType]);
   
+  // Check if we're in rent mode
+  const isRentMode = useMemo(() => selectedStatus === 'for-rent', [selectedStatus]);
+  
   // Get features list for current property type
   const featuresList = useMemo(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:127',message:'featuresList computation start',data:{isRentMode,selectedType,rentApartmentFeaturesLength:RENT_APARTMENT_FEATURES.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    // For rent apartments, use RENT_APARTMENT_FEATURES instead of schema features
+    if (isRentMode && selectedType === 'apartment') {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:130',message:'Rent apartment condition matched',data:{rentApartmentFeaturesLength:RENT_APARTMENT_FEATURES.length,filteredLength:RENT_APARTMENT_FEATURES.filter(f => f.id !== 'all').length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      return RENT_APARTMENT_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent houses, use RENT_HOUSE_FEATURES instead of schema features
+    if (isRentMode && selectedType === 'house') {
+      return RENT_HOUSE_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent offices/shops, use RENT_COMMERCIAL_FEATURES instead of schema features
+    if (isRentMode && (selectedType === 'office' || selectedType === 'shop')) {
+      return RENT_COMMERCIAL_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent garages, use RENT_GARAGE_FEATURES instead of schema features
+    if (isRentMode && selectedType === 'garage') {
+      return RENT_GARAGE_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent warehouses, use RENT_WAREHOUSE_FEATURES instead of schema features
+    if (isRentMode && selectedType === 'warehouse') {
+      return RENT_WAREHOUSE_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent building plots (land), use RENT_BUILDING_PLOTS_FEATURES instead of schema features
+    if (isRentMode && selectedType === 'land') {
+      return RENT_BUILDING_PLOTS_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent hotels, use RENT_HOTEL_FEATURES instead of schema features
+    if (isRentMode && selectedType === 'hotel') {
+      return RENT_HOTEL_FEATURES.filter(f => f.id !== 'all');
+    }
     const featuresField = typeSchema.fields.find(f => f.key === 'features');
-    return featuresField?.options || [];
-  }, [typeSchema]);
+    const defaultFeatures = featuresField?.options || [];
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:153',message:'featuresList computation end',data:{isRentMode,selectedType,returnedFeaturesLength:defaultFeatures.length,conditionMatched:isRentMode && selectedType === 'apartment'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    return defaultFeatures;
+  }, [typeSchema, isRentMode, selectedType]);
   
   // Check which fields should be shown
   
@@ -151,6 +189,30 @@ export function AddPropertyPage() {
     return !!completionField;
   }, [typeSchema]);
   
+  // Rent-specific field visibility
+  const showFurnishing = useMemo(() => isRentMode && (selectedType === 'apartment' || selectedType === 'house'), [isRentMode, selectedType]);
+  const showHouseTypes = useMemo(() => isRentMode && selectedType === 'house', [isRentMode, selectedType]);
+  const showBuildingTypeForRent = useMemo(() => isRentMode && selectedType === 'office', [isRentMode, selectedType]);
+  const showWorkingOptions = useMemo(() => isRentMode && selectedType === 'hotel', [isRentMode, selectedType]);
+  const showLocationType = useMemo(() => isRentMode && selectedType === 'restaurant', [isRentMode, selectedType]);
+  const showGarageConstruction = useMemo(() => isRentMode && selectedType === 'garage', [isRentMode, selectedType]);
+  
+  // Reset selected type when status changes (sale/rent)
+  useEffect(() => {
+    // Reset to first available property type when switching between sale/rent
+    if (availablePropertyTypes.length > 0) {
+      const currentTypeExists = availablePropertyTypes.some(type => type.id === selectedType);
+      if (!currentTypeExists) {
+        setSelectedType(availablePropertyTypes[0].id);
+      }
+    }
+    // Reset rent-specific fields when switching between sale/rent
+    setFurnishing('');
+    setHouseTypes([]);
+    setWorkingOptions([]);
+    setLocationType('');
+  }, [selectedStatus, availablePropertyTypes, selectedType]);
+
   // Reset type-specific fields when property type changes
   useEffect(() => {
     // Clear subtype when switching types
@@ -178,40 +240,24 @@ export function AddPropertyPage() {
     setHotelCategory('');
     setAgriculturalCategory('');
     setBedBase('');
-    // Clear validation errors
-    setAreaError(null);
-    setPriceError(null);
-    setPricePerSqmError(null);
-    setYearBuiltError(null);
-    setBrokerPhoneError(null);
+    // Reset rent-specific fields
+    setFurnishing('');
+    setHouseTypes([]);
+    setWorkingOptions([]);
+    setLocationType('');
   }, [selectedType, showConstruction, showCompletion]);
 
   const neighborhoodOptions = useMemo(() => getNeighborhoodsByCity(city), [city]);
 
   useEffect(() => {
-    // Only validate neighborhoods if city is in the list
-    if (isCitySelected) {
-      if (!neighborhoodOptions.length) {
-        setNeighborhood('');
-        setManualNeighborhoodInput('');
-        return;
-      }
-      if (!neighborhoodOptions.includes(neighborhood)) {
-        setNeighborhood(neighborhoodOptions[0]);
-      }
-      // Clear manual input when switching to a valid city
-      if (manualNeighborhoodInput) {
-        setManualNeighborhoodInput('');
-      }
-    } else {
-      // For manual cities, use manual neighborhood input
-      if (manualNeighborhoodInput.trim()) {
-        setNeighborhood(manualNeighborhoodInput.trim());
-      } else {
-        setNeighborhood('');
-      }
+    if (!neighborhoodOptions.length) {
+      setNeighborhood('');
+      return;
     }
-  }, [neighborhoodOptions, neighborhood, isCitySelected, manualNeighborhoodInput]);
+    if (!neighborhoodOptions.includes(neighborhood)) {
+      setNeighborhood(neighborhoodOptions[0]);
+    }
+  }, [neighborhoodOptions, neighborhood]);
 
   const calculatedPricePerSqm = useMemo(() => {
     if (!price || !area) {
@@ -276,27 +322,6 @@ export function AddPropertyPage() {
     brokerImageInputRef.current?.click();
   };
 
-  // Helper to format city / neighborhood names: each word capitalized
-  // For neighborhoods, keeps abbreviations like "ж.к", "ул.", "бул." lowercase
-  const formatLocationName = (value: string, isNeighborhood: boolean = false) => {
-    if (!value) return value;
-    return value
-      .trim()
-      .split(/\s+/)
-      .map((word) => {
-        if (word.length === 0) return word;
-        // For neighborhoods, keep abbreviations lowercase
-        if (isNeighborhood) {
-          const lowerWord = word.toLowerCase();
-          if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.')) {
-            return lowerWord;
-          }
-        }
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-      })
-      .join(' ');
-  };
-
   const handleSubmit = async () => {
     if (isSubmitting) {
       return;
@@ -321,46 +346,33 @@ export function AddPropertyPage() {
       return;
     }
 
-    // Validate area is a number
-    if (!area.trim() || isNaN(numericArea) || !Number.isFinite(numericArea) || numericArea <= 0) {
-      setAreaError(t('errors.areaMustBePositive'));
+    if (!Number.isFinite(numericArea) || numericArea <= 0) {
       setSubmitError(t('errors.areaMustBePositive'));
       return;
     }
 
-    // Validate price is a number
-    if (!price.trim() || isNaN(numericPrice) || !Number.isFinite(numericPrice) || numericPrice <= 0) {
-      setPriceError(t('errors.priceMustBePositive'));
+    if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
       setSubmitError(t('errors.priceMustBePositive'));
       return;
     }
-    
-    // Validate price per sqm (required)
-    const resolvedPricePerSqm = pricePerSqm || calculatedPricePerSqm;
-    if (!resolvedPricePerSqm || !resolvedPricePerSqm.trim()) {
-      setPricePerSqmError(t('errors.pricePerSqmInvalid'));
-      setSubmitError(t('errors.pricePerSqmInvalid'));
-      return;
-    }
-    const numericPricePerSqm = parseFloat(resolvedPricePerSqm);
-    if (isNaN(numericPricePerSqm) || !Number.isFinite(numericPricePerSqm) || numericPricePerSqm < 0) {
-      setPricePerSqmError(t('errors.pricePerSqmInvalid'));
-      setSubmitError(t('errors.pricePerSqmInvalid'));
+
+    if (!neighborhood) {
+      setSubmitError(t('errors.neighborhoodRequired'));
       return;
     }
 
     if (typeSchema.subtypeOptions.length > 0 && !subtype) {
-      setSubmitError(t('errors.subtypeRequired'));
+      setSubmitError(t('errors.subtypeRequired') || 'Подтипът е задължителен');
       return;
     }
 
     if (!broker.title.trim()) {
-      setSubmitError(t('errors.brokerPositionRequired'));
+      setSubmitError(t('errors.brokerPositionRequired') || 'Длъжността е задължителна');
       return;
     }
 
     if (!brokerImageFileRef.current && !brokerImagePreview) {
-      setSubmitError(t('errors.brokerImageRequired'));
+      setSubmitError(t('errors.brokerImageRequired') || 'Снимката на брокера е задължителна');
       return;
     }
 
@@ -370,17 +382,7 @@ export function AddPropertyPage() {
     }
 
     if (!trimmedBrokerName || !trimmedBrokerPhone) {
-      if (!trimmedBrokerPhone) {
-        setBrokerPhoneError(t('errors.brokerNameAndPhoneRequired'));
-      }
       setSubmitError(t('errors.brokerNameAndPhoneRequired'));
-      return;
-    }
-    
-    // Validate Bulgarian phone number format
-    if (!validateBulgarianPhone(trimmedBrokerPhone)) {
-      setBrokerPhoneError(t('errors.phoneInvalid'));
-      setSubmitError(t('errors.phoneInvalid'));
       return;
     }
 
@@ -390,40 +392,26 @@ export function AddPropertyPage() {
       return;
     }
 
-    // Validate year built (required and must be a number) - skip for land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates
-    if (selectedType !== 'land' && selectedType !== 'agricultural' && selectedType !== 'warehouse' && selectedType !== 'garage' && selectedType !== 'hotel' && selectedType !== 'restaurant' && selectedType !== 'replace-real-estates' && selectedType !== 'buy-real-estates') {
-      if (!yearBuilt || !yearBuilt.trim()) {
-        setYearBuiltError(t('errors.yearBuiltRequired'));
-        setSubmitError(t('errors.yearBuiltRequired'));
-        return;
-      }
-      const numericYearBuilt = parseInt(yearBuilt, 10);
-      if (isNaN(numericYearBuilt) || !Number.isFinite(numericYearBuilt)) {
-        setYearBuiltError(t('errors.yearBuiltInvalid'));
-        setSubmitError(t('errors.yearBuiltInvalid'));
-        return;
-      }
-      if (numericYearBuilt < 1000 || numericYearBuilt > new Date().getFullYear() + 10) {
-        setYearBuiltError(t('errors.yearBuiltInvalid'));
-        setSubmitError(t('errors.yearBuiltInvalid'));
-        return;
-      }
+    // Validate year built (required, but not for rent mode)
+    if (!isRentMode && (!yearBuilt || !yearBuilt.trim())) {
+      setSubmitError(t('errors.yearBuiltRequired'));
+      return;
     }
 
-    // Validate construction type (required when shown)
-    if (showConstruction && (!selectedConstruction || selectedConstruction.trim() === '')) {
+    // Validate construction type (required when shown, but not for rent mode)
+    if (showConstruction && !isRentMode && (!selectedConstruction || selectedConstruction.trim() === '')) {
       setSubmitError(t('errors.constructionRequired'));
       return;
     }
 
-    // Validate completion status (required when shown)
-    if (showCompletion && (!selectedCompletion || selectedCompletion.trim() === '')) {
+    // Validate completion status (required when shown, but not for rent mode)
+    if (showCompletion && !isRentMode && (!selectedCompletion || selectedCompletion.trim() === '')) {
       setSubmitError(t('errors.completionStatusRequired'));
       return;
     }
 
-    // Validate features (at least one required only if features section is displayed)
-    if (featuresList.length > 0 && selectedFeatures.length === 0) {
+    // Validate features (at least one required)
+    if (selectedFeatures.length === 0) {
       setSubmitError(t('errors.atLeastOneFeatureRequired'));
       return;
     }
@@ -439,49 +427,44 @@ export function AddPropertyPage() {
 
       if (typeSchema.subtypeOptions.length > 0) {
         formData.append('subtype', subtype);
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:subtype',message:'Submitting property with subtype',data:{selectedType,subtype},timestamp:Date.now(),sessionId:'debug-session',runId:'subtype-debug',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
       }
 
       formData.append('area_sqm', numericArea.toString());
       formData.append('price', numericPrice.toString());
 
-      // Price per sqm is required - use provided value or calculated value
       const resolvedPricePerSqm = pricePerSqm || calculatedPricePerSqm;
-      formData.append('price_per_sqm', resolvedPricePerSqm);
+      if (resolvedPricePerSqm) {
+        formData.append('price_per_sqm', resolvedPricePerSqm);
+      }
 
       // Floor is required for apartments, offices, shops
       if (showFloor) {
         formData.append('floor', floor);
       }
 
-      const formattedCity = formatLocationName(city, false);
-      const formattedNeighborhood = formatLocationName(neighborhood, true);
-
-      formData.append('city', formattedCity);
-      formData.append('neighborhood', formattedNeighborhood);
+      formData.append('city', city);
+      formData.append('neighborhood', neighborhood);
 
       formData.append('title', trimmedTitle);
       formData.append('description', trimmedDescription);
 
-      // Year built is required (except for land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates)
-      if (selectedType !== 'land' && selectedType !== 'agricultural' && selectedType !== 'warehouse' && selectedType !== 'garage' && selectedType !== 'hotel' && selectedType !== 'restaurant' && selectedType !== 'replace-real-estates' && selectedType !== 'buy-real-estates') {
+      // Year built is required (but not for rent mode)
+      if (!isRentMode) {
         formData.append('build_year', yearBuilt);
       }
 
-      // Construction type is required when shown
-      if (showConstruction && selectedConstruction) {
+      // Construction type is required when shown (but not for rent mode)
+      if (showConstruction && !isRentMode && selectedConstruction) {
         formData.append('construction_type', selectedConstruction);
       }
 
-      // Completion status is required when shown
-      if (showCompletion && selectedCompletion) {
+      // Completion status is required when shown (but not for rent mode)
+      if (showCompletion && !isRentMode && selectedCompletion) {
         formData.append('completion_degree', selectedCompletion);
       }
 
-      // Building type (вид сграда) - optional, when available in schema
-      if (buildingType) {
+      // Building type - for offices in rent mode
+      if (showBuildingTypeForRent && buildingType) {
         formData.append('building_type', buildingType);
       }
 
@@ -497,29 +480,12 @@ export function AddPropertyPage() {
         formData.append('bed_base', bedBase);
       }
 
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:494',message:'Electricity and water values before formData append',data:{electricity,electricityType:typeof electricity,electricityTruthy:!!electricity,water,waterType:typeof water,waterTruthy:!!water,selectedType},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H1'})}).catch(()=>{});
-      // #endregion
       if (electricity) {
         formData.append('electricity', electricity);
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:496',message:'Electricity appended to formData',data:{electricity},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
-      } else {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:497',message:'Electricity NOT appended (falsy value)',data:{electricity},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H3'})}).catch(()=>{});
-        // #endregion
       }
 
       if (water) {
         formData.append('water', water);
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:500',message:'Water appended to formData',data:{water},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
-      } else {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:501',message:'Water NOT appended (falsy value)',data:{water},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H3'})}).catch(()=>{});
-        // #endregion
       }
 
       if (yardArea) {
@@ -530,6 +496,40 @@ export function AddPropertyPage() {
         formData.append('features', feature);
       });
 
+      // Rent-specific fields
+      if (isRentMode) {
+        // Furnishing for apartments - map to furniture field
+        if (showFurnishing && furnishing && selectedType === 'apartment') {
+          // Map UI values to database values
+          const furnitureMap: Record<string, string> = {
+            'furnished': 'full',
+            'partially-furnished': 'partial',
+            'unfurnished': 'none',
+          };
+          const furnitureValue = furnitureMap[furnishing];
+          if (furnitureValue) {
+            formData.append('furniture', furnitureValue);
+          }
+        }
+        
+        // Working options for hotels
+        if (showWorkingOptions && workingOptions.length > 0) {
+          workingOptions.forEach((option) => {
+            formData.append('features', option);
+          });
+        }
+        
+        // Location type for restaurants
+        if (showLocationType && locationType) {
+          formData.append('building_type', locationType);
+        }
+        
+        // Garage construction type
+        if (showGarageConstruction && buildingType) {
+          formData.append('construction_type', buildingType);
+        }
+      }
+
       formData.append('broker_name', trimmedBrokerName);
       formData.append('broker_position', broker.title.trim());
       formData.append('broker_phone', trimmedBrokerPhone);
@@ -539,7 +539,7 @@ export function AddPropertyPage() {
         formData.append('broker_image', brokerImageFileRef.current);
       } else {
         // This should not happen due to validation, but handle it gracefully
-        setSubmitError(t('errors.brokerImageRequired'));
+        setSubmitError(t('errors.brokerImageRequired') || 'Снимката на брокера е задължителна');
         return;
       }
 
@@ -554,20 +554,7 @@ export function AddPropertyPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:472',message:'API error response',data:{status:response.status,statusText:response.statusText,errorData,formDataKeys:Array.from(formData.keys())},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
-        
-        // Handle validation errors - format them in Bulgarian
-        if (errorData?.details && Array.isArray(errorData.details)) {
-          const validationErrors = errorData.details.map((err: any) => {
-            const fieldLabel = err.fieldLabel || err.path || 'поле';
-            return `${fieldLabel}: ${err.message}`;
-          }).join('\n');
-          throw new Error(`Грешки при валидация:\n${validationErrors}`);
-        }
-        
-        const errorMessage = errorData?.error || errorData?.details || 'flashMessages.propertyAddError';
+        const errorMessage = errorData?.error || 'flashMessages.propertyAddError';
         // Translate error message if it's a translation key
         const translatedError = errorMessage.startsWith('errors.') 
           ? t(errorMessage as any, { fileName: errorMessage.split(':')[1] || '' })
@@ -626,7 +613,7 @@ export function AddPropertyPage() {
       <main className={styles.main}>
         <div className={styles.container}>
         <div className={styles.breadcrumbs}>
-          <Link href="/admin/properties/quick-view">Имоти</Link>
+          <Link href="/admin/properties">Имоти</Link>
           <span>/</span>
           <span>Конфигуратор</span>
         </div>
@@ -662,144 +649,42 @@ export function AddPropertyPage() {
                   ))}
                 </div>
               </div>
-            </div>
-          </section>
-
-          <section className={styles.section}>
-            <h2>Локация</h2>
-            <div className={styles.inputsRow}>
-              <div className={styles.control}>
-                <label>Град *</label>
-                <div className={styles.autocompleteWrapper}>
-                  <Input
-                    placeholder="Въведете или изберете град (пр. Бургас)"
-                        value={city}
-                            onChange={(event) => {
-                      const value = event.target.value;
-                      setCity(value);
-                      // Show dropdown only when there is some input
-                      if (value.trim().length > 0) {
-                        setShowCityDropdown(true);
-                      } else {
-                        setShowCityDropdown(false);
-                      }
-                    }}
-                    onFocus={() => {
-                      // Show dropdown if there are matching options
-                      if (city.trim().length > 0 || CITY_OPTIONS.length > 0) {
-                        setShowCityDropdown(true);
-                      }
-                    }}
-                    onBlur={() => {
-                      // Delay hiding dropdown to allow click on dropdown item
-                      setTimeout(() => {
-                        if (!cityDropdownRef.current?.contains(document.activeElement)) {
-                          setShowCityDropdown(false);
-                          // Format city name on blur if manually entered
-                          if (city.trim() && !isCitySelected) {
-                            const formatted = formatLocationName(city, false);
-                            setCity(formatted);
-                          }
-                        }
-                      }, 200);
-                    }}
-                    ref={cityInputRef}
+              <div className={styles.inputsRow}>
+                <div className={styles.control}>
+                  <label>Град *</label>
+                  <select
+                    value={city}
+                    onChange={(event) => setCity(event.target.value)}
+                    className={styles.select}
+                    required
+                  >
+                    {CITY_OPTIONS.map((cityName) => (
+                      <option key={cityName} value={cityName}>
+                        {cityName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className={styles.control}>
+                  <NeighborhoodSelect
+                    city={city}
+                    value={neighborhood}
+                    onChange={(val) => setNeighborhood(Array.isArray(val) ? val[0] ?? '' : val)}
+                    disabled={!city}
+                    label="Квартал"
                     required
                   />
-                  {showCityDropdown && CITY_OPTIONS.length > 0 && (
-                    <div
-                      ref={cityDropdownRef}
-                      className={styles.cityDropdown}
-                    >
-                      {CITY_OPTIONS
-                        .filter((cityName) => {
-                          const searchTerm = city.toLowerCase().trim();
-                          if (!searchTerm) return true;
-                          return cityName.toLowerCase().includes(searchTerm);
-                        })
-                        .map((cityName) => {
-                          // Find coordinates from burgasCities for map/distance calculations
-                          const cityData = burgasCities.cities.find(
-                            (c) => c.name.toLowerCase() === cityName.toLowerCase() ||
-                              c.nameEn.toLowerCase() === cityName.toLowerCase()
-                          );
-                          const coordinates: [number, number] = cityData && cityData.coordinates && cityData.coordinates.length === 2
-                            ? [cityData.coordinates[0], cityData.coordinates[1]]
-                            : [0, 0]; // Fallback if coordinates not found
-                          
-                          return (
-                            <button
-                              key={cityName}
-                              type="button"
-                              className={styles.cityDropdownItem}
-                              onMouseDown={(e) => {
-                                e.preventDefault(); // Prevent input blur
-                              }}
-                                    onClick={() => {
-                                const formattedCityName = formatLocationName(cityName, false);
-                                setCity(formattedCityName);
-                                setShowCityDropdown(false);
-                                // Reset neighborhood when city changes
-                                const newOptions = getNeighborhoodsByCity(formattedCityName);
-                                setNeighborhood(newOptions[0] ?? '');
-                                setManualNeighborhoodInput('');
-                              }}
-                            >
-                              {cityName}
-                            </button>
-                          );
-                        })}
-                    </div>
-                  )}
                 </div>
               </div>
-              {city.trim() && (
-                <div className={styles.control}>
-                  {isCitySelected ? (
-                    <NeighborhoodSelect
-                      city={city}
-                      value={neighborhood}
-                      onChange={(val) => setNeighborhood(Array.isArray(val) ? val[0] ?? '' : val)}
-                      disabled={!isCitySelected}
-                      label="Квартал"
-                    />
-                  ) : (
-                    <div className={styles.manualNeighborhoodInputWrapper}>
-                      <label htmlFor="neighborhood-manual" className={styles.manualNeighborhoodLabel}>
-                        Квартал
-                      </label>
-                      <input
-                        id="neighborhood-manual"
-                        type="text"
-                        placeholder="Въведете квартал"
-                        value={manualNeighborhoodInput}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          setManualNeighborhoodInput(value);
-                          // Update neighborhood state immediately
-                          const trimmedValue = value.trim();
-                          setNeighborhood(trimmedValue);
-                        }}
-                        onBlur={() => {
-                          // Format neighborhood name on blur
-                          if (manualNeighborhoodInput.trim()) {
-                            const formatted = formatLocationName(manualNeighborhoodInput, true);
-                            setManualNeighborhoodInput(formatted);
-                            setNeighborhood(formatted);
-                          }
-                        }}
-                        className={styles.manualNeighborhoodInputField}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </section>
-
-          <section className={styles.section}>
-            <h2>Основна информация</h2>
-            <div className={styles.optionGrid}>
+              <div className={styles.inputsRow}>
+                <Input
+                  label="Заглавие *"
+                  placeholder="Луксозен апартамент в центъра"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  required
+                />
+              </div>
               <div className={styles.inputsRow}>
                 <div className={styles.selectWrapper}>
                   <label className={styles.label}>Тип имот *</label>
@@ -809,17 +694,11 @@ export function AddPropertyPage() {
                     className={styles.select}
                     required
                   >
-                    <option value="apartment">Апартамент</option>
-                    <option value="house">Къща/Вила</option>
-                    <option value="office">Магазин/Офис/Кабинет/Салон</option>
-                    <option value="land">Строителен парцел/Инвестиционен проект</option>
-                    <option value="agricultural">Земеделска земя/Лозя/Гори</option>
-                    <option value="warehouse">Складове/Индустриални и стопански имоти</option>
-                    <option value="garage">Гараж/Паркоместа</option>
-                    <option value="hotel">Хотели/Мотели</option>
-                    <option value="restaurant">Ресторант</option>
-                    <option value="replace-real-estates">Замяна на недвижими имоти</option>
-                    <option value="buy-real-estates">Купуване на недвижими имоти</option>
+                    {availablePropertyTypes.map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 {/* Subtype field - shown based on property type */}
@@ -845,15 +724,6 @@ export function AddPropertyPage() {
                 )}
               </div>
             </div>
-            <div className={`${styles.inputsRow} ${styles.titleRow}`}>
-              <Input
-                label="Заглавие *"
-                placeholder="Луксозен апартамент в центъра"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                required
-              />
-            </div>
           </section>
 
           <section className={styles.section}>
@@ -862,113 +732,22 @@ export function AddPropertyPage() {
               <Input
                 label={`${selectedType === 'hotel' ? 'РЗП (м²)' : 'Площ (м²)'} *`}
                 placeholder="120"
-                type="number"
-                min="0"
-                step="0.01"
                 value={area}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  setArea(value);
-                  // Validate immediately
-                  if (value.trim() === '') {
-                    setAreaError(null);
-                  } else {
-                    const numValue = parseFloat(value);
-                    if (isNaN(numValue)) {
-                      setAreaError(t('errors.areaInvalid'));
-                    } else if (numValue <= 0) {
-                      setAreaError(t('errors.areaMustBePositive'));
-                    } else {
-                      setAreaError(null);
-                    }
-                  }
-                }}
-                onBlur={() => {
-                  if (area.trim() && !areaError) {
-                    const numValue = parseFloat(area);
-                    if (isNaN(numValue) || numValue <= 0) {
-                      setAreaError('Площта трябва да е положително число');
-                    }
-                  }
-                }}
-                error={areaError || undefined}
+                onChange={(event) => setArea(event.target.value)}
                 required
               />
               <Input
-                label="Цена *"
+                label={isRentMode ? "Месечен наем (евро) *" : "Цена *"}
                 placeholder="250 000"
-                type="number"
-                min="0"
-                step="0.01"
                 value={price}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  setPrice(value);
-                  // Validate immediately
-                  if (value.trim() === '') {
-                    setPriceError(null);
-                  } else {
-                    const numValue = parseFloat(value);
-                    if (isNaN(numValue)) {
-                      setPriceError(t('errors.priceInvalid'));
-                    } else if (numValue <= 0) {
-                      setPriceError(t('errors.priceMustBePositive'));
-                    } else {
-                      setPriceError(null);
-                    }
-                  }
-                }}
-                onBlur={() => {
-                  if (price.trim() && !priceError) {
-                    const numValue = parseFloat(price);
-                    if (isNaN(numValue) || numValue <= 0) {
-                      setPriceError('Цената трябва да е положително число');
-                    }
-                  }
-                }}
-                error={priceError || undefined}
+                onChange={(event) => setPrice(event.target.value)}
                 required
               />
               <Input
-                label="Цена на м² *"
+                label={isRentMode ? "Наем на м² (евро)" : "Цена на м²"}
                 placeholder="изчислява се"
-                type="number"
-                min="0"
-                step="0.01"
                 value={pricePerSqm || calculatedPricePerSqm}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  setPricePerSqm(value);
-                  // Validate immediately
-                  const resolvedValue = value || calculatedPricePerSqm;
-                  if (!resolvedValue || !resolvedValue.trim()) {
-                    setPricePerSqmError(t('errors.pricePerSqmInvalid'));
-                  } else {
-                    const numValue = parseFloat(resolvedValue);
-                    if (isNaN(numValue)) {
-                      setPricePerSqmError(t('errors.pricePerSqmInvalid'));
-                    } else if (numValue < 0) {
-                      setPricePerSqmError(t('errors.pricePerSqmInvalid'));
-                    } else {
-                      setPricePerSqmError(null);
-                    }
-                  }
-                }}
-                onBlur={() => {
-                  const resolvedValue = pricePerSqm || calculatedPricePerSqm;
-                  if (!resolvedValue || !resolvedValue.trim()) {
-                    setPricePerSqmError(t('errors.pricePerSqmInvalid'));
-                  } else {
-                    const numValue = parseFloat(resolvedValue);
-                    if (isNaN(numValue) || numValue < 0) {
-                      setPricePerSqmError(t('errors.pricePerSqmInvalid'));
-                    } else {
-                      setPricePerSqmError(null);
-                    }
-                  }
-                }}
-                error={pricePerSqmError || undefined}
-                required
+                onChange={(event) => setPricePerSqm(event.target.value)}
               />
               {/* Yard area - only for houses and villas */}
               {showYardArea && (
@@ -990,11 +769,18 @@ export function AddPropertyPage() {
                     required
                   >
                     <option value="">Изберете етаж</option>
-                    {FLOOR_SPECIAL_OPTIONS.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
+                    {(isRentMode && (selectedType === 'office' || selectedType === 'shop'))
+                      ? RENT_COMMERCIAL_FLOOR_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.label}
+                          </option>
+                        ))
+                      : FLOOR_SPECIAL_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.label}
+                          </option>
+                        ))
+                    }
                   </select>
                 </div>
               )}
@@ -1073,36 +859,26 @@ export function AddPropertyPage() {
             />
           </section>
 
-          {/* Parameters section - hidden for warehouse, replace-real-estates, and buy-real-estates types */}
-          {selectedType !== 'warehouse' && selectedType !== 'replace-real-estates' && selectedType !== 'buy-real-estates' && (
+          {/* Параметри section - hidden for all rent types */}
+          {!isRentMode && (
           <section className={styles.section}>
             <h2>Параметри</h2>
             <div className={styles.filtersRow}>
-              {/* Year built - shown for all property types except land, agricultural, warehouse, garage, hotel, restaurant, replace-real-estates, and buy-real-estates */}
-              {selectedType !== 'land' && selectedType !== 'agricultural' && selectedType !== 'warehouse' && selectedType !== 'garage' && selectedType !== 'hotel' && selectedType !== 'restaurant' && selectedType !== 'replace-real-estates' && selectedType !== 'buy-real-estates' && (
-                <div className={styles.control}>
-                  <label>Година на строеж *</label>
-                  <Input
-                    type="number"
-                    placeholder="2024"
-                    min="1000"
-                    max={new Date().getFullYear() + 10}
-                    step="1"
-                    value={yearBuilt}
-                    onChange={(event) => {
-                      setYearBuilt(event.target.value);
-                      // Clear error when user types
-                      setYearBuiltError(null);
-                    }}
-                    error={yearBuiltError || undefined}
-                    required
-                  />
-                </div>
-              )}
+              {/* Year built - shown for all property types */}
+              <div className={styles.control}>
+                <label>Година на строеж *</label>
+                <Input
+                  type="number"
+                  placeholder="2024"
+                  value={yearBuilt}
+                  onChange={(event) => setYearBuilt(event.target.value)}
+                  required
+                />
+              </div>
               {/* Construction Type - only if in schema */}
               {showConstruction && (
                 <div className={styles.control}>
-                  <label>Вид строителство *</label>
+                  <label>Конструкция *</label>
                   <select
                     value={selectedConstruction}
                     onChange={(e) => setSelectedConstruction(e.target.value)}
@@ -1140,8 +916,26 @@ export function AddPropertyPage() {
                   </select>
                 </div>
               )}
-              {/* Building Type - for offices/shops (not for restaurant) */}
-              {typeSchema.fields.find(f => f.key === 'building_type') && selectedType !== 'restaurant' && (
+              {/* Building Type - for offices/shops (rent mode) */}
+              {showBuildingTypeForRent && (
+                <div className={styles.control}>
+                  <label>Вид сграда</label>
+                  <select
+                    value={buildingType}
+                    onChange={(e) => setBuildingType(e.target.value)}
+                    className={styles.select}
+                  >
+                    <option value="">Изберете</option>
+                    {BUILDING_TYPES.filter(type => type.id !== 'all').map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {/* Building Type - for offices/shops (sale mode) */}
+              {!isRentMode && typeSchema.fields.find(f => f.key === 'building_type') && (
                 <div className={styles.control}>
                   <label>Вид сграда</label>
                   <select
@@ -1159,6 +953,87 @@ export function AddPropertyPage() {
                       )) || [];
                     })()}
                   </select>
+                </div>
+              )}
+              {/* Garage Construction Type - for garages (rent mode) */}
+              {showGarageConstruction && (
+                <div className={styles.control}>
+                  <label>Вид конструкция</label>
+                  <select
+                    value={buildingType}
+                    onChange={(e) => setBuildingType(e.target.value)}
+                    className={styles.select}
+                  >
+                    <option value="">Изберете</option>
+                    {GARAGE_CONSTRUCTION_TYPES.map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {/* Location Type - for restaurants (rent mode) */}
+              {showLocationType && (
+                <div className={styles.control}>
+                  <label>Разположение</label>
+                  <select
+                    value={locationType}
+                    onChange={(e) => setLocationType(e.target.value)}
+                    className={styles.select}
+                  >
+                    <option value="">Изберете</option>
+                    {ESTABLISHMENTS_LOCATION_TYPES.filter(type => type.id !== 'all').map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {/* Hotel Construction Type - for hotels (rent mode) */}
+              {isRentMode && selectedType === 'hotel' && (
+                <div className={styles.control}>
+                  <label>Тип строителство</label>
+                  <select
+                    value={selectedConstruction}
+                    onChange={(e) => setSelectedConstruction(e.target.value)}
+                    className={styles.select}
+                  >
+                    <option value="">Изберете</option>
+                    {HOTEL_CONSTRUCTION_TYPES.filter(type => type.id !== 'all').map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {/* Working Options - for hotels (rent mode) */}
+              {showWorkingOptions && (
+                <div className={styles.control}>
+                  <label>Работен режим</label>
+                  <div className={styles.featuresGrid} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    {WORKING_OPTIONS.map((option) => {
+                      const isSelected = workingOptions.includes(option.id);
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          className={`${styles.featureCard} ${isSelected ? styles.active : ''}`}
+                          onClick={() => {
+                            setWorkingOptions(prev =>
+                              prev.includes(option.id)
+                                ? prev.filter(id => id !== option.id)
+                                : [...prev, option.id]
+                            );
+                          }}
+                        >
+                          <span>{option.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
               {/* Hotel Category - for hotels */}
@@ -1282,6 +1157,33 @@ export function AddPropertyPage() {
             </section>
           )}
 
+          {/* Rent-specific filters */}
+          {isRentMode && (
+            <section className={styles.section}>
+              <h2>Допълнителни параметри за наем</h2>
+              <div className={styles.filtersRow}>
+                {/* Furnishing - for apartments and houses */}
+                {showFurnishing && (
+                  <div className={styles.control}>
+                    <label>Обзавеждане</label>
+                    <select
+                      value={furnishing}
+                      onChange={(e) => setFurnishing(e.target.value)}
+                      className={styles.select}
+                    >
+                      <option value="">Изберете</option>
+                      {FURNISHING_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
           <section className={styles.section}>
             <h2>Брокер</h2>
             <div className={styles.brokerGrid}>
@@ -1301,14 +1203,9 @@ export function AddPropertyPage() {
               />
               <Input
                 label="Телефон *"
-                placeholder="+359 888 123 456 или 0888 123 456"
+                placeholder="+359 888 123 456"
                 value={broker.phone}
-                onChange={(event) => {
-                  setBroker((prev) => ({ ...prev, phone: event.target.value }));
-                  // Clear error when user types
-                  setBrokerPhoneError(null);
-                }}
-                error={brokerPhoneError || undefined}
+                onChange={(event) => setBroker((prev) => ({ ...prev, phone: event.target.value }))}
                 required
               />
             </div>

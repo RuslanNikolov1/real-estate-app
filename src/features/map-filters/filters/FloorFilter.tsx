@@ -14,8 +14,8 @@ interface FloorFilterProps {
     floorOptions?: FloorSpecialOption[];
 }
 
-// Filter to only show the specified options: basement, first-residential, not-last, last, attic
-const ALLOWED_FLOOR_OPTIONS = ['basement', 'first-residential', 'not-last', 'last', 'attic'];
+// Filter to only show the specified options: basement, ground, first-residential, not-last, last, attic
+const ALLOWED_FLOOR_OPTIONS = ['basement', 'ground', 'first-residential', 'not-last', 'last', 'attic'];
 
 export function FloorFilter({
     onFilterChange,

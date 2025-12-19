@@ -111,9 +111,6 @@ export async function GET(request: NextRequest) {
     if (filtersParam) {
       try {
         filters = JSON.parse(decodeURIComponent(filtersParam));
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:113',message:'API received filters',data:{filtersParam,filters},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
-        // #endregion
       } catch (e) {
         console.error('Error parsing filters:', e);
       }
@@ -121,12 +118,6 @@ export async function GET(request: NextRequest) {
 
     // Build query
     let query = supabaseAdmin.from('properties').select('*');
-    
-    // #region agent log
-    const baseRoute = searchParams.get('baseRoute');
-    const propertyTypeId = searchParams.get('propertyTypeId');
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:120',message:'Query initialization',data:{baseRoute,propertyTypeId,hasFilters:!!filters},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-    // #endregion
 
     // Apply filters if provided
     if (filters) {
@@ -137,41 +128,10 @@ export async function GET(request: NextRequest) {
       
       // Status filter (for-sale/for-rent)
       if (filters.city) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:131',message:'Applying city filter',data:{city:filters.city,type:typeof filters.city},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
-        
-        // Check what city values actually exist in database (case-insensitive check)
-        // #region agent log
-        (async () => {
-          try {
-            const { data: cityCheckData } = await supabaseAdmin.from('properties').select('city, neighborhood').ilike('city', `%${filters.city}%`).limit(10);
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:138',message:'Database city values check (case-insensitive)',data:{requestedCity:filters.city,foundCities:cityCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-          } catch {}
-        })();
-        // #endregion
-        
         query = query.eq('city', filters.city);
       }
       
       if (filters.neighborhoods && Array.isArray(filters.neighborhoods) && filters.neighborhoods.length > 0) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:150',message:'Applying neighborhood filter',data:{neighborhoods:filters.neighborhoods,city:filters.city,count:filters.neighborhoods.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
-        
-        // Check what neighborhood values actually exist in database for this city
-        // #region agent log
-        if (filters.city) {
-          const neighborhoodCheckQuery = supabaseAdmin.from('properties').select('city, neighborhood').eq('city', filters.city).limit(20);
-          (async () => {
-            try {
-              const { data: neighborhoodCheckData } = await neighborhoodCheckQuery;
-              fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:157',message:'Database neighborhood values for city',data:{requestedCity:filters.city,requestedNeighborhoods:filters.neighborhoods,foundNeighborhoods:neighborhoodCheckData?.map((p:any) => p.neighborhood).filter(Boolean) || [],allProperties:neighborhoodCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-            } catch {}
-          })();
-        }
-        // #endregion
-        
         query = query.in('neighborhood', filters.neighborhoods);
       }
       
@@ -192,62 +152,29 @@ export async function GET(request: NextRequest) {
       };
       
       // Determine property types from baseRoute or filters
+      const baseRoute = searchParams.get('baseRoute');
+      const propertyTypeId = searchParams.get('propertyTypeId');
+      
       if (propertyTypeId && typeMapping[propertyTypeId]) {
         query = query.in('type', typeMapping[propertyTypeId]);
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:195',message:'Applied property type filter',data:{propertyTypeId,types:typeMapping[propertyTypeId],mappedTypes:typeMapping[propertyTypeId]},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H3'})}).catch(()=>{});
-        // #endregion
-      } else if (propertyTypeId) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:201',message:'WARNING: propertyTypeId not in typeMapping',data:{propertyTypeId,availableKeys:Object.keys(typeMapping)},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H3'})}).catch(()=>{});
-        // #endregion
-      } else {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:205',message:'No propertyTypeId provided',data:{baseRoute,hasFilters:!!filters},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
       }
       
       // Also support direct type filter from filters object
       if (filters.type && typeof filters.type === 'string') {
         query = query.eq('type', filters.type);
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:193',message:'Applied direct type filter',data:{type:filters.type},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-        // #endregion
       }
       
       // Support types array filter
       if (filters.types && Array.isArray(filters.types) && filters.types.length > 0) {
         query = query.in('type', filters.types);
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:198',message:'Applied types array filter',data:{types:filters.types},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-        // #endregion
       }
       
       // Sale/Rent filter based on baseRoute (using sale_or_rent instead of status)
       if (baseRoute === '/sale/search') {
         query = query.eq('sale_or_rent', 'sale');
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:203',message:'Applied sale filter',data:{baseRoute,sale_or_rent:'sale'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-        // #endregion
       } else if (baseRoute === '/rent/search') {
         query = query.eq('sale_or_rent', 'rent');
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:205',message:'Applied rent filter',data:{baseRoute,sale_or_rent:'rent'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-        // #endregion
       }
-      
-      // Check what sale_or_rent value the property actually has
-      // #region agent log
-      if (filters.city && filters.neighborhoods) {
-        const propertyCheckQuery = supabaseAdmin.from('properties').select('city, neighborhood, sale_or_rent, type').eq('city', filters.city).in('neighborhood', filters.neighborhoods).limit(5);
-        (async () => {
-          try {
-            const { data: propertyCheckData } = await propertyCheckQuery;
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:212',message:'Property sale_or_rent check',data:{requestedCity:filters.city,requestedNeighborhoods:filters.neighborhoods,baseRoute,properties:propertyCheckData?.map((p:any) => ({city:p.city,neighborhood:p.neighborhood,sale_or_rent:p.sale_or_rent,type:p.type})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-          } catch {}
-        })();
-      }
-      // #endregion
       
       // Area filters - only apply if explicitly set (not 0, null, or undefined)
       if (filters.areaFrom !== undefined && filters.areaFrom !== null && filters.areaFrom > 0) {
@@ -271,6 +198,25 @@ export async function GET(request: NextRequest) {
       }
       if (filters.pricePerSqmTo !== undefined && filters.pricePerSqmTo !== null && filters.pricePerSqmTo > 0) {
         query = query.lte('price_per_sqm', filters.pricePerSqmTo);
+      }
+
+      // Furnishing filter (Обзавеждане) for rent apartments
+      // UI sends IDs: 'furnished', 'partially-furnished', 'unfurnished'
+      // Map them to furniture column values: 'full', 'partial', 'none'
+      if (filters.selectedFurnishing && Array.isArray(filters.selectedFurnishing) && filters.selectedFurnishing.length > 0) {
+        const furnishingMap: Record<string, string> = {
+          furnished: 'full',
+          'partially-furnished': 'partial',
+          unfurnished: 'none',
+        };
+
+        const mappedFurniture = filters.selectedFurnishing
+          .map((id: string) => furnishingMap[id])
+          .filter((val: string | undefined): val is string => !!val);
+
+        if (mappedFurniture.length > 0) {
+          query = query.in('furniture', mappedFurniture);
+        }
       }
       
       // Subtype filter (for apartments only)
@@ -358,73 +304,33 @@ export async function GET(request: NextRequest) {
         }
       }
       
-      // Agricultural property types filter (vineyard, forest, agricultural-land, etc.)
-      if (filters.propertyTypes && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0 && propertyTypeId === 'agricultural-land') {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:352',message:'Processing agricultural propertyTypes filter',data:{propertyTypes:filters.propertyTypes,propertyTypeId,willFilter:true},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H2'})}).catch(()=>{});
-        // #endregion
+      // Garage property types filter (garage-standalone, parking-space, whole-parking)
+      // Only apply when propertyTypeId is garages-parking
+      // #region agent log
+      if (filters.propertyTypes && propertyTypeId === 'garages-parking') {
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:307',message:'Garage propertyTypes filter check',data:{propertyTypeId,hasPropertyTypes:!!filters.propertyTypes,propertyTypesArray:Array.isArray(filters.propertyTypes),propertyTypesLength:filters.propertyTypes?.length || 0,propertyTypes:filters.propertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      }
+      // #endregion
+      if (filters.propertyTypes && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0 && propertyTypeId === 'garages-parking') {
         const validPropertyTypes = filters.propertyTypes.filter(
-          (propType: string) => propType && propType !== 'all'
+          (propertyType: string) => propertyType && propertyType !== 'all'
         );
-        
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:312',message:'Garage propertyTypes filter processing',data:{validPropertyTypes,validPropertyTypesLength:validPropertyTypes.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         if (validPropertyTypes.length > 0) {
-          // Filter by subtype for agricultural properties
+          // Filter by subtype for garage properties
+          // The type filter is already applied at line 159 if propertyTypeId === 'garages-parking'
           query = query.in('subtype', validPropertyTypes);
           // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:361',message:'Applied agricultural subtype filter',data:{subtypes:validPropertyTypes,queryApplied:true},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H2'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:320',message:'Garage propertyTypes filter applied',data:{validPropertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
           // #endregion
-        }
-      }
-      
-      // Warehouse/Industrial property types filter (warehouse, factory, farm, etc.)
-      if (filters.propertyTypes && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0 && propertyTypeId === 'warehouses-industrial') {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:369',message:'Processing warehouse propertyTypes filter',data:{propertyTypes:filters.propertyTypes,propertyTypeId,willFilter:true},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H2'})}).catch(()=>{});
-        // #endregion
-        const validPropertyTypes = filters.propertyTypes.filter(
-          (propType: string) => propType && propType !== 'all'
-        );
-        
-        if (validPropertyTypes.length > 0) {
-          // Filter by subtype for warehouse properties
-          query = query.in('subtype', validPropertyTypes);
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:377',message:'Applied warehouse subtype filter',data:{subtypes:validPropertyTypes,queryApplied:true},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H2'})}).catch(()=>{});
-          // #endregion
-        }
-      }
-      
-      // Stores/Offices property types filter (store, office, cabinet, beauty-salon, sport, other)
-      if (filters.propertyTypes && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0 && propertyTypeId === 'stores-offices') {
-        const validPropertyTypes = filters.propertyTypes.filter(
-          (propType: string) => propType && propType !== 'all'
-        );
-        
-        if (validPropertyTypes.length > 0) {
-          // Filter by subtype for stores/offices properties
-          query = query.in('subtype', validPropertyTypes);
         }
       }
       
       // Construction type
       if (filters.selectedConstructionTypes && Array.isArray(filters.selectedConstructionTypes) && filters.selectedConstructionTypes.length > 0) {
         query = query.in('construction_type', filters.selectedConstructionTypes);
-      }
-      
-      // Building type (stores/offices, restaurants, etc.)
-      if (filters.buildingTypes && Array.isArray(filters.buildingTypes) && filters.buildingTypes.length > 0) {
-        query = query.in('building_type', filters.buildingTypes);
-      }
-      
-      // Location types filter for restaurants (maps to subtype)
-      if (filters.locationTypes && Array.isArray(filters.locationTypes) && filters.locationTypes.length > 0 && propertyTypeId === 'restaurants') {
-        const validLocationTypes = filters.locationTypes.filter((type: string) => type && type !== 'all');
-        if (validLocationTypes.length > 0) {
-          query = query.in('subtype', validLocationTypes);
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:420',message:'Applied restaurant locationTypes filter',data:{locationTypes:validLocationTypes,propertyTypeId},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H3'})}).catch(()=>{});
-          // #endregion
-        }
       }
       
       // Completion degree
@@ -459,17 +365,7 @@ export async function GET(request: NextRequest) {
         query = query.contains('features', filters.selectedFeatures);
       }
       
-      // Electricity filter (for building plots)
-      if (filters.electricityOptions && Array.isArray(filters.electricityOptions) && filters.electricityOptions.length > 0) {
-        query = query.in('electricity', filters.electricityOptions);
-      }
-      
-      // Water filter (for building plots)
-      if (filters.waterOptions && Array.isArray(filters.waterOptions) && filters.waterOptions.length > 0) {
-        query = query.in('water', filters.waterOptions);
-      }
-      
-      // Category filter - maps to hotel_category for hotels or agricultural_category for agricultural land
+      // Hotel category
       if (filters.selectedCategories && Array.isArray(filters.selectedCategories) && filters.selectedCategories.length > 0) {
         if (propertyTypeId === 'hotels-motels') {
           query = query.in('hotel_category', filters.selectedCategories);
@@ -489,54 +385,16 @@ export async function GET(request: NextRequest) {
 
     // Order and limit
     query = query.order('created_at', { ascending: false }).limit(limit);
-    
-    // #region agent log
-    // Log final query state before execution
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:375',message:'Query state before execution',data:{baseRoute,propertyTypeId,hasCityFilter:!!filters?.city,hasNeighborhoodFilter:!!(filters?.neighborhoods?.length),limit},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-    // #endregion
 
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:480',message:'Executing query',data:{propertyTypeId,hasFilters:!!filters,filtersKeys:filters ? Object.keys(filters) : [],filtersPropertyTypes:filters?.propertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H5'})}).catch(()=>{});
-    // #endregion
     const { data: properties, error } = await query;
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:490',message:'Query executed - results',data:{propertyTypeId,propertyCount:properties?.length || 0,error:error?.message,propertyTypes:properties?.slice(0,5).map((p:any) => ({id:p.id,type:p.type,title:p.title?.substring(0,50)})) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'restaurant-filter-debug',hypothesisId:'H3'})}).catch(()=>{});
-    // #endregion
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:507',message:'Query results',data:{propertyCount:properties?.length || 0,error:error?.message,propertyTypes:properties?.map((p:any) => ({id:p.id,type:p.type,subtype:p.subtype,title:p.title?.substring(0,50)})) || [],warehouseSubtypes:properties?.filter((p:any) => p.type === 'warehouse').map((p:any) => p.subtype) || []},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H5'})}).catch(()=>{});
-    // #endregion
 
     if (error) {
       console.error('Error fetching properties:', error);
       return NextResponse.json(
-        { error: 'Неуспешно зареждане на имоти', details: error.message },
+        { error: 'Failed to fetch properties', details: error.message },
         { status: 500 }
       );
     }
-    
-    // #region agent log
-    if (filters && (filters.city || filters.neighborhoods)) {
-      const sampleProperties = (properties || []).slice(0, 5).map((p: any) => ({
-        id: p.id,
-        city: p.city,
-        neighborhood: p.neighborhood,
-        title: p.title?.substring(0, 50)
-      }));
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:356',message:'Query results for city/neighborhood filter',data:{requestedCity:filters.city,requestedNeighborhoods:filters.neighborhoods,resultCount:properties?.length || 0,sampleProperties},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
-    }
-    // #endregion
-
-    // #region agent log
-    if (filters?.neighborhoods && Array.isArray(filters.neighborhoods) && filters.neighborhoods.length > 0) {
-      console.log('API: Query results for neighborhood filter:', {
-        requestedNeighborhoods: filters.neighborhoods,
-        requestedCity: filters.city,
-        foundProperties: properties?.length || 0,
-        foundNeighborhoods: [...new Set((properties || []).map((p: any) => p.neighborhood).filter(Boolean))],
-        foundCities: [...new Set((properties || []).map((p: any) => p.city).filter(Boolean))],
-      });
-    }
-    // #endregion
 
     // Debug: Log query results for subtype filtering
     if (filters?.apartmentSubtypes) {
@@ -547,7 +405,6 @@ export async function GET(request: NextRequest) {
         foundSubtypes: [...new Set((properties || []).map((p: any) => p.subtype).filter(Boolean))],
       });
     }
-    
 
     // Transform database properties to match Property interface
     const transformedProperties = (properties || []).map((prop: any) => ({
@@ -567,16 +424,9 @@ export async function GET(request: NextRequest) {
       subtype: prop.subtype || undefined,
       construction_type: prop.construction_type || undefined,
       completion_degree: prop.completion_degree || undefined,
-      building_type: prop.building_type || undefined,
       floor: prop.floor ? String(prop.floor) : undefined,
       total_floors: prop.total_floors ? Number(prop.total_floors) : undefined,
       year_built: prop.build_year || undefined,
-      yard_area_sqm: prop.yard_area_sqm ? Number(prop.yard_area_sqm) : undefined,
-      electricity: prop.electricity || undefined,
-      water: prop.water || undefined,
-      hotel_category: prop.hotel_category || undefined,
-      agricultural_category: prop.agricultural_category || undefined,
-      bed_base: prop.bed_base || undefined,
       images: (prop.image_urls || []).map((url: string, index: number) => ({
         id: `${prop.id}-img-${index}`,
         url,
@@ -600,8 +450,8 @@ export async function GET(request: NextRequest) {
     console.error('Unexpected error in GET /api/properties:', error);
     return NextResponse.json(
       {
-        error: 'Вътрешна грешка на сървъра',
-        details: error instanceof Error ? error.message : 'Неизвестна грешка',
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -632,10 +482,6 @@ export async function POST(request: NextRequest) {
     if (featuresArray.length > 0) {
       textFields.features = featuresArray;
     }
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:590',message:'TextFields extracted from formData',data:{textFieldsKeys:Object.keys(textFields),electricity:textFields.electricity,water:textFields.water,electricityType:typeof textFields.electricity,waterType:typeof textFields.water},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H1'})}).catch(()=>{});
-    // #endregion
 
     // Extract images
     const imageFiles = formData.getAll('images') as File[];
@@ -644,7 +490,7 @@ export async function POST(request: NextRequest) {
     // Validate images exist
     if (!imageFiles || imageFiles.length === 0) {
       return NextResponse.json(
-        { error: 'Поне едно изображение е задължително' },
+        { error: 'At least one image is required' },
         { status: 400 }
       );
     }
@@ -653,13 +499,13 @@ export async function POST(request: NextRequest) {
     for (const file of imageFiles) {
       if (!(file instanceof File)) {
         return NextResponse.json(
-          { error: 'Всички полета за изображения трябва да са валидни файлове' },
+          { error: 'All image fields must be valid files' },
           { status: 400 }
         );
       }
       if (!file.type.startsWith('image/')) {
-          return NextResponse.json(
-          { error: `Файлът ${file.name} не е изображение` },
+        return NextResponse.json(
+          { error: `File ${file.name} is not an image` },
           { status: 400 }
         );
       }
@@ -675,13 +521,13 @@ export async function POST(request: NextRequest) {
     if (brokerImageFile) {
       if (!(brokerImageFile instanceof File)) {
         return NextResponse.json(
-          { error: 'Снимката на брокера трябва да е валиден файл' },
+          { error: 'Broker image must be a valid file' },
           { status: 400 }
         );
       }
       if (!brokerImageFile.type.startsWith('image/')) {
         return NextResponse.json(
-          { error: 'Снимката на брокера трябва да е файл с изображение' },
+          { error: `Broker image must be an image file` },
           { status: 400 }
         );
       }
@@ -703,83 +549,11 @@ export async function POST(request: NextRequest) {
     // Validate with Zod
     const validationResult = createPropertySchema.safeParse(validationData);
     
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:594',message:'Zod validation result',data:{success:validationResult.success,validationDataKeys:Object.keys(validationData),errors:validationResult.success ? null : validationResult.error.errors},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-    // #endregion
-    
     if (!validationResult.success) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:600',message:'Validation failed - returning error',data:{errors:validationResult.error.errors,formatted:validationResult.error.format()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-      // #endregion
-      
-      // Field name mappings in Bulgarian
-      const fieldNames: Record<string, string> = {
-        'sale_or_rent': 'Статус',
-        'type': 'Тип имот',
-        'subtype': 'Подтип',
-        'area_sqm': 'Площ',
-        'price': 'Цена',
-        'price_per_sqm': 'Цена на м²',
-        'floor': 'Етаж',
-        'total_floors': 'Общо етажи',
-        'yard_area': 'Площ на двора',
-        'city': 'Град',
-        'neighborhood': 'Квартал',
-        'title': 'Заглавие',
-        'description': 'Описание',
-        'build_year': 'Година на строеж',
-        'construction_type': 'Вид строителство',
-        'completion_degree': 'Степен на завършеност',
-        'features': 'Особености',
-        'broker_name': 'Име на брокера',
-        'broker_position': 'Длъжност',
-        'broker_phone': 'Телефон на брокера',
-        'images': 'Изображения',
-      };
-      
-      // Format validation errors in Bulgarian
-      const formattedErrors = validationResult.error.errors.map((err) => {
-        let message = err.message;
-        const fieldPath = err.path.join('.');
-        const fieldLabel = fieldNames[fieldPath] || fieldPath;
-        
-        // Translate common Zod error messages to Bulgarian
-        if (err.code === 'invalid_type') {
-          if (err.expected === 'string') {
-            message = `${fieldLabel} трябва да е текст`;
-          } else if (err.expected === 'number') {
-            message = `${fieldLabel} трябва да е число`;
-          } else if (err.expected === 'array') {
-            message = `${fieldLabel} трябва да е списък`;
-          }
-        } else if (err.code === 'invalid_enum_value') {
-          message = `Невалидна стойност за ${fieldLabel}. Очаква се една от следните: ${err.options?.join(', ') || ''}`;
-        } else if (err.code === 'too_small') {
-          if (err.type === 'string') {
-            message = `${fieldLabel} трябва да има поне ${err.minimum} символа`;
-          } else if (err.type === 'number') {
-            message = `${fieldLabel} трябва да е поне ${err.minimum}`;
-          }
-        } else if (err.code === 'too_big') {
-          if (err.type === 'number') {
-            message = `${fieldLabel} трябва да е най-много ${err.maximum}`;
-          }
-        } else if (err.code === 'invalid_string') {
-          message = `Невалиден формат за ${fieldLabel}`;
-        }
-        
-        // Use the custom message from schema if available, otherwise use translated message
-        return {
-          path: fieldPath,
-          fieldLabel: fieldLabel,
-          message: message,
-        };
-      });
-      
       return NextResponse.json(
         {
-          error: 'Валидацията не бе успешна',
-          details: formattedErrors,
+          error: 'Validation failed',
+          details: validationResult.error.errors,
         },
         { status: 400 }
       );
@@ -820,7 +594,7 @@ export async function POST(request: NextRequest) {
     if (successfulUploads.length === 0) {
       return NextResponse.json(
         {
-          error: 'Всички качвания на изображения не са успешни',
+          error: 'All image uploads failed',
           details: failedUploads.map((f) => f.error).filter(Boolean),
         },
         { status: 500 }
@@ -880,12 +654,7 @@ export async function POST(request: NextRequest) {
       build_year: validatedData.build_year || null,
       construction_type: validatedData.construction_type || null,
       completion_degree: validatedData.completion_degree || null,
-      building_type: validatedData.building_type || null,
-      electricity: validatedData.electricity || null,
-      water: validatedData.water || null,
-      hotel_category: validatedData.hotel_category || null,
-      agricultural_category: validatedData.agricultural_category || null,
-      bed_base: validatedData.bed_base || null,
+      furniture: validatedData.furniture || null,
       features: validatedData.features || [],
       broker_name: validatedData.broker_name,
       broker_position: validatedData.broker_position || null,
@@ -894,10 +663,6 @@ export async function POST(request: NextRequest) {
       image_urls: imageUrls,
       image_public_ids: uploadedPublicIds,
     };
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:848',message:'Payload before database insert',data:{payloadKeys:Object.keys(payload),electricity:payload.electricity,water:payload.water,electricityInValidated:validatedData.electricity,waterInValidated:validatedData.water},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-debug',hypothesisId:'H2'})}).catch(()=>{});
-    // #endregion
 
     // Insert into Supabase
     const supabaseAdmin = getSupabaseAdminClient();
@@ -918,8 +683,8 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         {
-          error: 'Неуспешно създаване на имот',
-          details: insertError?.message || 'Неизвестна грешка',
+          error: 'Failed to create property',
+          details: insertError?.message || 'Unknown error',
         },
         { status: 500 }
       );
@@ -932,8 +697,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(
       {
-        error: 'Вътрешна грешка на сървъра',
-        details: error instanceof Error ? error.message : 'Неизвестна грешка',
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

@@ -3,7 +3,6 @@
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import {
     SubtypeFilter,
@@ -17,6 +16,7 @@ import {
     HOTELS_PROPERTY_TYPES,
     HOTELS_FEATURES
 } from '../filters';
+import { RENT_HOTEL_FEATURES } from '../filters/constants';
 import {
     HOTELS_AREA_SLIDER_MAX,
     HOTELS_BED_BASE_SLIDER_MAX,
@@ -44,17 +44,16 @@ interface HotelsMotelsFiltersPageProps {
 
 export interface HotelsMotelsFiltersState {
     searchTerm: string;
-    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
     propertyTypes: string[];
-    areaFrom?: number;
-    areaTo?: number;
+    areaFrom: number;
+    areaTo: number;
     isAreaNotProvided: boolean;
     selectedCategories: string[];
-    bedBaseFrom?: number;
-    bedBaseTo?: number;
+    bedBaseFrom: number;
+    bedBaseTo: number;
     isBedBaseNotProvided: boolean;
     selectedPresetId: string | null;
     selectedCompletionStatuses?: string[];
@@ -90,7 +89,6 @@ export function HotelsMotelsFiltersPage({
         neighborhoods: [] as string[],
         distance: 0
     });
-    const [propertyId, setPropertyId] = useState('');
 
     const locationState = externalLocationState || internalLocationState;
     const setLocationState = externalOnLocationChange
@@ -113,34 +111,32 @@ export function HotelsMotelsFiltersPage({
     const RENT_PER_SQM_SLIDER_MIN = 0;
 
     // Store current filter values - all hotels/motels filter state managed here
-    // Use undefined for numeric filters so they're not sent unless user explicitly sets them
     const filterValuesRef = useRef<Partial<HotelsMotelsFiltersState>>({
         searchTerm: '',
-        propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0,
         propertyTypes: [],
-        areaFrom: undefined,
-        areaTo: undefined,
+        areaFrom: 0,
+        areaTo: HOTELS_AREA_SLIDER_MAX,
         isAreaNotProvided: false,
         selectedCategories: [],
-        bedBaseFrom: undefined,
-        bedBaseTo: undefined,
+        bedBaseFrom: 0,
+        bedBaseTo: HOTELS_BED_BASE_SLIDER_MAX,
         isBedBaseNotProvided: false,
         selectedPresetId: null,
         selectedCompletionStatuses: [],
         selectedConstructionTypes: [],
         selectedFeatures: [],
-        priceFrom: undefined,
-        priceTo: undefined,
-        pricePerSqmFrom: undefined,
-        pricePerSqmTo: undefined,
+        priceFrom: 0,
+        priceTo: HOTELS_PRICE_SLIDER_MAX,
+        pricePerSqmFrom: 0,
+        pricePerSqmTo: HOTELS_PRICE_PER_SQM_SLIDER_MAX,
         // Rent-specific fields
-        monthlyRentFrom: undefined,
-        monthlyRentTo: undefined,
-        rentPerSqmFrom: undefined,
-        rentPerSqmTo: undefined,
+        monthlyRentFrom: RENT_SLIDER_MIN,
+        monthlyRentTo: RENT_SLIDER_MAX,
+        rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
+        rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX,
         selectedWorkingOptions: []
     });
 
@@ -181,49 +177,12 @@ export function HotelsMotelsFiltersPage({
             });
         }
 
-        // Format city name: first letter uppercase, rest lowercase for each word
-        const formatCityName = (cityName: string): string => {
-            if (!cityName || !cityName.trim()) return cityName;
-            return cityName
-                .trim()
-                .split(/\s+/)
-                .map(word => {
-                    if (word.length === 0) return word;
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                })
-                .join(' ');
-        };
-
-        // Format neighborhood names: first letter uppercase, rest lowercase for each word
-        const formatNeighborhoodName = (neighborhoodName: string): string => {
-            if (!neighborhoodName || !neighborhoodName.trim()) return neighborhoodName;
-            return neighborhoodName
-                .trim()
-                .split(/\s+/)
-                .map(word => {
-                    if (word.length === 0) return word;
-                    // Keep abbreviations like "ж.к", "ж.к.", "ул.", etc. lowercase
-                    const lowerWord = word.toLowerCase();
-                    if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.')) {
-                        return lowerWord;
-                    }
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                })
-                .join(' ');
-        };
-
         filterValuesRef.current.searchTerm = searchTerm;
-        filterValuesRef.current.city = formatCityName(city);
-        filterValuesRef.current.neighborhoods = neighborhoods.map(formatNeighborhoodName);
+        filterValuesRef.current.city = city;
+        filterValuesRef.current.neighborhoods = neighborhoods;
         filterValuesRef.current.distance = distance;
         notifyFiltersChange();
     }, [externalOnLocationChange, notifyFiltersChange]);
-
-    const handlePropertyIdChange = useCallback((value: string) => {
-        setPropertyId(value);
-        filterValuesRef.current.propertyId = value.trim();
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
 
     const handlePropertyTypeChange = useCallback((selectedTypes: string[]) => {
         filterValuesRef.current.propertyTypes = selectedTypes;
@@ -245,7 +204,7 @@ export function HotelsMotelsFiltersPage({
     const handleBedBaseChange = useCallback((bedBaseFrom: number, bedBaseTo: number, isNotProvided: boolean) => {
         filterValuesRef.current.bedBaseFrom = bedBaseFrom;
         filterValuesRef.current.bedBaseTo = bedBaseTo;
-        filterValuesRef.current.isBedBaseNotProvided = false; // Always false since we removed the "not provided" option
+        filterValuesRef.current.isBedBaseNotProvided = isNotProvided;
         notifyFiltersChange();
     }, [notifyFiltersChange]);
 
@@ -299,7 +258,6 @@ export function HotelsMotelsFiltersPage({
             neighborhoods: [],
             distance: 0
         });
-        setPropertyId('');
 
         // Reset all filter values
         filterValuesRef.current = {
@@ -307,22 +265,21 @@ export function HotelsMotelsFiltersPage({
             city: '',
             neighborhoods: [],
             distance: 0,
-            propertyId: '',
             propertyTypes: [],
-            areaFrom: undefined,
-            areaTo: undefined,
+            areaFrom: 0,
+            areaTo: HOTELS_AREA_SLIDER_MAX,
             isAreaNotProvided: false,
             selectedCategories: [],
-            bedBaseFrom: undefined,
-            bedBaseTo: undefined,
+            bedBaseFrom: 0,
+            bedBaseTo: HOTELS_BED_BASE_SLIDER_MAX,
             isBedBaseNotProvided: false,
             selectedPresetId: null,
             selectedCompletionStatuses: [],
             selectedConstructionTypes: [],
             selectedFeatures: [],
-            priceFrom: undefined,
-            priceTo: undefined,
-            pricePerSqmFrom: undefined,
+            priceFrom: 0,
+            priceTo: HOTELS_PRICE_SLIDER_MAX,
+            pricePerSqmFrom: 0,
             pricePerSqmTo: HOTELS_PRICE_PER_SQM_SLIDER_MAX,
             // Reset rent-specific fields
             monthlyRentFrom: RENT_SLIDER_MIN,
@@ -545,14 +502,6 @@ export function HotelsMotelsFiltersPage({
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
-                <div className={styles.idFilter}>
-                    <Input
-                        label="ID на имот"
-                        placeholder="Въведете ID"
-                        value={propertyId}
-                        onChange={(event) => handlePropertyIdChange(event.target.value)}
-                    />
-                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}
@@ -579,7 +528,7 @@ export function HotelsMotelsFiltersPage({
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
                         title="Месечен наем"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
                         from={filterValuesRef.current.monthlyRentFrom || RENT_SLIDER_MIN}
@@ -590,7 +539,7 @@ export function HotelsMotelsFiltersPage({
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
                         title="Цена за кв.м"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
                         from={filterValuesRef.current.rentPerSqmFrom || RENT_PER_SQM_SLIDER_MIN}
@@ -632,13 +581,15 @@ export function HotelsMotelsFiltersPage({
             </div>
 
             {/* Bed Base Filter (Леглова база) */}
-            <BedBaseFilter
-                key={`bed-base-${filterKey}`}
-                onFilterChange={handleBedBaseChange}
-                initialBedBaseFrom={filterValuesRef.current.bedBaseFrom}
-                initialBedBaseTo={filterValuesRef.current.bedBaseTo}
-                initialIsNotProvided={filterValuesRef.current.isBedBaseNotProvided}
-            />
+            <div className={styles.leftFilters}>
+                <BedBaseFilter
+                    key={`bed-base-${filterKey}`}
+                    onFilterChange={handleBedBaseChange}
+                    initialBedBaseFrom={filterValuesRef.current.bedBaseFrom}
+                    initialBedBaseTo={filterValuesRef.current.bedBaseTo}
+                    initialIsNotProvided={filterValuesRef.current.isBedBaseNotProvided}
+                />
+            </div>
 
             {/* Completion Status Filter (Степен на завършеност) - Only for sale mode */}
             {!isRentMode && (
@@ -662,21 +613,23 @@ export function HotelsMotelsFiltersPage({
                 />
             )}
 
-            <div className={styles.leftFilters}>
-                {/* Construction Type Filter (Тип строителство) */}
-                <HotelConstructionTypeFilter
-                    key={`construction-${filterKey}`}
-                    onFilterChange={handleConstructionTypeChange}
-                    initialSelected={filterValuesRef.current.selectedConstructionTypes}
-                />
-            </div>
+            {/* Construction Type Filter (Тип строителство) - Only for sale mode */}
+            {!isRentMode && (
+                <div className={styles.leftFilters}>
+                    <HotelConstructionTypeFilter
+                        key={`construction-${filterKey}`}
+                        onFilterChange={handleConstructionTypeChange}
+                        initialSelected={filterValuesRef.current.selectedConstructionTypes}
+                    />
+                </div>
+            )}
 
             {/* Features Filter (Особености) */}
             <FeaturesFilter
                 key={`features-${filterKey}`}
                 initialSelected={filterValuesRef.current.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
-                features={HOTELS_FEATURES}
+                features={isRentMode ? RENT_HOTEL_FEATURES : HOTELS_FEATURES}
             />
         </div>
     );

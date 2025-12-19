@@ -313,7 +313,7 @@ export function AgriculturalLandFiltersPage({
                 onFilterChange={handlePropertyTypeChange}
                 initialSelected={filters.propertyTypes || []}
             />
-            {/* Price Filter (Цена на имота в лева) */}
+            {/* Price Filter (Цена на имота в евро) */}
             <PriceFilter
                 key={`price-${filterKey}`}
                 onFilterChange={handlePriceChange}

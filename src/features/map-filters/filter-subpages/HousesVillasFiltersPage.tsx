@@ -12,6 +12,7 @@ import {
     FeaturesFilter,
     HOUSE_TYPES
 } from '../filters';
+import { HOUSE_FEATURES, RENT_HOUSE_FEATURES } from '../filters/constants';
 import {
     HOUSE_AREA_SLIDER_MAX,
     YARD_AREA_SLIDER_MAX,
@@ -545,7 +546,7 @@ export function HousesVillasFiltersPage({
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
                         title="Месечен наем"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
                         from={filterValuesRef.current.monthlyRentFrom || RENT_SLIDER_MIN}
@@ -556,7 +557,7 @@ export function HousesVillasFiltersPage({
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
                         title="Цена за кв.м"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
                         from={filterValuesRef.current.rentPerSqmFrom || RENT_PER_SQM_SLIDER_MIN}
@@ -600,6 +601,7 @@ export function HousesVillasFiltersPage({
                     filterValuesRef.current.selectedFeatures = newSelection;
                     notifyFiltersChange();
                 }}
+                features={isRentMode ? RENT_HOUSE_FEATURES : HOUSE_FEATURES}
             />
         </div>
     );

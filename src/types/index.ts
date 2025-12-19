@@ -33,6 +33,8 @@ export interface PropertyImage {
 }
 
 export type FurnishingLevel = 'unfurnished' | 'semi-furnished' | 'furnished' | 'luxury';
+
+export type FurnitureLevel = 'full' | 'partial' | 'none';
 export type HeatingType = 'central' | 'electric' | 'gas' | 'wood' | 'none';
 
 export interface Property {
@@ -71,6 +73,7 @@ export interface Property {
   user_id?: string;
   // Допълнителни детайли
   furnishing_level?: FurnishingLevel;
+  furniture?: FurnitureLevel;
   heating?: HeatingType;
   has_elevator?: boolean;
   has_condominium?: boolean;

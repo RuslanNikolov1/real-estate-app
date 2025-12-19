@@ -3,7 +3,6 @@
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import {
     SubtypeFilter,
@@ -13,6 +12,7 @@ import {
     WAREHOUSES_PROPERTY_TYPES,
     WAREHOUSES_FEATURES
 } from '../filters';
+import { RENT_WAREHOUSE_FEATURES } from '../filters/constants';
 import {
     WAREHOUSES_AREA_SLIDER_MAX,
     WAREHOUSES_PRICE_SLIDER_MAX,
@@ -39,13 +39,12 @@ interface WarehousesIndustrialFiltersPageProps {
 
 export interface WarehousesIndustrialFiltersState {
     searchTerm: string;
-    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
     propertyTypes: string[];
-    areaFrom?: number;
-    areaTo?: number;
+    areaFrom: number;
+    areaTo: number;
     selectedFeatures: string[];
     priceFrom?: number;
     priceTo?: number;
@@ -76,7 +75,6 @@ export function WarehousesIndustrialFiltersPage({
         neighborhoods: [] as string[],
         distance: 0
     });
-    const [propertyId, setPropertyId] = useState('');
 
     const locationState = externalLocationState || internalLocationState;
     const setLocationState = externalOnLocationChange
@@ -92,26 +90,24 @@ export function WarehousesIndustrialFiltersPage({
     const RENT_PER_SQM_SLIDER_MIN = 0;
 
     // Store current filter values - all warehouses/industrial filter state managed here
-    // Use undefined for numeric filters so they're not sent unless user explicitly sets them
     const filterValuesRef = useRef<Partial<WarehousesIndustrialFiltersState>>({
         searchTerm: '',
-        propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0,
         propertyTypes: [],
-        areaFrom: undefined,
-        areaTo: undefined,
+        areaFrom: 0,
+        areaTo: WAREHOUSES_AREA_SLIDER_MAX,
         selectedFeatures: [],
-        priceFrom: undefined,
-        priceTo: undefined,
-        pricePerSqmFrom: undefined,
-        pricePerSqmTo: undefined,
+        priceFrom: 0,
+        priceTo: WAREHOUSES_PRICE_SLIDER_MAX,
+        pricePerSqmFrom: 0,
+        pricePerSqmTo: WAREHOUSES_PRICE_PER_SQM_SLIDER_MAX,
         // Rent-specific fields
-        monthlyRentFrom: undefined,
-        monthlyRentTo: undefined,
-        rentPerSqmFrom: undefined,
-        rentPerSqmTo: undefined
+        monthlyRentFrom: RENT_SLIDER_MIN,
+        monthlyRentTo: RENT_SLIDER_MAX,
+        rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
+        rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX
     });
 
     // Use keys to reset components on clear
@@ -151,55 +147,15 @@ export function WarehousesIndustrialFiltersPage({
             });
         }
 
-        // Format city name: first letter uppercase, rest lowercase for each word
-        const formatCityName = (cityName: string): string => {
-            if (!cityName || !cityName.trim()) return cityName;
-            return cityName
-                .trim()
-                .split(/\s+/)
-                .map(word => {
-                    if (word.length === 0) return word;
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                })
-                .join(' ');
-        };
-
-        // Format neighborhood names: first letter uppercase, rest lowercase for each word
-        const formatNeighborhoodName = (neighborhoodName: string): string => {
-            if (!neighborhoodName || !neighborhoodName.trim()) return neighborhoodName;
-            return neighborhoodName
-                .trim()
-                .split(/\s+/)
-                .map(word => {
-                    if (word.length === 0) return word;
-                    // Keep abbreviations like "ж.к", "ж.к.", "ул.", etc. lowercase
-                    const lowerWord = word.toLowerCase();
-                    if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.')) {
-                        return lowerWord;
-                    }
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                })
-                .join(' ');
-        };
-
         filterValuesRef.current.searchTerm = searchTerm;
-        filterValuesRef.current.city = formatCityName(city);
-        filterValuesRef.current.neighborhoods = neighborhoods.map(formatNeighborhoodName);
+        filterValuesRef.current.city = city;
+        filterValuesRef.current.neighborhoods = neighborhoods;
         filterValuesRef.current.distance = distance;
         notifyFiltersChange();
     }, [externalOnLocationChange, notifyFiltersChange]);
 
-    const handlePropertyIdChange = useCallback((value: string) => {
-        setPropertyId(value);
-        filterValuesRef.current.propertyId = value.trim();
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
-
     const handlePropertyTypeChange = useCallback((selectedTypes: string[]) => {
         filterValuesRef.current.propertyTypes = selectedTypes;
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WarehousesIndustrialFiltersPage.tsx:198',message:'Property type changed',data:{selectedTypes,filterValues:filterValuesRef.current.propertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'warehouse-subtype-debug',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
         notifyFiltersChange();
     }, [notifyFiltersChange]);
 
@@ -244,28 +200,26 @@ export function WarehousesIndustrialFiltersPage({
             neighborhoods: [],
             distance: 0
         });
-        setPropertyId('');
 
         // Reset all filter values
         filterValuesRef.current = {
             searchTerm: '',
-            propertyId: '',
             city: '',
             neighborhoods: [],
             distance: 0,
             propertyTypes: [],
-            areaFrom: undefined,
-            areaTo: undefined,
+            areaFrom: 0,
+            areaTo: WAREHOUSES_AREA_SLIDER_MAX,
             selectedFeatures: [],
-            priceFrom: undefined,
-            priceTo: undefined,
-            pricePerSqmFrom: undefined,
-            pricePerSqmTo: undefined,
+            priceFrom: 0,
+            priceTo: WAREHOUSES_PRICE_SLIDER_MAX,
+            pricePerSqmFrom: 0,
+            pricePerSqmTo: WAREHOUSES_PRICE_PER_SQM_SLIDER_MAX,
             // Reset rent-specific fields
-            monthlyRentFrom: undefined,
-            monthlyRentTo: undefined,
-            rentPerSqmFrom: undefined,
-            rentPerSqmTo: undefined
+            monthlyRentFrom: RENT_SLIDER_MIN,
+            monthlyRentTo: RENT_SLIDER_MAX,
+            rentPerSqmFrom: RENT_PER_SQM_SLIDER_MIN,
+            rentPerSqmTo: RENT_PER_SQM_SLIDER_MAX
         };
 
         // Reset components by changing key
@@ -481,14 +435,6 @@ export function WarehousesIndustrialFiltersPage({
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
-                <div className={styles.idFilter}>
-                    <Input
-                        label="ID на имот"
-                        placeholder="Въведете ID"
-                        value={propertyId}
-                        onChange={(event) => handlePropertyIdChange(event.target.value)}
-                    />
-                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}
@@ -515,7 +461,7 @@ export function WarehousesIndustrialFiltersPage({
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
                         title="Месечен наем"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
                         from={filterValuesRef.current.monthlyRentFrom || RENT_SLIDER_MIN}
@@ -526,7 +472,7 @@ export function WarehousesIndustrialFiltersPage({
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
                         title="Цена за кв.м"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
                         from={filterValuesRef.current.rentPerSqmFrom || RENT_PER_SQM_SLIDER_MIN}
@@ -562,7 +508,7 @@ export function WarehousesIndustrialFiltersPage({
                 key={`features-${filterKey}`}
                 initialSelected={filterValuesRef.current.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
-                features={WAREHOUSES_FEATURES}
+                features={isRentMode ? RENT_WAREHOUSE_FEATURES : WAREHOUSES_FEATURES}
             />
         </div>
     );

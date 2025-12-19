@@ -2,10 +2,9 @@
 
 import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
-import { PriceFilter, AreaFilter } from '../filters';
-import { BUY_REAL_ESTATES_PRICE_SLIDER_MAX, COMMERCIAL_AREA_SLIDER_MAX, PRICE_PER_SQM_SLIDER_MAX } from '../filters/types';
+import { PriceFilter } from '../filters';
+import { BUY_REAL_ESTATES_PRICE_SLIDER_MAX } from '../filters/types';
 import styles from '../MapFiltersPage.module.scss';
 
 interface BuyRealEstatesFiltersPageProps {
@@ -25,16 +24,11 @@ interface BuyRealEstatesFiltersPageProps {
 
 export interface BuyRealEstatesFiltersState {
     searchTerm: string;
-    propertyId?: string;
     city: string;
     neighborhoods: string[];
     distance: number;
-    areaFrom?: number;
-    areaTo?: number;
-    priceFrom?: number;
-    priceTo?: number;
-    pricePerSqmFrom?: number;
-    pricePerSqmTo?: number;
+    priceFrom: number;
+    priceTo: number;
 }
 
 export function BuyRealEstatesFiltersPage({ 
@@ -54,7 +48,6 @@ export function BuyRealEstatesFiltersPage({
         neighborhoods: [] as string[],
         distance: 0
     });
-    const [propertyId, setPropertyId] = useState('');
 
     const locationState = externalLocationState || internalLocationState;
     const setLocationState = externalOnLocationChange 
@@ -64,19 +57,13 @@ export function BuyRealEstatesFiltersPage({
         : setInternalLocationState;
     
     // Store current filter values
-    // Use undefined for numeric filters so they're not sent unless user explicitly sets them
     const filterValuesRef = useRef<Partial<BuyRealEstatesFiltersState>>({
         searchTerm: '',
-        propertyId: '',
         city: '',
         neighborhoods: [],
         distance: 0,
-        areaFrom: undefined,
-        areaTo: undefined,
-        priceFrom: undefined,
-        priceTo: undefined,
-        pricePerSqmFrom: undefined,
-        pricePerSqmTo: undefined
+        priceFrom: 0,
+        priceTo: BUY_REAL_ESTATES_PRICE_SLIDER_MAX
     });
 
     // Use keys to reset components on clear
@@ -116,61 +103,16 @@ export function BuyRealEstatesFiltersPage({
             });
         }
 
-        // Format city name: first letter uppercase, rest lowercase for each word
-        const formatCityName = (cityName: string): string => {
-            if (!cityName || !cityName.trim()) return cityName;
-            return cityName
-                .trim()
-                .split(/\s+/)
-                .map(word => {
-                    if (word.length === 0) return word;
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                })
-                .join(' ');
-        };
-
-        // Format neighborhood names: first letter uppercase, rest lowercase for each word
-        const formatNeighborhoodName = (neighborhoodName: string): string => {
-            if (!neighborhoodName || !neighborhoodName.trim()) return neighborhoodName;
-            return neighborhoodName
-                .trim()
-                .split(/\s+/)
-                .map(word => {
-                    if (word.length === 0) return word;
-                    // Keep abbreviations like "ж.к", "ж.к.", "ул.", etc. lowercase
-                    const lowerWord = word.toLowerCase();
-                    if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.')) {
-                        return lowerWord;
-                    }
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                })
-                .join(' ');
-        };
-
         filterValuesRef.current.searchTerm = searchTerm;
-        filterValuesRef.current.city = formatCityName(city);
-        filterValuesRef.current.neighborhoods = neighborhoods.map(formatNeighborhoodName);
+        filterValuesRef.current.city = city;
+        filterValuesRef.current.neighborhoods = neighborhoods;
         filterValuesRef.current.distance = distance;
         notifyFiltersChange();
     }, [externalOnLocationChange, notifyFiltersChange]);
 
-    const handlePropertyIdChange = useCallback((value: string) => {
-        setPropertyId(value);
-        filterValuesRef.current.propertyId = value.trim();
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
-
     const handlePriceChange = useCallback((priceFrom: number, priceTo: number, pricePerSqmFrom: number, pricePerSqmTo: number) => {
         filterValuesRef.current.priceFrom = priceFrom;
         filterValuesRef.current.priceTo = priceTo;
-        filterValuesRef.current.pricePerSqmFrom = pricePerSqmFrom;
-        filterValuesRef.current.pricePerSqmTo = pricePerSqmTo;
-        notifyFiltersChange();
-    }, [notifyFiltersChange]);
-
-    const handleAreaChange = useCallback((areaFrom: number, areaTo: number, isNotProvided?: boolean) => {
-        filterValuesRef.current.areaFrom = areaFrom;
-        filterValuesRef.current.areaTo = areaTo;
         notifyFiltersChange();
     }, [notifyFiltersChange]);
 
@@ -183,7 +125,6 @@ export function BuyRealEstatesFiltersPage({
             neighborhoods: [],
             distance: 0
         });
-        setPropertyId('');
 
         // Reset all filter values
         filterValuesRef.current = {
@@ -191,13 +132,8 @@ export function BuyRealEstatesFiltersPage({
             city: '',
             neighborhoods: [],
             distance: 0,
-            propertyId: '',
-            areaFrom: undefined,
-            areaTo: undefined,
-            priceFrom: undefined,
-            priceTo: undefined,
-            pricePerSqmFrom: undefined,
-            pricePerSqmTo: undefined
+            priceFrom: 0,
+            priceTo: BUY_REAL_ESTATES_PRICE_SLIDER_MAX
         };
         
         // Reset components by changing key
@@ -256,14 +192,6 @@ export function BuyRealEstatesFiltersPage({
         <div key={filterKey} className={styles.leftFiltersWrapper}>
             {/* Location Filters */}
             <div className={styles.leftFilters}>
-                <div className={styles.idFilter}>
-                    <Input
-                        label="ID на имот"
-                        placeholder="Въведете ID"
-                        value={propertyId}
-                        onChange={(event) => handlePropertyIdChange(event.target.value)}
-                    />
-                </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
                     initialSearchTerm={locationState.searchTerm}
@@ -274,27 +202,15 @@ export function BuyRealEstatesFiltersPage({
                 />
             </div>
 
-            {/* Price Filter */}
+            {/* Price Filter (Цена в лв) */}
             <PriceFilter
                 key={`price-${filterKey}`}
                 onFilterChange={handlePriceChange}
                 initialPriceFrom={filterValuesRef.current.priceFrom}
                 initialPriceTo={filterValuesRef.current.priceTo}
-                initialPricePerSqmFrom={filterValuesRef.current.pricePerSqmFrom}
-                initialPricePerSqmTo={filterValuesRef.current.pricePerSqmTo}
                 priceSliderMax={BUY_REAL_ESTATES_PRICE_SLIDER_MAX}
-                pricePerSqmSliderMax={PRICE_PER_SQM_SLIDER_MAX}
-            />
-
-            {/* Area Filter */}
-            <AreaFilter
-                key={`area-${filterKey}`}
-                onFilterChange={handleAreaChange}
-                initialAreaFrom={filterValuesRef.current.areaFrom}
-                initialAreaTo={filterValuesRef.current.areaTo}
-                sliderMax={COMMERCIAL_AREA_SLIDER_MAX}
-                areaCap={COMMERCIAL_AREA_SLIDER_MAX}
-                title="Площ в кв.м"
+                showPricePerSqm={false}
+                priceTitle="Цена в лв"
             />
         </div>
     );

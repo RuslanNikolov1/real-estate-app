@@ -14,6 +14,7 @@ import {
     GARAGES_PROPERTY_TYPES,
     GARAGES_FEATURES
 } from '../filters';
+import { RENT_GARAGE_FEATURES } from '../filters/constants';
 import {
     GARAGES_AREA_SLIDER_MAX,
     GARAGES_PRICE_SLIDER_MAX,
@@ -204,8 +205,11 @@ const { filters, updateFilters, resetFilters } = useFilterState<GaragesParkingFi
     }, [updateFilters]);
 
     const handlePropertyTypeChange = useCallback((selectedTypes: string[]) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GaragesParkingFiltersPage.tsx:207',message:'Property type filter changed',data:{selectedTypes,selectedTypesLength:selectedTypes.length,isRentMode},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         updateFilters({ propertyTypes: selectedTypes });
-    }, [updateFilters]);
+    }, [updateFilters, isRentMode]);
 
     const handleAreaChange = useCallback((areaFrom: number, areaTo: number, isNotProvided?: boolean) => {
         updateFilters({ areaFrom, areaTo });
@@ -491,7 +495,7 @@ const { filters, updateFilters, resetFilters } = useFilterState<GaragesParkingFi
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
                         title="Месечен наем"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
                         from={filters.monthlyRentFrom || RENT_SLIDER_MIN}
@@ -502,7 +506,7 @@ const { filters, updateFilters, resetFilters } = useFilterState<GaragesParkingFi
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
                         title="Цена за кв.м"
-                        unit="лева"
+                        unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
                         from={filters.rentPerSqmFrom || RENT_PER_SQM_SLIDER_MIN}
@@ -549,7 +553,7 @@ const { filters, updateFilters, resetFilters } = useFilterState<GaragesParkingFi
                 key={`features-${filterKey}`}
                 initialSelected={filters.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
-                features={GARAGES_FEATURES}
+                features={isRentMode ? RENT_GARAGE_FEATURES : GARAGES_FEATURES}
             />
         </div>
     );

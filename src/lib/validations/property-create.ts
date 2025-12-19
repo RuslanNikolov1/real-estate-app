@@ -47,6 +47,7 @@ export const createPropertySchema = z.object({
   construction_type: z.string().optional(),
   completion_degree: z.string().optional(),
   building_type: z.string().optional(),
+  furniture: z.enum(['full', 'partial', 'none']).optional(),
   electricity: z.string().optional(),
   water: z.string().optional(),
   hotel_category: z.string().optional(),
