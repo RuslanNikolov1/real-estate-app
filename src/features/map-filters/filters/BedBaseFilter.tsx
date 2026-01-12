@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { HOTEL_BED_BASE_PRESETS } from './constants';
 import { HOTELS_BED_BASE_SLIDER_MAX } from './types';
 import type { BedBasePreset } from './constants';
-import floorStyles from './FloorFilter.module.scss';
+import styles from './YearFilter.module.scss';
 import constructionStyles from './ConstructionTypeFilter.module.scss';
+import areaStyles from './AreaFilter.module.scss';
 
 interface BedBaseFilterProps {
     onFilterChange: (bedBaseFrom: number, bedBaseTo: number, isNotProvided: boolean) => void;
@@ -24,8 +25,19 @@ export function BedBaseFilter({
 }: BedBaseFilterProps) {
     const [bedBaseFrom, setBedBaseFrom] = useState(initialBedBaseFrom);
     const [bedBaseTo, setBedBaseTo] = useState(initialBedBaseTo);
+    const [bedBaseFromInput, setBedBaseFromInput] = useState<string>(String(initialBedBaseFrom));
+    const [bedBaseToInput, setBedBaseToInput] = useState<string>(String(initialBedBaseTo));
     const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
     const [isNotProvided, setIsNotProvided] = useState(initialIsNotProvided || false);
+
+    // Sync input values when state changes from external sources (e.g., presets)
+    useEffect(() => {
+        setBedBaseFromInput(String(bedBaseFrom));
+    }, [bedBaseFrom]);
+
+    useEffect(() => {
+        setBedBaseToInput(String(bedBaseTo));
+    }, [bedBaseTo]);
 
     const handleBedBaseFromChange = useCallback((val: number) => {
         // Allow values above slider max in internal state, but ensure from <= to
@@ -67,7 +79,7 @@ export function BedBaseFilter({
     return (
         <div className={constructionStyles.constructionFilter}>
             <h4 className={constructionStyles.featuresTitle}>Леглова база</h4>
-            <div className={floorStyles.floorControls}>
+            <div className={styles.yearControls}>
                 <div className={styles.dualRangeSlider}>
                     <input
                         type="range"
@@ -81,7 +93,7 @@ export function BedBaseFilter({
                                 handleBedBaseFromChange(Math.min(val, bedBaseTo));
                             }
                         }}
-                        className={`${floorStyles.yearSlider} ${floorStyles.yearSliderFrom}`}
+                        className={`${styles.yearSlider} ${styles.yearSliderFrom}`}
                         style={{
                             '--slider-value': `${((Math.min(bedBaseFromClamped, bedBaseToClamped) - 0) / HOTELS_BED_BASE_SLIDER_MAX) * 100}%`,
                             '--slider-to-value': `${((Math.max(bedBaseFromClamped, bedBaseToClamped) - 0) / HOTELS_BED_BASE_SLIDER_MAX) * 100}%`
@@ -99,59 +111,113 @@ export function BedBaseFilter({
                                 handleBedBaseToChange(val);
                             }
                         }}
-                        className={`${floorStyles.yearSlider} ${floorStyles.yearSliderTo}`}
+                        className={`${styles.yearSlider} ${styles.yearSliderTo}`}
                         style={{
                             '--slider-value': `${((Math.max(bedBaseFromClamped, bedBaseToClamped) - 0) / HOTELS_BED_BASE_SLIDER_MAX) * 100}%`
                         } as React.CSSProperties}
                     />
                 </div>
-                <div className={floorStyles.yearInputsRow}>
-                    <div className={floorStyles.yearInputWrapper}>
-                        <label htmlFor="bed-base-from" className={floorStyles.yearInputLabel}>
+                <div className={styles.yearInputsRow}>
+                    <div className={styles.yearInputWrapper}>
+                        <label htmlFor="bed-base-from" className={styles.yearInputLabel}>
                             От
                         </label>
                         <input
                             type="number"
                             id="bed-base-from"
                             min={0}
-                            value={bedBaseFrom}
+                            value={bedBaseFromInput}
                             onChange={(e) => {
-                                const val = Number(e.target.value);
+                                const inputValue = e.target.value;
+                                setBedBaseFromInput(inputValue);
+                                
+                                // Allow empty input for intermediate typing states
+                                if (inputValue === '' || inputValue === '-') {
+                                    return;
+                                }
+                                
+                                const val = Number(inputValue);
                                 if (!isNaN(val) && val >= 0 && val <= bedBaseTo) {
                                     handleBedBaseFromChange(val);
                                 }
                             }}
-                            className={floorStyles.yearInput}
+                            onBlur={(e) => {
+                                const inputValue = e.target.value;
+                                if (inputValue === '' || inputValue === '-') {
+                                    // Reset to current valid value on blur if empty
+                                    setBedBaseFromInput(String(bedBaseFrom));
+                                    return;
+                                }
+                                
+                                const val = Number(inputValue);
+                                if (isNaN(val) || val < 0) {
+                                    setBedBaseFromInput(String(bedBaseFrom));
+                                } else if (val > bedBaseTo) {
+                                    // If value exceeds bedBaseTo, clamp it
+                                    const clampedVal = bedBaseTo;
+                                    setBedBaseFromInput(String(clampedVal));
+                                    handleBedBaseFromChange(clampedVal);
+                                } else {
+                                    handleBedBaseFromChange(val);
+                                }
+                            }}
+                            className={styles.yearInput}
                         />
                     </div>
-                    <div className={floorStyles.yearInputWrapper}>
-                        <label htmlFor="bed-base-to" className={floorStyles.yearInputLabel}>
+                    <div className={styles.yearInputWrapper}>
+                        <label htmlFor="bed-base-to" className={styles.yearInputLabel}>
                             До
                         </label>
                         <input
                             type="number"
                             id="bed-base-to"
                             min={bedBaseFrom}
-                            value={bedBaseTo}
+                            value={bedBaseToInput}
                             onChange={(e) => {
-                                const val = Number(e.target.value);
+                                const inputValue = e.target.value;
+                                setBedBaseToInput(inputValue);
+                                
+                                // Allow empty input for intermediate typing states
+                                if (inputValue === '' || inputValue === '-') {
+                                    return;
+                                }
+                                
+                                const val = Number(inputValue);
                                 if (!isNaN(val) && val >= bedBaseFrom) {
                                     handleBedBaseToChange(val);
                                 }
                             }}
-                            className={floorStyles.yearInput}
+                            onBlur={(e) => {
+                                const inputValue = e.target.value;
+                                if (inputValue === '' || inputValue === '-') {
+                                    // Reset to current valid value on blur if empty
+                                    setBedBaseToInput(String(bedBaseTo));
+                                    return;
+                                }
+                                
+                                const val = Number(inputValue);
+                                if (isNaN(val) || val < bedBaseFrom) {
+                                    // If value is less than bedBaseFrom, clamp it
+                                    const clampedVal = bedBaseFrom;
+                                    setBedBaseToInput(String(clampedVal));
+                                    handleBedBaseToChange(clampedVal);
+                                } else {
+                                    handleBedBaseToChange(val);
+                                }
+                            }}
+                            className={styles.yearInput}
                         />
                     </div>
                 </div>
                 {presets && presets.length > 0 && (
-                    <div className={floorStyles.floorOptions}>
+                    <div className={areaStyles.areaPresets}>
                         {presets.map((preset: BedBasePreset) => {
                             const isSelected = selectedPresetId === preset.id;
                             return (
                                 <button
                                     key={preset.id}
                                     type="button"
-                                    className={`${floorStyles.floorOptionButton} ${isSelected ? floorStyles.floorOptionButtonActive : ''}`}
+                                    className={`${areaStyles.areaPresetButton} ${isSelected ? areaStyles.areaPresetButtonActive : ''}`}
                                     onClick={() => handlePresetClick(preset)}
                                 >
                                     {preset.label}
@@ -160,7 +226,7 @@ export function BedBaseFilter({
                         })}
                         <button
                             type="button"
-                            className={`${floorStyles.floorOptionButton} ${isNotProvided ? floorStyles.floorOptionButtonActive : ''}`}
+                            className={`${areaStyles.areaPresetButton} ${isNotProvided ? areaStyles.areaPresetButtonActive : ''}`}
                             onClick={handleNotProvidedClick}
                         >
                             Не е въведено

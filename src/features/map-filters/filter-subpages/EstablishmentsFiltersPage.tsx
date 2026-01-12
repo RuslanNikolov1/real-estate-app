@@ -13,7 +13,8 @@ import {
     EstablishmentConstructionTypeFilter,
     CompletionStatusFilter,
     ESTABLISHMENTS_LOCATION_TYPES,
-    ESTABLISHMENTS_FEATURES
+    ESTABLISHMENTS_FEATURES,
+    RENT_RESTAURANT_FEATURES
 } from '../filters';
 import {
     ESTABLISHMENTS_AREA_SLIDER_MAX,
@@ -107,8 +108,8 @@ export function EstablishmentsFiltersPage({
     ];
 
     // Rent price constants
-    const RENT_SLIDER_MAX = 7000;
-    const RENT_SLIDER_MIN = 35;
+    const RENT_SLIDER_MAX = 20000;
+    const RENT_SLIDER_MIN = 0;
     const RENT_PER_SQM_SLIDER_MAX = 50;
     const RENT_PER_SQM_SLIDER_MIN = 0;
     
@@ -548,6 +549,15 @@ export function EstablishmentsFiltersPage({
             {/* Price/Rent Filters - Conditional based on mode */}
             {isRentMode ? (
                 <>
+                    {/* Location Type Filter (Разположение) */}
+                    <SubtypeFilter
+                        key={`location-${filterKey}`}
+                        title="Разположение"
+                        options={ESTABLISHMENTS_LOCATION_TYPES}
+                        onFilterChange={handleLocationTypeChange}
+                        initialSelected={filterValuesRef.current.locationTypes || []}
+                    />
+
                     {/* Furnishing Filter */}
                     <SubtypeFilter
                         key={`furnishing-${filterKey}`}
@@ -604,14 +614,16 @@ export function EstablishmentsFiltersPage({
                 title="Квадратура"
             />
 
-            {/* Location Type Filter (Разположение) */}
-            <SubtypeFilter
-                key={`location-${filterKey}`}
-                title="Разположение"
-                options={ESTABLISHMENTS_LOCATION_TYPES}
-                onFilterChange={handleLocationTypeChange}
-                initialSelected={filterValuesRef.current.locationTypes || []}
-            />
+            {/* Location Type Filter (Разположение) - Only for sale mode */}
+            {!isRentMode && (
+                <SubtypeFilter
+                    key={`location-${filterKey}`}
+                    title="Разположение"
+                    options={ESTABLISHMENTS_LOCATION_TYPES}
+                    onFilterChange={handleLocationTypeChange}
+                    initialSelected={filterValuesRef.current.locationTypes || []}
+                />
+            )}
 
             {/* Construction Type Filter (Тип строителство) - Only for sale mode */}
             {!isRentMode && (
@@ -651,7 +663,7 @@ export function EstablishmentsFiltersPage({
                 key={`features-${filterKey}`}
                 initialSelected={filterValuesRef.current.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
-                features={ESTABLISHMENTS_FEATURES}
+                features={isRentMode ? RENT_RESTAURANT_FEATURES : ESTABLISHMENTS_FEATURES}
             />
 
         </div>

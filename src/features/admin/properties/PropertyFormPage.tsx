@@ -23,7 +23,7 @@ import {
 import { DynamicPropertyField } from '@/components/forms/DynamicPropertyField';
 import { plateValueToPlainText } from '@/lib/plate-utils';
 import { normalizeSubtypeToId } from '@/lib/subtype-mapper';
-import { FLOOR_SPECIAL_OPTIONS, RENT_HOUSE_FEATURES, RENT_COMMERCIAL_FEATURES, RENT_GARAGE_FEATURES, RENT_WAREHOUSE_FEATURES, RENT_BUILDING_PLOTS_FEATURES, RENT_APARTMENT_FEATURES, RENT_HOTEL_FEATURES, RENT_COMMERCIAL_FLOOR_OPTIONS } from '@/features/map-filters/filters/constants';
+import { FLOOR_SPECIAL_OPTIONS, RENT_HOUSE_FEATURES, RENT_COMMERCIAL_FEATURES, RENT_GARAGE_FEATURES, RENT_WAREHOUSE_FEATURES, RENT_BUILDING_PLOTS_FEATURES, RENT_APARTMENT_FEATURES, RENT_HOTEL_FEATURES, RENT_RESTAURANT_FEATURES, RENT_COMMERCIAL_FLOOR_OPTIONS } from '@/features/map-filters/filters/constants';
 import styles from './PropertyFormPage.module.scss';
 
 type PropertyFormData = z.infer<ReturnType<typeof generatePropertySchema>>;
@@ -346,6 +346,10 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     // For rent hotels, use RENT_HOTEL_FEATURES instead of schema features
     if (isRentMode && propertyType === 'hotel') {
       return RENT_HOTEL_FEATURES.filter(f => f.id !== 'all');
+    }
+    // For rent restaurants, use RENT_RESTAURANT_FEATURES instead of schema features
+    if (isRentMode && propertyType === 'restaurant') {
+      return RENT_RESTAURANT_FEATURES.filter(f => f.id !== 'all');
     }
     const featuresField = typeSchema.fields.find(f => f.key === 'features');
     const defaultFeatures = featuresField?.options || [];
@@ -716,7 +720,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
       formData.append('description', descriptionText);
       
       // Map year_built -> build_year (but not for rent mode)
-      const isRent = data.status === 'for-rent';
       if (!isRent && data.year_built) {
         formData.append('build_year', String(data.year_built));
       }

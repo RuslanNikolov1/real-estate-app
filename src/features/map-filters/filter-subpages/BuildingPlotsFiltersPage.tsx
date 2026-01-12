@@ -118,8 +118,8 @@ export function BuildingPlotsFiltersPage({
         : setInternalLocationState;
 
     // Rent price constants
-    const RENT_SLIDER_MAX = 5600;
-    const RENT_SLIDER_MIN = 1;
+    const RENT_SLIDER_MAX = 20000;
+    const RENT_SLIDER_MIN = 0;
     const RENT_PER_SQM_SLIDER_MAX = 6;
     const RENT_PER_SQM_SLIDER_MIN = 0;
     

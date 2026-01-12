@@ -83,7 +83,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         setSelectedPropertyType((prev) => (prev === initialPropertyType ? prev : initialPropertyType));
     }, [initialPropertyType]);
 
-    // Restore filters from URL on mount and sync showListings with URL params
+    // Sync showListings with URL params whenever pathname or search params change
     useEffect(() => {
         if (typeof window === 'undefined') return;
         
@@ -155,7 +155,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                 console.error('Error restoring filters from URL:', error);
             }
         }
-    }, [baseRoute, selectedPropertyType]);
+    }, [pathname, baseRoute, selectedPropertyType]);
 
     const isApartmentsSelected = selectedPropertyType === 'apartments';
     const isHousesVillasSelected = selectedPropertyType === 'houses-villas';
@@ -452,6 +452,12 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         if ('selectedCompletionStatuses' in filters && Array.isArray(filters.selectedCompletionStatuses) && filters.selectedCompletionStatuses.length > 0) {
             cleaned.selectedCompletionStatuses = filters.selectedCompletionStatuses;
         }
+        if ('locationTypes' in filters && Array.isArray(filters.locationTypes) && filters.locationTypes.length > 0) {
+            const validLocationTypes = filters.locationTypes.filter(t => t && t !== 'all');
+            if (validLocationTypes.length > 0) {
+                cleaned.locationTypes = validLocationTypes;
+            }
+        }
         if ('selectedCategories' in filters && Array.isArray(filters.selectedCategories) && filters.selectedCategories.length > 0) {
             cleaned.selectedCategories = filters.selectedCategories;
         }
@@ -468,6 +474,9 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
         }
         if ('bedBaseTo' in filters && filters.bedBaseTo !== undefined && filters.bedBaseTo !== null && filters.bedBaseTo < 120) {
             cleaned.bedBaseTo = filters.bedBaseTo;
+        }
+        if ('isBedBaseNotProvided' in filters && filters.isBedBaseNotProvided === true) {
+            cleaned.isBedBaseNotProvided = true;
         }
         
         // Distance filter

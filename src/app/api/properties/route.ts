@@ -119,6 +119,10 @@ export async function GET(request: NextRequest) {
     // Build query
     let query = supabaseAdmin.from('properties').select('*');
 
+    // Get propertyTypeId and baseRoute from query params (needed for filtering and debug logging)
+    const baseRoute = searchParams.get('baseRoute');
+    const propertyTypeId = searchParams.get('propertyTypeId');
+
     // Apply filters if provided
     if (filters) {
       // Property ID filter (short_id)
@@ -151,9 +155,16 @@ export async function GET(request: NextRequest) {
         'other-real-estates': ['other-real-estates'],
       };
       
-      // Determine property types from baseRoute or filters
-      const baseRoute = searchParams.get('baseRoute');
-      const propertyTypeId = searchParams.get('propertyTypeId');
+      // Debug: Log filter parameters for hotels
+      if (propertyTypeId === 'hotels-motels') {
+        console.log('Hotel filter parameters:', {
+          propertyTypeId,
+          baseRoute,
+          hasFilters: !!filters,
+          propertyTypes: filters?.propertyTypes,
+          filtersKeys: filters ? Object.keys(filters) : [],
+        });
+      }
       
       if (propertyTypeId && typeMapping[propertyTypeId]) {
         query = query.in('type', typeMapping[propertyTypeId]);
@@ -192,12 +203,16 @@ export async function GET(request: NextRequest) {
         query = query.lte('price', filters.priceTo);
       }
       
-      // Price per sqm filters - only apply if explicitly set (not 0, null, or undefined)
-      if (filters.pricePerSqmFrom !== undefined && filters.pricePerSqmFrom !== null && filters.pricePerSqmFrom > 0) {
-        query = query.gte('price_per_sqm', filters.pricePerSqmFrom);
-      }
-      if (filters.pricePerSqmTo !== undefined && filters.pricePerSqmTo !== null && filters.pricePerSqmTo > 0) {
-        query = query.lte('price_per_sqm', filters.pricePerSqmTo);
+      // Price per sqm filters - only apply for sale properties, not rent
+      // Rent hotels don't have area_sqm (it's null), so price_per_sqm is also null
+      // Filtering by price_per_sqm would exclude all rent hotels
+      if (baseRoute !== '/rent/search') {
+        if (filters.pricePerSqmFrom !== undefined && filters.pricePerSqmFrom !== null && filters.pricePerSqmFrom > 0) {
+          query = query.gte('price_per_sqm', filters.pricePerSqmFrom);
+        }
+        if (filters.pricePerSqmTo !== undefined && filters.pricePerSqmTo !== null && filters.pricePerSqmTo > 0) {
+          query = query.lte('price_per_sqm', filters.pricePerSqmTo);
+        }
       }
 
       // Furnishing filter (Обзавеждане) for rent apartments
@@ -328,6 +343,38 @@ export async function GET(request: NextRequest) {
         }
       }
       
+      // Hotel property types filter (hotel, family-hotel, hostel-pension, lodge, etc.)
+      // Only apply when propertyTypeId is hotels-motels
+      if (filters.propertyTypes && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0 && propertyTypeId === 'hotels-motels') {
+        const validPropertyTypes = filters.propertyTypes.filter(
+          (propertyType: string) => propertyType && propertyType !== 'all'
+        );
+        if (validPropertyTypes.length > 0) {
+          // Filter by subtype for hotel properties
+          // The type filter is already applied at line 159 if propertyTypeId === 'hotels-motels'
+          console.log('Hotel subtype filter applied:', {
+            propertyTypeId,
+            requestedSubtypes: validPropertyTypes,
+            filtersPropertyTypes: filters.propertyTypes,
+          });
+          query = query.in('subtype', validPropertyTypes);
+        }
+      }
+      
+      // Location types filter (Разположение) for restaurants/establishments
+      // Only apply when propertyTypeId is restaurants
+      // This filters by subtype column in the database
+      if (filters.locationTypes && Array.isArray(filters.locationTypes) && filters.locationTypes.length > 0 && propertyTypeId === 'restaurants') {
+        const validLocationTypes = filters.locationTypes.filter(
+          (locationType: string) => locationType && locationType !== 'all'
+        );
+        if (validLocationTypes.length > 0) {
+          // Filter by subtype for restaurant properties
+          // The type filter is already applied at line 169 if propertyTypeId === 'restaurants'
+          query = query.in('subtype', validLocationTypes);
+        }
+      }
+      
       // Construction type
       if (filters.selectedConstructionTypes && Array.isArray(filters.selectedConstructionTypes) && filters.selectedConstructionTypes.length > 0) {
         query = query.in('construction_type', filters.selectedConstructionTypes);
@@ -365,22 +412,82 @@ export async function GET(request: NextRequest) {
         query = query.contains('features', filters.selectedFeatures);
       }
       
-      // Hotel category
+      // Hotel category - handle 'uncategorized' and 'unspecified' as NULL
       if (filters.selectedCategories && Array.isArray(filters.selectedCategories) && filters.selectedCategories.length > 0) {
         if (propertyTypeId === 'hotels-motels') {
-          query = query.in('hotel_category', filters.selectedCategories);
+          const hasUncategorized = filters.selectedCategories.includes('uncategorized') || filters.selectedCategories.includes('unspecified');
+          const validCategories = filters.selectedCategories.filter(
+            (cat: string) => cat !== 'all' && cat !== 'uncategorized' && cat !== 'unspecified'
+          );
+          
+          if (validCategories.length > 0 && hasUncategorized) {
+            // Match either valid categories OR NULL
+            // Use OR query with PostgREST filter syntax
+            // Format: "column.in.(value1,value2),column.is.null"
+            const categoryList = validCategories.join(',');
+            query = query.or(`hotel_category.in.(${categoryList}),hotel_category.is.null`);
+          } else if (validCategories.length > 0) {
+            // Only valid categories
+            query = query.in('hotel_category', validCategories);
+          } else if (hasUncategorized) {
+            // Only NULL (uncategorized/unspecified)
+            query = query.is('hotel_category', null);
+          }
         } else if (propertyTypeId === 'agricultural-land') {
           query = query.in('agricultural_category', filters.selectedCategories);
         }
       }
       
-      // Bed base for hotels - only apply if explicitly set (not 0, null, or undefined)
-      if (filters.bedBaseFrom !== undefined && filters.bedBaseFrom !== null && filters.bedBaseFrom > 0) {
-        query = query.gte('bed_base', filters.bedBaseFrom);
+      // Bed base for hotels - handle NULL values when "not provided" is selected
+      if (filters.isBedBaseNotProvided) {
+        // Include hotels with NULL bed_base
+        query = query.is('bed_base', null);
+      } else {
+        // Only apply range filters if "not provided" is not selected
+        if (filters.bedBaseFrom !== undefined && filters.bedBaseFrom !== null && filters.bedBaseFrom > 0) {
+          query = query.gte('bed_base', filters.bedBaseFrom);
+        }
+        if (filters.bedBaseTo !== undefined && filters.bedBaseTo !== null && filters.bedBaseTo > 0) {
+          query = query.lte('bed_base', filters.bedBaseTo);
+        }
       }
-      if (filters.bedBaseTo !== undefined && filters.bedBaseTo !== null && filters.bedBaseTo > 0) {
-        query = query.lte('bed_base', filters.bedBaseTo);
+    }
+
+    // Comprehensive debug logging before query execution
+    // Log all active filters to help diagnose filtering issues
+    if (propertyTypeId === 'hotels-motels') {
+      const activeFilters: Record<string, any> = {
+        baseRoute,
+        propertyTypeId,
+        saleOrRent: baseRoute === '/sale/search' ? 'sale' : baseRoute === '/rent/search' ? 'rent' : 'none',
+      };
+
+      if (filters) {
+        if (filters.propertyTypes) activeFilters.propertyTypes = filters.propertyTypes;
+        if (filters.city) activeFilters.city = filters.city;
+        if (filters.neighborhoods) activeFilters.neighborhoods = filters.neighborhoods;
+        if (filters.areaFrom) activeFilters.areaFrom = filters.areaFrom;
+        if (filters.areaTo) activeFilters.areaTo = filters.areaTo;
+        if (filters.priceFrom) activeFilters.priceFrom = filters.priceFrom;
+        if (filters.priceTo) activeFilters.priceTo = filters.priceTo;
+        if (filters.pricePerSqmFrom) activeFilters.pricePerSqmFrom = filters.pricePerSqmFrom;
+        if (filters.pricePerSqmTo) activeFilters.pricePerSqmTo = filters.pricePerSqmTo;
+        if (filters.selectedCategories) activeFilters.selectedCategories = filters.selectedCategories;
+        if (filters.bedBaseFrom) activeFilters.bedBaseFrom = filters.bedBaseFrom;
+        if (filters.bedBaseTo) activeFilters.bedBaseTo = filters.bedBaseTo;
+        if (filters.isBedBaseNotProvided) activeFilters.isBedBaseNotProvided = filters.isBedBaseNotProvided;
+        if (filters.selectedFeatures) activeFilters.selectedFeatures = filters.selectedFeatures;
+        if (filters.selectedConstructionTypes) activeFilters.selectedConstructionTypes = filters.selectedConstructionTypes;
+        if (filters.selectedCompletionStatuses) activeFilters.selectedCompletionStatuses = filters.selectedCompletionStatuses;
+        
+        // Note about pricePerSqm filters
+        if (baseRoute === '/rent/search') {
+          activeFilters.pricePerSqmFiltersSkipped = true;
+          activeFilters.reason = 'Rent hotels have null price_per_sqm, so these filters are skipped';
+        }
       }
+
+      console.log('Hotel query - All active filters before execution:', activeFilters);
     }
 
     // Order and limit
@@ -405,6 +512,48 @@ export async function GET(request: NextRequest) {
         foundSubtypes: [...new Set((properties || []).map((p: any) => p.subtype).filter(Boolean))],
       });
     }
+    
+    // Debug: Log query results for hotel subtype filtering
+    if (filters && filters.propertyTypes && propertyTypeId === 'hotels-motels') {
+      const queryResults = {
+        propertyTypeId,
+        baseRoute,
+        requestedSubtypes: filters.propertyTypes,
+        foundProperties: properties?.length || 0,
+        propertyTypes: [...new Set((properties || []).map((p: any) => p.type))],
+        foundSubtypes: [...new Set((properties || []).map((p: any) => p.subtype).filter(Boolean))],
+        allProperties: (properties || []).map((p: any) => ({
+          id: p.id,
+          type: p.type,
+          subtype: p.subtype,
+          sale_or_rent: p.sale_or_rent,
+          city: p.city,
+          price: p.price,
+          price_per_sqm: p.price_per_sqm,
+        })),
+        appliedFilters: {
+          saleOrRent: baseRoute === '/sale/search' ? 'sale' : baseRoute === '/rent/search' ? 'rent' : 'none',
+          type: 'hotel',
+          subtype: filters.propertyTypes.filter((t: string) => t !== 'all'),
+          pricePerSqmFiltered: baseRoute === '/rent/search' ? false : !!(filters.pricePerSqmFrom || filters.pricePerSqmTo),
+        },
+      };
+
+      console.log('Hotel subtype filter query results:', queryResults);
+
+      // If no properties found, log diagnostic information
+      if (properties?.length === 0) {
+        console.warn('No hotels found with current filters. Diagnostic info:', {
+          expectedFilters: {
+            type: 'hotel',
+            sale_or_rent: baseRoute === '/rent/search' ? 'rent' : 'sale',
+            subtype: filters.propertyTypes.filter((t: string) => t !== 'all'),
+          },
+          pricePerSqmFilterSkipped: baseRoute === '/rent/search',
+          suggestion: 'Check if hotel in database matches: type=hotel, sale_or_rent=' + (baseRoute === '/rent/search' ? 'rent' : 'sale') + ', subtype=' + filters.propertyTypes.filter((t: string) => t !== 'all').join(','),
+        });
+      }
+    }
 
     // Transform database properties to match Property interface
     const transformedProperties = (properties || []).map((prop: any) => ({
@@ -427,6 +576,10 @@ export async function GET(request: NextRequest) {
       floor: prop.floor ? String(prop.floor) : undefined,
       total_floors: prop.total_floors ? Number(prop.total_floors) : undefined,
       year_built: prop.build_year || undefined,
+      hotel_category: (prop as any).hotel_category || undefined,
+      agricultural_category: (prop as any).agricultural_category || undefined,
+      bed_base: (prop as any).bed_base || undefined,
+      works: (prop as any).works || undefined,
       images: (prop.image_urls || []).map((url: string, index: number) => ({
         id: `${prop.id}-img-${index}`,
         url,
@@ -546,10 +699,17 @@ export async function POST(request: NextRequest) {
       images: imageFiles,
     };
 
+    // #region agent log
+    console.log(JSON.stringify({location:'route.ts:542',message:'Validation data before Zod',data:{textFields,validationDataKeys:Object.keys(validationData),areaSqm:validationData.area_sqm,pricePerSqm:validationData.price_per_sqm,hasPricePerSqm:'price_per_sqm' in validationData},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'}));
+    // #endregion
+
     // Validate with Zod
     const validationResult = createPropertySchema.safeParse(validationData);
     
     if (!validationResult.success) {
+      // #region agent log
+      console.log(JSON.stringify({location:'route.ts:552',message:'Zod validation failed',data:{errors:validationResult.error.errors,errorCount:validationResult.error.errors.length,firstError:validationResult.error.errors[0]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'}));
+      // #endregion
       return NextResponse.json(
         {
           error: 'Validation failed',
@@ -562,6 +722,9 @@ export async function POST(request: NextRequest) {
     const validatedData = validationResult.data;
 
     // Upload images with concurrency limit
+    // #region agent log
+    console.log(JSON.stringify({location:'route.ts:564',message:'Starting image uploads',data:{imageFilesCount:imageFiles.length,hasBrokerImage:!!brokerImageFile},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'}));
+    // #endregion
     const semaphore = { count: 0, queue: [] as Array<() => void> };
     const uploadPromises = imageFiles.map((file) =>
       uploadImageWithLimit(file, 'properties', semaphore)
@@ -589,6 +752,10 @@ export async function POST(request: NextRequest) {
         });
       }
     });
+
+    // #region agent log
+    console.log(JSON.stringify({location:'route.ts:593',message:'Image upload results',data:{successfulCount:successfulUploads.length,failedCount:failedUploads.length,failedErrors:failedUploads.map(f => f.error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'}));
+    // #endregion
 
     // If all uploads failed, return error
     if (successfulUploads.length === 0) {
@@ -621,9 +788,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate price_per_sqm if not provided
+    // For rent hotels, area_sqm may be undefined, so we can't calculate price_per_sqm
+    // #region agent log
+    console.log(JSON.stringify({location:'route.ts:630',message:'Price per sqm calculation',data:{hasPricePerSqm:!!validatedData.price_per_sqm,hasAreaSqm:!!validatedData.area_sqm,areaSqm:validatedData.area_sqm,price:validatedData.price,type:validatedData.type,saleOrRent:validatedData.sale_or_rent},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'}));
+    // #endregion
     const pricePerSqm = validatedData.price_per_sqm
       ? validatedData.price_per_sqm
-      : validatedData.price / validatedData.area_sqm;
+      : validatedData.area_sqm
+      ? validatedData.price / validatedData.area_sqm
+      : null;
+    // #region agent log
+    console.log(JSON.stringify({location:'route.ts:636',message:'Price per sqm result',data:{pricePerSqm,calculated:!validatedData.price_per_sqm && validatedData.area_sqm},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'}));
+    // #endregion
 
     // LANGUAGE-AGNOSTIC: Normalize subtype to English ID before saving to database
     // Handles subtypes in any language (Bulgarian, Russian, English, German) and converts to English IDs
@@ -641,9 +817,9 @@ export async function POST(request: NextRequest) {
       sale_or_rent: validatedData.sale_or_rent,
       type: validatedData.type,
       subtype: normalizedSubtype,
-      area_sqm: validatedData.area_sqm,
+      area_sqm: validatedData.area_sqm || null,
       price: validatedData.price,
-      price_per_sqm: pricePerSqm,
+      price_per_sqm: pricePerSqm || null,
       floor: validatedData.floor || null,
       total_floors: validatedData.total_floors || null,
       yard_area_sqm: validatedData.yard_area || null,
@@ -656,6 +832,11 @@ export async function POST(request: NextRequest) {
       completion_degree: validatedData.completion_degree || null,
       furniture: validatedData.furniture || null,
       features: validatedData.features || [],
+      hotel_category: validatedData.hotel_category || null,
+      agricultural_category: validatedData.agricultural_category || null,
+      bed_base: validatedData.bed_base !== undefined && !isNaN(validatedData.bed_base) ? validatedData.bed_base : null,
+      works: validatedData.works || null,
+      building_type: (validatedData as any).building_type || null,
       broker_name: validatedData.broker_name,
       broker_position: validatedData.broker_position || null,
       broker_phone: validatedData.broker_phone,
@@ -663,6 +844,10 @@ export async function POST(request: NextRequest) {
       image_urls: imageUrls,
       image_public_ids: uploadedPublicIds,
     };
+
+    // #region agent log
+    console.log(JSON.stringify({location:'route.ts:650',message:'Payload before Supabase insert',data:{payloadKeys:Object.keys(payload),areaSqm:payload.area_sqm,pricePerSqm:payload.price_per_sqm,type:payload.type,saleOrRent:payload.sale_or_rent,imageUrlsCount:payload.image_urls?.length,hasBrokerImage:!!payload.broker_image},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'}));
+    // #endregion
 
     // Insert into Supabase
     const supabaseAdmin = getSupabaseAdminClient();
@@ -674,6 +859,9 @@ export async function POST(request: NextRequest) {
 
     // If Supabase insert fails, cleanup uploaded images
     if (insertError || !insertedProperty) {
+      // #region agent log
+      console.log(JSON.stringify({location:'route.ts:686',message:'Supabase insert failed',data:{hasError:!!insertError,errorMessage:insertError?.message,errorCode:insertError?.code,errorDetails:insertError?.details,hasInsertedProperty:!!insertedProperty,payloadAreaSqm:payload.area_sqm},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'}));
+      // #endregion
       console.error('Supabase insert error:', insertError);
       
       // Cleanup all uploaded images (including broker image if any)
@@ -693,6 +881,9 @@ export async function POST(request: NextRequest) {
     // Return success with inserted property
     return NextResponse.json(insertedProperty, { status: 201 });
   } catch (error) {
+    // #region agent log
+    console.log(JSON.stringify({location:'route.ts:705',message:'Unexpected error in POST handler',data:{errorMessage:error instanceof Error ? error.message : 'Unknown error',errorStack:error instanceof Error ? error.stack : undefined,errorName:error instanceof Error ? error.name : undefined},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'}));
+    // #endregion
     console.error('Unexpected error in POST /api/properties:', error);
     
     return NextResponse.json(

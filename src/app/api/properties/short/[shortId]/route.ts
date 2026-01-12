@@ -76,6 +76,7 @@ export async function GET(
       hotel_category: (prop as any).hotel_category || undefined,
       agricultural_category: (prop as any).agricultural_category || undefined,
       bed_base: (prop as any).bed_base || undefined,
+      works: (prop as any).works || undefined,
       images: (prop.image_urls || []).map((url: string, index: number) => ({
         id: `${prop.id}-img-${index}`,
         url,

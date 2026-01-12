@@ -84,8 +84,8 @@ export function WarehousesIndustrialFiltersPage({
         : setInternalLocationState;
 
     // Rent price constants
-    const RENT_SLIDER_MAX = 14000;
-    const RENT_SLIDER_MIN = 2;
+    const RENT_SLIDER_MAX = 20000;
+    const RENT_SLIDER_MIN = 0;
     const RENT_PER_SQM_SLIDER_MAX = 12;
     const RENT_PER_SQM_SLIDER_MIN = 0;
 

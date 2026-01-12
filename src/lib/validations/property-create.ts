@@ -26,9 +26,9 @@ export const createPropertySchema = z.object({
   subtype: z.string().optional(),
 
   // Основни стойности
-  area_sqm: z.coerce.number().positive('Площта трябва да е положително число'),
+  area_sqm: z.coerce.number().positive('Площта трябва да е положително число').optional(),
   price: z.coerce.number().min(0, 'Цената не може да е отрицателна'),
-  price_per_sqm: z.coerce.number().min(0, 'Цената на м² трябва да е положително число'),
+  price_per_sqm: z.coerce.number().min(0, 'Цената на м² трябва да е положително число').optional(),
   floor: z.enum(['basement', 'ground', 'first-residential', 'not-last', 'last', 'attic']).optional(),
   total_floors: z.coerce.number().int().optional(),
   yard_area: z.coerce.number().optional(),
@@ -53,6 +53,7 @@ export const createPropertySchema = z.object({
   hotel_category: z.string().optional(),
   agricultural_category: z.string().optional(),
   bed_base: z.coerce.number().int().optional(),
+  works: z.enum(['seasonal', 'year-round']).optional(),
 
   // Особености
   features: z.array(z.string()).optional().default([]),

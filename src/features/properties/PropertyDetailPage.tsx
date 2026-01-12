@@ -56,6 +56,8 @@ import {
   WATER_OPTIONS,
   GARAGE_CONSTRUCTION_TYPES,
   ESTABLISHMENT_CONSTRUCTION_TYPES,
+  ESTABLISHMENTS_LOCATION_TYPES,
+  RENT_RESTAURANT_FEATURES,
 } from '@/features/map-filters/filters/constants';
 import { mockProperties as baseProperties } from './mockProperties';
 import styles from './PropertyDetailPage.module.scss';
@@ -205,14 +207,15 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   );
 
   // Basic runtime validation for required property fields
+  // For rent hotels, area_sqm can be null (area will be 0), so skip area validation for rent hotels
+  const isRentHotel = property?.status === 'for-rent' && property?.type === 'hotel';
   const hasRequiredFields =
     !!property &&
     !!property.title &&
     !!property.description &&
     typeof property.price === 'number' &&
     property.price > 0 &&
-    typeof property.area === 'number' &&
-    property.area > 0 &&
+    (isRentHotel || (typeof property.area === 'number' && property.area > 0)) &&
     !!property.city &&
     !!property.currency;
 
@@ -460,7 +463,10 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
     );
   };
 
+  // For rent hotels, area can be 0/null, so pricePerSqm will be 0
+  // We'll hide it in the UI for rent hotels when it's 0
   const pricePerSqm = property.area > 0 ? Math.round(property.price / property.area) : 0;
+  const shouldShowPricePerSqm = !(property.type === 'hotel' && property.status === 'for-rent') || pricePerSqm > 0;
 
   // Consistent number formatter to avoid hydration mismatch
   const formatNumber = (num: number) => {
@@ -522,6 +528,9 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
       case 'agricultural':
         options = AGRICULTURAL_PROPERTY_TYPES;
         break;
+      case 'restaurant':
+        options = ESTABLISHMENTS_LOCATION_TYPES;
+        break;
       default:
         options = undefined;
     }
@@ -562,6 +571,19 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
     return category?.label || 'Не е посочено';
   };
 
+  // Get works label (for rent hotels and restaurants)
+  const getWorksLabel = () => {
+    const works = (property as any).works as string | undefined;
+    if (!works) return 'Не е посочено';
+    
+    const worksMap: Record<string, string> = {
+      'seasonal': 'Работи сезонно',
+      'year-round': 'Работи целогодишно',
+    };
+    
+    return worksMap[works] || works;
+  };
+
   // Get electricity label
   const getElectricityLabel = () => {
     const electricity = ELECTRICITY_OPTIONS.find((e) => e.id === (property as any).electricity);
@@ -586,11 +608,21 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
     return construction?.label || 'Не е посочено';
   };
 
-  // Get furniture label (for rent apartments)
+  // Get furniture label (for rent apartments and restaurants)
   const getFurnitureLabel = () => {
     const furniture = (property as any).furniture as string | undefined;
     if (!furniture) return 'Не е посочено';
     
+    // For restaurants, use different labels
+    if (property.type === 'restaurant') {
+      const restaurantFurnitureMap: Record<string, string> = {
+        'full': 'С оборудване',
+        'none': 'Без оборудване',
+      };
+      return restaurantFurnitureMap[furniture] || 'Не е посочено';
+    }
+    
+    // For apartments, use standard furniture labels
     const furnitureMap: Record<string, string> = {
       'full': 'Обзаведен',
       'partial': 'Частично обзаведен',
@@ -751,9 +783,11 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   <div className={styles.priceRow}>
                     <div className={styles.priceValue}>{formatNumber(property.price)} {property.currency}</div>
                   </div>
-                  <div className={styles.pricePerSqmRow}>
-                    <div className={styles.pricePerSqmValue}>{formatNumber(pricePerSqm)} {property.currency}/м²</div>
-                  </div>
+                  {shouldShowPricePerSqm && (
+                    <div className={styles.pricePerSqmRow}>
+                      <div className={styles.pricePerSqmValue}>{formatNumber(pricePerSqm)} {property.currency}/м²</div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Details Row */}
@@ -769,10 +803,13 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       <div className={styles.detailValue}>{getSubtypeLabel()}</div>
                     </div>
                   )}
-                  <div className={styles.detailBox}>
-                    <Square size={24} />
-                    <div className={styles.detailValue}>{property.area} м²</div>
-                  </div>
+                  {/* Area - hide for rent hotels (area is 0/null) */}
+                  {!(property.type === 'hotel' && property.status === 'for-rent') && (
+                    <div className={styles.detailBox}>
+                      <Square size={24} />
+                      <div className={styles.detailValue}>{property.area} м²</div>
+                    </div>
+                  )}
                   {/* Yard Area - only show for houses/villas */}
                   {(property.type === 'house' && property.yard_area_sqm) && (
                     <div className={styles.detailBox}>
@@ -804,6 +841,9 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   <h2 className={styles.sectionTitle}>Особености</h2>
                   <div className={styles.featuresGrid}>
                     {property.features.map((featureId) => {
+                      // #region agent log
+                      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyDetailPage.tsx:832',message:'Feature mapping start',data:{propertyType:property.type,propertyStatus:property.status,featureId,allFeatures:property.features},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+                      // #endregion
                       let source;
 
                       switch (property.type) {
@@ -831,13 +871,23 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                           source = HOTELS_FEATURES;
                           break;
                         case 'restaurant':
-                          source = ESTABLISHMENTS_FEATURES;
+                          // #region agent log
+                          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyDetailPage.tsx:859',message:'Restaurant feature source selection',data:{propertyStatus:property.status,isRent:property.status==='for-rent',willUseRentFeatures:property.status==='for-rent',rentFeaturesAvailable:!!RENT_RESTAURANT_FEATURES},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+                          // #endregion
+                          // For rent restaurants, use RENT_RESTAURANT_FEATURES; for sale restaurants, use ESTABLISHMENTS_FEATURES
+                          source = property.status === 'for-rent' ? RENT_RESTAURANT_FEATURES : ESTABLISHMENTS_FEATURES;
                           break;
                         default:
                           source = APARTMENT_FEATURE_FILTERS;
                       }
 
+                      // #region agent log
+                      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyDetailPage.tsx:866',message:'Before feature lookup',data:{featureId,sourceName:source===ESTABLISHMENTS_FEATURES?'ESTABLISHMENTS_FEATURES':source===RENT_RESTAURANT_FEATURES?'RENT_RESTAURANT_FEATURES':'other',sourceLength:source.length,sourceIds:source.map(f=>f.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                      // #endregion
                       const feature = source.find((f) => f.id === featureId);
+                      // #region agent log
+                      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyDetailPage.tsx:867',message:'After feature lookup',data:{featureId,featureFound:!!feature,featureLabel:feature?.label,willRender:!!feature},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                      // #endregion
                       if (!feature) return null;
 
                       return (
@@ -867,8 +917,15 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
 
                 const hasConstructionDetails =
                   (propType === 'apartment' && (prop.construction_type || prop.completion_degree || property.year_built || (property.status === 'for-rent' && prop.furniture))) ||
-                  ((propType === 'office' || propType === 'shop' || propType === 'restaurant') && (prop.construction_type || prop.completion_degree || property.year_built || property.floor)) ||
-                  (propType === 'hotel' && (prop.construction_type || prop.completion_degree || prop.hotel_category || prop.bed_base || property.year_built)) ||
+                  ((propType === 'office' || propType === 'shop') && (prop.construction_type || prop.completion_degree || property.year_built || property.floor)) ||
+                  (propType === 'restaurant' && (
+                    (property.status === 'for-sale' && (prop.construction_type || property.year_built || property.floor)) ||
+                    (property.status === 'for-rent' && (property.year_built || property.floor || prop.furniture || prop.works))
+                  )) ||
+                  (propType === 'hotel' && (
+                    (property.status === 'for-sale' && (prop.construction_type || prop.completion_degree || prop.hotel_category || prop.bed_base || property.year_built)) ||
+                    (property.status === 'for-rent' && (prop.hotel_category || prop.bed_base || property.year_built || prop.works))
+                  )) ||
                   (propType === 'garage' && (prop.construction_type || property.year_built)) ||
                   ((propType === 'house' || propType === 'villa') && (property.year_built || property.yard_area_sqm)) ||
                   (propType === 'agricultural' && prop.agricultural_category) ||
@@ -883,16 +940,16 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       : 'Детайли за строителството'}
                   </h2>
                   <div className={styles.constructionGrid}>
-                    {/* Building Type (Вид сграда) - for offices, shops, restaurants */}
-                    {(property.type === 'office' || property.type === 'shop' || property.type === 'restaurant') && (
+                    {/* Building Type (Вид сграда) - for offices, shops (not restaurants) */}
+                    {(property.type === 'office' || property.type === 'shop') && (
                       <div className={styles.constructionItem}>
                         <span className={styles.constructionLabel}>Вид сграда</span>
                         <span className={styles.constructionValue}>{getBuildingTypeLabel()}</span>
                       </div>
                     )}
                     
-                    {/* Construction Type - for apartments, offices, shops, hotels, restaurants */}
-                    {((property.type === 'apartment' || property.type === 'office' || property.type === 'shop' || property.type === 'hotel' || property.type === 'restaurant') && (property as any).construction_type) && (
+                    {/* Construction Type - for apartments, offices, shops, restaurants, and sale hotels (not rent hotels) */}
+                    {((property.type === 'apartment' || property.type === 'office' || property.type === 'shop' || property.type === 'restaurant' || (property.type === 'hotel' && property.status === 'for-sale')) && (property as any).construction_type) && (
                       <div className={styles.constructionItem}>
                         <span className={styles.constructionLabel}>
                           {property.type === 'apartment' ? 'Вид строителство' : 
@@ -916,15 +973,14 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     )}
 
 
-                    {/* Completion Status - for apartments (sale only), offices, shops, hotels, restaurants */}
+                    {/* Completion Status - for apartments (sale only), offices, shops, sale hotels (not restaurants, not rent hotels) */}
                     {(
                       // Apartments: show only for sale mode
                       (property.type === 'apartment' && property.status === 'for-sale') ||
-                      // Other supported types: always show when present
+                      // Other supported types: always show when present (except rent hotels and restaurants)
                       property.type === 'office' ||
                       property.type === 'shop' ||
-                      property.type === 'hotel' ||
-                      property.type === 'restaurant'
+                      (property.type === 'hotel' && property.status === 'for-sale')
                     ) && (
                       <div className={styles.constructionItem}>
                         <span className={styles.constructionLabel}>Степен на завършеност</span>
@@ -937,6 +993,22 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       <div className={styles.constructionItem}>
                         <span className={styles.constructionLabel}>Обзавеждане</span>
                         <span className={styles.constructionValue}>{getFurnitureLabel()}</span>
+                      </div>
+                    )}
+
+                    {/* Furniture (Оборудване) - for rent restaurants */}
+                    {property.type === 'restaurant' && property.status === 'for-rent' && (property as any).furniture && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Оборудване</span>
+                        <span className={styles.constructionValue}>{getFurnitureLabel()}</span>
+                      </div>
+                    )}
+
+                    {/* Works (Работен режим) - for rent restaurants */}
+                    {property.type === 'restaurant' && property.status === 'for-rent' && (property as any).works && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Работен режим</span>
+                        <span className={styles.constructionValue}>{getWorksLabel()}</span>
                       </div>
                     )}
 
@@ -969,6 +1041,14 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       <div className={styles.constructionItem}>
                         <span className={styles.constructionLabel}>Леглова база</span>
                         <span className={styles.constructionValue}>{(property as any).bed_base}</span>
+                      </div>
+                    )}
+
+                    {/* Works (Работен режим) - for rent hotels */}
+                    {property.type === 'hotel' && property.status === 'for-rent' && (property as any).works && (
+                      <div className={styles.constructionItem}>
+                        <span className={styles.constructionLabel}>Работен режим</span>
+                        <span className={styles.constructionValue}>{getWorksLabel()}</span>
                       </div>
                     )}
 

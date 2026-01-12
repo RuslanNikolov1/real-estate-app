@@ -16,7 +16,7 @@ import {
     HOTELS_PROPERTY_TYPES,
     HOTELS_FEATURES
 } from '../filters';
-import { RENT_HOTEL_FEATURES } from '../filters/constants';
+import { RENT_HOTEL_FEATURES, RENT_HOTEL_SUBTYPES } from '../filters/constants';
 import {
     HOTELS_AREA_SLIDER_MAX,
     HOTELS_BED_BASE_SLIDER_MAX,
@@ -105,8 +105,8 @@ export function HotelsMotelsFiltersPage({
     ];
 
     // Rent price constants
-    const RENT_SLIDER_MAX = 42000;
-    const RENT_SLIDER_MIN = 600;
+    const RENT_SLIDER_MAX = 20000;
+    const RENT_SLIDER_MIN = 0;
     const RENT_PER_SQM_SLIDER_MAX = 20;
     const RENT_PER_SQM_SLIDER_MIN = 0;
 
@@ -518,7 +518,7 @@ export function HotelsMotelsFiltersPage({
             <SubtypeFilter
                 key={`property-type-${filterKey}`}
                 title="Вид"
-                options={HOTELS_PROPERTY_TYPES}
+                options={isRentMode ? RENT_HOTEL_SUBTYPES : HOTELS_PROPERTY_TYPES}
                 onFilterChange={handlePropertyTypeChange}
                 initialSelected={filterValuesRef.current.propertyTypes || []}
             />
@@ -535,17 +535,6 @@ export function HotelsMotelsFiltersPage({
                         to={filterValuesRef.current.monthlyRentTo || RENT_SLIDER_MAX}
                         onFilterChange={handleMonthlyRentChange}
                     />
-
-                    {/* Rent Per Sqm Filter */}
-                    <RentPriceFilter
-                        title="Цена за кв.м"
-                        unit="евро"
-                        sliderMin={RENT_PER_SQM_SLIDER_MIN}
-                        sliderMax={RENT_PER_SQM_SLIDER_MAX}
-                        from={filterValuesRef.current.rentPerSqmFrom || RENT_PER_SQM_SLIDER_MIN}
-                        to={filterValuesRef.current.rentPerSqmTo || RENT_PER_SQM_SLIDER_MAX}
-                        onFilterChange={handleRentPerSqmChange}
-                    />
                 </>
             ) : (
                 <PriceFilter
@@ -559,17 +548,19 @@ export function HotelsMotelsFiltersPage({
                     pricePerSqmSliderMax={HOTELS_PRICE_PER_SQM_SLIDER_MAX}
                 />
             )}
-            {/* Area Filter (РЗП в кв.м) */}
-            <AreaFilter
-                key={`area-${filterKey}`}
-                onFilterChange={handleAreaChange}
-                initialAreaFrom={filterValuesRef.current.areaFrom}
-                initialAreaTo={filterValuesRef.current.areaTo}
-                sliderMax={HOTELS_AREA_SLIDER_MAX}
-                areaCap={HOTELS_AREA_SLIDER_MAX}
-                title="РЗП в кв.м"
-                showNotProvided={true}
-            />
+            {/* Area Filter (РЗП в кв.м) - Only for sale mode */}
+            {!isRentMode && (
+                <AreaFilter
+                    key={`area-${filterKey}`}
+                    onFilterChange={handleAreaChange}
+                    initialAreaFrom={filterValuesRef.current.areaFrom}
+                    initialAreaTo={filterValuesRef.current.areaTo}
+                    sliderMax={HOTELS_AREA_SLIDER_MAX}
+                    areaCap={HOTELS_AREA_SLIDER_MAX}
+                    title="РЗП в кв.м"
+                    showNotProvided={true}
+                />
+            )}
 
             <div className={styles.leftFilters}>
                 {/* Category Filter (Категория) */}

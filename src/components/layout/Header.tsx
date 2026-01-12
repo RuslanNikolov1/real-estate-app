@@ -134,7 +134,7 @@ export function Header() {
                   }`}
               >
                 <Icon size={18} />
-                <span>{item.label}</span>
+                <span suppressHydrationWarning>{item.label}</span>
               </Link>
             );
           })}
@@ -151,7 +151,7 @@ export function Header() {
                   exit={{ opacity: 0, y: -10 }}
                   className={styles.ambienceMessage}
                 >
-                  {t('header.ambienceMessage')}
+                  <span suppressHydrationWarning>{t('header.ambienceMessage')}</span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -219,7 +219,7 @@ export function Header() {
                       className={styles.userMenuLink}
                       onClick={() => setIsUserMenuOpen(false)}
                     >
-                      {item.label}
+                      <span suppressHydrationWarning>{item.label}</span>
                     </Link>
                   ))}
                 </motion.div>
@@ -256,7 +256,7 @@ export function Header() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Icon size={20} />
-                  <span>{item.label}</span>
+                  <span suppressHydrationWarning>{item.label}</span>
                 </Link>
               );
             })}

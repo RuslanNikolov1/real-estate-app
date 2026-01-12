@@ -94,6 +94,39 @@ const SUBTYPE_LABEL_TO_ID_MAP: Record<string, string> = {
   'mult-bedroom': 'multi-bedroom', // typo: missing 'i'
   'multi-bedrom': 'multi-bedroom', // typo: missing 'o'
   'multi-bedrrom': 'multi-bedroom', // typo: double 'r'
+  
+  // Restaurant/Establishment location types - Bulgarian labels to IDs
+  'В жилищна сграда': 'residential-building',
+  'В бизнес сграда': 'business-building',
+  'Самостоятелна сграда': 'standalone-building',
+  
+  // Restaurant/Establishment location types - Russian labels to IDs
+  'В жилом здании': 'residential-building',
+  'В бизнес-здании': 'business-building',
+  'Отдельное здание': 'standalone-building',
+  
+  // Restaurant/Establishment location types - English labels to IDs
+  'In Residential Building': 'residential-building',
+  'in residential building': 'residential-building',
+  'Residential Building': 'residential-building',
+  'residential-building': 'residential-building',
+  'In Business Building': 'business-building',
+  'in business building': 'business-building',
+  'Business Building': 'business-building',
+  'business-building': 'business-building',
+  'Standalone Building': 'standalone-building',
+  'standalone building': 'standalone-building',
+  'standalone-building': 'standalone-building',
+  
+  // Restaurant/Establishment location types - German labels to IDs
+  'In Wohngebäude': 'residential-building',
+  'in wohngebäude': 'residential-building',
+  'Wohngebäude': 'residential-building',
+  'In Geschäftsgebäude': 'business-building',
+  'in geschäftsgebäude': 'business-building',
+  'Geschäftsgebäude': 'business-building',
+  'Eigenständiges Gebäude': 'standalone-building',
+  'eigenständiges gebäude': 'standalone-building',
 };
 
 /**
@@ -359,6 +392,25 @@ const SUBTYPE_ID_TO_LABEL_MAP: Record<string, Record<string, string>> = {
     'en': 'Pasture',
     'ru': 'Пастбище',
     'de': 'Weide',
+  },
+  // Restaurant/Establishment location types
+  'residential-building': {
+    'bg': 'В жилищна сграда',
+    'en': 'In Residential Building',
+    'ru': 'В жилом здании',
+    'de': 'In Wohngebäude',
+  },
+  'business-building': {
+    'bg': 'В бизнес сграда',
+    'en': 'In Business Building',
+    'ru': 'В бизнес-здании',
+    'de': 'In Geschäftsgebäude',
+  },
+  'standalone-building': {
+    'bg': 'Самостоятелна сграда',
+    'en': 'Standalone Building',
+    'ru': 'Отдельное здание',
+    'de': 'Eigenständiges Gebäude',
   },
 };
 

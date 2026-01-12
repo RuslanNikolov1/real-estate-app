@@ -110,8 +110,8 @@ export function ApartmentsFiltersPage({
     ];
 
     // Rent price constants
-    const RENT_SLIDER_MAX = 1800;
-    const RENT_SLIDER_MIN = 20;
+    const RENT_SLIDER_MAX = 20000;
+    const RENT_SLIDER_MIN = 0;
     const RENT_PER_SQM_SLIDER_MAX = 24;
     const RENT_PER_SQM_SLIDER_MIN = 0;
 
