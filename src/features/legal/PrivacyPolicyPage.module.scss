@@ -1,0 +1,118 @@
+@import '@/styles/variables.scss';
+
+.container {
+  min-height: 100vh;
+  background-color: $color-background;
+  padding: 8vh 5vw;
+
+  @media (max-width: $breakpoint-tablet) {
+    padding: 4vh 4vw;
+  }
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 6vh 5vw;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: $breakpoint-tablet) {
+    padding: 4vh 6vw;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  h1 {
+    font-size: clamp(28px, 4vw, 36px);
+    font-weight: 700;
+    color: $color-text-primary;
+    margin-bottom: 1vh;
+  }
+
+  h2 {
+    font-size: clamp(20px, 2.5vw, 24px);
+    font-weight: 600;
+    color: $color-text-primary;
+    margin-top: 4vh;
+    margin-bottom: 2vh;
+  }
+
+  h3 {
+    font-size: clamp(16px, 2vw, 18px);
+    font-weight: 600;
+    color: $color-text-primary;
+    margin-top: 3vh;
+    margin-bottom: 1.5vh;
+  }
+
+  p {
+    font-size: clamp(14px, 1.8vw, 16px);
+    line-height: 1.7;
+    color: $color-text-secondary;
+    margin-bottom: 2vh;
+  }
+
+  ul {
+    margin: 2vh 0;
+    padding-left: 3vw;
+
+    @media (max-width: $breakpoint-tablet) {
+      padding-left: 5vw;
+    }
+
+    li {
+      font-size: clamp(14px, 1.8vw, 16px);
+      line-height: 1.7;
+      color: $color-text-secondary;
+      margin-bottom: 1vh;
+    }
+  }
+
+  strong {
+    color: $color-text-primary;
+    font-weight: 600;
+  }
+
+  ol {
+    margin: 2vh 0;
+    padding-left: 3vw;
+
+    @media (max-width: $breakpoint-tablet) {
+      padding-left: 5vw;
+    }
+
+    li {
+      font-size: clamp(14px, 1.8vw, 16px);
+      line-height: 1.7;
+      color: $color-text-secondary;
+      margin-bottom: 1vh;
+    }
+  }
+}
+
+.lastUpdated {
+  font-size: clamp(12px, 1.6vw, 14px);
+  color: $color-text-tertiary;
+  font-style: italic;
+  margin-bottom: 4vh;
+}
+
+.link {
+  color: $color-primary;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: darken($color-primary, 10%);
+  }
+}
+
+.section {
+  margin-bottom: 4vh;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
