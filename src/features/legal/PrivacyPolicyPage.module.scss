@@ -1,11 +1,11 @@
-@import '@/styles/variables.scss';
+@use '@/styles/variables' as *;
 
 .container {
   min-height: 100vh;
   background-color: $color-background;
   padding: 8vh 5vw;
 
-  @media (max-width: $breakpoint-tablet) {
+  @media (max-width: $breakpoint-md) {
     padding: 4vh 4vw;
   }
 }
@@ -18,7 +18,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-  @media (max-width: $breakpoint-tablet) {
+  @media (max-width: $breakpoint-md) {
     padding: 4vh 6vw;
     border-radius: 0;
     box-shadow: none;
@@ -58,7 +58,7 @@
     margin: 2vh 0;
     padding-left: 3vw;
 
-    @media (max-width: $breakpoint-tablet) {
+    @media (max-width: $breakpoint-md) {
       padding-left: 5vw;
     }
 
@@ -79,7 +79,7 @@
     margin: 2vh 0;
     padding-left: 3vw;
 
-    @media (max-width: $breakpoint-tablet) {
+    @media (max-width: $breakpoint-md) {
       padding-left: 5vw;
     }
 
