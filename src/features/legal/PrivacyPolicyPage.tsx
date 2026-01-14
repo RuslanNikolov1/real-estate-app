@@ -136,8 +136,8 @@ export function PrivacyPolicyPage() {
             If you have any questions about this Privacy Policy or our data practices, please contact us at:
           </p>
           <p>
-            <strong>Email:</strong> privacy@yourdomain.com<br />
-            <strong>Address:</strong> [Your Business Address]
+            <strong>Email:</strong>ruslannikolov1@gmail.com<br />
+            <strong>Address:</strong> Burgas, Bulgaria
           </p>
         </section>
       </div>

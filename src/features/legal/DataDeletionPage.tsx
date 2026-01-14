@@ -34,7 +34,7 @@ export function DataDeletionPage() {
             If you prefer, you can send a data deletion request to us via email:
           </p>
           <p>
-            <strong>Email:</strong> privacy@yourdomain.com<br />
+            <strong>Email:</strong>ruslannikolov1@gmail.com<br />
             <strong>Subject:</strong> Data Deletion Request
           </p>
           <p>
@@ -100,7 +100,7 @@ export function DataDeletionPage() {
             If you have any questions about data deletion or need assistance with the process, please contact us:
           </p>
           <p>
-            <strong>Email:</strong> privacy@yourdomain.com<br />
+            <strong>Email:</strong>ruslannikolov1@gmail.com<br />
             <strong>Response Time:</strong> We typically respond within 48 hours
           </p>
         </section>
