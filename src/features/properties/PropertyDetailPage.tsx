@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
+import { ShareModal } from '@/components/ui/ShareModal';
 import { Property } from '@/types';
 import {
   MapPin,
@@ -150,6 +151,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -437,20 +439,8 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   };
 
   const handleShare = () => {
-    const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
-    // Use current window location for sharing (already correct for localhost or production)
-    const shareUrl = currentUrl;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: property.title,
-        text: property.description,
-        url: shareUrl,
-      });
-    } else {
-      navigator.clipboard.writeText(shareUrl);
-      alert('Линкът е копиран в клипборда!');
-    }
+    // Always show custom share modal with all platform options
+    setShowShareModal(true);
   };
 
   const nextImage = () => {
@@ -1362,6 +1352,16 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <ShareModal
+          url={typeof window !== 'undefined' ? window.location.href : ''}
+          title={property.title}
+          description={`${formatNumber(property.price)} ${property.currency} | ${property.city}${property.neighborhood ? `, ${property.neighborhood}` : ''}`}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </div>
   );
 }
