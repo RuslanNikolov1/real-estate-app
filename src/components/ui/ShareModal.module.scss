@@ -81,7 +81,7 @@
   padding: $spacing-xl;
 
   @media (max-width: $breakpoint-sm) {
-    padding: $spacing-lg;
+    padding: $spacing-xl;
   }
 }
 
@@ -101,7 +101,7 @@
 
   @media (max-width: $breakpoint-sm) {
     grid-template-columns: repeat(2, 1fr);
-    gap: $spacing-sm;
+    gap: $spacing-md;
   }
 }
 
@@ -123,8 +123,9 @@
   font-weight: 500;
 
   @media (max-width: $breakpoint-sm) {
-    padding: $spacing-md $spacing-sm;
-    font-size: 0.75rem;
+    padding: $spacing-lg $spacing-md;
+    font-size: 0.875rem;
+    min-height: 90px;
   }
 
   &:hover {
@@ -151,6 +152,13 @@
   align-items: center;
   justify-content: center;
   transition: transform $transition-base;
+
+  @media (max-width: $breakpoint-sm) {
+    svg {
+      width: 28px;
+      height: 28px;
+    }
+  }
 
   .platformButton:hover & {
     transform: scale(1.1);
@@ -205,6 +213,11 @@
   font-weight: 600;
   cursor: pointer;
   transition: all $transition-base;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-lg;
+    font-size: 1.125rem;
+  }
 
   &:hover {
     background-color: $dark-red;
