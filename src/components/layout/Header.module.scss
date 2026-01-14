@@ -250,6 +250,13 @@
   text-decoration: none;
   font-weight: 500;
   transition: background $transition-base, color $transition-base;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: $font-body;
+  font-size: 0.9375rem;
 
   &:hover,
   &:focus-visible {
@@ -257,6 +264,16 @@
     color: $dark-red;
     outline: none;
   }
+}
+
+.userMenuLabel {
+  padding: $spacing-sm $spacing-lg;
+  color: $dark-gray;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-bottom: 1px solid $light-gray;
+  background: rgba($light-gray, 0.3);
+  word-break: break-word;
 }
 
 .mobileMenuButton {

@@ -1,0 +1,63 @@
+@use '@/styles/variables' as *;
+
+.latestPropertiesSection {
+  padding: $spacing-3xl $spacing-xl;
+  background: $white;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-2xl $spacing-lg;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-xl $spacing-md;
+  }
+}
+
+.heading {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $dark-red;
+  margin-bottom: $spacing-2xl;
+  font-family: $font-heading;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 2rem;
+    margin-bottom: $spacing-xl;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 1.5rem;
+    margin-bottom: $spacing-lg;
+  }
+}
+
+.propertiesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-xl;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: $breakpoint-lg) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-lg;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    gap: $spacing-md;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+}
+
+.loadingState,
+.emptyState {
+  text-align: center;
+  padding: $spacing-3xl $spacing-md;
+  color: $medium-gray;
+  font-size: 1.125rem;
+}

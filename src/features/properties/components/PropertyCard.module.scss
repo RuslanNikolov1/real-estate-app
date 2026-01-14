@@ -19,17 +19,24 @@
 
 .link {
   display: flex;
-  flex-direction: row;
   text-decoration: none;
   color: inherit;
   gap: 0;
+}
+
+.horizontalLayout {
+  flex-direction: row;
 
   @media (max-width: $breakpoint-md) {
     flex-direction: column;
   }
 }
 
-.imageContainer {
+.verticalLayout {
+  flex-direction: column;
+}
+
+.horizontalLayout .imageContainer {
   position: relative;
   width: 40%;
   min-height: 220px;
@@ -51,7 +58,31 @@
   }
 }
 
-.image {
+.verticalLayout .imageContainer {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  min-height: 280px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: $light-gray;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  border-bottom: 3px solid $dark-red;
+  box-sizing: border-box;
+
+  @media (max-width: $breakpoint-md) {
+    height: 220px;
+    min-height: 220px;
+  }
+}
+
+.imageContainer {
+  position: relative;
+}
+
+.horizontalLayout .image {
   object-fit: cover;
   border-radius: 13px;
   transition: transform $transition-slow;
@@ -61,7 +92,25 @@
   }
 }
 
-.placeholder {
+.verticalLayout .image {
+  object-fit: cover;
+  border-radius: 0;
+  transition: transform $transition-slow;
+
+  .card:hover & {
+    transform: scale(1.05);
+  }
+}
+
+.image {
+  transition: transform $transition-slow;
+
+  .card:hover & {
+    transform: scale(1.05);
+  }
+}
+
+.horizontalLayout .placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,6 +119,17 @@
   color: $dark-gray;
   font-size: 1rem;
   border-radius: 16px;
+}
+
+.verticalLayout .placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: $light-gray;
+  color: $dark-gray;
+  font-size: 1rem;
+  border-radius: 0;
 }
 
 .moreImagesLabel {
@@ -88,10 +148,17 @@
 
 .content {
   flex: 1;
-  padding: $spacing-xl $spacing-lg $spacing-lg $spacing-lg;
   display: flex;
   flex-direction: column;
   gap: $spacing-md;
+}
+
+.horizontalLayout .content {
+  padding: $spacing-xl $spacing-lg $spacing-lg $spacing-lg;
+}
+
+.verticalLayout .content {
+  padding: $spacing-lg;
 }
 
 .header {

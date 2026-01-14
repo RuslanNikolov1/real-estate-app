@@ -16,9 +16,10 @@ interface PropertyCardProps {
   onClick?: () => void;
   onDelete?: (propertyId: string) => void;
   onEdit?: (propertyId: string) => void;
+  layout?: 'horizontal' | 'vertical';
 }
 
-export function PropertyCard({ property, onClick, onDelete, onEdit }: PropertyCardProps) {
+export function PropertyCard({ property, onClick, onDelete, onEdit, layout = 'horizontal' }: PropertyCardProps) {
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language || 'bg';
 
@@ -82,7 +83,7 @@ export function PropertyCard({ property, onClick, onDelete, onEdit }: PropertyCa
       )}
       <Link
         href={getPropertyUrl()}
-        className={styles.link}
+        className={`${styles.link} ${layout === 'vertical' ? styles.verticalLayout : styles.horizontalLayout}`}
         onClick={onClick}
         target="_blank"
         rel="noopener noreferrer"

@@ -20,6 +20,8 @@ import {
   ChartBar
 } from '@phosphor-icons/react';
 import { AudioPlayer } from '@/components/ui/AudioPlayer';
+import { useAuth } from '@/contexts/AuthContext';
+import { AuthModal } from '@/features/auth/components/AuthModal';
 import styles from './Header.module.scss';
 
 const languages = [
@@ -32,10 +34,13 @@ const languages = [
 export function Header() {
   const { t, i18n } = useTranslation();
   const pathname = usePathname();
+  const { user, signOut, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const [showAmbienceMessage, setShowAmbienceMessage] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('login');
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,10 +80,28 @@ export function Header() {
     { href: '/valuation', label: t('nav.valuation'), icon: ChartBar },
   ];
 
-  const userMenuItems = [
-    { href: '/login', label: t('nav.login') },
-    { href: '/admin-panel', label: t('nav.adminPanel') },
-  ];
+  const openAuthModal = (tab: 'login' | 'register') => {
+    setAuthModalTab(tab);
+    setAuthModalOpen(true);
+    setIsUserMenuOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsUserMenuOpen(false);
+  };
+
+  // User menu items based on authentication state
+  const userMenuItems = user
+    ? [
+        { label: user.email || 'Потребител', href: null, action: null },
+        { label: t('nav.adminPanel'), href: '/admin-panel', action: null },
+        { label: 'Изход', href: null, action: handleSignOut },
+      ]
+    : [
+        { label: 'Влез', href: null, action: () => openAuthModal('login') },
+        { label: 'Регистрация', href: null, action: () => openAuthModal('register') },
+      ];
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -201,7 +224,7 @@ export function Header() {
               aria-expanded={isUserMenuOpen}
               onClick={() => setIsUserMenuOpen((prev) => !prev)}
             >
-              <User size={20} color="white" />
+              <User size={20} color="white" weight={user ? 'fill' : 'regular'} />
             </button>
             <AnimatePresence>
               {isUserMenuOpen && (
@@ -211,16 +234,31 @@ export function Header() {
                   exit={{ opacity: 0, y: -10 }}
                   className={styles.userMenu}
                 >
-                  {userMenuItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      prefetch={false}
-                      className={styles.userMenuLink}
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <span suppressHydrationWarning>{item.label}</span>
-                    </Link>
+                  {userMenuItems.map((item, index) => (
+                    item.href ? (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        prefetch={false}
+                        className={styles.userMenuLink}
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <span suppressHydrationWarning>{item.label}</span>
+                      </Link>
+                    ) : item.action ? (
+                      <button
+                        key={`action-${index}`}
+                        type="button"
+                        className={styles.userMenuLink}
+                        onClick={item.action}
+                      >
+                        <span suppressHydrationWarning>{item.label}</span>
+                      </button>
+                    ) : (
+                      <div key={`label-${index}`} className={styles.userMenuLabel}>
+                        <span suppressHydrationWarning>{item.label}</span>
+                      </div>
+                    )
                   ))}
                 </motion.div>
               )}
@@ -263,6 +301,13 @@ export function Header() {
           </motion.nav>
         )}
       </AnimatePresence>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialTab={authModalTab}
+      />
     </header>
   );
 }

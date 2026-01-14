@@ -1,5 +1,7 @@
 'use client';
 
+import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { PropertySearch } from './components/PropertySearch';
@@ -13,6 +15,12 @@ import { ContactBroker } from './components/ContactBroker';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import styles from './HomePage.module.scss';
+
+// Lazy load LatestPropertiesSection
+const LatestPropertiesSection = dynamic(
+  () => import('./components/LatestPropertiesSection').then(mod => ({ default: mod.LatestPropertiesSection })),
+  { ssr: false, loading: () => <div className={styles.loadingSection}>Зареждане...</div> }
+);
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -107,6 +115,11 @@ export function HomePage() {
             description={t('home.burgasAbout')}
           />
         </section>
+
+        {/* Latest Properties */}
+        <Suspense fallback={<div className={styles.loadingSection}>Зареждане на най-новите имоти...</div>}>
+          <LatestPropertiesSection />
+        </Suspense>
 
         {/* Featured Properties */}
         {featuredProperties.length > 0 && (

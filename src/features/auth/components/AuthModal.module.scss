@@ -1,0 +1,272 @@
+@use 'sass:color';
+@use '@/styles/variables' as *;
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-modal;
+  padding: $spacing-md;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  position: relative;
+  background: $white;
+  border-radius: 24px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.closeButton {
+  position: absolute;
+  top: $spacing-lg;
+  right: $spacing-lg;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: $medium-gray;
+  transition: color $transition-fast;
+  padding: $spacing-xs;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  z-index: 1;
+
+  &:hover {
+    color: $dark-red;
+    background: rgba($dark-red, 0.1);
+  }
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid $light-gray;
+  padding: 0 $spacing-xl;
+  padding-top: $spacing-xl;
+}
+
+.tab {
+  flex: 1;
+  padding: $spacing-md $spacing-lg;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: $medium-gray;
+  transition: all $transition-base;
+  position: relative;
+  font-family: $font-heading;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: transparent;
+    transition: background $transition-base;
+  }
+
+  &:hover {
+    color: $dark-red;
+  }
+
+  &.active {
+    color: $dark-red;
+
+    &::after {
+      background: $dark-red;
+    }
+  }
+}
+
+.content {
+  padding: $spacing-2xl $spacing-xl;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-xl $spacing-lg;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.formTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0;
+  font-family: $font-heading;
+  text-align: center;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 1.5rem;
+  }
+}
+
+.formSubtitle {
+  font-size: 0.9375rem;
+  color: $medium-gray;
+  margin: 0;
+  text-align: center;
+  margin-top: -$spacing-sm;
+}
+
+.formFields {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+  margin-top: $spacing-md;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $dark-gray;
+  font-family: $font-heading;
+}
+
+.input {
+  padding: $spacing-md $spacing-lg;
+  border: 2px solid $light-gray;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: $font-body;
+  transition: all $transition-base;
+  background: $white;
+  color: $black;
+
+  &:focus {
+    outline: none;
+    border-color: $dark-red;
+    box-shadow: 0 0 0 3px rgba($dark-red, 0.1);
+  }
+
+  &::placeholder {
+    color: $medium-gray;
+  }
+
+  &:disabled {
+    background: $light-gray;
+    cursor: not-allowed;
+  }
+}
+
+.error {
+  padding: $spacing-md;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.submitButton {
+  padding: $spacing-md $spacing-lg;
+  background: $dark-red;
+  color: $white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: $font-heading;
+  cursor: pointer;
+  transition: all $transition-base;
+  margin-top: $spacing-sm;
+
+  &:hover:not(:disabled) {
+    background: color.adjust($dark-red, $lightness: -5%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba($dark-red, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  color: $medium-gray;
+  font-size: 0.875rem;
+  margin: $spacing-md 0;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: $light-gray;
+  }
+
+  span {
+    padding: 0 $spacing-sm;
+  }
+}
+
+.oauthButtons {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.oauthButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  background: $white;
+  color: $dark-gray;
+  border: 2px solid $light-gray;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: $font-heading;
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &:hover {
+    border-color: $dark-red;
+    color: $dark-red;
+    background: rgba($dark-red, 0.05);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}

@@ -6,9 +6,11 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { PropertyCard } from '@/features/properties/components/PropertyCard';
 import { Property } from '@/types';
-import { Heart, Trash } from '@phosphor-icons/react';
+import { Heart, Trash, LockKey } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { AuthModal } from '@/features/auth/components/AuthModal';
 import styles from './FavoritesPage.module.scss';
 
 // 3 изкуствени любими имота
@@ -110,13 +112,69 @@ const mockFavoriteProperties: Property[] = [
 
 export function FavoritesPage() {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [favorites, setFavorites] = useState<Property[]>(mockFavoriteProperties);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const handleRemoveFavorite = (id: string) => {
     if (window.confirm('Сигурни ли сте, че искате да премахнете този имот от любими?')) {
       setFavorites((prev) => prev.filter((property) => property.id !== id));
     }
   };
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className={styles.favoritesPage}>
+        <Header />
+        <main className={styles.main}>
+          <div className={styles.container}>
+            <div className={styles.loadingState}>
+              <p>Зареждане...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!user) {
+    return (
+      <div className={styles.favoritesPage}>
+        <Header />
+        <main className={styles.main}>
+          <div className={styles.container}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className={styles.loginPrompt}
+            >
+              <LockKey size={64} className={styles.lockIcon} />
+              <h2 className={styles.promptTitle}>Необходима е автентикация</h2>
+              <p className={styles.promptDescription}>
+                Трябва да влезете в профила си, за да видите любими имоти.
+              </p>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={() => setAuthModalOpen(true)}
+              >
+                Влез в профила си
+              </Button>
+            </motion.div>
+          </div>
+        </main>
+        <Footer />
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          initialTab="login"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.favoritesPage}>

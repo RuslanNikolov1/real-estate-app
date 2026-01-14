@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { poppins, inter, greatVibes, allura, dancingScript, pacifico } from '@/lib/fonts';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { I18nProvider } from '@/components/providers/I18nProvider';
+import { AuthProvider } from '@/providers/AuthProvider';
 import { getBaseUrl } from '@/lib/base-url';
 import '@/styles/globals.scss';
 
@@ -61,7 +62,9 @@ export default function RootLayout({
     <html lang="bg" className={`${poppins.variable} ${inter.variable} ${greatVibes.variable} ${allura.variable} ${dancingScript.variable} ${pacifico.variable}`}>
       <body>
         <I18nProvider>
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </QueryProvider>
         </I18nProvider>
       </body>
     </html>
