@@ -236,15 +236,19 @@
 
 .oauthButtons {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: $spacing-md;
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+  }
 }
 
 .oauthButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: $spacing-md;
+  gap: $spacing-sm;
   padding: $spacing-md $spacing-lg;
   background: $white;
   color: $dark-gray;
@@ -255,6 +259,11 @@
   font-family: $font-heading;
   cursor: pointer;
   transition: all $transition-base;
+  flex: 1;
+
+  @media (max-width: $breakpoint-sm) {
+    flex: none;
+  }
 
   &:hover {
     border-color: $dark-red;

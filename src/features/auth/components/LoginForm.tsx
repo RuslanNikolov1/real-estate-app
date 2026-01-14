@@ -117,18 +117,20 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           type="button"
           onClick={handleGoogleSignIn}
           className={styles.oauthButton}
+          aria-label="Влез с Google"
         >
-          <GoogleLogo size={20} weight="bold" />
-          <span>Продължи с Google</span>
+          <GoogleLogo size={24} weight="bold" />
+          <span>Google</span>
         </button>
 
         <button
           type="button"
           onClick={handleFacebookSignIn}
           className={styles.oauthButton}
+          aria-label="Влез с Facebook"
         >
-          <FacebookLogo size={20} weight="fill" />
-          <span>Продължи с Facebook</span>
+          <FacebookLogo size={24} weight="fill" />
+          <span>Facebook</span>
         </button>
       </div>
     </div>

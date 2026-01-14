@@ -148,18 +148,20 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           type="button"
           onClick={handleGoogleSignIn}
           className={styles.oauthButton}
+          aria-label="Регистрирай се с Google"
         >
-          <GoogleLogo size={20} weight="bold" />
-          <span>Продължи с Google</span>
+          <GoogleLogo size={24} weight="bold" />
+          <span>Google</span>
         </button>
 
         <button
           type="button"
           onClick={handleFacebookSignIn}
           className={styles.oauthButton}
+          aria-label="Регистрирай се с Facebook"
         >
-          <FacebookLogo size={20} weight="fill" />
-          <span>Продължи с Facebook</span>
+          <FacebookLogo size={24} weight="fill" />
+          <span>Facebook</span>
         </button>
       </div>
     </div>
