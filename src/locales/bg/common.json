@@ -88,6 +88,25 @@
       "fillFormRight": "Попълнете формата отдясно",
       "successMessage": "Съобщението е изпратено успешно!",
       "submit": "Изпрати"
+    },
+    "valuationForm": {
+      "title": "Оценка на имот",
+      "squareMeters": "Квадратни метри (м²)",
+      "yearOfConstruction": "Година на строеж",
+      "hasAct16": "Има ли акт 16?",
+      "hasElevator": "Има ли асансьор?",
+      "floor": "Етаж",
+      "city": "Град",
+      "neighborhood": "Квартал",
+      "phone": "Телефонен номер",
+      "submit": "Изпрати",
+      "submitting": "Изпращане...",
+      "successMessage": "Вашето съобщение е получено",
+      "akt16Options": {
+        "yes": "Да",
+        "no": "Не",
+        "notSpecified": "Не е посочено"
+      }
     }
   },
   "propertyTypes": {

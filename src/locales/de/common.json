@@ -88,6 +88,25 @@
       "fillFormRight": "Füllen Sie das Formular rechts aus",
       "successMessage": "Nachricht erfolgreich gesendet!",
       "submit": "Absenden"
+    },
+    "valuationForm": {
+      "title": "Immobilienbewertung",
+      "squareMeters": "Quadratmeter (m²)",
+      "yearOfConstruction": "Baujahr",
+      "hasAct16": "Hat es Akt 16 (акт 16)?",
+      "hasElevator": "Hat es einen Aufzug?",
+      "floor": "Etage",
+      "city": "Stadt",
+      "neighborhood": "Stadtteil",
+      "phone": "Telefonnummer",
+      "submit": "Absenden",
+      "submitting": "Wird gesendet...",
+      "successMessage": "Ihre Nachricht wurde erhalten",
+      "akt16Options": {
+        "yes": "Ja",
+        "no": "Nein",
+        "notSpecified": "Nicht angegeben"
+      }
     }
   },
   "propertyTypes": {

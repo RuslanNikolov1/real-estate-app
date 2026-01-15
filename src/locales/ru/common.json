@@ -88,6 +88,25 @@
       "fillFormRight": "Заполните форму справа",
       "successMessage": "Сообщение успешно отправлено!",
       "submit": "Отправить"
+    },
+    "valuationForm": {
+      "title": "Оценка недвижимости",
+      "squareMeters": "Квадратные метры (м²)",
+      "yearOfConstruction": "Год постройки",
+      "hasAct16": "Есть ли акт 16 (акт 16)?",
+      "hasElevator": "Есть ли лифт?",
+      "floor": "Этаж",
+      "city": "Город",
+      "neighborhood": "Район",
+      "phone": "Номер телефона",
+      "submit": "Отправить",
+      "submitting": "Отправка...",
+      "successMessage": "Ваше сообщение получено",
+      "akt16Options": {
+        "yes": "Да",
+        "no": "Нет",
+        "notSpecified": "Не указано"
+      }
     }
   },
   "propertyTypes": {

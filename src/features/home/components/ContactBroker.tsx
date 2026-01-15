@@ -9,46 +9,83 @@ import { motion } from 'framer-motion';
 import { EnvelopeSimple, Phone, ChatCircleText } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Toast } from '@/components/ui/Toast';
 import styles from './ContactBroker.module.scss';
 
-type ContactFormData = {
-  name: string;
-  email: string;
-  phone?: string;
-  message: string;
+type ValuationFormData = {
+  squareMeters: number;
+  yearOfConstruction?: number;
+  hasAct16: 'yes' | 'no' | 'not-specified';
+  hasElevator: boolean;
+  floor: number;
+  city: string;
+  neighborhood: string;
+  phone: string;
 };
 
 export function ContactBroker() {
   const { t } = useTranslation();
-  
-  const contactSchema = z.object({
-    name: z.string().min(2, t('errors.fieldRequired', { fieldLabel: t('home.contactForm.name') })),
-    email: z.string().email(t('errors.emailInvalid')),
-    phone: z.string().optional(),
-    message: z.string().min(10, t('errors.fieldRequired', { fieldLabel: t('home.contactForm.message') })),
-  });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  
+  const valuationSchema = z.object({
+    squareMeters: z.number({
+      required_error: t('errors.fieldRequired', { fieldLabel: t('home.valuationForm.squareMeters') }),
+      invalid_type_error: t('errors.fieldMustBePositive', { fieldLabel: t('home.valuationForm.squareMeters') }),
+    }).positive(t('errors.fieldMustBePositive', { fieldLabel: t('home.valuationForm.squareMeters') })),
+    yearOfConstruction: z.number().int().min(1800).max(new Date().getFullYear() + 1).optional(),
+    hasAct16: z.enum(['yes', 'no', 'not-specified'], {
+      required_error: t('errors.fieldRequired', { fieldLabel: t('home.valuationForm.hasAct16') }),
+    }),
+    hasElevator: z.boolean(),
+    floor: z.number({
+      required_error: t('errors.fieldRequired', { fieldLabel: t('home.valuationForm.floor') }),
+      invalid_type_error: t('errors.fieldRequired', { fieldLabel: t('home.valuationForm.floor') }),
+    }).int(),
+    city: z.string().min(2, t('errors.fieldRequired', { fieldLabel: t('home.valuationForm.city') })),
+    neighborhood: z.string().min(2, t('errors.fieldRequired', { fieldLabel: t('home.valuationForm.neighborhood') })),
+    phone: z.string().min(5, t('errors.fieldRequired', { fieldLabel: t('home.valuationForm.phone') })),
+  });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
+  } = useForm<ValuationFormData>({
+    resolver: zodResolver(valuationSchema),
+    defaultValues: {
+      hasAct16: 'not-specified',
+      hasElevator: false,
+    },
   });
 
-  const onSubmit = async (_data: ContactFormData) => {
+  const onSubmit = async (data: ValuationFormData) => {
     setIsSubmitting(true);
     try {
-      // TODO: Implement API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setIsSubmitted(true);
+      const response = await fetch('/api/valuation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit valuation request');
+      }
+
+      setShowToast(true);
       reset();
-      setTimeout(() => setIsSubmitted(false), 5000);
+      
+      // Auto-hide toast after 3 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
     } catch (error) {
       console.error('Error submitting form:', error);
+      // You could add error toast here if needed
     } finally {
       setIsSubmitting(false);
     }
@@ -57,7 +94,7 @@ export function ContactBroker() {
   return (
     <section className={styles.section}>
       <div className={styles.container}>
-        <h2 className={styles.title}>{t('home.contactBroker')}</h2>
+        <h2 className={styles.title}>{t('home.valuationForm.title')}</h2>
         <div className={styles.content}>
           <div className={styles.info}>
             <div className={styles.infoItem}>
@@ -90,47 +127,74 @@ export function ContactBroker() {
             className={styles.form}
           >
             <Input
-              label={t('home.contactForm.name')}
-              {...register('name')}
-              error={errors.name?.message}
+              label={t('home.valuationForm.squareMeters')}
+              type="number"
+              step="0.01"
+              {...register('squareMeters', { valueAsNumber: true })}
+              error={errors.squareMeters?.message}
             />
             <Input
-              label={t('home.contactForm.email')}
-              type="email"
-              {...register('email')}
-              error={errors.email?.message}
+              label={t('home.valuationForm.yearOfConstruction')}
+              type="number"
+              {...register('yearOfConstruction', { valueAsNumber: true })}
+              error={errors.yearOfConstruction?.message}
+            />
+            <div className={styles.selectWrapper}>
+              <label htmlFor="hasAct16" className={styles.label}>
+                {t('home.valuationForm.hasAct16')}
+              </label>
+              <select
+                id="hasAct16"
+                {...register('hasAct16')}
+                className={`${styles.select} ${errors.hasAct16 ? styles.error : ''}`}
+              >
+                <option value="not-specified">{t('home.valuationForm.akt16Options.notSpecified')}</option>
+                <option value="yes">{t('home.valuationForm.akt16Options.yes')}</option>
+                <option value="no">{t('home.valuationForm.akt16Options.no')}</option>
+              </select>
+              {errors.hasAct16 && (
+                <span className={styles.errorMessage}>
+                  {errors.hasAct16.message}
+                </span>
+              )}
+            </div>
+            <div className={styles.checkboxWrapper}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  {...register('hasElevator')}
+                  className={styles.checkbox}
+                />
+                <span>{t('home.valuationForm.hasElevator')}</span>
+              </label>
+              {errors.hasElevator && (
+                <span className={styles.errorMessage}>
+                  {errors.hasElevator.message}
+                </span>
+              )}
+            </div>
+            <Input
+              label={t('home.valuationForm.floor')}
+              type="number"
+              {...register('floor', { valueAsNumber: true })}
+              error={errors.floor?.message}
             />
             <Input
-              label={t('home.contactForm.phoneOptional')}
+              label={t('home.valuationForm.city')}
+              {...register('city')}
+              error={errors.city?.message}
+            />
+            <Input
+              label={t('home.valuationForm.neighborhood')}
+              {...register('neighborhood')}
+              error={errors.neighborhood?.message}
+            />
+            <Input
+              label={t('home.valuationForm.phone')}
               type="tel"
               {...register('phone')}
               error={errors.phone?.message}
             />
-            <div className={styles.textareaWrapper}>
-              <label htmlFor="message" className={styles.label}>
-                {t('home.contactForm.message')}
-              </label>
-              <textarea
-                id="message"
-                {...register('message')}
-                className={`${styles.textarea} ${errors.message ? styles.error : ''}`}
-                rows={5}
-              />
-              {errors.message && (
-                <span className={styles.errorMessage}>
-                  {errors.message.message}
-                </span>
-              )}
-            </div>
-            {isSubmitted && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className={styles.successMessage}
-              >
-                {t('home.contactForm.successMessage')}
-              </motion.div>
-            )}
             <Button
               type="submit"
               variant="primary"
@@ -138,11 +202,17 @@ export function ContactBroker() {
               isLoading={isSubmitting}
               className={styles.submitButton}
             >
-              {t('home.contactForm.submit')}
+              {isSubmitting ? t('home.valuationForm.submitting') : t('home.valuationForm.submit')}
             </Button>
           </motion.form>
         </div>
       </div>
+      <Toast
+        message={t('home.valuationForm.successMessage')}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+        duration={3000}
+      />
     </section>
   );
 }

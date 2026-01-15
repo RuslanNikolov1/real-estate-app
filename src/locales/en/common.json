@@ -88,6 +88,25 @@
       "fillFormRight": "Fill out the form on the right",
       "successMessage": "Message sent successfully!",
       "submit": "Submit"
+    },
+    "valuationForm": {
+      "title": "Property Valuation",
+      "squareMeters": "Square Meters (m²)",
+      "yearOfConstruction": "Year of Construction",
+      "hasAct16": "Does it have Act 16 (акт 16)?",
+      "hasElevator": "Does it have an elevator?",
+      "floor": "Floor",
+      "city": "City",
+      "neighborhood": "Neighborhood",
+      "phone": "Phone Number",
+      "submit": "Submit",
+      "submitting": "Submitting...",
+      "successMessage": "Your message has been received",
+      "akt16Options": {
+        "yes": "Yes",
+        "no": "No",
+        "notSpecified": "Not Specified"
+      }
     }
   },
   "propertyTypes": {
