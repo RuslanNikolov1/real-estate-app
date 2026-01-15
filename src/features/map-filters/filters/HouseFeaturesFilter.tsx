@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/Input';
 import { HOUSE_FEATURES } from './constants';
 import type { FeatureFilter } from './types';
@@ -19,6 +20,7 @@ export function HouseFeaturesFilter({
   featureSearchTerm = '',
   onSearchChange,
 }: HouseFeaturesFilterProps) {
+  const { t } = useTranslation();
   const featureFilters = useMemo<FeatureFilter[]>(() => HOUSE_FEATURES, []);
   const allFeature = featureFilters.find(f => f.id === 'all');
   const otherFeatures = featureFilters.filter(f => f.id !== 'all');
@@ -68,13 +70,13 @@ export function HouseFeaturesFilter({
   return (
     <div className={styles.container}>
       <div className={styles.featuresFilter}>
-        <h4 className={styles.featuresTitle}>Особености</h4>
+        <h4 className={styles.featuresTitle}>{t('filters.titles.features')}</h4>
 
         <div className={styles.featureSearchWrapper}>
           <div className={styles.autocompleteWrapper}>
             <Input
               id="features-search"
-              placeholder="Търсене на особености"
+              placeholder={t('filters.common.search')}
               value={featureSearchTerm}
               onChange={(e) => onSearchChange?.(e.target.value)}
               className={styles.featureSearchInput}

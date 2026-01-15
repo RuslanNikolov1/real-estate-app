@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import {
     SubtypeFilter,
     AreaFilter,
@@ -65,6 +67,7 @@ export function WarehousesIndustrialFiltersPage({
     onSearch,
     isRentMode = false
 }: WarehousesIndustrialFiltersPageProps) {
+    const { t } = useTranslation();
     const cityInputRef = useRef<HTMLDivElement>(null);
 
     // Use external location state if provided, otherwise use internal state
@@ -254,7 +257,7 @@ export function WarehousesIndustrialFiltersPage({
                         onClick={handleClearRef.current}
                         className={styles.clearButton}
                     >
-                        Изчисти
+                        {t('filters.common.clearFilters')}
                     </Button>
                     <Button
                         variant="primary"
@@ -266,7 +269,7 @@ export function WarehousesIndustrialFiltersPage({
                         }}
                         className={styles.searchButton}
                     >
-                        Търси
+                        {t('filters.common.search')}
                     </Button>
                 </div>
             );
@@ -275,14 +278,14 @@ export function WarehousesIndustrialFiltersPage({
     }, [filterKey, onSearch]);
 
     // Rent Price Filter Component
-    const RentPriceFilter = React.memo(({ 
-        title, 
-        unit, 
-        sliderMin, 
-        sliderMax, 
-        from, 
-        to, 
-        onFilterChange 
+    const RentPriceFilter = React.memo(({
+        title,
+        unit,
+        sliderMin,
+        sliderMax,
+        from,
+        to,
+        onFilterChange
     }: {
         title: string;
         unit: string;
@@ -292,6 +295,7 @@ export function WarehousesIndustrialFiltersPage({
         to: number;
         onFilterChange: (from: number, to: number) => void;
     }) => {
+        const { t } = useTranslation();
         const [rentFrom, setRentFrom] = useState(from);
         const [rentTo, setRentTo] = useState(to);
 
@@ -381,7 +385,7 @@ export function WarehousesIndustrialFiltersPage({
                         <div className={priceFilterStyles.priceInputs}>
                             <div className={priceFilterStyles.priceInputWrapper}>
                                 <label htmlFor={`${title}-from`} className={priceFilterStyles.priceInputLabel}>
-                                    От
+                                    {t('filters.common.from')}
                                 </label>
                                 <input
                                     type="number"
@@ -406,7 +410,7 @@ export function WarehousesIndustrialFiltersPage({
                             </div>
                             <div className={priceFilterStyles.priceInputWrapper}>
                                 <label htmlFor={`${title}-to`} className={priceFilterStyles.priceInputLabel}>
-                                    До
+                                    {t('filters.common.to')}
                                 </label>
                                 <input
                                     type="number"
@@ -449,8 +453,8 @@ export function WarehousesIndustrialFiltersPage({
             {/* Property Type Filter (Вид) */}
             <SubtypeFilter
                 key={`property-type-${filterKey}`}
-                title="Вид"
-                options={WAREHOUSES_PROPERTY_TYPES}
+                title={t('filters.titles.propertyType')}
+                options={translateFilterOptions(WAREHOUSES_PROPERTY_TYPES, t, 'filters.warehouseTypes')}
                 onFilterChange={handlePropertyTypeChange}
                 initialSelected={filterValuesRef.current.propertyTypes || []}
             />
@@ -460,7 +464,7 @@ export function WarehousesIndustrialFiltersPage({
                 <>
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
-                        title="Месечен наем"
+                        title={t('filters.titles.monthlyRent')}
                         unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
@@ -471,7 +475,7 @@ export function WarehousesIndustrialFiltersPage({
 
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
-                        title="Цена за кв.м"
+                        title={t('filters.titles.rentPerSqm')}
                         unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
@@ -500,7 +504,7 @@ export function WarehousesIndustrialFiltersPage({
                 initialAreaTo={filterValuesRef.current.areaTo}
                 sliderMax={WAREHOUSES_AREA_SLIDER_MAX}
                 areaCap={WAREHOUSES_AREA_SLIDER_MAX}
-                title="Квадратура"
+                title={t('filters.titles.area')}
             />
 
             {/* Features Filter (Особености) */}
@@ -508,7 +512,7 @@ export function WarehousesIndustrialFiltersPage({
                 key={`features-${filterKey}`}
                 initialSelected={filterValuesRef.current.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
-                features={isRentMode ? RENT_WAREHOUSE_FEATURES : WAREHOUSES_FEATURES}
+                features={translateFilterOptions(isRentMode ? RENT_WAREHOUSE_FEATURES : WAREHOUSES_FEATURES, t, 'filters.warehouseFeatures')}
             />
         </div>
     );

@@ -12,6 +12,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { supabase } from '@/lib/supabase';
+import { handleAuthError } from '@/lib/auth';
 import {
   EnvelopeSimple,
   Lock,
@@ -92,7 +93,8 @@ export function LoginPage() {
       });
 
       if (authError) {
-        setError(authError.message || t('flashMessages.loginError'));
+        const errorMessage = handleAuthError(authError) || authError.message || t('flashMessages.loginError');
+        setError(errorMessage);
         return;
       }
 

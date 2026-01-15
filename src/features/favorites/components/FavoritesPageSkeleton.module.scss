@@ -1,0 +1,138 @@
+@import '@/styles/_variables.scss';
+
+// Alias project variables to the names used in this module
+$breakpoint-mobile: $breakpoint-sm;
+$breakpoint-tablet: $breakpoint-md;
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+.skeletonCard {
+  display: flex;
+  gap: 2rem;
+  background: white;
+  border-radius: 1.2rem;
+  overflow: hidden;
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.08);
+  animation: pulse 1.5s ease-in-out infinite;
+
+  @media (max-width: $breakpoint-tablet) {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+.skeletonImage {
+  width: 40%;
+  min-height: 28rem;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e8e8e8 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+
+  @media (max-width: $breakpoint-tablet) {
+    width: 100%;
+    min-height: 24rem;
+  }
+}
+
+.skeletonContent {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.skeletonPrice {
+  width: 15rem;
+  height: 3rem;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e8e8e8 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.6rem;
+}
+
+.skeletonTitle {
+  width: 70%;
+  height: 2.4rem;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e8e8e8 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.6rem;
+}
+
+.skeletonLocation {
+  width: 40%;
+  height: 2rem;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e8e8e8 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.6rem;
+}
+
+.skeletonDetails {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+
+  @media (max-width: $breakpoint-mobile) {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+}
+
+.skeletonDetail {
+  width: 8rem;
+  height: 2rem;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e8e8e8 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.6rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}

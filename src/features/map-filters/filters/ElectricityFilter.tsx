@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import { ELECTRICITY_OPTIONS } from './constants';
 import type { ElectricityOption } from './constants';
 import styles from './ConstructionTypeFilter.module.scss';
@@ -11,10 +13,12 @@ interface ElectricityFilterProps {
 }
 
 export function ElectricityFilter({ onFilterChange, initialSelected = [] }: ElectricityFilterProps) {
+    const { t } = useTranslation();
     const [selectedOptions, setSelectedOptions] = useState<string[]>(initialSelected);
     const isInitialMount = useRef(true);
     const isSyncingFromProps = useRef(false);
     const onFilterChangeRef = useRef(onFilterChange);
+    const translatedOptions = translateFilterOptions(ELECTRICITY_OPTIONS, t, 'filters.electricityOptions');
 
     // Keep ref updated
     useEffect(() => {
@@ -52,9 +56,9 @@ export function ElectricityFilter({ onFilterChange, initialSelected = [] }: Elec
 
     return (
         <div className={styles.constructionFilter}>
-            <h4 className={styles.featuresTitle}>Ток</h4>
+            <h4 className={styles.featuresTitle}>{t('filters.titles.electricity')}</h4>
             <div className={styles.constructionGrid}>
-                {ELECTRICITY_OPTIONS.map((option: ElectricityOption) => {
+                {translatedOptions.map((option: ElectricityOption) => {
                     const isSelected = selectedOptions.includes(option.id);
                     return (
                         <button

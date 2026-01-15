@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useCallback, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import styles from '../MapFiltersPage.module.scss';
@@ -34,6 +35,7 @@ export function ReplaceRealEstatesFiltersPage({
     onActionButtonsReady,
     onSearch
 }: ReplaceRealEstatesFiltersPageProps) {
+    const { t } = useTranslation();
     const cityInputRef = useRef<HTMLDivElement>(null);
     
     // Use external location state if provided, otherwise use internal state
@@ -154,7 +156,7 @@ export function ReplaceRealEstatesFiltersPage({
                         onClick={handleClearRef.current}
                         className={styles.clearButton}
                     >
-                        Изчисти
+                        {t('filters.common.clearFilters')}
                     </Button>
                     <Button
                         variant="primary"
@@ -166,7 +168,7 @@ export function ReplaceRealEstatesFiltersPage({
                         }}
                         className={styles.searchButton}
                     >
-                        Търси
+                        {t('filters.common.search')}
                     </Button>
                 </div>
             );

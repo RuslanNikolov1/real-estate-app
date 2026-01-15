@@ -708,6 +708,35 @@ export function getFieldsForPropertyType(type: PropertyType): FieldConfig[] {
 }
 
 /**
+ * Translate field configs using a translation function
+ * This preserves all internal keys/IDs while translating display labels
+ */
+export function translateFieldConfigs(
+  fields: FieldConfig[],
+  t: (key: string) => string
+): FieldConfig[] {
+  return fields.map(field => {
+    const translatedField: FieldConfig = {
+      ...field,
+      label: field.label.startsWith('propertyForm.') 
+        ? t(field.label) 
+        : field.label, // If already a translation key, translate it
+      placeholder: field.placeholder?.startsWith('propertyForm.')
+        ? t(field.placeholder)
+        : field.placeholder,
+      options: field.options?.map(option => ({
+        ...option,
+        // Keep option.id unchanged (database value), only translate label
+        label: option.label.startsWith('propertyForm.')
+          ? t(option.label)
+          : option.label,
+      })),
+    };
+    return translatedField;
+  });
+}
+
+/**
  * Generate Zod schema dynamically based on property type
  */
 export function generatePropertySchema(type?: PropertyType) {

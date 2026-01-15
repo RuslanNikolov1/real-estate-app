@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/Input';
 import { APARTMENT_FEATURE_FILTERS } from './constants';
 import type { FeatureFilter } from './types';
@@ -10,9 +11,11 @@ interface FeaturesFilterProps {
     onFilterChange: (selectedFeatures: string[]) => void;
     initialSelected?: string[];
     features?: FeatureFilter[];
+    title?: string;
 }
 
-export function FeaturesFilter({ onFilterChange, initialSelected = [], features }: FeaturesFilterProps) {
+export function FeaturesFilter({ onFilterChange, initialSelected = [], features, title }: FeaturesFilterProps) {
+    const { t } = useTranslation();
     const [selectedFeatures, setSelectedFeatures] = useState<string[]>(initialSelected);
     const [featureSearchTerm, setFeatureSearchTerm] = useState('');
     const [showFeatureDropdown, setShowFeatureDropdown] = useState(false);
@@ -68,12 +71,12 @@ export function FeaturesFilter({ onFilterChange, initialSelected = [], features 
 
     return (
         <div className={styles.featuresFilter}>
-            <h4 className={styles.featuresTitle}>Особености</h4>
+            <h4 className={styles.featuresTitle}>{title || t('filters.titles.features')}</h4>
             <div className={styles.autocompleteWrapper}>
                 <Input
                     id="features-search"
-                    label="Търсене на особеност"
-                    placeholder="Изберете особеност..."
+                    label={t('filters.titles.features')}
+                    placeholder={t('filters.common.search')}
                     value={featureSearchTerm}
                     onChange={(event) => {
                         setFeatureSearchTerm(event.target.value);
@@ -133,7 +136,7 @@ export function FeaturesFilter({ onFilterChange, initialSelected = [], features 
                                 return feature.label.toLowerCase().includes(searchTerm);
                             }).length === 0 && (
                                 <div className={styles.noNeighborhoodsMessage}>
-                                    Няма налични особенности
+                                    {t('filters.common.notSpecified')}
                                 </div>
                             )}
                     </div>

@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import {
     SubtypeFilter,
     AreaFilter,
@@ -86,6 +88,7 @@ export function StoresOfficesFiltersPage({
     onSearch,
     isRentMode = false
 }: StoresOfficesFiltersPageProps) {
+    const { t } = useTranslation();
     const cityInputRef = useRef<HTMLDivElement>(null);
 
     // Use external location state if provided, otherwise use internal state
@@ -367,7 +370,7 @@ export function StoresOfficesFiltersPage({
                         onClick={handleClearRef.current}
                         className={styles.clearButton}
                     >
-                        Изчисти
+                        {t('filters.common.clearFilters')}
                     </Button>
                     <Button
                         variant="primary"
@@ -379,7 +382,7 @@ export function StoresOfficesFiltersPage({
                         }}
                         className={styles.searchButton}
                     >
-                        Търси
+                        {t('filters.common.search')}
                     </Button>
                 </div>
             );
@@ -388,14 +391,14 @@ export function StoresOfficesFiltersPage({
     }, [filterKey, onSearch]);
 
     // Rent Price Filter Component
-    const RentPriceFilter = React.memo(({ 
-        title, 
-        unit, 
-        sliderMin, 
-        sliderMax, 
-        from, 
-        to, 
-        onFilterChange 
+    const RentPriceFilter = React.memo(({
+        title,
+        unit,
+        sliderMin,
+        sliderMax,
+        from,
+        to,
+        onFilterChange
     }: {
         title: string;
         unit: string;
@@ -405,6 +408,7 @@ export function StoresOfficesFiltersPage({
         to: number;
         onFilterChange: (from: number, to: number) => void;
     }) => {
+        const { t } = useTranslation();
         const [rentFrom, setRentFrom] = useState(from);
         const [rentTo, setRentTo] = useState(to);
 
@@ -494,7 +498,7 @@ export function StoresOfficesFiltersPage({
                         <div className={priceFilterStyles.priceInputs}>
                             <div className={priceFilterStyles.priceInputWrapper}>
                                 <label htmlFor={`${title}-from`} className={priceFilterStyles.priceInputLabel}>
-                                    От
+                                    {t('filters.common.from')}
                                 </label>
                                 <input
                                     type="number"
@@ -519,7 +523,7 @@ export function StoresOfficesFiltersPage({
                             </div>
                             <div className={priceFilterStyles.priceInputWrapper}>
                                 <label htmlFor={`${title}-to`} className={priceFilterStyles.priceInputLabel}>
-                                    До
+                                    {t('filters.common.to')}
                                 </label>
                                 <input
                                     type="number"
@@ -550,8 +554,8 @@ export function StoresOfficesFiltersPage({
             <div className={styles.leftFilters}>
                 <div className={styles.idFilter}>
                     <Input
-                        label="ID на имот"
-                        placeholder="Въведете ID"
+                        label={t('filters.common.propertyId')}
+                        placeholder={t('filters.common.propertyIdPlaceholder')}
                         value={propertyId}
                         onChange={(event) => handlePropertyIdChange(event.target.value)}
                     />
@@ -571,8 +575,8 @@ export function StoresOfficesFiltersPage({
             {/* Property Type Filter (Подходящ за) */}
             <SubtypeFilter
                 key={`property-type-${filterKey}`}
-                title="Подходящ за"
-                options={COMMERCIAL_PROPERTY_TYPES}
+                title={t('filters.titles.suitableFor')}
+                options={translateFilterOptions(COMMERCIAL_PROPERTY_TYPES, t, 'filters.commercialTypes')}
                 onFilterChange={handlePropertyTypeChange}
                 initialSelected={filterValuesRef.current.propertyTypes || []}
                 leftOrder={['store', 'cabinet', 'sport']}
@@ -583,7 +587,7 @@ export function StoresOfficesFiltersPage({
                 <>
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
-                        title="Месечен наем"
+                        title={t('filters.titles.monthlyRent')}
                         unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
@@ -594,7 +598,7 @@ export function StoresOfficesFiltersPage({
 
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
-                        title="Цена за кв.м"
+                        title={t('filters.titles.rentPerSqm')}
                         unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
@@ -623,7 +627,7 @@ export function StoresOfficesFiltersPage({
                 initialAreaTo={filterValuesRef.current.areaTo}
                 sliderMax={COMMERCIAL_AREA_SLIDER_MAX}
                 areaCap={COMMERCIAL_AREA_SLIDER_MAX}
-                title="Квадратура"
+                title={t('filters.titles.area')}
             />
 
             {/* Floor Filter (Етаж) */}
@@ -679,7 +683,7 @@ export function StoresOfficesFiltersPage({
                 key={`features-${filterKey}`}
                 initialSelected={filterValuesRef.current.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
-                features={isRentMode ? RENT_COMMERCIAL_FEATURES : COMMERCIAL_FEATURES}
+                features={translateFilterOptions(isRentMode ? RENT_COMMERCIAL_FEATURES : COMMERCIAL_FEATURES, t, 'filters.commercialFeatures')}
             />
         </div>
     );

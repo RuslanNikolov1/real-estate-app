@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
+
 import { useState, useCallback, useMemo } from 'react';
 import { PiggyBank } from '@phosphor-icons/react';
 import { HOUSE_PRICE_SLIDER_MAX } from './types';
@@ -16,6 +18,7 @@ export function HousePriceFilter({
     initialPriceFrom = 0,
     initialPriceTo = HOUSE_PRICE_SLIDER_MAX
 }: HousePriceFilterProps) {
+    const { t } = useTranslation();
     const [priceFrom, setPriceFrom] = useState(initialPriceFrom);
     const [priceTo, setPriceTo] = useState(initialPriceTo);
 
@@ -99,7 +102,7 @@ export function HousePriceFilter({
                     <div className={styles.priceInputs}>
                         <div className={styles.priceInputWrapper}>
                             <label htmlFor="house-price-from" className={styles.priceInputLabel}>
-                                От
+                                {t('filters.common.from')}
                             </label>
                             <input
                                 type="number"
@@ -124,7 +127,7 @@ export function HousePriceFilter({
                         </div>
                         <div className={styles.priceInputWrapper}>
                             <label htmlFor="house-price-to" className={styles.priceInputLabel}>
-                                До
+                                {t('filters.common.to')}
                             </label>
                             <input
                                 type="number"

@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import { HOUSE_TYPES } from './constants';
 import type { HouseType } from './types';
 import styles from './ApartmentSubtypeFilter.module.scss';
@@ -12,7 +14,9 @@ interface HouseTypeFilterProps {
 }
 
 export function HouseTypeFilter({ onFilterChange, initialSelected = [] }: HouseTypeFilterProps) {
+    const { t } = useTranslation();
     const [selectedHouseTypes, setSelectedHouseTypes] = useState<string[]>(initialSelected);
+    const translatedHouseTypes = translateFilterOptions(HOUSE_TYPES, t, 'filters.houseTypes');
 
     const handleHouseTypeToggle = useCallback((typeId: string) => {
         if (typeId === 'all') {
@@ -41,7 +45,7 @@ export function HouseTypeFilter({ onFilterChange, initialSelected = [] }: HouseT
     }, [selectedHouseTypes, onFilterChange]);
 
     const layoutData = useMemo(() => {
-        const [allType, ...otherTypes] = HOUSE_TYPES;
+        const [allType, ...otherTypes] = translatedHouseTypes;
         const typeMap = new Map(otherTypes.map(type => [type.id, type]));
         const leftOrder = ['one-floor', 'three-floor', 'four-plus-floor'];
         const rightOrder = ['two-floor', 'house-floor', 'not-specified'];
@@ -68,7 +72,7 @@ export function HouseTypeFilter({ onFilterChange, initialSelected = [] }: HouseT
         const maxRows = Math.max(leftColumnTypes.length, rightColumnTypes.length);
 
         return { allType, leftColumnTypes, rightColumnTypes, maxRows };
-    }, []);
+    }, [translatedHouseTypes]);
 
     return (
         <motion.div
@@ -78,7 +82,7 @@ export function HouseTypeFilter({ onFilterChange, initialSelected = [] }: HouseT
             className={styles.container}
         >
             <div className={styles.apartmentSubtypeFilter}>
-                <h4 className={styles.apartmentSubtypeTitle}>Етажност</h4>
+                <h4 className={styles.apartmentSubtypeTitle}>{t('filters.titles.houseType')}</h4>
                 <div className={styles.apartmentSubtypeOptions}>
                     {layoutData.allType && (
                         <label

@@ -1,14 +1,21 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ReviewCard } from './components/ReviewCard';
-import { Review } from '@/types';
+import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/contexts/AuthContext';
+import { AuthModal } from '@/features/auth/components/AuthModal';
+import { FeedbackModal } from './components/FeedbackModal';
+import { ChatCircleDots, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import styles from './ReviewsPage.module.scss';
 
-// 10 изкуствени отзива
-const mockReviews: Review[] = [
+// Removed mock data - will fetch from API
+
+const oldMockReviews = [
   {
     id: '1',
     user_name: 'Иван Петров',
@@ -123,6 +130,31 @@ const mockReviews: Review[] = [
 
 export function ReviewsPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const [page, setPage] = useState(1);
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const limit = 16;
+
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['reviews', 'approved', page],
+    queryFn: async () => {
+      const response = await fetch(`/api/reviews?status=approved&page=${page}&limit=${limit}`);
+      if (!response.ok) throw new Error('Failed to fetch reviews');
+      return response.json();
+    },
+  });
+
+  const reviews = data?.reviews || [];
+  const totalPages = Math.ceil((data?.total || 0) / limit);
+
+  const handleSubmitClick = () => {
+    if (!user) {
+      setAuthModalOpen(true);
+      return;
+    }
+    setFeedbackModalOpen(true);
+  };
 
   return (
     <div className={styles.reviewsPage}>
@@ -131,21 +163,78 @@ export function ReviewsPage() {
         <section className={styles.section}>
           <div className={styles.container}>
             <div className={styles.header}>
-              <h1 className={styles.title}>{t('nav.reviews')}</h1>
-              <p className={styles.subtitle}>
-                Вижте какво казват нашите клиенти за нас
-              </p>
+              <div className={styles.headerText}>
+                <h1 className={styles.title}>{t('nav.reviews')}</h1>
+                <p className={styles.subtitle}>
+                  {t('reviews.subtitle')}
+                </p>
+              </div>
+              <Button onClick={handleSubmitClick}>
+                <ChatCircleDots size={18} />
+                {t('reviews.writeFeedback')}
+              </Button>
             </div>
 
-            <div className={styles.grid}>
-              {mockReviews.map((review) => (
-                <ReviewCard key={review.id} review={review} />
-              ))}
-            </div>
+            {isLoading ? (
+              <div className={styles.loading}>
+                {t('reviews.loading')}
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>{t('reviews.noReviews')}</p>
+              </div>
+            ) : (
+              <>
+                <div className={styles.grid}>
+                  {reviews.map((review) => (
+                    <ReviewCard key={review.id} review={review} />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className={styles.pagination}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                    >
+                      <CaretLeft size={18} />
+                      {t('reviews.previous')}
+                    </Button>
+                    <span className={styles.pageInfo}>
+                      {t('reviews.pageInfo', { current: page, total: totalPages })}
+                    </span>
+                    <Button
+                      variant="outline"
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                    >
+                      {t('reviews.next')}
+                      <CaretRight size={18} />
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </section>
       </main>
       <Footer />
+
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialTab="login"
+      />
+
+      <FeedbackModal
+        isOpen={feedbackModalOpen}
+        onClose={() => setFeedbackModalOpen(false)}
+        onSuccess={() => {
+          setFeedbackModalOpen(false);
+          refetch();
+        }}
+      />
     </div>
   );
 }

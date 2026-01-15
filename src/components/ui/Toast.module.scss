@@ -1,0 +1,77 @@
+@import '@/styles/_variables.scss';
+
+// Alias project variables to the names used in this module
+$breakpoint-mobile: $breakpoint-sm;
+
+.toast {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  background: white;
+  border-radius: 0.6rem;
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.12);
+  padding: 1.2rem 1.6rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 20rem;
+  max-width: 32rem;
+
+  @media (max-width: $breakpoint-mobile) {
+    top: 1.6rem;
+    right: 1.6rem;
+    left: 1.6rem;
+    min-width: auto;
+    max-width: none;
+    padding: 1rem 1.4rem;
+  }
+}
+
+.toastContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.icon {
+  color: $dark-red;
+  flex-shrink: 0;
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+.message {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: $color-text-secondary;
+  line-height: 1.4;
+
+  @media (max-width: $breakpoint-mobile) {
+    font-size: 1.1rem;
+  }
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  padding: 0.4rem;
+  cursor: pointer;
+  color: $color-text-tertiary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.4rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: $color-text-secondary;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}

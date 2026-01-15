@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import { WATER_OPTIONS } from './constants';
 import type { WaterOption } from './constants';
 import styles from './ConstructionTypeFilter.module.scss';
@@ -11,10 +13,12 @@ interface WaterFilterProps {
 }
 
 export function WaterFilter({ onFilterChange, initialSelected = [] }: WaterFilterProps) {
+    const { t } = useTranslation();
     const [selectedOptions, setSelectedOptions] = useState<string[]>(initialSelected);
     const isInitialMount = useRef(true);
     const isSyncingFromProps = useRef(false);
     const onFilterChangeRef = useRef(onFilterChange);
+    const translatedOptions = translateFilterOptions(WATER_OPTIONS, t, 'filters.waterOptions');
 
     // Keep ref updated
     useEffect(() => {
@@ -52,9 +56,9 @@ export function WaterFilter({ onFilterChange, initialSelected = [] }: WaterFilte
 
     return (
         <div className={styles.constructionFilter}>
-            <h4 className={styles.featuresTitle}>Вода</h4>
+            <h4 className={styles.featuresTitle}>{t('filters.titles.water')}</h4>
             <div className={styles.constructionGrid}>
-                {WATER_OPTIONS.map((option: WaterOption) => {
+                {translatedOptions.map((option: WaterOption) => {
                     const isSelected = selectedOptions.includes(option.id);
                     return (
                         <button

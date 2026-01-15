@@ -97,12 +97,17 @@
 
 .audioPlayerWrapper {
   position: relative;
+  margin-left: $spacing-xl;
+
+  @media (max-width: $breakpoint-md) {
+    margin-left: $spacing-md;
+  }
 }
 
 .ambienceMessage {
   position: absolute;
   top: calc(100% + $spacing-md);
-  left: -7.5vw;
+  left: -12vw;
   padding: $spacing-sm $spacing-md;
   background: $black;
   color: $white;
@@ -220,6 +225,7 @@
   color: $white;
   cursor: pointer;
   transition: all $transition-base;
+  position: relative;
 
   &:hover,
   &:focus-visible {
@@ -227,6 +233,27 @@
     border-color: $white;
     outline: none;
   }
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFD700;
+  color: $black;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 50%;
+  border: 2px solid $black;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  z-index: 1;
+  line-height: 1;
 }
 
 .userMenu {

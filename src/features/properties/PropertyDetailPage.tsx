@@ -6,6 +6,9 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
 import { ShareModal } from '@/components/ui/ShareModal';
+import { AuthModal } from '@/features/auth/components/AuthModal';
+import { useAuth } from '@/contexts/AuthContext';
+import { isFavorite as checkIsFavorite, toggleFavorite, addFavorite, getFavorites } from '@/lib/favorites';
 import { Property } from '@/types';
 import {
   MapPin,
@@ -143,6 +146,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   // Call useTranslation at the top, before any conditional logic or early returns
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language || 'bg';
+  const { user } = useAuth();
 
   const [remoteProperty, setRemoteProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -152,6 +156,8 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [showShareModal, setShowShareModal] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -197,6 +203,69 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
       isMounted = false;
     };
   }, [propertyId]);
+
+  // Check if property is favorited when user state changes
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (user && propertyId) {
+        const favorited = await checkIsFavorite(propertyId);
+        setIsFavorite(favorited);
+      } else {
+        setIsFavorite(false);
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [user, propertyId]);
+
+  // Refresh favorite status when page becomes visible or regains focus
+  // This ensures the button updates if favorite was removed in another tab/window
+  useEffect(() => {
+    if (!user || !propertyId) return;
+
+    const refreshFavoriteStatus = async () => {
+      const favorited = await checkIsFavorite(propertyId);
+      setIsFavorite(favorited);
+    };
+
+    // Check on visibility change (tab switch)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        refreshFavoriteStatus();
+      }
+    };
+
+    // Check on window focus (switching back to window)
+    const handleFocus = () => {
+      refreshFavoriteStatus();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [user, propertyId]);
+
+  // Handle favorite after login (auto-favorite if pending)
+  useEffect(() => {
+    const handlePendingFavorite = async () => {
+      if (user) {
+        const pendingFavorite = localStorage.getItem('pendingFavorite');
+        if (pendingFavorite === propertyId) {
+          const success = await addFavorite(propertyId);
+          if (success) {
+            setIsFavorite(true);
+          }
+          localStorage.removeItem('pendingFavorite');
+        }
+      }
+    };
+
+    handlePendingFavorite();
+  }, [user, propertyId]);
 
   const fallbackProperty = useMemo(
     () => mockProperties.find((p) => p.id === propertyId),
@@ -1191,8 +1260,26 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   <Button
                     variant={isFavorite ? 'primary' : 'outline'}
                     size="md"
-                    onClick={() => setIsFavorite(!isFavorite)}
+                    onClick={async () => {
+                      if (isTogglingFavorite) return;
+                      
+                      if (!user) {
+                        localStorage.setItem('pendingFavorite', propertyId);
+                        setAuthModalOpen(true);
+                        return;
+                      }
+                      
+                      setIsTogglingFavorite(true);
+                      const success = await toggleFavorite(propertyId);
+                      if (success) {
+                        // Refresh from database to ensure accuracy
+                        const currentStatus = await checkIsFavorite(propertyId);
+                        setIsFavorite(currentStatus);
+                      }
+                      setIsTogglingFavorite(false);
+                    }}
                     className={styles.actionButton}
+                    disabled={isTogglingFavorite}
                   >
                     <HeartStraight 
                       size={20} 
@@ -1362,6 +1449,13 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           onClose={() => setShowShareModal(false)}
         />
       )}
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialTab="login"
+      />
     </div>
   );
 }

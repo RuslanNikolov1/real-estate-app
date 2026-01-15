@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
+
 import { useState, useCallback, useMemo, type CSSProperties } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -17,6 +19,7 @@ export function HouseAreaFilter({
     initialAreaFrom = 50, 
     initialAreaTo = 200 
 }: HouseAreaFilterProps) {
+    const { t } = useTranslation();
     const [areaFrom, setAreaFrom] = useState(initialAreaFrom);
     const [areaTo, setAreaTo] = useState(initialAreaTo);
 
@@ -96,7 +99,7 @@ export function HouseAreaFilter({
                     <div className={styles.areaInputs}>
                         <div className={styles.areaInputWrapper}>
                             <label htmlFor="house-area-from" className={styles.areaInputLabel}>
-                                От
+                                {t('filters.common.from')}
                             </label>
                             <input
                                 type="number"
@@ -115,7 +118,7 @@ export function HouseAreaFilter({
                         </div>
                         <div className={styles.areaInputWrapper}>
                             <label htmlFor="house-area-to" className={styles.areaInputLabel}>
-                                До
+                                {t('filters.common.to')}
                             </label>
                             <input
                                 type="number"

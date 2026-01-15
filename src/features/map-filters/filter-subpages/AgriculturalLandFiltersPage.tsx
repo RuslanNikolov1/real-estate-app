@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useRef, useCallback, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import {
     SubtypeFilter,
     AreaFilter,
@@ -83,6 +85,7 @@ export function AgriculturalLandFiltersPage({
     onSearch,
     initialFilters
 }: AgriculturalLandFiltersPageProps) {
+    const { t } = useTranslation();
     const cityInputRef = useRef<HTMLDivElement>(null);
 
     // Use external location state if provided, otherwise use internal state
@@ -261,7 +264,7 @@ export function AgriculturalLandFiltersPage({
                         onClick={handleClearRef.current}
                         className={styles.clearButton}
                     >
-                        Изчисти
+                        {t('filters.common.clearFilters')}
                     </Button>
                     <Button
                         variant="primary"
@@ -273,7 +276,7 @@ export function AgriculturalLandFiltersPage({
                         }}
                         className={styles.searchButton}
                     >
-                        Търси
+                        {t('filters.common.search')}
                     </Button>
                 </div>
             );
@@ -287,8 +290,8 @@ export function AgriculturalLandFiltersPage({
             <div className={styles.leftFilters}>
                 <div className={styles.idFilter}>
                     <Input
-                        label="ID на имот"
-                        placeholder="Въведете ID"
+                        label={t('filters.common.propertyId')}
+                        placeholder={t('filters.common.propertyIdPlaceholder')}
                         value={filters.propertyId || ''}
                         onChange={(event) => handlePropertyIdChange(event.target.value)}
                     />
@@ -308,8 +311,8 @@ export function AgriculturalLandFiltersPage({
             {/* Property Type Filter (Вид) */}
             <SubtypeFilter
                 key={`property-type-${filterKey}`}
-                title="Вид"
-                options={AGRICULTURAL_PROPERTY_TYPES}
+                title={t('filters.titles.propertyType')}
+                options={translateFilterOptions(AGRICULTURAL_PROPERTY_TYPES, t, 'filters.agriculturalTypes')}
                 onFilterChange={handlePropertyTypeChange}
                 initialSelected={filters.propertyTypes || []}
             />
@@ -332,7 +335,7 @@ export function AgriculturalLandFiltersPage({
                 initialAreaTo={filters.areaTo}
                 sliderMax={AGRICULTURAL_AREA_SLIDER_MAX}
                 areaCap={AGRICULTURAL_AREA_SLIDER_MAX}
-                title="Площ (кв.м.)"
+                title={t('filters.titles.area')}
                 onPresetChange={handlePresetChange}
                 initialPresetId={filters.selectedPresetId}
             />
@@ -352,7 +355,7 @@ export function AgriculturalLandFiltersPage({
                 key={`features-${filterKey}`}
                 initialSelected={filters.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
-                features={AGRICULTURAL_FEATURES}
+                features={translateFilterOptions(AGRICULTURAL_FEATURES, t, 'filters.agriculturalFeatures')}
             />
 
         </div>

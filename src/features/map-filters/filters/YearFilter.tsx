@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { YEAR_SLIDER_MIN, YEAR_SLIDER_MAX } from './types';
 import styles from './YearFilter.module.scss';
 
@@ -17,6 +18,7 @@ export function YearFilter({
     initialYearTo = YEAR_SLIDER_MAX,
     initialIsNotProvided = false
 }: YearFilterProps) {
+    const { t } = useTranslation();
     const [yearFrom, setYearFrom] = useState(initialYearFrom);
     const [yearTo, setYearTo] = useState(initialYearTo);
     const [isYearNotProvided, setIsYearNotProvided] = useState(initialIsNotProvided);
@@ -48,7 +50,7 @@ export function YearFilter({
 
     return (
         <div className={styles.yearFilter}>
-            <h4 className={styles.featuresTitle}>Година на строителство</h4>
+            <h4 className={styles.featuresTitle}>{t('filters.titles.construction')} - {t('filters.common.from')} {yearFrom} {t('filters.common.to')} {yearTo}</h4>
             <div className={styles.yearControls}>
                 <div className={styles.dualRangeSlider}>
                     <input
@@ -90,7 +92,7 @@ export function YearFilter({
                 <div className={styles.yearInputsRow}>
                     <div className={styles.yearInputWrapper}>
                         <label htmlFor="year-from" className={styles.yearInputLabel}>
-                            От
+                            {t('filters.common.from')}
                         </label>
                         <input
                             type="number"
@@ -109,7 +111,7 @@ export function YearFilter({
                     </div>
                     <div className={styles.yearInputWrapper}>
                         <label htmlFor="year-to" className={styles.yearInputLabel}>
-                            До
+                            {t('filters.common.to')}
                         </label>
                         <input
                             type="number"
@@ -132,7 +134,7 @@ export function YearFilter({
                             checked={isYearNotProvided}
                             onChange={(e) => handleNotProvidedChange(e.target.checked)}
                         />
-                        Не е посочено
+                        {t('filters.common.notSpecified')}
                     </label>
                 </div>
             </div>

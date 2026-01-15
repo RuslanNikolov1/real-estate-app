@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import { BUILDING_TYPES } from './constants';
 import type { BuildingType } from './constants';
 import styles from './ConstructionTypeFilter.module.scss';
@@ -11,7 +13,9 @@ interface BuildingTypeFilterProps {
 }
 
 export function BuildingTypeFilter({ onFilterChange, initialSelected = [] }: BuildingTypeFilterProps) {
+    const { t } = useTranslation();
     const [selectedTypes, setSelectedTypes] = useState<string[]>(initialSelected);
+    const translatedTypes = translateFilterOptions(BUILDING_TYPES, t, 'filters.buildingTypes');
 
     const handleToggle = useCallback((typeId: string) => {
         setSelectedTypes((prev) => {
@@ -25,9 +29,9 @@ export function BuildingTypeFilter({ onFilterChange, initialSelected = [] }: Bui
 
     return (
         <div className={styles.constructionFilter}>
-            <h4 className={styles.featuresTitle}>Вид сграда</h4>
+            <h4 className={styles.featuresTitle}>{t('filters.titles.buildingType')}</h4>
             <div className={styles.constructionGrid}>
-                {BUILDING_TYPES.map((type: BuildingType) => {
+                {translatedTypes.map((type: BuildingType) => {
                     const isSelected = selectedTypes.includes(type.id);
                     return (
                         <button

@@ -1,7 +1,7 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Star } from '@phosphor-icons/react';
 import { Review } from '@/types';
 import styles from './ReviewCard.module.scss';
 
@@ -10,9 +10,17 @@ interface ReviewCardProps {
 }
 
 export function ReviewCard({ review }: ReviewCardProps) {
+  const { i18n } = useTranslation();
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('bg-BG', {
+    const localeMap: Record<string, string> = {
+      'en': 'en-US',
+      'bg': 'bg-BG',
+      'ru': 'ru-RU',
+      'de': 'de-DE',
+    };
+    const locale = localeMap[i18n.language] || 'bg-BG';
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -34,36 +42,14 @@ export function ReviewCard({ review }: ReviewCardProps) {
           </div>
           <div className={styles.userDetails}>
             <h3 className={styles.userName}>{review.user_name}</h3>
+            {review.user_email && (
+              <span className={styles.email}>{review.user_email}</span>
+            )}
             <span className={styles.date}>{formatDate(review.created_at)}</span>
           </div>
-        </div>
-        <div className={styles.rating}>
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              size={20}
-              className={`${styles.star} ${
-                i < review.rating ? styles.filled : styles.empty
-              }`}
-              fill={i < review.rating ? '#FFD700' : 'none'}
-            />
-          ))}
         </div>
       </div>
       <p className={styles.comment}>{review.comment}</p>
     </motion.div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

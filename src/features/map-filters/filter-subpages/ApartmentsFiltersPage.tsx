@@ -2,10 +2,12 @@
 
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { PiggyBank, MoneyWavy } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import {
     SubtypeFilter,
     AreaFilter,
@@ -16,7 +18,7 @@ import {
     CompletionStatusFilter,
     APARTMENT_SUBTYPES
 } from '../filters';
-import { RENT_APARTMENT_FEATURES } from '../filters/constants';
+import { RENT_APARTMENT_FEATURES, APARTMENT_FEATURE_FILTERS } from '../filters/constants';
 import {
     PRICE_SLIDER_MAX,
     PRICE_PER_SQM_SLIDER_MAX,
@@ -83,6 +85,7 @@ export function ApartmentsFiltersPage({
     onSearch,
     isRentMode = false
 }: ApartmentsFiltersPageProps) {
+    const { t } = useTranslation();
     const cityInputRef = useRef<HTMLDivElement>(null);
     
     // Use external location state if provided, otherwise use internal state
@@ -387,7 +390,7 @@ export function ApartmentsFiltersPage({
                         onClick={handleClear}
                         className={styles.clearButton}
                     >
-                        Изчисти
+                        {t('filters.common.clearFilters')}
                     </Button>
                     <Button
                         variant="primary"
@@ -399,7 +402,7 @@ export function ApartmentsFiltersPage({
                         }}
                         className={styles.searchButton}
                     >
-                        Търси
+                        {t('filters.common.search')}
                     </Button>
                 </div>
             );
@@ -514,7 +517,7 @@ export function ApartmentsFiltersPage({
                         <div className={priceFilterStyles.priceInputs}>
                             <div className={priceFilterStyles.priceInputWrapper}>
                                 <label htmlFor={`${title}-from`} className={priceFilterStyles.priceInputLabel}>
-                                    От
+                                    {t('filters.common.from')}
                                 </label>
                                 <input
                                     type="number"
@@ -539,7 +542,7 @@ export function ApartmentsFiltersPage({
                             </div>
                             <div className={priceFilterStyles.priceInputWrapper}>
                                 <label htmlFor={`${title}-to`} className={priceFilterStyles.priceInputLabel}>
-                                    До
+                                    {t('filters.common.to')}
                                 </label>
                                 <input
                                     type="number"
@@ -570,8 +573,8 @@ export function ApartmentsFiltersPage({
             <div className={styles.leftFilters}>
                 <div className={styles.idFilter}>
                     <Input
-                        label="ID на имот"
-                        placeholder="Въведете ID"
+                        label={t('filters.common.propertyId')}
+                        placeholder={t('filters.common.propertyIdPlaceholder')}
                         value={propertyId}
                         onChange={(event) => handlePropertyIdChange(event.target.value)}
                     />
@@ -591,8 +594,8 @@ export function ApartmentsFiltersPage({
             {/* Apartment Subtype Filter */}
             <SubtypeFilter
                 key={`subtype-${filterKey}`}
-                title="Вид на имота"
-                options={APARTMENT_SUBTYPES}
+                title={t('filters.titles.propertyType')}
+                options={translateFilterOptions(APARTMENT_SUBTYPES, t, 'filters.apartmentSubtypes')}
                 onFilterChange={handleApartmentSubtypeChange}
                 initialSelected={filterValuesRef.current.apartmentSubtypes || []}
                 leftOrder={['studio', 'two-bedroom', 'maisonette', 'attic']}
@@ -605,15 +608,15 @@ export function ApartmentsFiltersPage({
                     {/* Furnishing Filter */}
                     <SubtypeFilter
                         key={`furnishing-${filterKey}`}
-                        title="Обзавеждане"
-                        options={FURNISHING_OPTIONS}
+                        title={t('filters.titles.furnishing')}
+                        options={translateFilterOptions(FURNISHING_OPTIONS, t, 'filters.furnishing')}
                         onFilterChange={handleFurnishingChange}
                         initialSelected={filterValuesRef.current.selectedFurnishing || []}
                     />
                     
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
-                        title="Месечен наем"
+                        title={t('filters.titles.monthlyRent')}
                         unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
@@ -624,7 +627,7 @@ export function ApartmentsFiltersPage({
 
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
-                        title="Цена за кв.м"
+                        title={t('filters.titles.rentPerSqm')}
                         unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
@@ -655,7 +658,11 @@ export function ApartmentsFiltersPage({
                 key={`features-${filterKey}`}
                 onFilterChange={handleFeaturesChange}
                 initialSelected={rightColumnFilterState.selectedFeatures}
-                features={isRentMode ? RENT_APARTMENT_FEATURES : undefined}
+                features={translateFilterOptions(
+                    isRentMode ? RENT_APARTMENT_FEATURES : APARTMENT_FEATURE_FILTERS,
+                    t,
+                    'filters.features'
+                )}
             />
 
             {/* Construction & Year Filter - Only for sale mode */}

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import { HOTEL_CONSTRUCTION_TYPES } from './constants';
 import type { HotelConstructionType } from './constants';
 import styles from './ConstructionTypeFilter.module.scss';
@@ -11,8 +13,10 @@ interface HotelConstructionTypeFilterProps {
 }
 
 export function HotelConstructionTypeFilter({ onFilterChange, initialSelected = [] }: HotelConstructionTypeFilterProps) {
+    const { t } = useTranslation();
     // For single selection, we only keep the first item or null
     const [selectedType, setSelectedType] = useState<string | null>(initialSelected.length > 0 ? initialSelected[0] : null);
+    const translatedTypes = translateFilterOptions(HOTEL_CONSTRUCTION_TYPES, t, 'filters.hotelConstructionTypes');
 
     // Sync state when initialSelected changes
     useEffect(() => {
@@ -34,9 +38,9 @@ export function HotelConstructionTypeFilter({ onFilterChange, initialSelected = 
 
     return (
         <div className={styles.constructionFilter}>
-            <h4 className={styles.featuresTitle}>Тип строителство</h4>
+            <h4 className={styles.featuresTitle}>{t('filters.titles.construction')}</h4>
             <div className={styles.constructionGrid}>
-                {HOTEL_CONSTRUCTION_TYPES.map((type: HotelConstructionType) => {
+                {translatedTypes.map((type: HotelConstructionType) => {
                     const isSelected = selectedType === type.id;
                     return (
                         <button

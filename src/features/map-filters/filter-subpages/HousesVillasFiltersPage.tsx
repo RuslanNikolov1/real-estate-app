@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useRef, useCallback, useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import {
     SubtypeFilter,
     AreaFilter,
@@ -68,6 +70,7 @@ export function HousesVillasFiltersPage({
     onSearch,
     isRentMode = false
 }: HousesVillasFiltersPageProps) {
+    const { t } = useTranslation();
     const cityInputRef = useRef<HTMLDivElement>(null);
 
     // Use external location state if provided, otherwise use internal state
@@ -319,7 +322,7 @@ export function HousesVillasFiltersPage({
                         onClick={handleClearRef.current}
                         className={styles.clearButton}
                     >
-                        Изчисти
+                        {t('filters.common.clearFilters')}
                     </Button>
                     <Button
                         variant="primary"
@@ -331,7 +334,7 @@ export function HousesVillasFiltersPage({
                         }}
                         className={styles.searchButton}
                     >
-                        Търси
+                        {t('filters.common.search')}
                     </Button>
                 </div>
             );
@@ -502,8 +505,8 @@ export function HousesVillasFiltersPage({
             <div className={styles.leftFilters}>
                 <div className={styles.idFilter}>
                     <Input
-                        label="ID на имот"
-                        placeholder="Въведете ID"
+                        label={t('filters.common.propertyId')}
+                        placeholder={t('filters.common.propertyIdPlaceholder')}
                         value={propertyId}
                         onChange={(event) => handlePropertyIdChange(event.target.value)}
                     />
@@ -523,8 +526,8 @@ export function HousesVillasFiltersPage({
             {/* House Type Filter (Етажност) */}
             <SubtypeFilter
                 key={`house-type-${filterKey}`}
-                title="Етажност"
-                options={HOUSE_TYPES}
+                title={t('filters.titles.houseType')}
+                options={translateFilterOptions(HOUSE_TYPES, t, 'filters.houseTypes')}
                 onFilterChange={handleHouseTypeChange}
                 initialSelected={filterValuesRef.current.houseTypes || []}
                 leftOrder={['one-floor', 'three-floor', 'four-plus-floor']}
@@ -537,15 +540,15 @@ export function HousesVillasFiltersPage({
                     {/* Furnishing Filter */}
                     <SubtypeFilter
                         key={`furnishing-${filterKey}`}
-                        title="Обзавеждане"
-                        options={FURNISHING_OPTIONS}
+                        title={t('filters.titles.furnishing')}
+                        options={translateFilterOptions(FURNISHING_OPTIONS, t, 'filters.furnishing')}
                         onFilterChange={handleFurnishingChange}
                         initialSelected={filterValuesRef.current.selectedFurnishing || []}
                     />
                     
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
-                        title="Месечен наем"
+                        title={t('filters.titles.monthlyRent')}
                         unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
@@ -556,7 +559,7 @@ export function HousesVillasFiltersPage({
 
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
-                        title="Цена за кв.м"
+                        title={t('filters.titles.rentPerSqm')}
                         unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
@@ -585,7 +588,7 @@ export function HousesVillasFiltersPage({
             <AreaFilter
                 key={`yard-area-${filterKey}`}
                 onFilterChange={handleYardAreaChange}
-                title="Двор кв.м"
+                title={t('filters.titles.yardArea')}
                 sliderMax={YARD_AREA_SLIDER_MAX}
                 areaCap={YARD_AREA_CAP}
                 inputIdPrefix="yard-area"
@@ -601,7 +604,7 @@ export function HousesVillasFiltersPage({
                     filterValuesRef.current.selectedFeatures = newSelection;
                     notifyFiltersChange();
                 }}
-                features={isRentMode ? RENT_HOUSE_FEATURES : HOUSE_FEATURES}
+                features={translateFilterOptions(isRentMode ? RENT_HOUSE_FEATURES : HOUSE_FEATURES, t, 'filters.houseFeatures')}
             />
         </div>
     );

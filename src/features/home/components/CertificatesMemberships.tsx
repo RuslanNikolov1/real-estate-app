@@ -31,7 +31,7 @@ export function CertificatesMemberships({
           <h2 className={styles.title}>{t('home.certificatesMemberships')}</h2>
           <Link href="/certificates" prefetch={false}>
             <Button variant="outline" className={styles.viewAllButton}>
-              Виж всички
+              {t('home.viewAll')}
               <CaretRight size={16} />
             </Button>
           </Link>

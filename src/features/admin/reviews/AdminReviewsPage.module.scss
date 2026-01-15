@@ -8,6 +8,7 @@
 
 .main {
   flex: 1;
+  padding-top: $spacing-3xl;
 }
 
 .section {
@@ -20,6 +21,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 $spacing-lg;
+  padding-top: $spacing-lg;
 }
 
 .header {

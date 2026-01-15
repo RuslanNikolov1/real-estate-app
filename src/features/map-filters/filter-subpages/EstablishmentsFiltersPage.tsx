@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import {
     SubtypeFilter,
     AreaFilter,
@@ -74,6 +76,7 @@ export function EstablishmentsFiltersPage({
     onSearch,
     isRentMode = false
 }: EstablishmentsFiltersPageProps) {
+    const { t } = useTranslation();
     const cityInputRef = useRef<HTMLDivElement>(null);
     
     // Use external location state if provided, otherwise use internal state
@@ -347,7 +350,7 @@ export function EstablishmentsFiltersPage({
                         onClick={handleClearRef.current}
                         className={styles.clearButton}
                     >
-                        Изчисти
+                        {t('filters.common.clearFilters')}
                     </Button>
                     <Button
                         variant="primary"
@@ -359,7 +362,7 @@ export function EstablishmentsFiltersPage({
                         }}
                         className={styles.searchButton}
                     >
-                        Търси
+                        {t('filters.common.search')}
                     </Button>
                 </div>
             );
@@ -368,14 +371,14 @@ export function EstablishmentsFiltersPage({
     }, [filterKey, onSearch]);
 
     // Rent Price Filter Component
-    const RentPriceFilter = React.memo(({ 
-        title, 
-        unit, 
-        sliderMin, 
-        sliderMax, 
-        from, 
-        to, 
-        onFilterChange 
+    const RentPriceFilter = React.memo(({
+        title,
+        unit,
+        sliderMin,
+        sliderMax,
+        from,
+        to,
+        onFilterChange
     }: {
         title: string;
         unit: string;
@@ -385,6 +388,7 @@ export function EstablishmentsFiltersPage({
         to: number;
         onFilterChange: (from: number, to: number) => void;
     }) => {
+        const { t } = useTranslation();
         const [rentFrom, setRentFrom] = useState(from);
         const [rentTo, setRentTo] = useState(to);
 
@@ -474,7 +478,7 @@ export function EstablishmentsFiltersPage({
                         <div className={priceFilterStyles.priceInputs}>
                             <div className={priceFilterStyles.priceInputWrapper}>
                                 <label htmlFor={`${title}-from`} className={priceFilterStyles.priceInputLabel}>
-                                    От
+                                    {t('filters.common.from')}
                                 </label>
                                 <input
                                     type="number"
@@ -499,7 +503,7 @@ export function EstablishmentsFiltersPage({
                             </div>
                             <div className={priceFilterStyles.priceInputWrapper}>
                                 <label htmlFor={`${title}-to`} className={priceFilterStyles.priceInputLabel}>
-                                    До
+                                    {t('filters.common.to')}
                                 </label>
                                 <input
                                     type="number"
@@ -530,8 +534,8 @@ export function EstablishmentsFiltersPage({
             <div className={styles.leftFilters}>
                 <div className={styles.idFilter}>
                     <Input
-                        label="ID на имот"
-                        placeholder="Въведете ID"
+                        label={t('filters.common.propertyId')}
+                        placeholder={t('filters.common.propertyIdPlaceholder')}
                         value={propertyId}
                         onChange={(event) => handlePropertyIdChange(event.target.value)}
                     />
@@ -552,8 +556,8 @@ export function EstablishmentsFiltersPage({
                     {/* Location Type Filter (Разположение) */}
                     <SubtypeFilter
                         key={`location-${filterKey}`}
-                        title="Разположение"
-                        options={ESTABLISHMENTS_LOCATION_TYPES}
+                        title={t('search.locationType')}
+                        options={translateFilterOptions(ESTABLISHMENTS_LOCATION_TYPES, t, 'filters.establishmentLocationTypes')}
                         onFilterChange={handleLocationTypeChange}
                         initialSelected={filterValuesRef.current.locationTypes || []}
                     />
@@ -561,15 +565,15 @@ export function EstablishmentsFiltersPage({
                     {/* Furnishing Filter */}
                     <SubtypeFilter
                         key={`furnishing-${filterKey}`}
-                        title="Обзавеждане"
-                        options={FURNISHING_OPTIONS}
+                        title={t('filters.titles.furnishing')}
+                        options={translateFilterOptions(FURNISHING_OPTIONS, t, 'filters.furnishing')}
                         onFilterChange={handleFurnishingChange}
                         initialSelected={filterValuesRef.current.selectedFurnishing || []}
                     />
                     
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
-                        title="Месечен наем"
+                        title={t('filters.titles.monthlyRent')}
                         unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
@@ -580,7 +584,7 @@ export function EstablishmentsFiltersPage({
 
                     {/* Rent Per Sqm Filter */}
                     <RentPriceFilter
-                        title="Цена за кв.м"
+                        title={t('filters.titles.rentPerSqm')}
                         unit="евро"
                         sliderMin={RENT_PER_SQM_SLIDER_MIN}
                         sliderMax={RENT_PER_SQM_SLIDER_MAX}
@@ -611,15 +615,15 @@ export function EstablishmentsFiltersPage({
                 initialAreaTo={filterValuesRef.current.areaTo}
                 sliderMax={ESTABLISHMENTS_AREA_SLIDER_MAX}
                 areaCap={ESTABLISHMENTS_AREA_SLIDER_MAX}
-                title="Квадратура"
+                title={t('filters.titles.area')}
             />
 
             {/* Location Type Filter (Разположение) - Only for sale mode */}
             {!isRentMode && (
                 <SubtypeFilter
                     key={`location-${filterKey}`}
-                    title="Разположение"
-                    options={ESTABLISHMENTS_LOCATION_TYPES}
+                    title={t('search.locationType')}
+                    options={translateFilterOptions(ESTABLISHMENTS_LOCATION_TYPES, t, 'filters.establishmentLocationTypes')}
                     onFilterChange={handleLocationTypeChange}
                     initialSelected={filterValuesRef.current.locationTypes || []}
                 />
@@ -649,8 +653,8 @@ export function EstablishmentsFiltersPage({
             {isRentMode && (
                 <SubtypeFilter
                     key={`working-${filterKey}`}
-                    title="Работи"
-                    options={WORKING_OPTIONS}
+                    title={t('filters.commercialFeatures.working')}
+                    options={translateFilterOptions(WORKING_OPTIONS, t, 'filters.workingOptions')}
                     onFilterChange={handleWorkingOptionsChange}
                     initialSelected={filterValuesRef.current.selectedWorkingOptions || []}
                     leftOrder={['year-round']}
@@ -663,7 +667,7 @@ export function EstablishmentsFiltersPage({
                 key={`features-${filterKey}`}
                 initialSelected={filterValuesRef.current.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
-                features={isRentMode ? RENT_RESTAURANT_FEATURES : ESTABLISHMENTS_FEATURES}
+                features={translateFilterOptions(isRentMode ? RENT_RESTAURANT_FEATURES : ESTABLISHMENTS_FEATURES, t, 'filters.establishmentFeatures')}
             />
 
         </div>

@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import {
   List,
   X,
@@ -20,6 +21,7 @@ import {
   ChartBar
 } from '@phosphor-icons/react';
 import { AudioPlayer } from '@/components/ui/AudioPlayer';
+import { Toast } from '@/components/ui/Toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/features/auth/components/AuthModal';
 import styles from './Header.module.scss';
@@ -34,6 +36,7 @@ const languages = [
 export function Header() {
   const { t, i18n } = useTranslation();
   const pathname = usePathname();
+  const router = useRouter();
   const { user, signOut, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
@@ -41,7 +44,14 @@ export function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('login');
+  const [showLoginToast, setShowLoginToast] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const prevAuthModalOpenRef = useRef(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Check if message has already been shown in this session
@@ -89,18 +99,39 @@ export function Header() {
   const handleSignOut = async () => {
     await signOut();
     setIsUserMenuOpen(false);
+    // Clear login toast flag so it shows again on next login
+    sessionStorage.removeItem('loginToastShown');
   };
+
+  // Check if user is admin
+  const isAdmin = user?.email === 'ruslannikolov1@gmail.com';
+
+  // Fetch pending reviews count for admin
+  const { data: statsData } = useQuery({
+    queryKey: ['reviews-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/reviews/stats');
+      if (!response.ok) throw new Error('Failed to fetch review stats');
+      return response.json();
+    },
+    enabled: isAdmin && !!user,
+    refetchInterval: 30000, // Refetch every 30 seconds
+    retry: false,
+    staleTime: 25000,
+  });
+
+  const pendingCount = statsData?.pending || 0;
 
   // User menu items based on authentication state
   const userMenuItems = user
     ? [
-        { label: user.email || 'Потребител', href: null, action: null },
-        { label: t('nav.adminPanel'), href: '/admin-panel', action: null },
-        { label: 'Изход', href: null, action: handleSignOut },
+        { label: user.email || t('header.userLabel'), href: null, action: null },
+        ...(isAdmin ? [{ label: t('nav.adminPanel'), href: '/admin-panel', action: null }] : []),
+        { label: t('nav.logout'), href: null, action: handleSignOut },
       ]
     : [
-        { label: 'Влез', href: null, action: () => openAuthModal('login') },
-        { label: 'Регистрация', href: null, action: () => openAuthModal('register') },
+        { label: t('nav.login'), href: null, action: () => openAuthModal('login') },
+        { label: t('nav.register'), href: null, action: () => openAuthModal('register') },
       ];
 
   const changeLanguage = (lang: string) => {
@@ -138,12 +169,31 @@ export function Header() {
     setIsUserMenuOpen(false);
   }, [pathname]);
 
+  // Show toast only when user successfully logs in through the modal
+  useEffect(() => {
+    // Check if auth modal was just closed and user is now logged in
+    // This means a successful login just happened
+    if (prevAuthModalOpenRef.current && !authModalOpen && user) {
+      setShowLoginToast(true);
+      sessionStorage.setItem('loginToastShown', 'true');
+      // Auto-hide after 3 seconds
+      const timer = setTimeout(() => {
+        setShowLoginToast(false);
+      }, 3000);
+      // Update previous auth modal state
+      prevAuthModalOpenRef.current = authModalOpen;
+      return () => clearTimeout(timer);
+    }
+    // Update previous auth modal state
+    prevAuthModalOpenRef.current = authModalOpen;
+  }, [authModalOpen, user]);
+
   return (
     <header className={styles.header}>
       <div className={styles.container}>
         <Link href="/" className={styles.logo}>
           <img src="/Logo.png" alt="Logo" className={styles.logoImage} />
-          <span className={styles.logoText}>Broker Bulgaria</span>
+          <span className={styles.logoText}>{t('header.logoText')}</span>
         </Link>
 
         <nav className={styles.nav}>
@@ -164,21 +214,20 @@ export function Header() {
         </nav>
 
         <div className={styles.actions}>
-          <div className={styles.audioPlayerWrapper}>
-            <AudioPlayer src="/soft-piano.mp3" label={t('header.ambienceLabel')} />
-            <AnimatePresence>
-              {showAmbienceMessage && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className={styles.ambienceMessage}
-                >
-                  <span suppressHydrationWarning>{t('header.ambienceMessage')}</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <button
+            type="button"
+            className={styles.iconButton}
+            aria-label={mounted ? t('header.favoritesAriaLabel') : 'Любими'}
+            onClick={() => {
+              if (user) {
+                router.push('/favorites');
+              } else {
+                openAuthModal('login');
+              }
+            }}
+          >
+            <Heart size={24} color="white" weight="fill" />
+          </button>
 
           <div className={styles.languageSelector}>
             <button
@@ -187,7 +236,7 @@ export function Header() {
               aria-label="Change language"
             >
               <Globe size={20} color="white" />
-              <span>{currentLanguageLabel}</span>
+              <span suppressHydrationWarning>{currentLanguageLabel}</span>
             </button>
             <AnimatePresence>
               {isLanguageMenuOpen && (
@@ -212,10 +261,6 @@ export function Header() {
             </AnimatePresence>
           </div>
 
-          <Link href="/favorites" className={styles.iconButton} aria-label="Favorites">
-            <Heart size={20} color="white" />
-          </Link>
-
           <div className={styles.userMenuWrapper} ref={userMenuRef}>
             <button
               type="button"
@@ -225,6 +270,14 @@ export function Header() {
               onClick={() => setIsUserMenuOpen((prev) => !prev)}
             >
               <User size={20} color="white" weight={user ? 'fill' : 'regular'} />
+              {isAdmin && pendingCount > 0 && (
+                <span 
+                  className={styles.badge}
+                  aria-label={`${pendingCount} ${t('nav.pendingReviews')}`}
+                >
+                  {pendingCount}
+                </span>
+              )}
             </button>
             <AnimatePresence>
               {isUserMenuOpen && (
@@ -265,10 +318,26 @@ export function Header() {
             </AnimatePresence>
           </div>
 
+          <div className={styles.audioPlayerWrapper}>
+            <AudioPlayer src="/soft-piano.mp3" label={t('header.ambienceLabel')} />
+            <AnimatePresence>
+              {showAmbienceMessage && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={styles.ambienceMessage}
+                >
+                  <span suppressHydrationWarning>{t('header.ambienceMessage')}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <button
             className={styles.mobileMenuButton}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
+            aria-label={t('header.toggleMenuAriaLabel')}
           >
             {isMobileMenuOpen ? <X size={24} color="white" /> : <List size={24} color="white" />}
           </button>
@@ -307,6 +376,14 @@ export function Header() {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         initialTab={authModalTab}
+      />
+
+      {/* Login Success Toast */}
+      <Toast
+        message={t('flashMessages.loginSuccess')}
+        isVisible={showLoginToast}
+        onClose={() => setShowLoginToast(false)}
+        duration={3000}
       />
     </header>
   );

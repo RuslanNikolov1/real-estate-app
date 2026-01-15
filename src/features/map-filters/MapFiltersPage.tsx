@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -34,6 +35,7 @@ interface MapFiltersPageProps {
 }
 
 export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPageProps) {
+    const { t } = useTranslation();
     const router = useRouter();
     const pathname = usePathname();
     let baseRoute = '/map-filters';
@@ -633,25 +635,18 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                 'building-plots',
                 'hotels-motels'
             ];
-            const rentLabels: Record<string, string> = {
-                'apartments': 'Апартаменти',
-                'houses-villas': 'Къщи',
-                'restaurants': 'Заведения',
-                'stores-offices': 'Магазини/Офиси/Кабинети/Салони',
-                'garages-parking': 'Гаражи/Паркинги/Паркоместа под наем',
-                'warehouses-industrial': 'Складове/Промишлени и стопански имоти под наем',
-                'building-plots': 'Парцели/Терени',
-                'hotels-motels': 'Хотели/Почивни станции'
-            };
             return propertyTypes
                 .filter(type => rentPropertyTypeIds.includes(type.id))
                 .map(type => ({
                     ...type,
-                    label: rentLabels[type.id] || type.label
+                    label: t(`propertyTypes.rent.${type.id}`) || type.label
                 }));
         }
-        return propertyTypes;
-    }, [baseRoute]);
+        return propertyTypes.map(type => ({
+            ...type,
+            label: t(`propertyTypes.${type.id}`) || type.label
+        }));
+    }, [baseRoute, t]);
 
     return (
         <div className={styles.mapFiltersPage}>

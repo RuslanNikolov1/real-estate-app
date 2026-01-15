@@ -23,16 +23,30 @@
 }
 
 .header {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: $spacing-3xl;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+    align-items: flex-start;
+  }
+}
+
+.headerText {
+  flex: 1;
 }
 
 .title {
   font-size: 3rem;
   font-weight: 700;
   color: $black;
-  margin-bottom: $spacing-md;
+  margin: 0 0 $spacing-md 0;
   font-family: $font-headline;
+  text-align: left;
 
   @media (max-width: $breakpoint-md) {
     font-size: 2.5rem;
@@ -46,8 +60,8 @@
 .subtitle {
   font-size: 1.25rem;
   color: $dark-gray;
-  max-width: 600px;
-  margin: 0 auto;
+  margin: 0;
+  text-align: left;
 
   @media (max-width: $breakpoint-md) {
     font-size: 1.125rem;
@@ -56,7 +70,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: $spacing-xl;
 
   @media (max-width: $breakpoint-md) {
@@ -65,22 +79,35 @@
   }
 }
 
+.loading,
+.emptyState {
+  text-align: center;
+  padding: $spacing-3xl $spacing-xl;
+  background: $white;
+  border-radius: 16px;
+  
+  p {
+    font-size: 1.2rem;
+    color: $medium-gray;
+    margin: 0;
+  }
+}
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: $spacing-lg;
+  margin-top: $spacing-3xl;
 
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+.pageInfo {
+  font-size: 1.4rem;
+  color: $color-text-secondary;
+  font-weight: 500;
+}

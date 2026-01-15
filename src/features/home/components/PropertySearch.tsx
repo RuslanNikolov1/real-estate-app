@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import { CheckCircle, Calendar } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +11,7 @@ interface PropertySearchProps {
 }
 
 export function PropertySearch({}: PropertySearchProps) {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const handleSalesClick = () => {
@@ -25,11 +27,11 @@ export function PropertySearch({}: PropertySearchProps) {
         <div className={styles.buttonGroup}>
           <Button variant="outline" onClick={handleSalesClick} className={styles.actionButton} size="lg">
             <CheckCircle size={28} />
-            Продажби
+            {t('home.salesButton')}
           </Button>
           <Button variant="outline" onClick={handleRentClick} className={styles.actionButton} size="lg">
             <Calendar size={28} />
-            Наеми
+            {t('home.rentButton')}
           </Button>
         </div>
       </div>

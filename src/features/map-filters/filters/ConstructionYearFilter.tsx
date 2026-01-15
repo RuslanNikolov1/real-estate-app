@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import { CONSTRUCTION_FILTERS } from './constants';
 import { YEAR_SLIDER_MIN, YEAR_SLIDER_MAX } from './types';
 import type { ConstructionFilter } from './types';
@@ -23,11 +25,13 @@ export function ConstructionYearFilter({
     initialYearTo = YEAR_SLIDER_MAX,
     initialIsYearNotProvided = false
 }: ConstructionYearFilterProps) {
+    const { t } = useTranslation();
     // For single selection, we only keep the first item or null
     const [selectedType, setSelectedType] = useState<string | null>(initialSelectedTypes.length > 0 ? initialSelectedTypes[0] : null);
     const [yearFrom, setYearFrom] = useState(initialYearFrom);
     const [yearTo, setYearTo] = useState(initialYearTo);
     const [isYearNotProvided, setIsYearNotProvided] = useState(initialIsYearNotProvided);
+    const translatedTypes = translateFilterOptions(CONSTRUCTION_FILTERS, t, 'filters.construction');
 
     // Sync state when initialSelectedTypes changes
     useEffect(() => {
@@ -76,9 +80,9 @@ export function ConstructionYearFilter({
         <div className={styles.container}>
             {/* Construction Type Section */}
             <div className={styles.constructionFilter}>
-                <h4 className={styles.title}>Вид строителство</h4>
+                <h4 className={styles.title}>{t('filters.titles.construction')}</h4>
                 <div className={styles.constructionGrid}>
-                    {CONSTRUCTION_FILTERS.map((type: ConstructionFilter) => {
+                    {translatedTypes.map((type: ConstructionFilter) => {
                         const isSelected = selectedType === type.id;
                         return (
                             <button
@@ -102,7 +106,7 @@ export function ConstructionYearFilter({
 
             {/* Year Section */}
             <div className={styles.yearFilter}>
-                <h4 className={styles.title}>Година на строителство</h4>
+                <h4 className={styles.title}>{t('filters.common.from')} {yearFrom} {t('filters.common.to')} {yearTo}</h4>
                 <div className={styles.yearControls}>
                     <div className={styles.dualRangeSlider}>
                         <input
@@ -144,7 +148,7 @@ export function ConstructionYearFilter({
                     <div className={styles.yearInputsRow}>
                         <div className={styles.yearInputWrapper}>
                             <label htmlFor="year-from" className={styles.yearInputLabel}>
-                                От
+                                {t('filters.common.from')}
                             </label>
                             <input
                                 type="number"
@@ -163,7 +167,7 @@ export function ConstructionYearFilter({
                         </div>
                         <div className={styles.yearInputWrapper}>
                             <label htmlFor="year-to" className={styles.yearInputLabel}>
-                                До
+                                {t('filters.common.to')}
                             </label>
                             <input
                                 type="number"
@@ -186,7 +190,7 @@ export function ConstructionYearFilter({
                                 checked={isYearNotProvided}
                                 onChange={(e) => handleNotProvidedChange(e.target.checked)}
                             />
-                            Не е посочено
+                            {t('filters.common.notSpecified')}
                         </label>
                     </div>
                 </div>

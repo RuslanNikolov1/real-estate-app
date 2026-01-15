@@ -81,6 +81,16 @@
     }
   }
 
+  .badge {
+    background: $dark-red;
+    color: $white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: auto;
+  }
+
   p {
     font-size: 0.95rem;
     color: $dark-red;

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useCallback, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
 import { PriceFilter } from '../filters';
@@ -38,6 +39,7 @@ export function BuyRealEstatesFiltersPage({
     onActionButtonsReady,
     onSearch
 }: BuyRealEstatesFiltersPageProps) {
+    const { t } = useTranslation();
     const cityInputRef = useRef<HTMLDivElement>(null);
     
     // Use external location state if provided, otherwise use internal state
@@ -168,7 +170,7 @@ export function BuyRealEstatesFiltersPage({
                         onClick={handleClearRef.current}
                         className={styles.clearButton}
                     >
-                        Изчисти
+                        {t('filters.common.clearFilters')}
                     </Button>
                     <Button
                         variant="primary"
@@ -180,7 +182,7 @@ export function BuyRealEstatesFiltersPage({
                         }}
                         className={styles.searchButton}
                     >
-                        Търси
+                        {t('filters.common.search')}
                     </Button>
                 </div>
             );
@@ -210,7 +212,7 @@ export function BuyRealEstatesFiltersPage({
                 initialPriceTo={filterValuesRef.current.priceTo}
                 priceSliderMax={BUY_REAL_ESTATES_PRICE_SLIDER_MAX}
                 showPricePerSqm={false}
-                priceTitle="Цена в лв"
+                priceTitle={t('filters.titles.price')}
             />
         </div>
     );

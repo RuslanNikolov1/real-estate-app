@@ -60,28 +60,15 @@
   font-family: $font-headline;
 }
 
+.email {
+  font-size: 0.85rem;
+  color: $medium-gray;
+}
+
 .date {
   font-size: 0.875rem;
-  color: $dark-gray;
-}
-
-.rating {
-  display: flex;
-  gap: $spacing-xs;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.star {
-  transition: all $transition-base;
-
-  &.filled {
-    color: #ffd700;
-  }
-
-  &.empty {
-    color: #ddd;
-  }
+  color: $medium-gray;
+  white-space: nowrap;
 }
 
 .comment {
@@ -91,23 +78,3 @@
   margin: 0;
   flex: 1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

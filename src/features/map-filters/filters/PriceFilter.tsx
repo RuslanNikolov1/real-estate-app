@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PiggyBank, MoneyWavy } from '@phosphor-icons/react';
 import { PRICE_SLIDER_MAX, PRICE_PER_SQM_SLIDER_MAX } from './types';
 import styles from './PriceFilter.module.scss';
@@ -33,8 +34,9 @@ export function PriceFilter({
     pricePerSqmSliderMin = 0,
     pricePerSqmSliderMax = PRICE_PER_SQM_SLIDER_MAX,
     showPricePerSqm = true,
-    priceTitle = 'Цена (€)'
+    priceTitle
 }: PriceFilterProps) {
+    const { t } = useTranslation();
     // Use default values for UI display only
     const defaultPriceFrom = 0;
     const defaultPriceTo = PRICE_SLIDER_MAX;
@@ -115,7 +117,7 @@ export function PriceFilter({
     return (
         <div className={styles.container}>
             <div className={styles.priceFilter}>
-                <h4 className={styles.priceTitle}>{priceTitle}</h4>
+                <h4 className={styles.priceTitle}>{priceTitle || t('filters.titles.price')}</h4>
                 <div className={styles.priceControls}>
                     <div className={styles.dualRangeSlider}>
                         <input
@@ -159,7 +161,7 @@ export function PriceFilter({
                     <div className={styles.priceInputs}>
                         <div className={styles.priceInputWrapper}>
                             <label htmlFor="price-from" className={styles.priceInputLabel}>
-                                От
+                                {t('filters.common.from')}
                             </label>
                             <input
                                 type="number"
@@ -184,7 +186,7 @@ export function PriceFilter({
                         </div>
                         <div className={styles.priceInputWrapper}>
                             <label htmlFor="price-to" className={styles.priceInputLabel}>
-                                До
+                                {t('filters.common.to')}
                             </label>
                             <input
                                 type="number"
@@ -204,7 +206,7 @@ export function PriceFilter({
                     </div>
                     {showPricePerSqm && (
                         <div className={styles.pricePerSqmContainer}>
-                            <h4 className={styles.pricePerSqmTitle}>Цена на кв.м (€)</h4>
+                            <h4 className={styles.pricePerSqmTitle}>{t('filters.titles.pricePerSqm')}</h4>
                         <div className={styles.dualRangeSlider}>
                             <input
                                 type="range"
@@ -247,7 +249,7 @@ export function PriceFilter({
                         <div className={styles.priceInputs}>
                             <div className={styles.priceInputWrapper}>
                                 <label htmlFor="price-per-sqm-from" className={styles.priceInputLabel}>
-                                    От
+                                    {t('filters.common.from')}
                                 </label>
                                 <input
                                     type="number"
@@ -272,7 +274,7 @@ export function PriceFilter({
                             </div>
                             <div className={styles.priceInputWrapper}>
                                 <label htmlFor="price-per-sqm-to" className={styles.priceInputLabel}>
-                                    До
+                                    {t('filters.common.to')}
                                 </label>
                                 <input
                                     type="number"

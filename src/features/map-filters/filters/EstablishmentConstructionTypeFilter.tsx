@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import { ESTABLISHMENT_CONSTRUCTION_TYPES } from './constants';
 import type { EstablishmentConstructionType } from './constants';
 import styles from './ConstructionTypeFilter.module.scss';
@@ -11,8 +13,10 @@ interface EstablishmentConstructionTypeFilterProps {
 }
 
 export function EstablishmentConstructionTypeFilter({ onFilterChange, initialSelected = [] }: EstablishmentConstructionTypeFilterProps) {
+    const { t } = useTranslation();
     // For single selection, we only keep the first item or null
     const [selectedType, setSelectedType] = useState<string | null>(initialSelected.length > 0 ? initialSelected[0] : null);
+    const translatedTypes = translateFilterOptions(ESTABLISHMENT_CONSTRUCTION_TYPES, t, 'filters.establishmentConstructionTypes');
 
     // Sync state when initialSelected changes
     useEffect(() => {
@@ -34,9 +38,9 @@ export function EstablishmentConstructionTypeFilter({ onFilterChange, initialSel
 
     return (
         <div className={styles.constructionFilter}>
-            <h4 className={styles.featuresTitle}>Тип строителство</h4>
+            <h4 className={styles.featuresTitle}>{t('filters.titles.construction')}</h4>
             <div className={styles.constructionGrid}>
-                {ESTABLISHMENT_CONSTRUCTION_TYPES.map((type: EstablishmentConstructionType) => {
+                {translatedTypes.map((type: EstablishmentConstructionType) => {
                     const isSelected = selectedType === type.id;
                     return (
                         <button

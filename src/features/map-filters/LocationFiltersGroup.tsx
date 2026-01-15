@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/Input';
 import { CrosshairSimple } from '@phosphor-icons/react';
 import burgasCities from '@/data/burgasCities.json';
@@ -25,6 +26,7 @@ export function LocationFiltersGroup({
     initialDistance = 0,
     cityInputRef: externalCityInputRef
 }: LocationFiltersGroupProps) {
+    const { t } = useTranslation();
     // Check if the city is a valid selected city from the list
     const isValidCity = useCallback((cityName: string) => {
         if (!cityName) return false;
@@ -305,8 +307,8 @@ export function LocationFiltersGroup({
         <div className={styles.inputsGrid}>
             <Input
                 id="filters-search"
-                label="Търсене"
-                placeholder="Ключова дума или референтен номер"
+                label={t('filters.common.searchLabel')}
+                placeholder={t('filters.common.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(event) => handleSearchTermChange(event.target.value)}
                 className={styles.filterInput}
@@ -316,8 +318,8 @@ export function LocationFiltersGroup({
                     <div className={styles.autocompleteWrapper}>
                         <Input
                             id="filters-city"
-                            label="Град"
-                            placeholder="Въведете или изберете град (пр. Бургас)"
+                            label={t('filters.common.cityLabel')}
+                            placeholder={t('filters.common.cityPlaceholder')}
                             value={city}
                             onChange={(event) => {
                                 const value = event.target.value;
@@ -418,7 +420,7 @@ export function LocationFiltersGroup({
                                     onChange={handleNeighborhoodSelectChange}
                                     multiple
                                     disabled={!isCitySelected}
-                                    label="Квартали"
+                                    label={t('filters.common.neighborhoodsLabel')}
                                 />
                                 {neighborhoods.length > 0 && (
                                     <>
@@ -441,7 +443,7 @@ export function LocationFiltersGroup({
                                             ))}
                                         </div>
                                         <p className={styles.neighborhoodHint}>
-                                            {neighborhoods.length} квартал{neighborhoods.length > 1 ? 'а' : ''} избран{neighborhoods.length > 1 ? 'и' : ''}.
+                                            {t('filters.common.neighborhoodsSelected', { count: neighborhoods.length })}
                                         </p>
                                     </>
                                 )}
@@ -451,12 +453,12 @@ export function LocationFiltersGroup({
                             <>
                                 <div className={styles.manualNeighborhoodInputWrapper}>
                                     <label htmlFor="filters-neighborhood-manual" className={styles.manualNeighborhoodLabel}>
-                                        Квартал
+                                        {t('filters.common.neighborhoodLabel')}
                                     </label>
                                     <input
                                         id="filters-neighborhood-manual"
                                         type="text"
-                                        placeholder="Въведете квартал"
+                                        placeholder={t('filters.common.neighborhoodPlaceholder')}
                                         value={manualNeighborhoodInput}
                                         onChange={(event) => {
                                             const value = event.target.value;
@@ -508,10 +510,10 @@ export function LocationFiltersGroup({
                 {showAdditionalFilters && (
                     <div className={styles.distanceFilter}>
                         <span className={styles.distanceHint}>
-                            Провери картата на увеличаване
+                            {t('filters.common.distanceHint')}
                         </span>
                         <label htmlFor="distance-slider" className={styles.distanceLabel}>
-                            Радиус: {distance} km
+                            {t('filters.common.distanceLabel', { distance })}
                         </label>
                         <div className={styles.distanceControls}>
                             <input

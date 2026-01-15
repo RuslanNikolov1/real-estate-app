@@ -1,27 +1,33 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Star, CheckCircle, XCircle, Trash, EnvelopeSimple } from '@phosphor-icons/react';
+import { CheckCircle, XCircle, EnvelopeSimple } from '@phosphor-icons/react';
 import { Review } from '@/types';
-import { Button } from '@/components/ui/Button';
 import styles from './AdminReviewCard.module.scss';
 
 interface AdminReviewCardProps {
   review: Review;
   onApprove: () => void;
-  onReject: () => void;
   onDelete: () => void;
 }
 
 export function AdminReviewCard({
   review,
   onApprove,
-  onReject,
   onDelete,
 }: AdminReviewCardProps) {
+  const { t, i18n } = useTranslation();
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('bg-BG', {
+    const localeMap: Record<string, string> = {
+      'en': 'en-US',
+      'bg': 'bg-BG',
+      'ru': 'ru-RU',
+      'de': 'de-DE',
+    };
+    const locale = localeMap[i18n.language] || 'bg-BG';
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -41,9 +47,6 @@ export function AdminReviewCard({
     >
       <div className={styles.header}>
         <div className={styles.userInfo}>
-          <div className={styles.avatar}>
-            {review.user_name.charAt(0).toUpperCase()}
-          </div>
           <div className={styles.userDetails}>
             <h3 className={styles.userName}>{review.user_name}</h3>
             {review.user_email && (
@@ -55,53 +58,29 @@ export function AdminReviewCard({
             <span className={styles.date}>{formatDate(review.created_at)}</span>
           </div>
         </div>
-        <div className={styles.status}>
-          {review.is_approved ? (
-            <span className={`${styles.badge} ${styles.approved}`}>
-              <CheckCircle size={16} />
-              Одобрен
-            </span>
-          ) : (
-            <span className={`${styles.badge} ${styles.pending}`}>
-              <XCircle size={16} />
-              Очаква одобрение
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className={styles.rating}>
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            size={20}
-            className={`${styles.star} ${
-              i < review.rating ? styles.filled : styles.empty
-            }`}
-            fill={i < review.rating ? '#FFD700' : 'none'}
-          />
-        ))}
-        <span className={styles.ratingText}>({review.rating}/5)</span>
       </div>
 
       <p className={styles.comment}>{review.comment}</p>
 
       <div className={styles.actions}>
-        {!review.is_approved ? (
-          <Button variant="primary" size="sm" onClick={onApprove}>
-            <CheckCircle size={16} />
-            Одобри
-          </Button>
-        ) : (
-          <Button variant="outline" size="sm" onClick={onReject}>
-            <XCircle size={16} />
-            Отхвърли
-          </Button>
-        )}
-        <Button variant="ghost" size="sm" onClick={onDelete}>
-          <Trash size={16} />
-          Изтрий
-        </Button>
+        <button
+          type="button"
+          className={styles.approveButton}
+          onClick={onApprove}
+          aria-label={t('reviews.adminApprove')}
+          title={t('reviews.adminApprove')}
+        >
+          <CheckCircle size={48} weight="fill" />
+        </button>
+        <button
+          type="button"
+          className={styles.deleteButton}
+          onClick={onDelete}
+          aria-label={t('reviews.adminDelete')}
+          title={t('reviews.adminDelete')}
+        >
+          <XCircle size={48} />
+        </button>
       </div>
     </motion.div>
   );

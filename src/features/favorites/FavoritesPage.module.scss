@@ -1,200 +1,253 @@
-@use '@/styles/variables' as *;
+@import '@/styles/_variables.scss';
+
+// Alias project variables to the names used in this module
+$breakpoint-mobile: $breakpoint-sm;
+$breakpoint-tablet: $breakpoint-md;
+$primary-color: $color-primary;
+$text-dark: $color-text-secondary;
+$text-light: $color-text-tertiary;
 
 .favoritesPage {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 .main {
   flex: 1;
-  background: $light-gray;
-  padding: $spacing-2xl 0;
-}
+  padding: 4rem 0;
 
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 $spacing-lg;
-}
+  @media (max-width: $breakpoint-tablet) {
+    padding: 3rem 0;
+  }
 
-.header {
-  margin-bottom: $spacing-2xl;
-  background: $white;
-  padding: $spacing-2xl;
-  border-radius: 24px; // Very rounded
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.headerContent {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-}
-
-.titleSection {
-  display: flex;
-  align-items: center;
-  gap: $spacing-md;
-}
-
-.heartIcon {
-  color: $dark-red;
-  flex-shrink: 0;
-}
-
-.title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: $black;
-  margin: 0;
-  font-family: $font-headline;
-
-  @media (max-width: $breakpoint-md) {
-    font-size: 2rem;
+  @media (max-width: $breakpoint-mobile) {
+    padding: 2rem 0;
   }
 }
 
-.subtitle {
-  font-size: 1.125rem;
-  color: $dark-gray;
+.container {
+  width: 60vw;
+  max-width: 120rem;
+  margin: 0 auto;
+  padding: 0 2rem;
+
+  @media (max-width: $breakpoint-tablet) {
+    width: 90vw;
+  }
+
+  @media (max-width: $breakpoint-mobile) {
+    width: 100%;
+    padding: 0 1.6rem;
+  }
+}
+
+.headerSection {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+
+  @media (max-width: $breakpoint-mobile) {
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+}
+
+.headerIcon {
+  color: $primary-color;
+  flex-shrink: 0;
+
+  @media (max-width: $breakpoint-mobile) {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+}
+
+.pageTitle {
+  font-size: 3.6rem;
+  font-weight: 700;
+  color: $text-dark;
   margin: 0;
-  line-height: 1.6;
+
+  @media (max-width: $breakpoint-tablet) {
+    font-size: 3rem;
+  }
+
+  @media (max-width: $breakpoint-mobile) {
+    font-size: 2.4rem;
+  }
+}
+
+.notLoggedIn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 1.6rem;
+  box-shadow: 0 0.4rem 1.6rem rgba(0, 0, 0, 0.08);
+
+  @media (max-width: $breakpoint-mobile) {
+    padding: 4rem 2rem;
+  }
+
+  .signInIcon {
+    color: $primary-color;
+    margin-bottom: 2rem;
+    opacity: 0.6;
+  }
+
+  h2 {
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0 0 1rem 0;
+
+    @media (max-width: $breakpoint-mobile) {
+      font-size: 2rem;
+    }
+  }
+
+  p {
+    font-size: 1.6rem;
+    color: $text-light;
+    margin: 0 0 3rem 0;
+    max-width: 50rem;
+
+    @media (max-width: $breakpoint-mobile) {
+      font-size: 1.4rem;
+    }
+  }
+}
+
+.loginButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem 3rem;
+  background: $primary-color;
+  color: white;
+  border-radius: 0.8rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: darken($primary-color, 8%);
+    transform: translateY(-0.2rem);
+    box-shadow: 0 0.4rem 1.2rem rgba($primary-color, 0.3);
+  }
+
+  @media (max-width: $breakpoint-mobile) {
+    padding: 1rem 2.4rem;
+    font-size: 1.4rem;
+  }
+}
+
+.error {
+  background: #fee;
+  border: 0.1rem solid #fcc;
+  border-radius: 0.8rem;
+  padding: 2rem;
+  text-align: center;
+
+  p {
+    color: #c33;
+    margin: 0;
+    font-size: 1.6rem;
+  }
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 1.6rem;
+  box-shadow: 0 0.4rem 1.6rem rgba(0, 0, 0, 0.08);
+
+  @media (max-width: $breakpoint-mobile) {
+    padding: 6rem 2rem;
+  }
+
+  .emptyIcon {
+    color: $primary-color;
+    margin-bottom: 2rem;
+    opacity: 0.4;
+  }
+
+  h2 {
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0 0 1rem 0;
+
+    @media (max-width: $breakpoint-mobile) {
+      font-size: 2rem;
+    }
+  }
+
+  p {
+    font-size: 1.6rem;
+    color: $text-light;
+    margin: 0 0 3rem 0;
+    max-width: 60rem;
+    line-height: 1.6;
+
+    @media (max-width: $breakpoint-mobile) {
+      font-size: 1.4rem;
+    }
+  }
+}
+
+.browseButton {
+  display: inline-block;
+  padding: 1.2rem 3rem;
+  background: $primary-color;
+  color: white;
+  border-radius: 0.8rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: darken($primary-color, 8%);
+    transform: translateY(-0.2rem);
+    box-shadow: 0 0.4rem 1.2rem rgba($primary-color, 0.3);
+  }
+
+  @media (max-width: $breakpoint-mobile) {
+    padding: 1rem 2.4rem;
+    font-size: 1.4rem;
+  }
+}
+
+.resultsCount {
+  font-size: 1.6rem;
+  color: $text-light;
+  margin-bottom: 2rem;
+  font-weight: 500;
+
+  @media (max-width: $breakpoint-mobile) {
+    font-size: 1.4rem;
+  }
 }
 
 .propertiesList {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
-}
+  gap: 2rem;
 
-.propertyWrapper {
-  position: relative;
-  background: $white;
-  border-radius: 24px; // Very rounded
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all $transition-base;
-
-  &:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  @media (max-width: $breakpoint-mobile) {
+    gap: 1.6rem;
   }
 }
-
-.removeButton {
-  position: absolute;
-  top: $spacing-md;
-  right: $spacing-md;
-  padding: $spacing-sm $spacing-md;
-  background: rgba(255, 255, 255, 0.95);
-  color: $dark-red;
-  border: 2px solid $dark-red;
-  border-radius: 9999px; // Pill shape
-  font-weight: 600;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all $transition-base;
-  display: flex;
-  align-items: center;
-  gap: $spacing-xs;
-  z-index: 10;
-  backdrop-filter: blur(10px);
-
-  &:hover {
-    background: $dark-red;
-    color: $white;
-    transform: scale(1.05);
-  }
-
-  svg {
-    flex-shrink: 0;
-  }
-}
-
-.emptyState {
-  text-align: center;
-  padding: $spacing-3xl;
-  background: $white;
-  border-radius: 24px; // Very rounded
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.emptyHeartIcon {
-  color: $light-gray;
-  margin-bottom: $spacing-lg;
-  opacity: 0.5;
-}
-
-.emptyTitle {
-  font-size: 2rem;
-  font-weight: 700;
-  color: $black;
-  margin: 0 0 $spacing-md 0;
-  font-family: $font-headline;
-}
-
-.emptyDescription {
-  font-size: 1.125rem;
-  color: $dark-gray;
-  line-height: 1.6;
-  margin: 0 0 $spacing-2xl 0;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.loginPrompt {
-  text-align: center;
-  padding: $spacing-3xl;
-  background: $white;
-  border-radius: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  margin: $spacing-3xl auto;
-}
-
-.lockIcon {
-  color: $dark-red;
-  margin-bottom: $spacing-lg;
-}
-
-.promptTitle {
-  font-size: 2rem;
-  font-weight: 700;
-  color: $black;
-  margin: 0 0 $spacing-md 0;
-  font-family: $font-heading;
-}
-
-.promptDescription {
-  font-size: 1.125rem;
-  color: $dark-gray;
-  margin: 0 0 $spacing-2xl 0;
-}
-
-.loadingState {
-  text-align: center;
-  padding: $spacing-3xl;
-  color: $medium-gray;
-  font-size: 1.125rem;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

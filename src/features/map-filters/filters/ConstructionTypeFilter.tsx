@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import { CONSTRUCTION_FILTERS } from './constants';
 import type { ConstructionFilter } from './types';
 import styles from './ConstructionTypeFilter.module.scss';
@@ -11,8 +13,10 @@ interface ConstructionTypeFilterProps {
 }
 
 export function ConstructionTypeFilter({ onFilterChange, initialSelected = [] }: ConstructionTypeFilterProps) {
+    const { t } = useTranslation();
     // For single selection, we only keep the first item or null
     const [selectedType, setSelectedType] = useState<string | null>(initialSelected.length > 0 ? initialSelected[0] : null);
+    const translatedTypes = translateFilterOptions(CONSTRUCTION_FILTERS, t, 'filters.construction');
 
     // Sync state when initialSelected changes
     useEffect(() => {
@@ -34,9 +38,9 @@ export function ConstructionTypeFilter({ onFilterChange, initialSelected = [] }:
 
     return (
         <div className={styles.constructionFilter}>
-            <h4 className={styles.featuresTitle}>Вид строителство</h4>
+            <h4 className={styles.featuresTitle}>{t('filters.titles.construction')}</h4>
             <div className={styles.constructionGrid}>
-                {CONSTRUCTION_FILTERS.map((type: ConstructionFilter) => {
+                {translatedTypes.map((type: ConstructionFilter) => {
                     const isSelected = selectedType === type.id;
                     return (
                         <button

@@ -15,8 +15,7 @@ export function Footer() {
           <div className={styles.column}>
             <h3 className={styles.title}>Broker Bulgaria</h3>
             <p className={styles.description}>
-              Професионални недвижими имоти в Бургас. Намерете своя идеален имот
-              с нас.
+              {t('footer.description')}
             </p>
             <div className={styles.social}>
               <a
@@ -44,7 +43,7 @@ export function Footer() {
           </div>
 
           <div className={styles.column}>
-            <h4 className={styles.columnTitle}>Бързи връзки</h4>
+            <h4 className={styles.columnTitle}>{t('footer.quickLinks')}</h4>
             <ul className={styles.links}>
               <li>
                 <Link href="/properties/for-sale" prefetch={false}>{t('nav.forSale')}</Link>
@@ -65,13 +64,13 @@ export function Footer() {
           </div>
 
           <div className={styles.column}>
-            <h4 className={styles.columnTitle}>Услуги</h4>
+            <h4 className={styles.columnTitle}>{t('footer.services')}</h4>
             <ul className={styles.links}>
               <li>
                 <Link href="/valuation" prefetch={false}>{t('nav.valuation')}</Link>
               </li>
               <li>
-                <Link href="/properties/add" prefetch={false}>Добави обява</Link>
+                <Link href="/properties/add" prefetch={false}>{t('footer.addListing')}</Link>
               </li>
               <li>
                 <Link href="/favorites" prefetch={false}>{t('nav.favorites')}</Link>
@@ -80,11 +79,11 @@ export function Footer() {
           </div>
 
           <div className={styles.column}>
-            <h4 className={styles.columnTitle}>Контакти</h4>
+            <h4 className={styles.columnTitle}>{t('footer.contacts')}</h4>
             <ul className={styles.contact}>
               <li>
                 <MapPin size={18} />
-                <span>Бургас, България</span>
+                <span>{t('footer.location')}</span>
               </li>
               <li>
                 <Phone size={18} />
@@ -110,7 +109,7 @@ export function Footer() {
             </span>
           </a>
           <p className={styles.copyright}>
-            © 2025 Broker Bulgaria. Всички права запазени.
+            © 2025 Broker Bulgaria. {t('footer.allRightsReserved')}
           </p>
         </div>
       </div>

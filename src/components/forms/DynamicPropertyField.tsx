@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
 import { FieldConfig } from '@/lib/property-schemas';
 import { Input } from '@/components/ui/Input';
 import { UseFormRegister, FieldErrors, UseFormSetValue, Control, useWatch } from 'react-hook-form';
@@ -24,6 +25,7 @@ export function DynamicPropertyField({
   onFeaturesChange,
   selectedFeatures = [],
 }: DynamicPropertyFieldProps) {
+  const { t } = useTranslation();
   const fieldError = errors[field.key]?.message 
     ? String(errors[field.key]?.message)
     : undefined;
@@ -65,7 +67,7 @@ export function DynamicPropertyField({
             onChange={(e) => setValue(field.key, e.target.value)}
             required={field.required}
           >
-            <option value="">Изберете</option>
+            <option value="">{t('common.select')}</option>
             {field.options?.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.label}

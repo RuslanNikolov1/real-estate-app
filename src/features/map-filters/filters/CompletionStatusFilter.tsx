@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import { COMPLETION_STATUSES } from './constants';
 import type { CompletionStatus } from './types';
 import styles from './CompletionStatusFilter.module.scss';
@@ -11,8 +13,10 @@ interface CompletionStatusFilterProps {
 }
 
 export function CompletionStatusFilter({ onFilterChange, initialSelected = [] }: CompletionStatusFilterProps) {
+    const { t } = useTranslation();
     // For multiple selection, keep an array of selected statuses
     const [selectedStatuses, setSelectedStatuses] = useState<string[]>(initialSelected);
+    const translatedStatuses = translateFilterOptions(COMPLETION_STATUSES, t, 'filters.completion');
 
     // Sync state when initialSelected changes
     useEffect(() => {
@@ -43,9 +47,9 @@ export function CompletionStatusFilter({ onFilterChange, initialSelected = [] }:
 
     return (
         <div className={styles.completionFilter}>
-            <h4 className={styles.featuresTitle}>Степен на завършеност</h4>
+            <h4 className={styles.featuresTitle}>{t('filters.titles.completion')}</h4>
             <div className={styles.constructionGrid}>
-                {COMPLETION_STATUSES.map((status: CompletionStatus) => {
+                {translatedStatuses.map((status: CompletionStatus) => {
                     const isSelected = selectedStatuses.includes(status.id);
                     return (
                         <button

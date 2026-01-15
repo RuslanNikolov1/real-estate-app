@@ -1,266 +1,154 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { AdminReviewCard } from './components/AdminReviewCard';
-import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { Toast } from '@/components/ui/Toast';
 import { Review } from '@/types';
-import { MagnifyingGlass, Funnel, CheckCircle, XCircle } from '@phosphor-icons/react';
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 import styles from './AdminReviewsPage.module.scss';
 
-// Mock data - всички отзиви (одобрени и неодобрени)
-const allReviews: Review[] = [
-  {
-    id: '1',
-    user_name: 'Иван Петров',
-    user_email: 'ivan@example.com',
-    rating: 5,
-    comment:
-      'Отлично обслужване! Намерихме идеалния апартамент в центъра на Бургас. Брокерът беше много професионален и помогна с всички документи. Препоръчвам!',
-    is_approved: true,
-    created_at: '2024-01-15T10:00:00Z',
-    updated_at: '2024-01-15T10:00:00Z',
-  },
-  {
-    id: '2',
-    user_name: 'Мария Георгиева',
-    user_email: 'maria@example.com',
-    rating: 5,
-    comment:
-      'Много доволна от услугите. Продадохме къщата си бързо и на добра цена. Екипът е много отзивчив и професионален. Благодаря!',
-    is_approved: true,
-    created_at: '2024-01-20T14:30:00Z',
-    updated_at: '2024-01-20T14:30:00Z',
-  },
-  {
-    id: '3',
-    user_name: 'Георги Димитров',
-    user_email: 'georgi@example.com',
-    rating: 4,
-    comment:
-      'Добро обслужване, но можеше да бъде малко по-бързо. В крайна сметка намерихме подходящ имот. Брокерът беше любезен и знаеше какво търсим.',
-    is_approved: true,
-    created_at: '2024-02-01T09:15:00Z',
-    updated_at: '2024-02-01T09:15:00Z',
-  },
-  {
-    id: '4',
-    user_name: 'Нов отзив',
-    user_email: 'new@example.com',
-    rating: 5,
-    comment: 'Това е нов отзив, който очаква одобрение.',
-    is_approved: false,
-    created_at: '2024-03-20T10:00:00Z',
-    updated_at: '2024-03-20T10:00:00Z',
-  },
-  {
-    id: '5',
-    user_name: 'Друг клиент',
-    user_email: 'client@example.com',
-    rating: 3,
-    comment: 'Средно обслужване. Очаквах повече.',
-    is_approved: false,
-    created_at: '2024-03-21T11:00:00Z',
-    updated_at: '2024-03-21T11:00:00Z',
-  },
-  {
-    id: '6',
-    user_name: 'Елена Стоянова',
-    user_email: 'elena@example.com',
-    rating: 5,
-    comment:
-      'Най-добрият опит с недвижими имоти! Намерихме перфектната вила на морето. Процесът беше гладък и безпроблемен. Определено ще се обърнем отново!',
-    is_approved: true,
-    created_at: '2024-02-10T16:45:00Z',
-    updated_at: '2024-02-10T16:45:00Z',
-  },
-  {
-    id: '7',
-    user_name: 'Димитър Николов',
-    user_email: 'dimitar@example.com',
-    rating: 5,
-    comment:
-      'Професионално обслужване от начало до край. Помогнаха ни да намерим офис пространство за нашия бизнес. Много доволни сме!',
-    is_approved: true,
-    created_at: '2024-02-15T11:20:00Z',
-    updated_at: '2024-02-15T11:20:00Z',
-  },
-  {
-    id: '8',
-    user_name: 'Светла Иванова',
-    user_email: 'svetla@example.com',
-    rating: 5,
-    comment:
-      'Отлично отношение и професионализъм! Намерихме апартамент точно според нашите изисквания. Брокерът беше много търпелив и отзивчив. Препоръчвам с две ръце!',
-    is_approved: true,
-    created_at: '2024-02-20T13:10:00Z',
-    updated_at: '2024-02-20T13:10:00Z',
-  },
-  {
-    id: '9',
-    user_name: 'Петър Стефанов',
-    user_email: 'petar@example.com',
-    rating: 4,
-    comment:
-      'Добро обслужване и голяма гама от имоти. Намерихме подходящ имот, макар че процесът отне малко повече време от очакваното. Като цяло доволен съм.',
-    is_approved: true,
-    created_at: '2024-03-01T10:30:00Z',
-    updated_at: '2024-03-01T10:30:00Z',
-  },
-  {
-    id: '10',
-    user_name: 'Анна Тодорова',
-    user_email: 'anna@example.com',
-    rating: 5,
-    comment:
-      'Невероятен опит! Продадохме имота си за рекордно време и на отлична цена. Екипът е много професионален и знае какво прави. Благодаря за всичко!',
-    is_approved: true,
-    created_at: '2024-03-05T15:00:00Z',
-    updated_at: '2024-03-05T15:00:00Z',
-  },
-];
-
 export function AdminReviewsPage() {
-  const [reviews, setReviews] = useState<Review[]>(allReviews);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'approved' | 'pending'>(
-    'all'
-  );
+  const { t } = useTranslation();
+  const [page, setPage] = useState(1);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const limit = 20;
 
-  const handleApprove = (id: string) => {
-    setReviews((prev) =>
-      prev.map((review) =>
-        review.id === id ? { ...review, is_approved: true } : review
-      )
-    );
-  };
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['admin-reviews', 'pending', page],
+    queryFn: async () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:queryFn:before',message:'before API call',data:{page,limit},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
+      const response = await fetch(`/api/reviews?status=pending&page=${page}&limit=${limit}`);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:queryFn:afterFetch',message:'after fetch',data:{ok:response.ok,status:response.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
+      if (!response.ok) throw new Error('Failed to fetch reviews');
+      const jsonData = await response.json();
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:queryFn:afterJson',message:'after json parse',data:{reviewsCount:jsonData?.reviews?.length,total:jsonData?.total,pending:jsonData?.pending},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
+      return jsonData;
+    },
+  });
 
-  const handleReject = (id: string) => {
-    setReviews((prev) =>
-      prev.map((review) =>
-        review.id === id ? { ...review, is_approved: false } : review
-      )
-    );
-  };
+  const reviews = data?.reviews || [];
+  const pendingCount = data?.pending || 0;
+  const totalPages = Math.ceil((data?.total || 0) / limit);
 
-  const handleDelete = (id: string) => {
-    if (confirm('Сигурни ли сте, че искате да изтриете този отзив?')) {
-      setReviews((prev) => prev.filter((review) => review.id !== id));
+  const handleApprove = async (id: string) => {
+    try {
+      const response = await fetch(`/api/reviews/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_approved: true }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to approve review');
+      }
+      
+      refetch();
+    } catch (error) {
+      console.error('Error approving review:', error);
+      setToastMessage(t('flashMessages.unexpectedError'));
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     }
   };
 
-  const filteredReviews = reviews.filter((review) => {
-    const matchesSearch =
-      review.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      review.comment.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      review.user_email?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesFilter =
-      filterStatus === 'all' ||
-      (filterStatus === 'approved' && review.is_approved) ||
-      (filterStatus === 'pending' && !review.is_approved);
-
-    return matchesSearch && matchesFilter;
-  });
-
-  const pendingCount = reviews.filter((r) => !r.is_approved).length;
-  const approvedCount = reviews.filter((r) => r.is_approved).length;
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/reviews/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete review');
+      }
+      
+      refetch();
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      setToastMessage(t('flashMessages.unexpectedError'));
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  };
 
   return (
-    <div className={styles.adminPage}>
+    <div className={styles.adminReviewsPage}>
       <Header />
       <main className={styles.main}>
-        <section className={styles.section}>
-          <div className={styles.container}>
-            <div className={styles.header}>
-              <div>
-                <h1 className={styles.title}>Админ панел - Отзиви</h1>
-                <p className={styles.subtitle}>
-                  Управление на отзиви от клиенти
-                </p>
-              </div>
-              <div className={styles.stats}>
-                <div className={styles.statCard}>
-                  <span className={styles.statLabel}>Всички</span>
-                  <span className={styles.statValue}>{reviews.length}</span>
-                </div>
-                <div className={`${styles.statCard} ${styles.approved}`}>
-                  <span className={styles.statLabel}>Одобрени</span>
-                  <span className={styles.statValue}>{approvedCount}</span>
-                </div>
-                <div className={`${styles.statCard} ${styles.pending}`}>
-                  <span className={styles.statLabel}>Очакващи</span>
-                  <span className={styles.statValue}>{pendingCount}</span>
-                </div>
-              </div>
+        <div className={styles.container}>
+          <div className={styles.header}>
+            <h1 className={styles.title}>{t('reviews.adminPendingTitle')}</h1>
+            {pendingCount > 0 && (
+              <span className={styles.badge}>{t('reviews.adminPendingCount', { count: pendingCount })}</span>
+            )}
+          </div>
+
+          {isLoading ? (
+            <div className={styles.loading}>
+              {t('reviews.adminLoading')}
             </div>
-
-            <div className={styles.controls}>
-              <div className={styles.searchWrapper}>
-                <MagnifyingGlass size={20} className={styles.searchIcon} />
-                <Input
-                  type="text"
-                  placeholder="Търсене по име, имейл или коментар..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={styles.searchInput}
-                />
-              </div>
-
-              <div className={styles.filters}>
-                <button
-                  onClick={() => setFilterStatus('all')}
-                  className={`${styles.filterButton} ${
-                    filterStatus === 'all' ? styles.active : ''
-                  }`}
-                >
-                  <Funnel size={16} />
-                  Всички
-                </button>
-                <button
-                  onClick={() => setFilterStatus('approved')}
-                  className={`${styles.filterButton} ${
-                    filterStatus === 'approved' ? styles.active : ''
-                  }`}
-                >
-                  <CheckCircle size={16} />
-                  Одобрени
-                </button>
-                <button
-                  onClick={() => setFilterStatus('pending')}
-                  className={`${styles.filterButton} ${
-                    filterStatus === 'pending' ? styles.active : ''
-                  }`}
-                >
-                  <XCircle size={16} />
-                  Очакващи ({pendingCount})
-                </button>
-              </div>
+          ) : reviews.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>{t('reviews.adminNoReviews')}</p>
             </div>
-
-            <div className={styles.grid}>
-              {filteredReviews.length > 0 ? (
-                filteredReviews.map((review) => (
+          ) : (
+            <>
+              <div className={styles.grid}>
+                {reviews.map((review: Review) => (
                   <AdminReviewCard
                     key={review.id}
                     review={review}
                     onApprove={() => handleApprove(review.id)}
-                    onReject={() => handleReject(review.id)}
                     onDelete={() => handleDelete(review.id)}
                   />
-                ))
-              ) : (
-                <div className={styles.emptyState}>
-                  <p>Няма отзиви, отговарящи на критериите.</p>
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className={styles.pagination}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    <CaretLeft size={18} />
+                    {t('reviews.previous')}
+                  </Button>
+                  <span className={styles.pageInfo}>
+                    {t('reviews.pageInfo', { current: page, total: totalPages })}
+                  </span>
+                  <Button
+                    variant="outline"
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                  >
+                    {t('reviews.next')}
+                    <CaretRight size={18} />
+                  </Button>
                 </div>
               )}
-            </div>
-          </div>
-        </section>
+            </>
+          )}
+        </div>
       </main>
       <Footer />
+      <Toast
+        message={toastMessage}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+        duration={3000}
+      />
     </div>
   );
 }
-

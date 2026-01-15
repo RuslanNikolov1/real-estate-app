@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PiggyBank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import { LocationFiltersGroup } from '../LocationFiltersGroup';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import {
     SubtypeFilter,
     AreaFilter,
@@ -79,6 +81,7 @@ export function HotelsMotelsFiltersPage({
     onSearch,
     isRentMode = false
 }: HotelsMotelsFiltersPageProps) {
+    const { t } = useTranslation();
     const cityInputRef = useRef<HTMLDivElement>(null);
 
     // Use external location state if provided, otherwise use internal state
@@ -321,7 +324,7 @@ export function HotelsMotelsFiltersPage({
                         onClick={handleClearRef.current}
                         className={styles.clearButton}
                     >
-                        Изчисти
+                        {t('filters.common.clearFilters')}
                     </Button>
                     <Button
                         variant="primary"
@@ -333,7 +336,7 @@ export function HotelsMotelsFiltersPage({
                         }}
                         className={styles.searchButton}
                     >
-                        Търси
+                        {t('filters.common.search')}
                     </Button>
                 </div>
             );
@@ -342,14 +345,14 @@ export function HotelsMotelsFiltersPage({
     }, [filterKey, onSearch]);
 
     // Rent Price Filter Component
-    const RentPriceFilter = React.memo(({ 
-        title, 
-        unit, 
-        sliderMin, 
-        sliderMax, 
-        from, 
-        to, 
-        onFilterChange 
+    const RentPriceFilter = React.memo(({
+        title,
+        unit,
+        sliderMin,
+        sliderMax,
+        from,
+        to,
+        onFilterChange
     }: {
         title: string;
         unit: string;
@@ -359,6 +362,7 @@ export function HotelsMotelsFiltersPage({
         to: number;
         onFilterChange: (from: number, to: number) => void;
     }) => {
+        const { t } = useTranslation();
         const [rentFrom, setRentFrom] = useState(from);
         const [rentTo, setRentTo] = useState(to);
 
@@ -448,7 +452,7 @@ export function HotelsMotelsFiltersPage({
                         <div className={priceFilterStyles.priceInputs}>
                             <div className={priceFilterStyles.priceInputWrapper}>
                                 <label htmlFor={`${title}-from`} className={priceFilterStyles.priceInputLabel}>
-                                    От
+                                    {t('filters.common.from')}
                                 </label>
                                 <input
                                     type="number"
@@ -473,7 +477,7 @@ export function HotelsMotelsFiltersPage({
                             </div>
                             <div className={priceFilterStyles.priceInputWrapper}>
                                 <label htmlFor={`${title}-to`} className={priceFilterStyles.priceInputLabel}>
-                                    До
+                                    {t('filters.common.to')}
                                 </label>
                                 <input
                                     type="number"
@@ -517,8 +521,8 @@ export function HotelsMotelsFiltersPage({
             {/* Property Type Filter (Вид) */}
             <SubtypeFilter
                 key={`property-type-${filterKey}`}
-                title="Вид"
-                options={isRentMode ? RENT_HOTEL_SUBTYPES : HOTELS_PROPERTY_TYPES}
+                title={t('filters.titles.propertyType')}
+                options={translateFilterOptions(isRentMode ? RENT_HOTEL_SUBTYPES : HOTELS_PROPERTY_TYPES, t, 'filters.hotelTypes')}
                 onFilterChange={handlePropertyTypeChange}
                 initialSelected={filterValuesRef.current.propertyTypes || []}
             />
@@ -527,7 +531,7 @@ export function HotelsMotelsFiltersPage({
                 <>
                     {/* Monthly Rent Filter */}
                     <RentPriceFilter
-                        title="Месечен наем"
+                        title={t('filters.titles.monthlyRent')}
                         unit="евро"
                         sliderMin={RENT_SLIDER_MIN}
                         sliderMax={RENT_SLIDER_MAX}
@@ -557,7 +561,7 @@ export function HotelsMotelsFiltersPage({
                     initialAreaTo={filterValuesRef.current.areaTo}
                     sliderMax={HOTELS_AREA_SLIDER_MAX}
                     areaCap={HOTELS_AREA_SLIDER_MAX}
-                    title="РЗП в кв.м"
+                    title={t('filters.titles.area')}
                     showNotProvided={true}
                 />
             )}
@@ -595,8 +599,8 @@ export function HotelsMotelsFiltersPage({
             {isRentMode && (
                 <SubtypeFilter
                     key={`working-${filterKey}`}
-                    title="Работи"
-                    options={WORKING_OPTIONS}
+                    title={t('filters.commercialFeatures.working')}
+                    options={translateFilterOptions(WORKING_OPTIONS, t, 'filters.workingOptions')}
                     onFilterChange={handleWorkingOptionsChange}
                     initialSelected={filterValuesRef.current.selectedWorkingOptions || []}
                     leftOrder={['seasonal']}
@@ -620,7 +624,7 @@ export function HotelsMotelsFiltersPage({
                 key={`features-${filterKey}`}
                 initialSelected={filterValuesRef.current.selectedFeatures || []}
                 onFilterChange={handleFeaturesChange}
-                features={isRentMode ? RENT_HOTEL_FEATURES : HOTELS_FEATURES}
+                features={translateFilterOptions(isRentMode ? RENT_HOTEL_FEATURES : HOTELS_FEATURES, t, 'filters.hotelFeatures')}
             />
         </div>
     );

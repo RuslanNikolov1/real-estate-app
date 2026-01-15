@@ -53,7 +53,7 @@ export function PartnerServices({ services }: PartnerServicesProps) {
                   rel="noopener noreferrer"
                   className={styles.link}
                 >
-                  Посетете сайта
+                  {t('home.visitWebsite')}
                 </a>
               )}
             </motion.div>

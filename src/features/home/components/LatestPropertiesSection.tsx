@@ -1,11 +1,13 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Property } from '@/types';
 import { PropertyCard } from '@/features/properties/components/PropertyCard';
 import styles from './LatestPropertiesSection.module.scss';
 
 export function LatestPropertiesSection() {
+  const { t } = useTranslation();
   // Fetch the 4 latest properties
   const { data: properties = [], isLoading, error } = useQuery({
     queryKey: ['latest-properties'],
@@ -30,7 +32,7 @@ export function LatestPropertiesSection() {
     return (
       <section className={styles.latestPropertiesSection}>
         <div className={styles.loadingState}>
-          Зареждане на най-новите имоти...
+          {t('home.loadingLatestProperties')}
         </div>
       </section>
     );
@@ -42,7 +44,7 @@ export function LatestPropertiesSection() {
 
   return (
     <section className={styles.latestPropertiesSection}>
-      <h2 className={styles.heading}>Нови оферти</h2>
+      <h2 className={styles.heading}>{t('home.latestProperties')}</h2>
       <div className={styles.propertiesGrid}>
         {properties.map((property) => (
           <PropertyCard key={property.id} property={property} layout="vertical" />

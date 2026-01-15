@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import { AGRICULTURAL_CATEGORIES } from './constants';
 import type { CategoryOption } from './constants';
 import styles from './ConstructionTypeFilter.module.scss';
@@ -11,7 +13,9 @@ interface CategoryFilterProps {
 }
 
 export function CategoryFilter({ onFilterChange, initialSelected = [] }: CategoryFilterProps) {
+    const { t } = useTranslation();
     const [selectedCategories, setSelectedCategories] = useState<string[]>(initialSelected);
+    const translatedCategories = translateFilterOptions(AGRICULTURAL_CATEGORIES, t, 'filters.agriculturalCategories');
 
     const handleToggle = useCallback((categoryId: string) => {
         setSelectedCategories((prev) => {
@@ -25,9 +29,9 @@ export function CategoryFilter({ onFilterChange, initialSelected = [] }: Categor
 
     return (
         <div className={styles.constructionFilter}>
-            <h4 className={styles.featuresTitle}>Категория</h4>
+            <h4 className={styles.featuresTitle}>{t('filters.titles.category')}</h4>
             <div className={styles.constructionGrid}>
-                {AGRICULTURAL_CATEGORIES.map((category: CategoryOption) => {
+                {translatedCategories.map((category: CategoryOption) => {
                     const isSelected = selectedCategories.includes(category.id);
                     return (
                         <button

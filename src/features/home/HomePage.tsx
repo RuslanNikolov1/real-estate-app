@@ -19,7 +19,7 @@ import styles from './HomePage.module.scss';
 // Lazy load LatestPropertiesSection
 const LatestPropertiesSection = dynamic(
   () => import('./components/LatestPropertiesSection').then(mod => ({ default: mod.LatestPropertiesSection })),
-  { ssr: false, loading: () => <div className={styles.loadingSection}>Зареждане...</div> }
+  { ssr: false }
 );
 
 export function HomePage() {
@@ -51,13 +51,28 @@ export function HomePage() {
   });
 
   // Fetch reviews
-  const { data: reviews = [] } = useQuery({
-    queryKey: ['reviews'],
+  const { data: reviewsData, refetch: refetchReviews } = useQuery({
+    queryKey: ['reviews', 'approved'],
     queryFn: async () => {
-      // TODO: Replace with actual API call
-      return [];
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'HomePage.tsx:queryFn:entry',message:'Starting reviews fetch',data:{url:'/api/reviews?status=approved&limit=6'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      const response = await fetch('/api/reviews?status=approved&limit=6');
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'HomePage.tsx:queryFn:response',message:'Fetch response received',data:{ok:response.ok,status:response.status,statusText:response.statusText},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      if (!response.ok) throw new Error('Failed to fetch reviews');
+      const jsonData = await response.json();
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'HomePage.tsx:queryFn:parsed',message:'JSON parsed',data:{hasReviews:!!jsonData.reviews,reviewsCount:jsonData.reviews?.length,total:jsonData.total,reviewsData:jsonData.reviews},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      return jsonData;
     },
   });
+  const reviews = reviewsData?.reviews || [];
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'HomePage.tsx:reviews-assigned',message:'Reviews assigned to variable',data:{hasReviewsData:!!reviewsData,reviewsLength:reviews.length,reviews:reviews},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+  // #endregion
 
   // Fetch partner services
   const { data: partnerServices = [] } = useQuery({
@@ -117,7 +132,7 @@ export function HomePage() {
         </section>
 
         {/* Latest Properties */}
-        <Suspense fallback={<div className={styles.loadingSection}>Зареждане на най-новите имоти...</div>}>
+        <Suspense fallback={<div className={styles.loadingSection}>{t('common.loading')}</div>}>
           <LatestPropertiesSection />
         </Suspense>
 
@@ -130,7 +145,7 @@ export function HomePage() {
         <SellYourProperty />
 
         {/* Client Reviews */}
-        {reviews.length > 0 && <ClientReviews reviews={reviews} />}
+        <ClientReviews reviews={reviews} onRefresh={refetchReviews} />
 
         {/* Partner Services */}
         {partnerServices.length > 0 && (

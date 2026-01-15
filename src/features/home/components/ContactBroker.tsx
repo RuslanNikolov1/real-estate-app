@@ -11,17 +11,22 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import styles from './ContactBroker.module.scss';
 
-const contactSchema = z.object({
-  name: z.string().min(2, 'Името трябва да е поне 2 символа'),
-  email: z.string().email('Невалиден имейл адрес'),
-  phone: z.string().optional(),
-  message: z.string().min(10, 'Съобщението трябва да е поне 10 символа'),
-});
-
-type ContactFormData = z.infer<typeof contactSchema>;
+type ContactFormData = {
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+};
 
 export function ContactBroker() {
   const { t } = useTranslation();
+  
+  const contactSchema = z.object({
+    name: z.string().min(2, t('errors.fieldRequired', { fieldLabel: t('home.contactForm.name') })),
+    email: z.string().email(t('errors.emailInvalid')),
+    phone: z.string().optional(),
+    message: z.string().min(10, t('errors.fieldRequired', { fieldLabel: t('home.contactForm.message') })),
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -58,22 +63,22 @@ export function ContactBroker() {
             <div className={styles.infoItem}>
               <EnvelopeSimple size={24} />
               <div>
-                <h3>Имейл</h3>
+                <h3>{t('home.contactForm.email')}</h3>
                 <a href="mailto:info@example.com">info@example.com</a>
               </div>
             </div>
             <div className={styles.infoItem}>
               <Phone size={24} />
               <div>
-                <h3>Телефон</h3>
+                <h3>{t('home.contactForm.phone')}</h3>
                 <a href="tel:+359888888888">+359 888 888 888</a>
               </div>
             </div>
             <div className={styles.infoItem}>
               <ChatCircleText size={24} />
               <div>
-                <h3>Съобщение</h3>
-                <p>Попълнете формата отдясно</p>
+                <h3>{t('home.contactForm.message')}</h3>
+                <p>{t('home.contactForm.fillFormRight')}</p>
               </div>
             </div>
           </div>
@@ -85,25 +90,25 @@ export function ContactBroker() {
             className={styles.form}
           >
             <Input
-              label="Име"
+              label={t('home.contactForm.name')}
               {...register('name')}
               error={errors.name?.message}
             />
             <Input
-              label="Имейл"
+              label={t('home.contactForm.email')}
               type="email"
               {...register('email')}
               error={errors.email?.message}
             />
             <Input
-              label="Телефон (по избор)"
+              label={t('home.contactForm.phoneOptional')}
               type="tel"
               {...register('phone')}
               error={errors.phone?.message}
             />
             <div className={styles.textareaWrapper}>
               <label htmlFor="message" className={styles.label}>
-                Съобщение
+                {t('home.contactForm.message')}
               </label>
               <textarea
                 id="message"
@@ -123,7 +128,7 @@ export function ContactBroker() {
                 animate={{ opacity: 1 }}
                 className={styles.successMessage}
               >
-                Съобщението е изпратено успешно!
+                {t('home.contactForm.successMessage')}
               </motion.div>
             )}
             <Button
@@ -133,7 +138,7 @@ export function ContactBroker() {
               isLoading={isSubmitting}
               className={styles.submitButton}
             >
-              Изпрати
+              {t('home.contactForm.submit')}
             </Button>
           </motion.form>
         </div>

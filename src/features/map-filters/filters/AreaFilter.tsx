@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, type CSSProperties } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 import { AREA_SLIDER_MAX, SQUARE_AREA_CAP, YARD_AREA_SLIDER_MAX, YARD_AREA_CAP } from './types';
 import type { AreaPreset } from './constants';
@@ -25,7 +26,7 @@ export function AreaFilter({
     onFilterChange, 
     initialAreaFrom, 
     initialAreaTo,
-    title = 'Площ в кв.м',
+    title,
     sliderMax = AREA_SLIDER_MAX,
     areaCap = SQUARE_AREA_CAP,
     inputIdPrefix = 'area',
@@ -34,6 +35,7 @@ export function AreaFilter({
     initialPresetId = null,
     showNotProvided = false
 }: AreaFilterProps) {
+    const { t } = useTranslation();
     // Use default values for UI display only
     const defaultAreaFrom = 20;
     const defaultAreaTo = 100;
@@ -122,7 +124,7 @@ export function AreaFilter({
             style={areaLeftFiltersStyle}
         >
             <div className={styles.areaFilter}>
-                <h4 className={styles.areaTitle}>{title}</h4>
+                <h4 className={styles.areaTitle}>{title || t('filters.titles.area')}</h4>
                 <div className={styles.areaControls}>
                     <div className={styles.dualRangeSlider}>
                         <input
@@ -168,7 +170,7 @@ export function AreaFilter({
                     <div className={styles.areaInputs}>
                         <div className={styles.areaInputWrapper}>
                             <label htmlFor={`${inputIdPrefix}-from`} className={styles.areaInputLabel}>
-                                От
+                                {t('filters.common.from')}
                             </label>
                             <input
                                 type="number"
@@ -187,7 +189,7 @@ export function AreaFilter({
                         </div>
                         <div className={styles.areaInputWrapper}>
                             <label htmlFor={`${inputIdPrefix}-to`} className={styles.areaInputLabel}>
-                                До
+                                {t('filters.common.to')}
                             </label>
                             <input
                                 type="number"
@@ -226,7 +228,7 @@ export function AreaFilter({
                                     className={`${styles.areaPresetButton} ${isNotProvided ? styles.areaPresetButtonActive : ''}`}
                                     onClick={handleNotProvidedClick}
                                 >
-                                    Не е въведено
+                                    {t('filters.common.notSpecified')}
                                 </button>
                             )}
                         </div>

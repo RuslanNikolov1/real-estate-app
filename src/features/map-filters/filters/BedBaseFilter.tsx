@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
+
 import { useState, useCallback, useEffect } from 'react';
 import { HOTEL_BED_BASE_PRESETS } from './constants';
 import { HOTELS_BED_BASE_SLIDER_MAX } from './types';
@@ -23,6 +25,7 @@ export function BedBaseFilter({
     initialIsNotProvided = false,
     presets = HOTEL_BED_BASE_PRESETS
 }: BedBaseFilterProps) {
+    const { t } = useTranslation();
     const [bedBaseFrom, setBedBaseFrom] = useState(initialBedBaseFrom);
     const [bedBaseTo, setBedBaseTo] = useState(initialBedBaseTo);
     const [bedBaseFromInput, setBedBaseFromInput] = useState<string>(String(initialBedBaseFrom));
@@ -78,7 +81,7 @@ export function BedBaseFilter({
 
     return (
         <div className={constructionStyles.constructionFilter}>
-            <h4 className={constructionStyles.featuresTitle}>Леглова база</h4>
+            <h4 className={constructionStyles.featuresTitle}>{t('filters.titles.bedBase')}</h4>
             <div className={styles.yearControls}>
                 <div className={styles.dualRangeSlider}>
                     <input
@@ -120,7 +123,7 @@ export function BedBaseFilter({
                 <div className={styles.yearInputsRow}>
                     <div className={styles.yearInputWrapper}>
                         <label htmlFor="bed-base-from" className={styles.yearInputLabel}>
-                            От
+                            {t('filters.common.from')}
                         </label>
                         <input
                             type="number"
@@ -166,7 +169,7 @@ export function BedBaseFilter({
                     </div>
                     <div className={styles.yearInputWrapper}>
                         <label htmlFor="bed-base-to" className={styles.yearInputLabel}>
-                            До
+                            {t('filters.common.to')}
                         </label>
                         <input
                             type="number"
@@ -229,7 +232,7 @@ export function BedBaseFilter({
                             className={`${areaStyles.areaPresetButton} ${isNotProvided ? areaStyles.areaPresetButtonActive : ''}`}
                             onClick={handleNotProvidedClick}
                         >
-                            Не е въведено
+                            {t('filters.common.notSpecified')}
                         </button>
                     </div>
                 )}

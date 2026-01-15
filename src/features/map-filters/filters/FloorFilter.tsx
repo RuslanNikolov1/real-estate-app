@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateFilterOptions } from '@/lib/filter-translations';
 import { FLOOR_SPECIAL_OPTIONS } from './constants';
 import type { FloorSpecialOption } from './types';
 import styles from './FloorFilter.module.scss';
@@ -22,10 +24,12 @@ export function FloorFilter({
     initialSpecialOptions = [],
     floorOptions = FLOOR_SPECIAL_OPTIONS
 }: FloorFilterProps) {
-    // Filter floor options to only show allowed ones
+    const { t } = useTranslation();
+    // Filter floor options to only show allowed ones and translate them
     const filteredFloorOptions = useMemo(() => {
-        return floorOptions.filter(option => ALLOWED_FLOOR_OPTIONS.includes(option.id));
-    }, [floorOptions]);
+        const filtered = floorOptions.filter(option => ALLOWED_FLOOR_OPTIONS.includes(option.id));
+        return translateFilterOptions(filtered, t, 'filters.floor');
+    }, [floorOptions, t]);
 
     // For multiple selection, keep an array of selected options
     const [selectedOptions, setSelectedOptions] = useState<string[]>(initialSpecialOptions);
@@ -59,7 +63,7 @@ export function FloorFilter({
 
     return (
         <div className={styles.floorFilter}>
-            <h4 className={styles.featuresTitle}>Етаж</h4>
+            <h4 className={styles.featuresTitle}>{t('filters.titles.floor')}</h4>
             <div className={styles.constructionGrid}>
                 {filteredFloorOptions.map((option: FloorSpecialOption) => {
                     const isSelected = selectedOptions.includes(option.id);
