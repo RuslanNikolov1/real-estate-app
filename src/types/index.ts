@@ -95,6 +95,12 @@ export interface Property {
   broker_phone?: string;
   broker_position?: string;
   broker_image?: string;
+  // Hotel-specific properties
+  hotel_category?: string;
+  bed_base?: number;
+  works?: string;
+  // Agricultural-specific properties
+  agricultural_category?: string;
 }
 
 export interface PropertySearchFilters {
