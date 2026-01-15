@@ -337,7 +337,7 @@ export function Header() {
           <button
             className={styles.mobileMenuButton}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label={t('header.toggleMenuAriaLabel')}
+            aria-label={mounted ? t('header.toggleMenuAriaLabel') : 'Toggle menu'}
           >
             {isMobileMenuOpen ? <X size={24} color="white" /> : <List size={24} color="white" />}
           </button>

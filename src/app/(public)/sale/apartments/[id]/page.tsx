@@ -1,17 +1,46 @@
-'use client';
-
 import { Metadata } from 'next';
-import { useParams } from 'next/navigation';
 import { PropertyDetailPage } from '@/features/properties/PropertyDetailPage';
+import { getBaseUrl } from '@/lib/base-url';
 
-export default function SaleApartmentPage() {
-  const params = useParams<{ id: string }>();
-  const propertyId = params?.id;
+const baseUrl = getBaseUrl();
 
-  if (!propertyId) {
-    return null;
-  }
-
-  return <PropertyDetailPage propertyId={propertyId} />;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  
+  const propertyUrl = `${baseUrl}/sale/apartments/${id}`;
+  
+  return {
+    metadataBase: new URL(baseUrl),
+    alternates: {
+      canonical: propertyUrl,
+    },
+    openGraph: {
+      type: 'website',
+      url: propertyUrl,
+      siteName: 'Broker Bulgaria',
+    },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'default',
+      title: 'Broker Bulgaria',
+    },
+  };
 }
 
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  
+  if (!id) {
+    return null;
+  }
+  
+  return <PropertyDetailPage propertyId={id} />;
+}

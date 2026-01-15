@@ -139,6 +139,76 @@
     "addToFavorites": "Add to Favorites",
     "removeFromFavorites": "Remove from Favorites"
   },
+  "propertyDetail": {
+    "loading": "Loading...",
+    "notFound": "Property not found.",
+    "incompleteData": "Property has incomplete required data.",
+    "errorLoading": "Error loading property.",
+    "notSpecified": "Not specified",
+    "morePhotos": "{{count}} more photos",
+    "sections": {
+      "description": "Description",
+      "features": "Features",
+      "constructionDetails": "Construction Details",
+      "additionalParameters": "Additional Parameters",
+      "priceHistory": "Price History",
+      "contactUs": "Contact Us"
+    },
+    "labels": {
+      "buildingType": "Building Type",
+      "constructionType": "Construction Type",
+      "constructionTypeHotel": "Construction Type",
+      "constructionTypeRestaurant": "Construction Type",
+      "constructionTypeGeneric": "Construction Type",
+      "garageConstructionType": "Construction Type",
+      "completionStatus": "Completion Status",
+      "furnishing": "Furnishing",
+      "equipment": "Equipment",
+      "workingMode": "Working Mode",
+      "yearBuilt": "Year Built",
+      "yardArea": "Yard Area (m²)",
+      "category": "Category",
+      "bedBase": "Bed Base",
+      "electricity": "Electricity",
+      "water": "Water",
+      "yard": "Yard"
+    },
+    "actions": {
+      "saved": "Saved",
+      "save": "Save",
+      "share": "Share",
+      "phone": "Phone",
+      "email": "Email",
+      "viber": "Viber",
+      "whatsapp": "WhatsApp",
+      "broker": "Broker"
+    },
+    "furniture": {
+      "withEquipment": "With Equipment",
+      "withoutEquipment": "Without Equipment",
+      "furnished": "Furnished",
+      "partiallyFurnished": "Partially Furnished",
+      "unfurnished": "Unfurnished"
+    },
+    "workingModes": {
+      "seasonal": "Seasonal",
+      "yearRound": "Year-round"
+    },
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    }
+  },
   "flashMessages": {
     "propertyAdded": "Property added!",
     "propertyUpdated": "Property updated!",
@@ -538,12 +608,14 @@
     },
     "agriculturalFeatures": {
       "all": "All",
+      "water": "Water",
       "dividable": "Dividable",
       "to-road": "To Road",
       "to-river": "To River",
       "wind-turbines": "Suitable for Wind Turbines",
       "irrigated": "Irrigated",
-      "with-building": "With Building"
+      "with-building": "With Building",
+      "electricity": "Electricity"
     },
     "warehouseTypes": {
       "all": "All",
@@ -587,12 +659,19 @@
     "garageFeatures": {
       "all": "All",
       "automatic-door": "Automatic Door",
+      "elevator": "Elevator",
+      "barter": "Barter",
+      "water": "Water",
       "rear": "Rear",
       "repair-channel": "Repair Channel",
+      "sewerage": "Sewerage",
+      "leasing": "Leasing",
       "lighted": "Lighted",
       "separate-meter": "Separate Meter",
       "heated": "Heated",
-      "front": "Front"
+      "security": "Security",
+      "front": "Front",
+      "electricity": "Electricity"
     },
     "hotelTypes": {
       "all": "All",
@@ -639,7 +718,10 @@
       "sea-front": "Sea Front",
       "park-garden": "Park/Garden",
       "working": "Operating",
-      "recently-renovated": "Recently Renovated"
+      "recently-renovated": "Recently Renovated",
+      "leasing": "Leasing",
+      "mortgaged": "Mortgaged",
+      "barter": "Barter"
     },
     "establishmentLocationTypes": {
       "all": "All",

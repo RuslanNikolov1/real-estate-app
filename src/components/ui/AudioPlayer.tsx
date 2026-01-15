@@ -13,6 +13,11 @@ interface AudioPlayerProps {
 export function AudioPlayer({ src, label = 'Ambience' }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(audioManager.isPlaying);
   const [volume, setVolumeState] = useState(audioManager.volume);
+  const [displayLabel, setDisplayLabel] = useState('Ambience');
+
+  useEffect(() => {
+    setDisplayLabel(label);
+  }, [label]);
 
   useEffect(() => {
     audioManager.initialize(src);
@@ -69,7 +74,9 @@ export function AudioPlayer({ src, label = 'Ambience' }: AudioPlayerProps) {
           aria-label="Volume"
         />
       ) : (
-        <span className={styles.label}>{label}</span>
+        <span className={styles.label} suppressHydrationWarning>
+          {displayLabel}
+        </span>
       )}
     </div>
   );

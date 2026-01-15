@@ -55,6 +55,7 @@ import {
   AGRICULTURAL_PROPERTY_TYPES,
   BUILDING_TYPES,
   HOTEL_CATEGORIES,
+  HOTEL_CONSTRUCTION_TYPES,
   AGRICULTURAL_CATEGORIES,
   ELECTRICITY_OPTIONS,
   WATER_OPTIONS,
@@ -144,7 +145,7 @@ interface PropertyDetailPageProps {
 export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   // Hooks must be called in the same order on every render
   // Call useTranslation at the top, before any conditional logic or early returns
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const currentLanguage = i18n.language || 'bg';
   const { user } = useAuth();
 
@@ -173,12 +174,12 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
           if (response.status === 404) {
             if (isMounted) {
               setRemoteProperty(null);
-              setError('Имотът не е намерен.');
+              setError(t('propertyDetail.notFound'));
             }
             return;
           }
 
-          throw new Error('Грешка при зареждането на имота');
+          throw new Error(t('propertyDetail.errorLoading'));
         }
 
         const data: Property = await response.json();
@@ -188,7 +189,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
       } catch (err) {
         console.error('Error fetching property by id:', err);
         if (isMounted) {
-          setError('Грешка при зареждането на имота.');
+          setError(t('propertyDetail.errorLoading'));
         }
       } finally {
         if (isMounted) {
@@ -290,138 +291,6 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
     !!property.city &&
     !!property.currency;
 
-  const recommendedProperties = useMemo(() => {
-    const filtered = mockProperties.filter(
-      (p) => p.id !== propertyId && p.status === 'for-sale' && p.type === 'apartment',
-    );
-
-    // If we don't have enough, add some mock properties
-    if (filtered.length < 4) {
-      const additionalProperties: Property[] = [
-        {
-          id: 'rec1',
-          title: 'Модерен апартамент в квартал Изгрев',
-          description: 'Двустаен апартамент с балкон и изглед към града.',
-          type: 'apartment',
-          status: 'for-sale',
-          city: 'Бургас',
-          neighborhood: 'Изгрев',
-          price: 145000,
-          currency: '€',
-          area: 75,
-          rooms: 2,
-          bathrooms: 1,
-          floor: 'not-last',
-          total_floors: 6,
-          images: [
-            {
-              id: 'rec1-img',
-              url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af',
-              public_id: 'rec1-1',
-              width: 1200,
-              height: 800,
-              is_primary: true,
-            },
-          ],
-          view_count: 156,
-          created_at: '2024-01-10T10:00:00Z',
-          updated_at: '2024-01-10T10:00:00Z',
-        },
-        {
-          id: 'rec2',
-          title: 'Апартамент с изглед към морето',
-          description: 'Тристаен апартамент на първа линия море.',
-          type: 'apartment',
-          status: 'for-sale',
-          city: 'Бургас',
-          neighborhood: 'Морска градина',
-          price: 220000,
-          currency: '€',
-          area: 110,
-          rooms: 3,
-          bathrooms: 2,
-          floor: 'not-last',
-          total_floors: 5,
-          images: [
-            {
-              id: 'rec2-img',
-              url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2',
-              public_id: 'rec2-1',
-              width: 1200,
-              height: 800,
-              is_primary: true,
-            },
-          ],
-          view_count: 234,
-          created_at: '2024-01-12T10:00:00Z',
-          updated_at: '2024-01-12T10:00:00Z',
-        },
-        {
-          id: 'rec3',
-          title: 'Нов апартамент в тих квартал',
-          description: 'Едностаен апартамент в нова сграда.',
-          type: 'apartment',
-          status: 'for-sale',
-          city: 'Бургас',
-          neighborhood: 'Лазур',
-          price: 95000,
-          currency: '€',
-          area: 55,
-          rooms: 1,
-          bathrooms: 1,
-          floor: 'ground',
-          total_floors: 4,
-          images: [
-            {
-              id: 'rec3-img',
-              url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb',
-              public_id: 'rec3-1',
-              width: 1200,
-              height: 800,
-              is_primary: true,
-            },
-          ],
-          view_count: 98,
-          created_at: '2024-01-14T10:00:00Z',
-          updated_at: '2024-01-14T10:00:00Z',
-        },
-        {
-          id: 'rec4',
-          title: 'Луксозен пентхаус с тераса',
-          description: 'Голям апартамент на последен етаж с голяма тераса.',
-          type: 'apartment',
-          status: 'for-sale',
-          city: 'Бургас',
-          neighborhood: 'Център',
-          price: 280000,
-          currency: '€',
-          area: 130,
-          rooms: 4,
-          bathrooms: 3,
-          floor: 'last',
-          total_floors: 8,
-          images: [
-            {
-              id: 'rec4-img',
-              url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2',
-              public_id: 'rec4-1',
-              width: 1200,
-              height: 800,
-              is_primary: true,
-            },
-          ],
-          view_count: 412,
-          created_at: '2024-01-16T10:00:00Z',
-          updated_at: '2024-01-16T10:00:00Z',
-        },
-      ];
-
-      return [...filtered, ...additionalProperties].slice(0, 4);
-    }
-
-    return filtered.slice(0, 4);
-  }, [propertyId]);
-
   // Keyboard navigation for slideshow
   const imagesLength = property?.images?.length ?? 0;
   useEffect(() => {
@@ -454,7 +323,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
         <Header />
         <main className={styles.main}>
           <div className={styles.container}>
-            <p>Зареждане...</p>
+            <p>{t('propertyDetail.loading')}</p>
           </div>
         </main>
         <Footer />
@@ -468,11 +337,11 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
         <Header />
         <main className={styles.main}>
           <div className={styles.container}>
-            <p>
+            <p suppressHydrationWarning>
               {error ||
                 (property && !hasRequiredFields
-                  ? 'Имотът има непълни задължителни данни.'
-                  : 'Имотът не е намерен.')}
+                  ? t('propertyDetail.incompleteData')
+                  : t('propertyDetail.notFound'))}
             </p>
           </div>
         </main>
@@ -487,7 +356,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
         <Header />
         <main className={styles.main}>
           <div className={styles.container}>
-            <p>Имотът не е намерен.</p>
+            <p>{t('propertyDetail.notFound')}</p>
           </div>
         </main>
         <Footer />
@@ -497,12 +366,12 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const months = [
-      'януари', 'февруари', 'март', 'април', 'май', 'юни',
-      'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'
+    const monthKeys = [
+      'january', 'february', 'march', 'april', 'may', 'june',
+      'july', 'august', 'september', 'october', 'november', 'december'
     ];
     const day = date.getDate();
-    const month = months[date.getMonth()];
+    const month = t(`propertyDetail.months.${monthKeys[date.getMonth()]}`);
     const year = date.getFullYear();
     return `${day} ${month} ${year}`;
   };
@@ -544,14 +413,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
 
   const getSubtypeLabel = () => {
     if (!property.subtype) {
-      // Translate "Not specified" based on language
-      const notSpecifiedMap: Record<string, string> = {
-        'bg': 'Не е посочено',
-        'en': 'Not Specified',
-        'ru': 'Не указано',
-        'de': 'Nicht angegeben',
-      };
-      return notSpecifiedMap[currentLanguage] || notSpecifiedMap['bg'];
+      return t('propertyDetail.notSpecified');
     }
 
     // Use the translation function for all property types
@@ -561,7 +423,48 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
       return translated;
     }
     
-    // If translation returned empty or the ID itself, try fallback to constants
+    // If translation returned empty or the ID itself, try translation keys based on property type
+    let translationKey: string | undefined;
+    
+    switch (property.type) {
+      case 'house':
+      case 'villa':
+        translationKey = `filters.houseTypes.${property.subtype}`;
+        break;
+      case 'office':
+      case 'shop':
+        translationKey = `filters.commercialTypes.${property.subtype}`;
+        break;
+      case 'warehouse':
+        translationKey = `filters.warehouseTypes.${property.subtype}`;
+        break;
+      case 'hotel':
+        translationKey = `filters.hotelTypes.${property.subtype}`;
+        break;
+      case 'garage':
+        translationKey = `filters.garageTypes.${property.subtype}`;
+        break;
+      case 'agricultural':
+        translationKey = `filters.agriculturalTypes.${property.subtype}`;
+        break;
+      case 'restaurant':
+        translationKey = `filters.establishmentLocationTypes.${property.subtype}`;
+        break;
+      case 'apartment':
+      default:
+        translationKey = `filters.apartmentSubtypes.${property.subtype}`;
+        break;
+    }
+    
+    // Try translation key if available
+    if (translationKey) {
+      const keyTranslated = t(translationKey);
+      if (keyTranslated && keyTranslated !== translationKey) {
+        return keyTranslated;
+      }
+    }
+    
+    // Final fallback to constants
     let options:
       | { id: string; label: string }[]
       | undefined;
@@ -600,44 +503,195 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
 
   // Get construction type label
   const getConstructionLabel = () => {
-    const construction = CONSTRUCTION_FILTERS.find((c) => c.id === (property as any).construction_type);
-    return construction?.label || 'Не е посочено';
+    const constructionTypeId = (property as any).construction_type as string | undefined;
+    if (!constructionTypeId) return t('propertyDetail.notSpecified');
+    
+    // For hotels, use hotel-specific construction types
+    if (property.type === 'hotel') {
+      const hotelTranslationKey = `filters.hotelConstructionTypes.${constructionTypeId}`;
+      const hotelTranslated = t(hotelTranslationKey);
+      if (hotelTranslated && hotelTranslated !== hotelTranslationKey) {
+        return hotelTranslated;
+      }
+      // Fallback to hotel construction types constant
+      const hotelConstruction = HOTEL_CONSTRUCTION_TYPES.find((c) => c.id === constructionTypeId);
+      if (hotelConstruction) {
+        return hotelConstruction.label;
+      }
+    }
+    
+    // For other property types, use standard construction types
+    const translationKey = `filters.construction.${constructionTypeId}`;
+    const translated = t(translationKey);
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+    // Fallback to constant label if translation not found
+    const construction = CONSTRUCTION_FILTERS.find((c) => c.id === constructionTypeId);
+    return construction?.label || t('propertyDetail.notSpecified');
   };
 
   // Get building type label (Вид сграда)
   const getBuildingTypeLabel = () => {
     const buildingTypeId = (property as any).building_type as string | undefined;
-    if (!buildingTypeId) return 'Не е посочено';
+    if (!buildingTypeId) return t('propertyDetail.notSpecified');
+    const translationKey = `filters.buildingTypes.${buildingTypeId}`;
+    const translated = t(translationKey);
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+    // Fallback to constant label if translation not found
     const match = BUILDING_TYPES.find((b) => b.id === buildingTypeId);
-    return match?.label || 'Не е посочено';
+    return match?.label || t('propertyDetail.notSpecified');
+  };
+
+  // Get floor translation
+  const getFloorTranslation = (floorId: string | number | undefined | null): string => {
+    if (!floorId && floorId !== 0) return '';
+    
+    let floorIdStr: string;
+    
+    // Map numeric values to IDs
+    if (typeof floorId === 'number') {
+      const floorMap: Record<number, string> = {
+        [-1]: 'basement',
+        [0]: 'ground',
+        [1]: 'first-residential',
+        [2]: 'not-last',
+        [3]: 'last',
+        [99]: 'attic',
+      };
+      floorIdStr = floorMap[floorId] || String(floorId);
+    } else {
+      floorIdStr = String(floorId);
+    }
+    
+    // Try translation first
+    const translationKey = `filters.floor.${floorIdStr}`;
+    const translated = t(translationKey);
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+    
+    // Fallback to getFloorLabel if translation not found
+    return getFloorLabel(floorIdStr);
+  };
+
+  // Get feature translation based on property type
+  const getFeatureTranslation = (featureId: string, propertyType: string, propertyStatus?: string): string => {
+    // Determine the translation key prefix based on property type
+    let translationPrefix: string;
+    
+    switch (propertyType) {
+      case 'house':
+      case 'villa':
+        translationPrefix = 'filters.houseFeatures';
+        break;
+      case 'office':
+      case 'shop':
+        translationPrefix = 'filters.commercialFeatures';
+        break;
+      case 'warehouse':
+        translationPrefix = 'filters.warehouseFeatures';
+        break;
+      case 'land':
+        translationPrefix = 'filters.buildingPlotsFeatures';
+        break;
+      case 'agricultural':
+        translationPrefix = 'filters.agriculturalFeatures';
+        break;
+      case 'garage':
+        translationPrefix = 'filters.garageFeatures';
+        break;
+      case 'hotel':
+        translationPrefix = 'filters.hotelFeatures';
+        break;
+      case 'restaurant':
+        translationPrefix = propertyStatus === 'for-rent' ? 'filters.establishmentFeatures' : 'filters.establishmentFeatures';
+        break;
+      case 'apartment':
+      default:
+        // For apartments, check if it's rent mode
+        translationPrefix = propertyStatus === 'for-rent' ? 'filters.features' : 'filters.features';
+        break;
+    }
+    
+    const translationKey = `${translationPrefix}.${featureId}`;
+    const translated = t(translationKey);
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+    
+    // Fallback: try generic features for apartments
+    if (propertyType === 'apartment') {
+      const genericKey = `filters.features.${featureId}`;
+      const genericTranslated = t(genericKey);
+      if (genericTranslated && genericTranslated !== genericKey) {
+        return genericTranslated;
+      }
+    }
+    
+    // Final fallback: return the feature ID or find from constants
+    return featureId;
   };
 
   // Get completion status label
   const getCompletionLabel = () => {
-    const completion = COMPLETION_STATUSES.find((c) => c.id === (property as any).completion_degree);
-    return completion?.label || 'Не е посочено';
+    const completionId = (property as any).completion_degree as string | undefined;
+    if (!completionId) return t('propertyDetail.notSpecified');
+    const translationKey = `filters.completion.${completionId}`;
+    const translated = t(translationKey);
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+    // Fallback to constant label if translation not found
+    const completion = COMPLETION_STATUSES.find((c) => c.id === completionId);
+    return completion?.label || t('propertyDetail.notSpecified');
   };
 
   // Get hotel category label
   const getHotelCategoryLabel = () => {
-    const category = HOTEL_CATEGORIES.find((c) => c.id === (property as any).hotel_category);
-    return category?.label || 'Не е посочено';
+    const categoryId = (property as any).hotel_category as string | undefined;
+    if (!categoryId) return t('propertyDetail.notSpecified');
+    const translationKey = `filters.hotelCategories.${categoryId}`;
+    const translated = t(translationKey);
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+    // Fallback to constant label if translation not found
+    const category = HOTEL_CATEGORIES.find((c) => c.id === categoryId);
+    return category?.label || t('propertyDetail.notSpecified');
   };
 
   // Get agricultural category label
   const getAgriculturalCategoryLabel = () => {
-    const category = AGRICULTURAL_CATEGORIES.find((c) => c.id === (property as any).agricultural_category);
-    return category?.label || 'Не е посочено';
+    const categoryId = (property as any).agricultural_category as string | undefined;
+    if (!categoryId) return t('propertyDetail.notSpecified');
+    const translationKey = `filters.agriculturalCategories.${categoryId}`;
+    const translated = t(translationKey);
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+    // Fallback to constant label if translation not found
+    const category = AGRICULTURAL_CATEGORIES.find((c) => c.id === categoryId);
+    return category?.label || t('propertyDetail.notSpecified');
   };
 
   // Get works label (for rent hotels and restaurants)
   const getWorksLabel = () => {
     const works = (property as any).works as string | undefined;
-    if (!works) return 'Не е посочено';
+    if (!works) return t('propertyDetail.notSpecified');
     
     const worksMap: Record<string, string> = {
-      'seasonal': 'Работи сезонно',
-      'year-round': 'Работи целогодишно',
+      'seasonal': t('propertyDetail.workingModes.seasonal'),
+      'year-round': t('propertyDetail.workingModes.yearRound'),
     };
     
     return worksMap[works] || works;
@@ -645,50 +699,77 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
 
   // Get electricity label
   const getElectricityLabel = () => {
-    const electricity = ELECTRICITY_OPTIONS.find((e) => e.id === (property as any).electricity);
-    return electricity?.label || 'Не е посочено';
+    const electricityId = (property as any).electricity as string | undefined;
+    if (!electricityId) return t('propertyDetail.notSpecified');
+    const translationKey = `filters.electricityOptions.${electricityId}`;
+    const translated = t(translationKey);
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+    // Fallback to constant label if translation not found
+    const electricity = ELECTRICITY_OPTIONS.find((e) => e.id === electricityId);
+    return electricity?.label || t('propertyDetail.notSpecified');
   };
 
   // Get water label
   const getWaterLabel = () => {
-    const water = WATER_OPTIONS.find((w) => w.id === (property as any).water);
-    return water?.label || 'Не е посочено';
+    const waterId = (property as any).water as string | undefined;
+    if (!waterId) return t('propertyDetail.notSpecified');
+    const translationKey = `filters.waterOptions.${waterId}`;
+    const translated = t(translationKey);
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+    // Fallback to constant label if translation not found
+    const water = WATER_OPTIONS.find((w) => w.id === waterId);
+    return water?.label || t('propertyDetail.notSpecified');
   };
 
   // Get garage construction type label
   const getGarageConstructionLabel = () => {
-    const construction = GARAGE_CONSTRUCTION_TYPES.find((c) => c.id === (property as any).construction_type);
-    return construction?.label || 'Не е посочено';
+    const constructionTypeId = (property as any).construction_type as string | undefined;
+    if (!constructionTypeId) return t('propertyDetail.notSpecified');
+    const translationKey = `filters.garageConstructionTypes.${constructionTypeId}`;
+    const translated = t(translationKey);
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+    // Fallback to constant label if translation not found
+    const construction = GARAGE_CONSTRUCTION_TYPES.find((c) => c.id === constructionTypeId);
+    return construction?.label || t('propertyDetail.notSpecified');
   };
 
   // Get establishment construction type label (for restaurants)
   const getEstablishmentConstructionLabel = () => {
     const construction = ESTABLISHMENT_CONSTRUCTION_TYPES.find((c) => c.id === (property as any).construction_type);
-    return construction?.label || 'Не е посочено';
+    return construction?.label || t('propertyDetail.notSpecified');
   };
 
   // Get furniture label (for rent apartments and restaurants)
   const getFurnitureLabel = () => {
     const furniture = (property as any).furniture as string | undefined;
-    if (!furniture) return 'Не е посочено';
+    if (!furniture) return t('propertyDetail.notSpecified');
     
     // For restaurants, use different labels
     if (property.type === 'restaurant') {
       const restaurantFurnitureMap: Record<string, string> = {
-        'full': 'С оборудване',
-        'none': 'Без оборудване',
+        'full': t('propertyDetail.furniture.withEquipment'),
+        'none': t('propertyDetail.furniture.withoutEquipment'),
       };
-      return restaurantFurnitureMap[furniture] || 'Не е посочено';
+      return restaurantFurnitureMap[furniture] || t('propertyDetail.notSpecified');
     }
     
     // For apartments, use standard furniture labels
     const furnitureMap: Record<string, string> = {
-      'full': 'Обзаведен',
-      'partial': 'Частично обзаведен',
-      'none': 'Необзаведен',
+      'full': t('propertyDetail.furniture.furnished'),
+      'partial': t('propertyDetail.furniture.partiallyFurnished'),
+      'none': t('propertyDetail.furniture.unfurnished'),
     };
     
-    return furnitureMap[furniture] || 'Не е посочено';
+    return furnitureMap[furniture] || t('propertyDetail.notSpecified');
   };
 
 
@@ -816,7 +897,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   )}
                   {index === 1 && remainingImagesCount > 0 && (
                     <div className={styles.moreImagesLabel}>
-                      <span>Още {remainingImagesCount} снимки</span>
+                      <span>{t('propertyDetail.morePhotos', { count: remainingImagesCount })}</span>
                     </div>
                   )}
                 </div>
@@ -873,7 +954,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   {(property.type === 'house' && property.yard_area_sqm) && (
                     <div className={styles.detailBox}>
                       <Square size={24} />
-                      <div className={styles.detailValue}>Двор: {property.yard_area_sqm} м²</div>
+                      <div className={styles.detailValue}>{t('propertyDetail.labels.yard')}: {property.yard_area_sqm} м²</div>
                     </div>
                   )}
                   {/* Floor - only show for apartments, offices, shops, restaurants */}
@@ -881,7 +962,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     <div className={styles.detailBox}>
                       <Buildings size={24} />
                       <div className={styles.detailValue}>
-                        {getFloorLabel(String(property.floor))}
+                        {getFloorTranslation(property.floor)}
                       </div>
                     </div>
                   )}
@@ -890,14 +971,14 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
 
               {/* Description */}
               <div className={styles.descriptionSection}>
-                <h2 className={styles.sectionTitle}>Описание</h2>
+                <h2 className={styles.sectionTitle}>{t('propertyDetail.sections.description')}</h2>
                 <p className={styles.description}>{property.description}</p>
               </div>
 
               {/* Features Section */}
               {property.features && property.features.length > 0 && (
                 <div className={styles.featuresSection}>
-                  <h2 className={styles.sectionTitle}>Особености</h2>
+                  <h2 className={styles.sectionTitle}>{t('propertyDetail.sections.features')}</h2>
                   <div className={styles.featuresGrid}>
                     {property.features.map((featureId) => {
                       // #region agent log
@@ -949,10 +1030,13 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       // #endregion
                       if (!feature) return null;
 
+                      // Get translated feature label
+                      const featureLabel = getFeatureTranslation(featureId, property.type, property.status) || feature.label;
+
                       return (
                         <div key={featureId} className={styles.featureItem}>
                           {feature.icon && <span className={styles.featureIcon}>{feature.icon}</span>}
-                          <span className={styles.featureLabel}>{feature.label}</span>
+                          <span className={styles.featureLabel}>{featureLabel}</span>
                         </div>
                       );
                     })}
@@ -991,18 +1075,18 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   (propType === 'land' && (prop.electricity || prop.water));
 
                 return hasConstructionDetails;
-              })() && (
+              }              )() && (
                 <div className={styles.constructionSection}>
                   <h2 className={styles.sectionTitle}>
                     {property.type === 'land' 
-                      ? 'Допълнителни параметри' 
-                      : 'Детайли за строителството'}
+                      ? t('propertyDetail.sections.additionalParameters')
+                      : t('propertyDetail.sections.constructionDetails')}
                   </h2>
                   <div className={styles.constructionGrid}>
                     {/* Building Type (Вид сграда) - for offices, shops (not restaurants) */}
                     {(property.type === 'office' || property.type === 'shop') && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Вид сграда</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.buildingType')}</span>
                         <span className={styles.constructionValue}>{getBuildingTypeLabel()}</span>
                       </div>
                     )}
@@ -1011,9 +1095,9 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {((property.type === 'apartment' || property.type === 'office' || property.type === 'shop' || property.type === 'restaurant' || (property.type === 'hotel' && property.status === 'for-sale')) && (property as any).construction_type) && (
                       <div className={styles.constructionItem}>
                         <span className={styles.constructionLabel}>
-                          {property.type === 'apartment' ? 'Вид строителство' : 
-                           property.type === 'hotel' ? 'Тип строителство' :
-                           property.type === 'restaurant' ? 'Тип строителство' : 'Тип строителство'}
+                          {property.type === 'apartment' ? t('propertyDetail.labels.constructionType') : 
+                           property.type === 'hotel' ? t('propertyDetail.labels.constructionTypeHotel') :
+                           property.type === 'restaurant' ? t('propertyDetail.labels.constructionTypeRestaurant') : t('propertyDetail.labels.constructionTypeGeneric')}
                         </span>
                         <span className={styles.constructionValue}>
                           {property.type === 'apartment' ? getConstructionLabel() :
@@ -1026,7 +1110,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Garage Construction Type */}
                     {property.type === 'garage' && (property as any).construction_type && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Вид конструкция</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.garageConstructionType')}</span>
                         <span className={styles.constructionValue}>{getGarageConstructionLabel()}</span>
                       </div>
                     )}
@@ -1042,7 +1126,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       (property.type === 'hotel' && property.status === 'for-sale')
                     ) && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Степен на завършеност</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.completionStatus')}</span>
                         <span className={styles.constructionValue}>{getCompletionLabel()}</span>
                       </div>
                     )}
@@ -1050,7 +1134,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Furniture - for rent apartments */}
                     {property.type === 'apartment' && property.status === 'for-rent' && (property as any).furniture && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Обзавеждане</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.furnishing')}</span>
                         <span className={styles.constructionValue}>{getFurnitureLabel()}</span>
                       </div>
                     )}
@@ -1058,7 +1142,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Furniture (Оборудване) - for rent restaurants */}
                     {property.type === 'restaurant' && property.status === 'for-rent' && (property as any).furniture && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Оборудване</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.equipment')}</span>
                         <span className={styles.constructionValue}>{getFurnitureLabel()}</span>
                       </div>
                     )}
@@ -1066,7 +1150,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Works (Работен режим) - for rent restaurants */}
                     {property.type === 'restaurant' && property.status === 'for-rent' && (property as any).works && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Работен режим</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.workingMode')}</span>
                         <span className={styles.constructionValue}>{getWorksLabel()}</span>
                       </div>
                     )}
@@ -1074,7 +1158,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Year Built - for all types that have it (except land and agricultural) */}
                     {property.year_built && property.type !== 'land' && property.type !== 'agricultural' && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Година на строителство</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.yearBuilt')}</span>
                         <span className={styles.constructionValue}>{property.year_built}</span>
                       </div>
                     )}
@@ -1082,7 +1166,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Yard Area - for houses/villas */}
                     {((property.type === 'house' || property.type === 'villa') && property.yard_area_sqm) && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Площ на двора (м²)</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.yardArea')}</span>
                         <span className={styles.constructionValue}>{property.yard_area_sqm}</span>
                       </div>
                     )}
@@ -1090,7 +1174,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Hotel Category */}
                     {property.type === 'hotel' && (property as any).hotel_category && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Категория</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.category')}</span>
                         <span className={styles.constructionValue}>{getHotelCategoryLabel()}</span>
                       </div>
                     )}
@@ -1098,7 +1182,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Hotel Bed Base */}
                     {property.type === 'hotel' && (property as any).bed_base && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Леглова база</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.bedBase')}</span>
                         <span className={styles.constructionValue}>{(property as any).bed_base}</span>
                       </div>
                     )}
@@ -1106,7 +1190,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Works (Работен режим) - for rent hotels */}
                     {property.type === 'hotel' && property.status === 'for-rent' && (property as any).works && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Работен режим</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.workingMode')}</span>
                         <span className={styles.constructionValue}>{getWorksLabel()}</span>
                       </div>
                     )}
@@ -1114,7 +1198,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Agricultural Category */}
                     {property.type === 'agricultural' && (property as any).agricultural_category && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Категория</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.category')}</span>
                         <span className={styles.constructionValue}>{getAgriculturalCategoryLabel()}</span>
                       </div>
                     )}
@@ -1122,7 +1206,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Land - Electricity */}
                     {property.type === 'land' && (property as any).electricity && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Ток</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.electricity')}</span>
                         <span className={styles.constructionValue}>{getElectricityLabel()}</span>
                       </div>
                     )}
@@ -1130,7 +1214,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     {/* Land - Water */}
                     {property.type === 'land' && (property as any).water && (
                       <div className={styles.constructionItem}>
-                        <span className={styles.constructionLabel}>Вода</span>
+                        <span className={styles.constructionLabel}>{t('propertyDetail.labels.water')}</span>
                         <span className={styles.constructionValue}>{getWaterLabel()}</span>
                       </div>
                     )}
@@ -1141,7 +1225,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
               {/* Price History Graph */}
               {property.price_history && property.price_history.length > 0 && (
                 <div className={styles.priceHistorySection}>
-                  <h2 className={styles.sectionTitle}>История на цената</h2>
+                  <h2 className={styles.sectionTitle}>{t('propertyDetail.sections.priceHistory')}</h2>
                   <div className={styles.priceChart}>
                     <svg className={styles.chartSvg} viewBox="0 0 800 300">
                       <defs>
@@ -1187,21 +1271,21 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
 
               {/* Contact Buttons */}
               <div className={styles.contactSection}>
-                <h2 className={styles.sectionTitle}>Свържете се с нас</h2>
+                <h2 className={styles.sectionTitle}>{t('propertyDetail.sections.contactUs')}</h2>
                 <div className={styles.contactButtons}>
                   <a
                     href="tel:+359898993030"
                     className={`${styles.contactButton} ${styles.phoneButton}`}
                   >
                     <Phone size={24} weight="fill" />
-                    <span>Телефон</span>
+                    <span>{t('propertyDetail.actions.phone')}</span>
                   </a>
                   <a
                     href="viber://chat?number=+359898993030"
                     className={`${styles.contactButton} ${styles.viberButton}`}
                   >
                     <ChatCircle size={24} weight="fill" />
-                    <span>Viber</span>
+                    <span>{t('propertyDetail.actions.viber')}</span>
                   </a>
                   <a
                     href="https://wa.me/359898993030"
@@ -1210,14 +1294,14 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     rel="noopener noreferrer"
                   >
                     <ChatCircleDots size={24} weight="fill" />
-                    <span>WhatsApp</span>
+                    <span>{t('propertyDetail.actions.whatsapp')}</span>
                   </a>
                   <a
                     href="mailto:brokerbulgaria1@abv.bg"
                     className={`${styles.contactButton} ${styles.emailButton}`}
                   >
                     <Envelope size={24} weight="fill" />
-                    <span>Имейл</span>
+                    <span>{t('propertyDetail.actions.email')}</span>
                   </a>
                 </div>
               </div>
@@ -1235,7 +1319,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   </div>
                   <div className={styles.infoText}>
                     <Calendar size={24} />
-                    <span>{property.created_at ? formatDate(property.created_at) : 'Не е посочено'}</span>
+                    <span>{property.created_at ? formatDate(property.created_at) : t('propertyDetail.notSpecified')}</span>
                   </div>
                 </div>
 
@@ -1288,7 +1372,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       className={isFavorite ? '' : styles.outlinedHeart}
                       style={!isFavorite ? { color: '#802e2e', stroke: '#802e2e', strokeWidth: '2.5', fill: 'none' } : undefined}
                     />
-                    <span>{isFavorite ? 'Запазено' : 'Запази'}</span>
+                    <span>{isFavorite ? t('propertyDetail.actions.saved') : t('propertyDetail.actions.save')}</span>
                   </Button>
                   <Button 
                     variant="outline" 
@@ -1297,7 +1381,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     className={styles.actionButton}
                   >
                     <ShareNetwork size={18} />
-                    Сподели
+                    {t('propertyDetail.actions.share')}
                   </Button>
                 </div>
 
@@ -1307,7 +1391,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     <div className={styles.brokerImage}>
                       <Image
                         src={property.broker_image || '/Red Logo.jpg'}
-                        alt={property.broker_name || 'Брокер'}
+                        alt={property.broker_name || t('propertyDetail.actions.broker')}
                         fill
                         className={styles.brokerAvatar}
                         sizes="100px"
@@ -1334,52 +1418,6 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
               </div>
             </div>
           </div>
-
-          {/* Recommended Properties */}
-          {recommendedProperties.length > 0 && (
-            <div className={styles.recommendedSection}>
-              <h2 className={styles.sectionTitle}>Препоръчани имоти</h2>
-              <div className={styles.recommendedRow}>
-                {recommendedProperties.map((prop) => {
-                  const primaryImage = prop.images?.find((img) => img.is_primary) || prop.images?.[0];
-                  return (
-                    <div key={prop.id} className={styles.recommendedCard}>
-                      <div className={styles.recommendedImage}>
-                        {primaryImage ? (
-                          <CloudinaryImage
-                            src={primaryImage.url}
-                            publicId={primaryImage.public_id}
-                            alt={prop.title}
-                            fill
-                            className={styles.recommendedImageContent}
-                            sizes="(max-width: 768px) 50vw, 20vw"
-                          />
-                        ) : (
-                          <div className={styles.recommendedPlaceholder}>Няма снимка</div>
-                        )}
-                      </div>
-                      <div className={styles.recommendedDetails}>
-                        <div className={styles.recommendedPrice}>
-                          {formatNumber(prop.price)} {prop.currency}
-                        </div>
-                        <div className={styles.recommendedLocation}>
-                          {prop.city}
-                          {prop.neighborhood && `, ${prop.neighborhood}`}
-                        </div>
-                        <div className={styles.recommendedDivider}></div>
-                        <div className={styles.recommendedInfo}>
-                          {prop.rooms && <span>{prop.rooms} стаи</span>}
-                          {prop.rooms && prop.area && <span> • </span>}
-                          <span>{prop.area} м²</span>
-                          {prop.floor && <span> • {prop.floor}/{prop.total_floors}</span>}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </main>
       <Footer />

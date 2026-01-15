@@ -139,6 +139,76 @@
     "addToFavorites": "Добавить в избранное",
     "removeFromFavorites": "Удалить из избранного"
   },
+  "propertyDetail": {
+    "loading": "Загрузка...",
+    "notFound": "Объект не найден.",
+    "incompleteData": "У объекта неполные обязательные данные.",
+    "errorLoading": "Ошибка загрузки объекта.",
+    "notSpecified": "Не указано",
+    "morePhotos": "Еще {{count}} фото",
+    "sections": {
+      "description": "Описание",
+      "features": "Особенности",
+      "constructionDetails": "Детали строительства",
+      "additionalParameters": "Дополнительные параметры",
+      "priceHistory": "История цены",
+      "contactUs": "Свяжитесь с нами"
+    },
+    "labels": {
+      "buildingType": "Тип здания",
+      "constructionType": "Тип строительства",
+      "constructionTypeHotel": "Тип строительства",
+      "constructionTypeRestaurant": "Тип строительства",
+      "constructionTypeGeneric": "Тип строительства",
+      "garageConstructionType": "Тип конструкции",
+      "completionStatus": "Степень завершенности",
+      "furnishing": "Мебель",
+      "equipment": "Оборудование",
+      "workingMode": "Режим работы",
+      "yearBuilt": "Год постройки",
+      "yardArea": "Площадь двора (м²)",
+      "category": "Категория",
+      "bedBase": "Количество мест",
+      "electricity": "Электричество",
+      "water": "Вода",
+      "yard": "Двор"
+    },
+    "actions": {
+      "saved": "Сохранено",
+      "save": "Сохранить",
+      "share": "Поделиться",
+      "phone": "Телефон",
+      "email": "Эл. почта",
+      "viber": "Viber",
+      "whatsapp": "WhatsApp",
+      "broker": "Брокер"
+    },
+    "furniture": {
+      "withEquipment": "С оборудованием",
+      "withoutEquipment": "Без оборудования",
+      "furnished": "Меблированная",
+      "partiallyFurnished": "Частично меблированная",
+      "unfurnished": "Без мебели"
+    },
+    "workingModes": {
+      "seasonal": "Работает сезонно",
+      "yearRound": "Работает круглый год"
+    },
+    "months": {
+      "january": "января",
+      "february": "февраля",
+      "march": "марта",
+      "april": "апреля",
+      "may": "мая",
+      "june": "июня",
+      "july": "июля",
+      "august": "августа",
+      "september": "сентября",
+      "october": "октября",
+      "november": "ноября",
+      "december": "декабря"
+    }
+  },
   "flashMessages": {
     "propertyAdded": "Объект добавлен!",
     "propertyUpdated": "Объект обновлен!",
@@ -590,12 +660,19 @@
     "garageFeatures": {
       "all": "Все",
       "automatic-door": "Автоматические ворота",
+      "elevator": "Лифт",
+      "barter": "Бартер",
+      "water": "Вода",
       "rear": "Задний",
       "repair-channel": "Канал для ремонта",
+      "sewerage": "Канализация",
+      "leasing": "Лизинг",
       "lighted": "Освещенный",
       "separate-meter": "Отдельный счетчик",
       "heated": "Отапливаемый",
-      "front": "Передний"
+      "security": "Охрана",
+      "front": "Передний",
+      "electricity": "Электричество"
     },
     "hotelTypes": {
       "all": "Все",
@@ -642,7 +719,10 @@
       "sea-front": "Первая линия моря",
       "park-garden": "Парк/Сад",
       "working": "Работающий",
-      "recently-renovated": "После ремонта"
+      "recently-renovated": "После ремонта",
+      "leasing": "Лизинг",
+      "mortgaged": "Ипотекирован",
+      "barter": "Бартер"
     },
     "establishmentLocationTypes": {
       "all": "Все",

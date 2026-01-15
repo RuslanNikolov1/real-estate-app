@@ -108,10 +108,10 @@ export function HomePage() {
             <img src="/Picture Logo Mirrored.png" alt="Logo" />
           </div>
           <div className={styles.heroContent}>
-            <h1 className={styles.heroTitle}>
+            <h1 className={styles.heroTitle} suppressHydrationWarning>
               {t('home.title')}
             </h1>
-            <p className={styles.heroSubtitle}>
+            <p className={styles.heroSubtitle} suppressHydrationWarning>
               {t('home.subtitle')}
             </p>
             <div className={styles.searchWrapper}>

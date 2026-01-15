@@ -139,6 +139,76 @@
     "addToFavorites": "Zu Favoriten hinzufügen",
     "removeFromFavorites": "Aus Favoriten entfernen"
   },
+  "propertyDetail": {
+    "loading": "Lädt...",
+    "notFound": "Immobilie nicht gefunden.",
+    "incompleteData": "Die Immobilie hat unvollständige erforderliche Daten.",
+    "errorLoading": "Fehler beim Laden der Immobilie.",
+    "notSpecified": "Nicht angegeben",
+    "morePhotos": "{{count}} weitere Fotos",
+    "sections": {
+      "description": "Beschreibung",
+      "features": "Merkmale",
+      "constructionDetails": "Baudetails",
+      "additionalParameters": "Zusätzliche Parameter",
+      "priceHistory": "Preisverlauf",
+      "contactUs": "Kontaktieren Sie uns"
+    },
+    "labels": {
+      "buildingType": "Gebäudetyp",
+      "constructionType": "Bauart",
+      "constructionTypeHotel": "Bauart",
+      "constructionTypeRestaurant": "Bauart",
+      "constructionTypeGeneric": "Bauart",
+      "garageConstructionType": "Konstruktionsart",
+      "completionStatus": "Fertigstellungsgrad",
+      "furnishing": "Möblierung",
+      "equipment": "Ausstattung",
+      "workingMode": "Betriebsmodus",
+      "yearBuilt": "Baujahr",
+      "yardArea": "Hoffläche (m²)",
+      "category": "Kategorie",
+      "bedBase": "Bettenbasis",
+      "electricity": "Strom",
+      "water": "Wasser",
+      "yard": "Hof"
+    },
+    "actions": {
+      "saved": "Gespeichert",
+      "save": "Speichern",
+      "share": "Teilen",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "viber": "Viber",
+      "whatsapp": "WhatsApp",
+      "broker": "Makler"
+    },
+    "furniture": {
+      "withEquipment": "Mit Ausstattung",
+      "withoutEquipment": "Ohne Ausstattung",
+      "furnished": "Möbliert",
+      "partiallyFurnished": "Teilmöbliert",
+      "unfurnished": "Unmöbliert"
+    },
+    "workingModes": {
+      "seasonal": "Saisonal",
+      "yearRound": "Ganzjährig"
+    },
+    "months": {
+      "january": "Januar",
+      "february": "Februar",
+      "march": "März",
+      "april": "April",
+      "may": "Mai",
+      "june": "Juni",
+      "july": "Juli",
+      "august": "August",
+      "september": "September",
+      "october": "Oktober",
+      "november": "November",
+      "december": "Dezember"
+    }
+  },
   "flashMessages": {
     "propertyAdded": "Immobilie hinzugefügt!",
     "propertyUpdated": "Immobilie aktualisiert!",
@@ -587,12 +657,19 @@
     "garageFeatures": {
       "all": "Alle",
       "automatic-door": "Automatisches Tor",
+      "elevator": "Aufzug",
+      "barter": "Barter",
+      "water": "Wasser",
       "rear": "Hinten",
       "repair-channel": "Reparaturkanal",
+      "sewerage": "Kanalisation",
+      "leasing": "Leasing",
       "lighted": "Beleuchtet",
       "separate-meter": "Separater Zähler",
       "heated": "Beheizt",
-      "front": "Vorne"
+      "security": "Sicherheit",
+      "front": "Vorne",
+      "electricity": "Strom"
     },
     "hotelTypes": {
       "all": "Alle",
@@ -639,7 +716,10 @@
       "sea-front": "Meerfront",
       "park-garden": "Park/Garten",
       "working": "In Betrieb",
-      "recently-renovated": "Kürzlich renoviert"
+      "recently-renovated": "Kürzlich renoviert",
+      "leasing": "Leasing",
+      "mortgaged": "Hypothekenbelastet",
+      "barter": "Barter"
     },
     "establishmentLocationTypes": {
       "all": "Alle",

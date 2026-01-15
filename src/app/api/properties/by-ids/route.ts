@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
           .from('properties')
           .select('*')
           .in('id', uuidIds)
+          .then((result) => result)
       );
     }
     
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
           .from('properties')
           .select('*')
           .in('short_id', numericIds)
+          .then((result) => result)
       );
     }
     

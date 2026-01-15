@@ -139,6 +139,76 @@
     "addToFavorites": "Добави в любими",
     "removeFromFavorites": "Премахни от любими"
   },
+  "propertyDetail": {
+    "loading": "Зареждане...",
+    "notFound": "Имотът не е намерен.",
+    "incompleteData": "Имотът има непълни задължителни данни.",
+    "errorLoading": "Грешка при зареждането на имота.",
+    "notSpecified": "Не е посочено",
+    "morePhotos": "Още {{count}} снимки",
+    "sections": {
+      "description": "Описание",
+      "features": "Особености",
+      "constructionDetails": "Детайли за строителството",
+      "additionalParameters": "Допълнителни параметри",
+      "priceHistory": "История на цената",
+      "contactUs": "Свържете се с нас"
+    },
+    "labels": {
+      "buildingType": "Вид сграда",
+      "constructionType": "Вид строителство",
+      "constructionTypeHotel": "Тип строителство",
+      "constructionTypeRestaurant": "Тип строителство",
+      "constructionTypeGeneric": "Тип строителство",
+      "garageConstructionType": "Вид конструкция",
+      "completionStatus": "Степен на завършеност",
+      "furnishing": "Обзавеждане",
+      "equipment": "Оборудване",
+      "workingMode": "Работен режим",
+      "yearBuilt": "Година на строителство",
+      "yardArea": "Площ на двора (м²)",
+      "category": "Категория",
+      "bedBase": "Леглова база",
+      "electricity": "Ток",
+      "water": "Вода",
+      "yard": "Двор"
+    },
+    "actions": {
+      "saved": "Запазено",
+      "save": "Запази",
+      "share": "Сподели",
+      "phone": "Телефон",
+      "email": "Имейл",
+      "viber": "Viber",
+      "whatsapp": "WhatsApp",
+      "broker": "Брокер"
+    },
+    "furniture": {
+      "withEquipment": "С оборудване",
+      "withoutEquipment": "Без оборудване",
+      "furnished": "Обзаведен",
+      "partiallyFurnished": "Частично обзаведен",
+      "unfurnished": "Необзаведен"
+    },
+    "workingModes": {
+      "seasonal": "Работи сезонно",
+      "yearRound": "Работи целогодишно"
+    },
+    "months": {
+      "january": "януари",
+      "february": "февруари",
+      "march": "март",
+      "april": "април",
+      "may": "май",
+      "june": "юни",
+      "july": "юли",
+      "august": "август",
+      "september": "септември",
+      "october": "октомври",
+      "november": "ноември",
+      "december": "декември"
+    }
+  },
   "flashMessages": {
     "propertyAdded": "Имотът е добавен!",
     "propertyUpdated": "Имотът е обновен!",
@@ -596,12 +666,19 @@
     "garageFeatures": {
       "all": "Всички",
       "automatic-door": "Автоматична врата",
+      "elevator": "Асансьор",
+      "barter": "Бартер",
+      "water": "Вода",
       "rear": "Заден",
       "repair-channel": "Канал за ремонт",
+      "sewerage": "Канализация",
+      "leasing": "Лизинг",
       "lighted": "Осветен",
       "separate-meter": "Отделен електромер",
       "heated": "Отопляем",
-      "front": "Преден"
+      "security": "Охрана",
+      "front": "Преден",
+      "electricity": "Ток"
     },
     "hotelTypes": {
       "all": "Всички",
@@ -648,7 +725,10 @@
       "sea-front": "Първа линия море",
       "park-garden": "Парк/Градина",
       "working": "Работещ",
-      "recently-renovated": "След ремонт"
+      "recently-renovated": "След ремонт",
+      "leasing": "Лизинг",
+      "mortgaged": "Ипотекиран",
+      "barter": "Бартер"
     },
     "establishmentLocationTypes": {
       "all": "Всички",

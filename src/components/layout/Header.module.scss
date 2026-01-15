@@ -98,6 +98,7 @@
 .audioPlayerWrapper {
   position: relative;
   margin-left: $spacing-xl;
+  width: 6vw;
 
   @media (max-width: $breakpoint-md) {
     margin-left: $spacing-md;
@@ -107,8 +108,8 @@
 .ambienceMessage {
   position: absolute;
   top: calc(100% + $spacing-md);
-  left: -12vw;
   padding: $spacing-sm $spacing-md;
+  right: 1.5vw;
   background: $black;
   color: $white;
   border-radius: 8px;
@@ -123,8 +124,7 @@
     content: '';
     position: absolute;
     bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
+    right: 1.5vw;
     border: 6px solid transparent;
     border-bottom-color: $black;
   }
@@ -196,12 +196,17 @@
   width: 40px;
   height: 40px;
   border-radius: 50%; // Already circular
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
   color: $white;
+  cursor: pointer;
   transition: all $transition-base;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     background: rgba(255, 255, 255, 0.1);
-    color: $white;
+    border-color: $white;
+    outline: none;
   }
 
   @media (max-width: $breakpoint-md) {

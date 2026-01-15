@@ -15,7 +15,7 @@ export function Footer() {
           <div className={styles.column}>
             <h3 className={styles.title}>Broker Bulgaria</h3>
             <p className={styles.description}>
-              {t('footer.description')}
+              <span suppressHydrationWarning>{t('footer.description')}</span>
             </p>
             <div className={styles.social}>
               <a
@@ -43,47 +43,47 @@ export function Footer() {
           </div>
 
           <div className={styles.column}>
-            <h4 className={styles.columnTitle}>{t('footer.quickLinks')}</h4>
+            <h4 className={styles.columnTitle}><span suppressHydrationWarning>{t('footer.quickLinks')}</span></h4>
             <ul className={styles.links}>
               <li>
-                <Link href="/properties/for-sale" prefetch={false}>{t('nav.forSale')}</Link>
+                <Link href="/properties/for-sale" prefetch={false}><span suppressHydrationWarning>{t('nav.forSale')}</span></Link>
               </li>
               <li>
-                <Link href="/properties/for-rent" prefetch={false}>{t('nav.forRent')}</Link>
+                <Link href="/properties/for-rent" prefetch={false}><span suppressHydrationWarning>{t('nav.forRent')}</span></Link>
               </li>
               <li>
-                <Link href="/neighborhoods" prefetch={false}>{t('nav.neighborhoods')}</Link>
+                <Link href="/neighborhoods" prefetch={false}><span suppressHydrationWarning>{t('nav.neighborhoods')}</span></Link>
               </li>
               <li>
-                <Link href="/reviews" prefetch={false}>{t('nav.reviews')}</Link>
+                <Link href="/reviews" prefetch={false}><span suppressHydrationWarning>{t('nav.reviews')}</span></Link>
               </li>
               <li>
-                <Link href="/certificates" prefetch={false}>{t('nav.certificates')}</Link>
+                <Link href="/certificates" prefetch={false}><span suppressHydrationWarning>{t('nav.certificates')}</span></Link>
               </li>
             </ul>
           </div>
 
           <div className={styles.column}>
-            <h4 className={styles.columnTitle}>{t('footer.services')}</h4>
+            <h4 className={styles.columnTitle}><span suppressHydrationWarning>{t('footer.services')}</span></h4>
             <ul className={styles.links}>
               <li>
-                <Link href="/valuation" prefetch={false}>{t('nav.valuation')}</Link>
+                <Link href="/valuation" prefetch={false}><span suppressHydrationWarning>{t('nav.valuation')}</span></Link>
               </li>
               <li>
-                <Link href="/properties/add" prefetch={false}>{t('footer.addListing')}</Link>
+                <Link href="/properties/add" prefetch={false}><span suppressHydrationWarning>{t('footer.addListing')}</span></Link>
               </li>
               <li>
-                <Link href="/favorites" prefetch={false}>{t('nav.favorites')}</Link>
+                <Link href="/favorites" prefetch={false}><span suppressHydrationWarning>{t('nav.favorites')}</span></Link>
               </li>
             </ul>
           </div>
 
           <div className={styles.column}>
-            <h4 className={styles.columnTitle}>{t('footer.contacts')}</h4>
+            <h4 className={styles.columnTitle}><span suppressHydrationWarning>{t('footer.contacts')}</span></h4>
             <ul className={styles.contact}>
               <li>
                 <MapPin size={18} />
-                <span>{t('footer.location')}</span>
+                <span suppressHydrationWarning>{t('footer.location')}</span>
               </li>
               <li>
                 <Phone size={18} />
@@ -109,7 +109,7 @@ export function Footer() {
             </span>
           </a>
           <p className={styles.copyright}>
-            © 2025 Broker Bulgaria. {t('footer.allRightsReserved')}
+            © 2025 Broker Bulgaria. <span suppressHydrationWarning>{t('footer.allRightsReserved')}</span>
           </p>
         </div>
       </div>
