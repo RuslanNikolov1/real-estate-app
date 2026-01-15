@@ -14,8 +14,14 @@ export function translateFilterOptions<T extends { id: string; label: string }>(
   t: (key: string) => string,
   keyPrefix: string
 ): T[] {
-  return options.map(option => ({
-    ...option,
-    label: t(`${keyPrefix}.${option.id}`, option.label) // Use original label as fallback
-  }));
+  return options.map(option => {
+    const translationKey = `${keyPrefix}.${option.id}`;
+    const translatedLabel = t(translationKey);
+    // Use original label as fallback if translation key wasn't found (returns the key itself)
+    const label = translatedLabel === translationKey ? option.label : translatedLabel;
+    return {
+      ...option,
+      label
+    };
+  });
 }
