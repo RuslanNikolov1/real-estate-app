@@ -94,7 +94,7 @@ export function PropertyCard({ property, onClick, onDelete, onEdit, layout = 'ho
             <CloudinaryImage
               src={primaryImage.url}
               publicId={primaryImage.public_id}
-              alt={property.title}
+              alt={`${property.title} - ${property.city}${property.neighborhood ? `, ${property.neighborhood}` : ''} - ${property.type === 'apartment' ? 'Апартамент' : property.type === 'house' ? 'Къща' : property.type === 'villa' ? 'Вила' : 'Имот'} ${property.status === 'for-sale' ? 'за продажба' : 'под наем'}`}
               fill
               className={styles.image}
               sizes="(max-width: 768px) 100vw, 40vw"

@@ -4,6 +4,8 @@ import { QueryProvider } from '@/components/providers/QueryProvider';
 import { I18nProvider } from '@/components/providers/I18nProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { getBaseUrl } from '@/lib/base-url';
+import { generateOrganizationSchema, generateLocalBusinessSchema } from '@/lib/seo/structured-data';
+import { StructuredData } from '@/components/seo/StructuredData';
 import '@/styles/globals.scss';
 
 const baseUrl = getBaseUrl();
@@ -50,6 +52,13 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: baseUrl,
+    languages: {
+      'bg': baseUrl,
+      'en': baseUrl, // Update when language routes are implemented
+      'ru': baseUrl, // Update when language routes are implemented
+      'de': baseUrl, // Update when language routes are implemented
+      'x-default': baseUrl,
+    },
   },
 };
 
@@ -58,9 +67,17 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const organizationSchema = generateOrganizationSchema();
+  const localBusinessSchema = generateLocalBusinessSchema();
+  
   return (
     <html lang="bg" className={`${poppins.variable} ${inter.variable} ${greatVibes.variable} ${allura.variable} ${dancingScript.variable} ${pacifico.variable}`}>
+      <head>
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+      </head>
       <body>
+        <StructuredData data={[organizationSchema, localBusinessSchema]} />
         <I18nProvider>
           <QueryProvider>
             <AuthProvider>{children}</AuthProvider>

@@ -1,8 +1,7 @@
 import { Metadata } from 'next';
-import { PropertyDetailPage } from '@/features/properties/PropertyDetailPage';
+import { generatePropertyMetadata } from '@/lib/seo/metadata';
+import { PropertyPageWrapper } from '@/lib/seo/property-page-wrapper';
 import { getBaseUrl } from '@/lib/base-url';
-
-const baseUrl = getBaseUrl();
 
 export async function generateMetadata({
   params,
@@ -10,25 +9,10 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  
+  const baseUrl = getBaseUrl();
   const propertyUrl = `${baseUrl}/rent/apartments/${id}`;
   
-  return {
-    metadataBase: new URL(baseUrl),
-    alternates: {
-      canonical: propertyUrl,
-    },
-    openGraph: {
-      type: 'website',
-      url: propertyUrl,
-      siteName: 'Broker Bulgaria',
-    },
-    appleWebApp: {
-      capable: true,
-      statusBarStyle: 'default',
-      title: 'Broker Bulgaria',
-    },
-  };
+  return generatePropertyMetadata(id, propertyUrl);
 }
 
 export default async function Page({
@@ -37,10 +21,12 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const baseUrl = getBaseUrl();
+  const propertyUrl = `${baseUrl}/rent/apartments/${id}`;
   
   if (!id) {
     return null;
   }
   
-  return <PropertyDetailPage propertyId={id} />;
+  return <PropertyPageWrapper propertyId={id} propertyUrl={propertyUrl} />;
 }

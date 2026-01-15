@@ -832,7 +832,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     <CloudinaryImage
                       src={img.url}
                       publicId={img.public_id}
-                      alt={`${property.title} - ${index + 1}`}
+                      alt={`${property.title} - ${property.city}${property.neighborhood ? `, ${property.neighborhood}` : ''} - Снимка ${index + 2}`}
                       fill
                       className={styles.image}
                       sizes="(max-width: 768px) 50vw, 20vw"
@@ -861,7 +861,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   <CloudinaryImage
                     src={middleSlot.url}
                     publicId={middleSlot.public_id}
-                    alt={property.title}
+                    alt={`${property.title} - ${property.city}${property.neighborhood ? `, ${property.neighborhood}` : ''} - Главна снимка`}
                     fill
                     className={styles.image}
                     sizes="(max-width: 768px) 100vw, 40vw"
@@ -894,7 +894,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     <CloudinaryImage
                       src={img.url}
                       publicId={img.public_id}
-                      alt={`${property.title} - ${index + 4}`}
+                      alt={`${property.title} - ${property.city}${property.neighborhood ? `, ${property.neighborhood}` : ''} - Снимка ${index + 4}`}
                       fill
                       className={styles.image}
                       sizes="(max-width: 768px) 50vw, 20vw"
@@ -1440,7 +1440,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                 <CloudinaryImage
                   src={activeFullscreenImage.url}
                   publicId={activeFullscreenImage.public_id}
-                  alt={`${property.title} - ${currentImageIndex + 1}`}
+                  alt={`${property.title} - ${property.city}${property.neighborhood ? `, ${property.neighborhood}` : ''} - Снимка ${currentImageIndex + 1}`}
                   fill
                   className={styles.fullscreenImage}
                   sizes="100vw"

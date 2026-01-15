@@ -1,11 +1,12 @@
 import { MetadataRoute } from 'next';
 import { getBaseUrl } from '@/lib/base-url';
+import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 
 /**
  * Dynamic sitemap for Google Search Console
  * https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseUrl();
 
   // Static pages
@@ -126,21 +127,55 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // TODO: Add dynamic property pages when you fetch from database
-  // Example:
-  // const properties = await getSupabaseAdminClient()
-  //   .from('properties')
-  //   .select('id, updated_at')
-  //   .eq('sale_or_rent', 'sale'); // Note: status column removed, using sale_or_rent instead
-  //
-  // const propertyRoutes: MetadataRoute.Sitemap = properties.data?.map((property) => ({
-  //   url: `${baseUrl}/properties/${property.id}`,
-  //   lastModified: new Date(property.updated_at),
-  //   changeFrequency: 'weekly',
-  //   priority: 0.8,
-  // })) || [];
+  // Fetch all published properties from database
+  try {
+    const supabaseAdmin = getSupabaseAdminClient();
+    
+    const { data: properties, error } = await supabaseAdmin
+      .from('properties')
+      .select('id, updated_at, sale_or_rent, type')
+      .order('updated_at', { ascending: false });
 
-  return [...staticRoutes];
+    if (error) {
+      console.error('Error fetching properties for sitemap:', error);
+      return staticRoutes;
+    }
+
+    // Generate property URLs based on type and status
+    const propertyRoutes: MetadataRoute.Sitemap = (properties || []).map((property) => {
+      const statusPath = property.sale_or_rent === 'sale' ? 'sale' : 'rent';
+      const typePath = property.type === 'apartment' ? 'apartments' : 
+                       property.type === 'house' || property.type === 'villa' ? 'houses-villas' :
+                       property.type === 'office' ? 'offices' :
+                       property.type === 'shop' ? 'shops' :
+                       property.type === 'warehouse' ? 'warehouses' :
+                       property.type === 'land' ? 'lands' :
+                       property.type === 'hotel' ? 'hotels' :
+                       property.type === 'garage' ? 'garages' :
+                       property.type === 'restaurant' ? 'establishments' : 'properties';
+
+      // Use type-specific URL if available, otherwise fallback to /properties/[id]
+      const url = property.type === 'apartment' && property.sale_or_rent === 'sale'
+        ? `${baseUrl}/sale/apartments/${property.id}`
+        : property.type === 'apartment' && property.sale_or_rent === 'rent'
+        ? `${baseUrl}/rent/apartments/${property.id}`
+        : property.sale_or_rent === 'rent'
+        ? `${baseUrl}/rent/${typePath}/${property.id}`
+        : `${baseUrl}/properties/${property.id}`;
+
+      return {
+        url,
+        lastModified: new Date(property.updated_at),
+        changeFrequency: property.sale_or_rent === 'rent' ? 'weekly' : 'monthly',
+        priority: 0.8,
+      };
+    });
+
+    return [...staticRoutes, ...propertyRoutes];
+  } catch (error) {
+    console.error('Error generating sitemap:', error);
+    return staticRoutes;
+  }
 }
 
 
