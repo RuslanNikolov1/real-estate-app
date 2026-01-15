@@ -50,21 +50,23 @@ export async function POST(request: NextRequest) {
     
     if (uuidIds.length > 0) {
       queries.push(
-        supabase
-          .from('properties')
-          .select('*')
-          .in('id', uuidIds)
-          .then((result) => result)
+        Promise.resolve(
+          supabase
+            .from('properties')
+            .select('*')
+            .in('id', uuidIds)
+        )
       );
     }
     
     if (numericIds.length > 0) {
       queries.push(
-        supabase
-          .from('properties')
-          .select('*')
-          .in('short_id', numericIds)
-          .then((result) => result)
+        Promise.resolve(
+          supabase
+            .from('properties')
+            .select('*')
+            .in('short_id', numericIds)
+        )
       );
     }
     
