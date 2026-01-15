@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/features/auth/components/AuthModal';
 import { FeedbackModal } from './components/FeedbackModal';
 import { ChatCircleDots, CaretLeft, CaretRight } from '@phosphor-icons/react';
+import { Review } from '@/types';
 import styles from './ReviewsPage.module.scss';
 
 // Removed mock data - will fetch from API
@@ -186,7 +187,7 @@ export function ReviewsPage() {
             ) : (
               <>
                 <div className={styles.grid}>
-                  {reviews.map((review) => (
+                  {reviews.map((review: Review) => (
                     <ReviewCard key={review.id} review={review} />
                   ))}
                 </div>
