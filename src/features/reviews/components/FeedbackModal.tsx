@@ -50,11 +50,6 @@ export function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackModalProps
     setError(null);
 
     try {
-      // #region agent log
-      const allCookies = typeof document !== 'undefined' ? document.cookie : '';
-      const cookieNames = allCookies.split(';').map(c => c.trim().split('=')[0]).filter(Boolean);
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:handleSubmit:before-fetch',message:'before fetch request',data:{commentLength:comment.trim().length,hasCredentials:typeof document!=='undefined',cookieCount:cookieNames.length,cookieNames:cookieNames,hasSupabaseCookie:cookieNames.some(n=>n.includes('sb-')||n.includes('supabase'))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       const response = await fetch('/api/reviews', {
         method: 'POST',
         headers: {
@@ -63,9 +58,6 @@ export function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackModalProps
         credentials: 'include', // Ensure cookies are sent
         body: JSON.stringify({ comment: comment.trim() }),
       });
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:handleSubmit:after-fetch',message:'after fetch request',data:{status:response.status,statusText:response.statusText,ok:response.ok},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
 
       if (!response.ok) {
         const data = await response.json();

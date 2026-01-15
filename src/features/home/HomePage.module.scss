@@ -49,12 +49,6 @@
   bottom: 0px;
   left: 0px;
   z-index: 1;
-
-  img {
-    display: block;
-    height: 80vh;
-    width: 30vw;
-  }
 }
 
 .logoBottomRight {
@@ -62,12 +56,13 @@
   bottom: 0px;
   right: 0px;
   z-index: 1;
+}
 
-  img {
-    display: block;
-    height: 80vh;
-    width: 30vw;
-  }
+.logoImage {
+  display: block;
+  height: 80vh;
+  width: 30vw;
+  object-fit: contain;
 }
 
 .heroContent {

@@ -129,10 +129,6 @@ export async function GET(
     if (!prop) {
       return NextResponse.json({ error: 'Имотът не е намерен' }, { status: 404 });
     }
-
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'[id]/route.ts:132',message:'Property fetched from database',data:{electricity:(prop as any).electricity,water:(prop as any).water,electricityType:typeof (prop as any).electricity,waterType:typeof (prop as any).water,type:prop.type},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-display',hypothesisId:'H1'})}).catch(()=>{});
-    // #endregion
     
     const transformedProperty = {
       id: prop.id as string,
@@ -179,10 +175,6 @@ export async function GET(
       created_at: prop.created_at || new Date().toISOString(),
       updated_at: prop.updated_at || new Date().toISOString(),
     };
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'[id]/route.ts:171',message:'Transformed property before sending',data:{electricity:transformedProperty.electricity,water:transformedProperty.water,type:transformedProperty.type},timestamp:Date.now(),sessionId:'debug-session',runId:'electricity-water-display',hypothesisId:'H2'})}).catch(()=>{});
-    // #endregion
 
     return NextResponse.json(transformedProperty, { status: 200 });
   } catch (error) {

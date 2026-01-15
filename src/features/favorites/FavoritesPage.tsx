@@ -32,16 +32,10 @@ export function FavoritesPage() {
 
   const loadFavorites = async () => {
     try {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FavoritesPage.tsx:31',message:'loadFavorites called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-      // #endregion
       setLoading(true);
       setError(null);
       
       const favoriteIds = await getFavorites();
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FavoritesPage.tsx:36',message:'Favorite IDs received',data:{favoriteIdsCount:favoriteIds.length,favoriteIds},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-      // #endregion
       
       if (favoriteIds.length === 0) {
         setFavorites([]);
@@ -50,9 +44,6 @@ export function FavoritesPage() {
       }
       
       const properties = await fetchPropertiesByIds(favoriteIds);
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FavoritesPage.tsx:50',message:'Properties fetched',data:{propertiesCount:properties.length,propertyIds:properties.map((p:any)=>p.id),propertyShortIds:properties.map((p:any)=>p.short_id),favoriteIds},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
-      // #endregion
       
       // Sort by most recent (reverse order to match the order they were added)
       // Since newest favorites are appended to the end of the array, we reverse it
@@ -66,22 +57,13 @@ export function FavoritesPage() {
             p.id === id || 
             p.short_id?.toString() === id
           );
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FavoritesPage.tsx:62',message:'Matching favorite ID',data:{favoriteId:id,found:!!found,matchedPropertyId:found?.id,matchedPropertyShortId:found?.short_id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
-          // #endregion
           return found;
         })
         .filter((p): p is Property => p !== undefined)
         .reverse(); // Reverse to show most recent first
       
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FavoritesPage.tsx:54',message:'Setting favorites state',data:{orderedPropertiesCount:orderedProperties.length,orderedPropertyIds:orderedProperties.map(p=>p.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-      // #endregion
       setFavorites(orderedProperties);
     } catch (err) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FavoritesPage.tsx:57',message:'loadFavorites error',data:{error:err instanceof Error?err.message:String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-      // #endregion
       console.error('Error loading favorites:', err);
       setError(t('favorites.loadError'));
     } finally {

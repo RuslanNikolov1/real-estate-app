@@ -61,42 +61,22 @@ export function AreaFilter({
         : {};
 
     const handleAreaFromChange = useCallback((val: number) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AreaFilter.tsx:61',message:'handleAreaFromChange called',data:{val,areaTo,willUpdate:val <= areaTo,currentAreaFrom:areaFrom},timestamp:Date.now(),sessionId:'debug-session',runId:'slider-debug',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
         if (val <= areaTo) {
             setAreaFrom(val);
             setSelectedPresetId(null);
             setIsNotProvided(false);
             onFilterChange(val, areaTo, false);
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AreaFilter.tsx:67',message:'AreaFrom updated',data:{newVal:val,areaTo},timestamp:Date.now(),sessionId:'debug-session',runId:'slider-debug',hypothesisId:'H1'})}).catch(()=>{});
-            // #endregion
-        } else {
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AreaFilter.tsx:70',message:'AreaFrom update blocked by validation',data:{val,areaTo,reason:'val > areaTo'},timestamp:Date.now(),sessionId:'debug-session',runId:'slider-debug',hypothesisId:'H1'})}).catch(()=>{});
-            // #endregion
         }
-    }, [areaTo, onFilterChange, areaFrom]);
+    }, [areaTo, onFilterChange]);
 
     const handleAreaToChange = useCallback((val: number) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AreaFilter.tsx:70',message:'handleAreaToChange called',data:{val,areaFrom,willUpdate:val >= areaFrom,currentAreaTo:areaTo},timestamp:Date.now(),sessionId:'debug-session',runId:'slider-debug',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
         if (val >= areaFrom) {
             setAreaTo(val);
             setSelectedPresetId(null);
             setIsNotProvided(false);
             onFilterChange(areaFrom, val, false);
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AreaFilter.tsx:77',message:'AreaTo updated',data:{newVal:val,areaFrom},timestamp:Date.now(),sessionId:'debug-session',runId:'slider-debug',hypothesisId:'H1'})}).catch(()=>{});
-            // #endregion
-        } else {
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AreaFilter.tsx:80',message:'AreaTo update blocked by validation',data:{val,areaFrom,reason:'val < areaFrom'},timestamp:Date.now(),sessionId:'debug-session',runId:'slider-debug',hypothesisId:'H1'})}).catch(()=>{});
-            // #endregion
         }
-    }, [areaFrom, onFilterChange, areaTo]);
+    }, [areaFrom, onFilterChange]);
 
     const handlePresetClick = useCallback((preset: AreaPreset) => {
         setAreaFrom(preset.from);
@@ -136,9 +116,6 @@ export function AreaFilter({
                             value={Math.min(areaFrom, sliderMax)}
                             onChange={(e) => {
                                 const val = Number(e.target.value);
-                                // #region agent log
-                                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AreaFilter.tsx:115',message:'Slider from onChange triggered',data:{rawValue:e.target.value,parsedVal:val,currentAreaFrom:areaFrom,currentAreaTo:areaTo},timestamp:Date.now(),sessionId:'debug-session',runId:'slider-debug',hypothesisId:'H2'})}).catch(()=>{});
-                                // #endregion
                                 handleAreaFromChange(val);
                             }}
                             className={`${styles.areaSlider} ${styles.areaSliderFrom}`}
@@ -156,9 +133,6 @@ export function AreaFilter({
                             value={Math.min(areaTo, sliderMax)}
                             onChange={(e) => {
                                 const val = Number(e.target.value);
-                                // #region agent log
-                                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AreaFilter.tsx:132',message:'Slider to onChange triggered',data:{rawValue:e.target.value,parsedVal:val,currentAreaFrom:areaFrom,currentAreaTo:areaTo},timestamp:Date.now(),sessionId:'debug-session',runId:'slider-debug',hypothesisId:'H2'})}).catch(()=>{});
-                                // #endregion
                                 handleAreaToChange(val);
                             }}
                             className={`${styles.areaSlider} ${styles.areaSliderTo}`}

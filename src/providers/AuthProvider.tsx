@@ -14,25 +14,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Initialize auth state
+  // Initialize auth state - non-blocking
   useEffect(() => {
-    // Get initial session
+    let mounted = true;
+
+    // Get initial session (non-blocking)
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+    }).catch(() => {
+      // If session check fails, still set loading to false to avoid blocking
+      if (mounted) {
+        setLoading(false);
+      }
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Handle auth errors and return user-friendly messages

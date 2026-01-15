@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import {
   List,
@@ -238,14 +237,8 @@ export function Header() {
               <Globe size={20} color="white" />
               <span suppressHydrationWarning>{currentLanguageLabel}</span>
             </button>
-            <AnimatePresence>
-              {isLanguageMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className={styles.languageMenu}
-                >
+            {isLanguageMenuOpen && (
+              <div className={styles.languageMenu}>
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
@@ -256,9 +249,8 @@ export function Header() {
                       {lang.label}
                     </button>
                   ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+              </div>
+            )}
           </div>
 
           <div className={styles.userMenuWrapper} ref={userMenuRef}>
@@ -279,14 +271,8 @@ export function Header() {
                 </span>
               )}
             </button>
-            <AnimatePresence>
-              {isUserMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className={styles.userMenu}
-                >
+            {isUserMenuOpen && (
+              <div className={styles.userMenu}>
                   {userMenuItems.map((item, index) => (
                     item.href ? (
                       <Link
@@ -313,25 +299,17 @@ export function Header() {
                       </div>
                     )
                   ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+              </div>
+            )}
           </div>
 
           <div className={styles.audioPlayerWrapper}>
             <AudioPlayer src="/soft-piano.mp3" label={t('header.ambienceLabel')} />
-            <AnimatePresence>
-              {showAmbienceMessage && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className={styles.ambienceMessage}
-                >
-                  <span suppressHydrationWarning>{t('header.ambienceMessage')}</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {showAmbienceMessage && (
+              <div className={styles.ambienceMessage}>
+                <span suppressHydrationWarning>{t('header.ambienceMessage')}</span>
+              </div>
+            )}
           </div>
 
           <button
@@ -344,14 +322,8 @@ export function Header() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.nav
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className={styles.mobileNav}
-          >
+      {isMobileMenuOpen && (
+        <nav className={styles.mobileNav}>
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -367,9 +339,8 @@ export function Header() {
                 </Link>
               );
             })}
-          </motion.nav>
-        )}
-      </AnimatePresence>
+        </nav>
+      )}
 
       {/* Auth Modal */}
       <AuthModal

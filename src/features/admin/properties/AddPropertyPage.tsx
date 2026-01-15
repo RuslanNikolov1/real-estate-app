@@ -146,14 +146,8 @@ export function AddPropertyPage() {
   
   // Get features list for current property type
   const featuresList = useMemo(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:127',message:'featuresList computation start',data:{isRentMode,selectedType,rentApartmentFeaturesLength:RENT_APARTMENT_FEATURES.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     // For rent apartments, use RENT_APARTMENT_FEATURES instead of schema features
     if (isRentMode && selectedType === 'apartment') {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:130',message:'Rent apartment condition matched',data:{rentApartmentFeaturesLength:RENT_APARTMENT_FEATURES.length,filteredLength:RENT_APARTMENT_FEATURES.filter(f => f.id !== 'all').length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       return RENT_APARTMENT_FEATURES.filter(f => f.id !== 'all');
     }
     // For rent houses, use RENT_HOUSE_FEATURES instead of schema features
@@ -186,9 +180,6 @@ export function AddPropertyPage() {
     }
     const featuresField = typeSchema.fields.find(f => f.key === 'features');
     const defaultFeatures = featuresField?.options || [];
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:153',message:'featuresList computation end',data:{isRentMode,selectedType,returnedFeaturesLength:defaultFeatures.length,conditionMatched:isRentMode && selectedType === 'apartment'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     return defaultFeatures;
   }, [typeSchema, isRentMode, selectedType]);
   
@@ -469,9 +460,6 @@ export function AddPropertyPage() {
       formData.append('price', numericPrice.toString());
 
       const resolvedPricePerSqm = pricePerSqm || calculatedPricePerSqm;
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:464',message:'Price per sqm calculation',data:{isRentMode,selectedType,pricePerSqm,calculatedPricePerSqm,resolvedPricePerSqm,willAppend:!!resolvedPricePerSqm},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
       if (resolvedPricePerSqm) {
         formData.append('price_per_sqm', resolvedPricePerSqm);
       } else if (isRentMode && selectedType === 'hotel') {
@@ -613,18 +601,6 @@ export function AddPropertyPage() {
         formData.append('images', file);
       });
 
-      // #region agent log
-      const formDataEntries: Record<string, string> = {};
-      for (const [key, value] of formData.entries()) {
-        if (key === 'images' || key === 'broker_image') {
-          formDataEntries[key] = `[File: ${value instanceof File ? value.name : 'unknown'}]`;
-        } else {
-          formDataEntries[key] = value.toString();
-        }
-      }
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:591',message:'FormData before API call',data:{isRentMode,selectedType,formDataEntries,areaValue:isRentMode && selectedType === 'hotel' ? '0' : numericArea.toString(),pricePerSqmValue:resolvedPricePerSqm || 'missing',hasPricePerSqm:!!resolvedPricePerSqm},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
-
       const response = await fetch('/api/properties', {
         method: 'POST',
         body: formData,
@@ -632,9 +608,6 @@ export function AddPropertyPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AddPropertyPage.tsx:597',message:'API validation error response',data:{status:response.status,errorData,errorDetails:errorData?.details},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-        // #endregion
         const errorMessage = errorData?.error || 'flashMessages.propertyAddError';
         // Translate error message if it's a translation key
         const translatedError = errorMessage.startsWith('errors.') 

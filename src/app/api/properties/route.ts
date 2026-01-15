@@ -321,25 +321,14 @@ export async function GET(request: NextRequest) {
       
       // Garage property types filter (garage-standalone, parking-space, whole-parking)
       // Only apply when propertyTypeId is garages-parking
-      // #region agent log
-      if (filters.propertyTypes && propertyTypeId === 'garages-parking') {
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:307',message:'Garage propertyTypes filter check',data:{propertyTypeId,hasPropertyTypes:!!filters.propertyTypes,propertyTypesArray:Array.isArray(filters.propertyTypes),propertyTypesLength:filters.propertyTypes?.length || 0,propertyTypes:filters.propertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      }
-      // #endregion
       if (filters.propertyTypes && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0 && propertyTypeId === 'garages-parking') {
         const validPropertyTypes = filters.propertyTypes.filter(
           (propertyType: string) => propertyType && propertyType !== 'all'
         );
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:312',message:'Garage propertyTypes filter processing',data:{validPropertyTypes,validPropertyTypesLength:validPropertyTypes.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         if (validPropertyTypes.length > 0) {
           // Filter by subtype for garage properties
           // The type filter is already applied at line 159 if propertyTypeId === 'garages-parking'
           query = query.in('subtype', validPropertyTypes);
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:320',message:'Garage propertyTypes filter applied',data:{validPropertyTypes},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-          // #endregion
         }
       }
       
@@ -598,7 +587,12 @@ export async function GET(request: NextRequest) {
       updated_at: prop.updated_at || new Date().toISOString(),
     }));
 
-    return NextResponse.json(transformedProperties, { status: 200 });
+    return NextResponse.json(transformedProperties, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+      },
+    });
   } catch (error) {
     console.error('Unexpected error in GET /api/properties:', error);
     return NextResponse.json(
@@ -699,17 +693,11 @@ export async function POST(request: NextRequest) {
       images: imageFiles,
     };
 
-    // #region agent log
-    console.log(JSON.stringify({location:'route.ts:542',message:'Validation data before Zod',data:{textFields,validationDataKeys:Object.keys(validationData),areaSqm:validationData.area_sqm,pricePerSqm:validationData.price_per_sqm,hasPricePerSqm:'price_per_sqm' in validationData},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'}));
-    // #endregion
 
     // Validate with Zod
     const validationResult = createPropertySchema.safeParse(validationData);
     
     if (!validationResult.success) {
-      // #region agent log
-      console.log(JSON.stringify({location:'route.ts:552',message:'Zod validation failed',data:{errors:validationResult.error.errors,errorCount:validationResult.error.errors.length,firstError:validationResult.error.errors[0]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'}));
-      // #endregion
       return NextResponse.json(
         {
           error: 'Validation failed',
@@ -722,9 +710,6 @@ export async function POST(request: NextRequest) {
     const validatedData = validationResult.data;
 
     // Upload images with concurrency limit
-    // #region agent log
-    console.log(JSON.stringify({location:'route.ts:564',message:'Starting image uploads',data:{imageFilesCount:imageFiles.length,hasBrokerImage:!!brokerImageFile},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'}));
-    // #endregion
     const semaphore = { count: 0, queue: [] as Array<() => void> };
     const uploadPromises = imageFiles.map((file) =>
       uploadImageWithLimit(file, 'properties', semaphore)
@@ -753,9 +738,6 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // #region agent log
-    console.log(JSON.stringify({location:'route.ts:593',message:'Image upload results',data:{successfulCount:successfulUploads.length,failedCount:failedUploads.length,failedErrors:failedUploads.map(f => f.error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'}));
-    // #endregion
 
     // If all uploads failed, return error
     if (successfulUploads.length === 0) {
@@ -789,17 +771,11 @@ export async function POST(request: NextRequest) {
 
     // Calculate price_per_sqm if not provided
     // For rent hotels, area_sqm may be undefined, so we can't calculate price_per_sqm
-    // #region agent log
-    console.log(JSON.stringify({location:'route.ts:630',message:'Price per sqm calculation',data:{hasPricePerSqm:!!validatedData.price_per_sqm,hasAreaSqm:!!validatedData.area_sqm,areaSqm:validatedData.area_sqm,price:validatedData.price,type:validatedData.type,saleOrRent:validatedData.sale_or_rent},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'}));
-    // #endregion
     const pricePerSqm = validatedData.price_per_sqm
       ? validatedData.price_per_sqm
       : validatedData.area_sqm
       ? validatedData.price / validatedData.area_sqm
       : null;
-    // #region agent log
-    console.log(JSON.stringify({location:'route.ts:636',message:'Price per sqm result',data:{pricePerSqm,calculated:!validatedData.price_per_sqm && validatedData.area_sqm},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'}));
-    // #endregion
 
     // LANGUAGE-AGNOSTIC: Normalize subtype to English ID before saving to database
     // Handles subtypes in any language (Bulgarian, Russian, English, German) and converts to English IDs
@@ -845,9 +821,6 @@ export async function POST(request: NextRequest) {
       image_public_ids: uploadedPublicIds,
     };
 
-    // #region agent log
-    console.log(JSON.stringify({location:'route.ts:650',message:'Payload before Supabase insert',data:{payloadKeys:Object.keys(payload),areaSqm:payload.area_sqm,pricePerSqm:payload.price_per_sqm,type:payload.type,saleOrRent:payload.sale_or_rent,imageUrlsCount:payload.image_urls?.length,hasBrokerImage:!!payload.broker_image},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'}));
-    // #endregion
 
     // Insert into Supabase
     const supabaseAdmin = getSupabaseAdminClient();
@@ -859,9 +832,6 @@ export async function POST(request: NextRequest) {
 
     // If Supabase insert fails, cleanup uploaded images
     if (insertError || !insertedProperty) {
-      // #region agent log
-      console.log(JSON.stringify({location:'route.ts:686',message:'Supabase insert failed',data:{hasError:!!insertError,errorMessage:insertError?.message,errorCode:insertError?.code,errorDetails:insertError?.details,hasInsertedProperty:!!insertedProperty,payloadAreaSqm:payload.area_sqm},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'}));
-      // #endregion
       console.error('Supabase insert error:', insertError);
       
       // Cleanup all uploaded images (including broker image if any)
@@ -881,9 +851,6 @@ export async function POST(request: NextRequest) {
     // Return success with inserted property
     return NextResponse.json(insertedProperty, { status: 201 });
   } catch (error) {
-    // #region agent log
-    console.log(JSON.stringify({location:'route.ts:705',message:'Unexpected error in POST handler',data:{errorMessage:error instanceof Error ? error.message : 'Unknown error',errorStack:error instanceof Error ? error.stack : undefined,errorName:error instanceof Error ? error.name : undefined},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'}));
-    // #endregion
     console.error('Unexpected error in POST /api/properties:', error);
     
     return NextResponse.json(

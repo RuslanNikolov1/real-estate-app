@@ -313,14 +313,8 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
   
   // Get features list for current property type
   const featuresList = useMemo(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyFormPage.tsx:315',message:'featuresList computation start',data:{isRentMode,propertyType,statusValue,rentApartmentFeaturesLength:RENT_APARTMENT_FEATURES.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     // For rent apartments, use RENT_APARTMENT_FEATURES instead of schema features
     if (isRentMode && propertyType === 'apartment') {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyFormPage.tsx:318',message:'Rent apartment condition matched',data:{rentApartmentFeaturesLength:RENT_APARTMENT_FEATURES.length,filteredLength:RENT_APARTMENT_FEATURES.filter(f => f.id !== 'all').length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       return RENT_APARTMENT_FEATURES.filter(f => f.id !== 'all');
     }
     // For rent houses, use RENT_HOUSE_FEATURES instead of schema features
@@ -353,9 +347,6 @@ export function PropertyFormPage({ propertyId }: PropertyFormPageProps) {
     }
     const featuresField = typeSchema.fields.find(f => f.key === 'features');
     const defaultFeatures = featuresField?.options || [];
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyFormPage.tsx:341',message:'featuresList computation end',data:{isRentMode,propertyType,statusValue,returnedFeaturesLength:defaultFeatures.length,conditionMatched:isRentMode && propertyType === 'apartment'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     return defaultFeatures;
   }, [typeSchema, isRentMode, propertyType]);
   

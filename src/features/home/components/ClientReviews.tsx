@@ -28,13 +28,7 @@ export function ClientReviews({ reviews, onRefresh }: ClientReviewsProps) {
   const prevAuthModalOpenRef = useRef(false);
   const prevUserRef = useRef(user);
 
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClientReviews.tsx:component-render',message:'ClientReviews rendering',data:{reviewsLength:reviews.length,reviews:reviews},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-  // #endregion
   const approvedReviews = reviews.filter((r) => r.is_approved).slice(0, 6);
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClientReviews.tsx:after-filter',message:'After filtering approved reviews',data:{approvedReviewsLength:approvedReviews.length,approvedReviews:approvedReviews},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-  // #endregion
 
   const handleSubmitClick = () => {
     if (!user) {

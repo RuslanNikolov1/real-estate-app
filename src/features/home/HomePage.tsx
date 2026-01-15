@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { PropertySearch } from './components/PropertySearch';
@@ -54,25 +55,13 @@ export function HomePage() {
   const { data: reviewsData, refetch: refetchReviews } = useQuery({
     queryKey: ['reviews', 'approved'],
     queryFn: async () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'HomePage.tsx:queryFn:entry',message:'Starting reviews fetch',data:{url:'/api/reviews?status=approved&limit=6'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       const response = await fetch('/api/reviews?status=approved&limit=6');
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'HomePage.tsx:queryFn:response',message:'Fetch response received',data:{ok:response.ok,status:response.status,statusText:response.statusText},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       if (!response.ok) throw new Error('Failed to fetch reviews');
       const jsonData = await response.json();
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'HomePage.tsx:queryFn:parsed',message:'JSON parsed',data:{hasReviews:!!jsonData.reviews,reviewsCount:jsonData.reviews?.length,total:jsonData.total,reviewsData:jsonData.reviews},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       return jsonData;
     },
   });
   const reviews = reviewsData?.reviews || [];
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'HomePage.tsx:reviews-assigned',message:'Reviews assigned to variable',data:{hasReviewsData:!!reviewsData,reviewsLength:reviews.length,reviews:reviews},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-  // #endregion
 
   // Fetch partner services
   const { data: partnerServices = [] } = useQuery({
@@ -102,10 +91,24 @@ export function HomePage() {
           <div className={styles.heroBackground}></div>
           <div className={styles.heroOverlay}></div>
           <div className={styles.logoBottomLeft}>
-            <img src="/Picture Logo.png" alt="Logo" />
+            <Image 
+              src="/Picture Logo.png" 
+              alt="Logo" 
+              width={400}
+              height={800}
+              priority
+              className={styles.logoImage}
+            />
           </div>
           <div className={styles.logoBottomRight}>
-            <img src="/Picture Logo Mirrored.png" alt="Logo" />
+            <Image 
+              src="/Picture Logo Mirrored.png" 
+              alt="Logo" 
+              width={400}
+              height={800}
+              priority
+              className={styles.logoImage}
+            />
           </div>
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle} suppressHydrationWarning>

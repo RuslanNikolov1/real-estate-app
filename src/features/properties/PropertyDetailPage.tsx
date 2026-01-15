@@ -2,11 +2,17 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { CloudinaryImage } from '@/components/ui/CloudinaryImage';
-import { ShareModal } from '@/components/ui/ShareModal';
 import { AuthModal } from '@/features/auth/components/AuthModal';
+
+// Lazy load ShareModal to reduce initial bundle size
+const ShareModal = dynamic(
+  () => import('@/components/ui/ShareModal').then((mod) => ({ default: mod.ShareModal })),
+  { ssr: false }
+);
 import { useAuth } from '@/contexts/AuthContext';
 import { isFavorite as checkIsFavorite, toggleFavorite, addFavorite, getFavorites } from '@/lib/favorites';
 import { Property } from '@/types';
@@ -981,9 +987,6 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   <h2 className={styles.sectionTitle}>{t('propertyDetail.sections.features')}</h2>
                   <div className={styles.featuresGrid}>
                     {property.features.map((featureId) => {
-                      // #region agent log
-                      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyDetailPage.tsx:832',message:'Feature mapping start',data:{propertyType:property.type,propertyStatus:property.status,featureId,allFeatures:property.features},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                      // #endregion
                       let source;
 
                       switch (property.type) {
@@ -1011,9 +1014,6 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                           source = HOTELS_FEATURES;
                           break;
                         case 'restaurant':
-                          // #region agent log
-                          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyDetailPage.tsx:859',message:'Restaurant feature source selection',data:{propertyStatus:property.status,isRent:property.status==='for-rent',willUseRentFeatures:property.status==='for-rent',rentFeaturesAvailable:!!RENT_RESTAURANT_FEATURES},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-                          // #endregion
                           // For rent restaurants, use RENT_RESTAURANT_FEATURES; for sale restaurants, use ESTABLISHMENTS_FEATURES
                           source = property.status === 'for-rent' ? RENT_RESTAURANT_FEATURES : ESTABLISHMENTS_FEATURES;
                           break;
@@ -1021,13 +1021,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                           source = APARTMENT_FEATURE_FILTERS;
                       }
 
-                      // #region agent log
-                      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyDetailPage.tsx:866',message:'Before feature lookup',data:{featureId,sourceName:source===ESTABLISHMENTS_FEATURES?'ESTABLISHMENTS_FEATURES':source===RENT_RESTAURANT_FEATURES?'RENT_RESTAURANT_FEATURES':'other',sourceLength:source.length,sourceIds:source.map(f=>f.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                      // #endregion
                       const feature = source.find((f) => f.id === featureId);
-                      // #region agent log
-                      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'PropertyDetailPage.tsx:867',message:'After feature lookup',data:{featureId,featureFound:!!feature,featureLabel:feature?.label,willRender:!!feature},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                      // #endregion
                       if (!feature) return null;
 
                       // Get translated feature label

@@ -22,18 +22,9 @@ export function AdminReviewsPage() {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['admin-reviews', 'pending', page],
     queryFn: async () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:queryFn:before',message:'before API call',data:{page,limit},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
       const response = await fetch(`/api/reviews?status=pending&page=${page}&limit=${limit}`);
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:queryFn:afterFetch',message:'after fetch',data:{ok:response.ok,status:response.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
       if (!response.ok) throw new Error('Failed to fetch reviews');
       const jsonData = await response.json();
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:queryFn:afterJson',message:'after json parse',data:{reviewsCount:jsonData?.reviews?.length,total:jsonData?.total,pending:jsonData?.pending},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
       return jsonData;
     },
   });

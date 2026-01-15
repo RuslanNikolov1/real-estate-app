@@ -3,13 +3,12 @@ import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
+// Cache property data for 5 minutes
+export const revalidate = 300;
 
 export async function POST(request: NextRequest) {
   try {
     const { ids } = await request.json();
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'by-ids/route.ts:9',message:'API route called',data:{idsCount:ids?.length||0,ids:ids||[]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
-    // #endregion
     
     // Validate input
     if (!Array.isArray(ids)) {
@@ -41,9 +40,6 @@ export async function POST(request: NextRequest) {
         }
       }
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'by-ids/route.ts:40',message:'ID separation result',data:{uuidIdsCount:uuidIds.length,uuidIds,numericIdsCount:numericIds.length,numericIds},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
-    // #endregion
     
     // Fetch properties by UUIDs and short_ids separately
     const queries: Promise<any>[] = [];
@@ -93,10 +89,6 @@ export async function POST(request: NextRequest) {
         }
       }
     }
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'by-ids/route.ts:87',message:'Properties fetched from DB',data:{allPropertiesCount:allProperties.length,propertyIds:allProperties.map((p:any)=>p.id),propertyShortIds:allProperties.map((p:any)=>p.short_id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
-    // #endregion
     
     if (allProperties.length === 0) {
       return NextResponse.json({ properties: [] });
@@ -150,11 +142,14 @@ export async function POST(request: NextRequest) {
       updated_at: prop.updated_at || new Date().toISOString(),
     }));
     
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'by-ids/route.ts:141',message:'API route returning',data:{propertiesCount:properties.length,transformedPropertyIds:properties.map((p:any)=>p.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
-    // #endregion
-    
-    return NextResponse.json({ properties });
+    return NextResponse.json(
+      { properties },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error in by-ids route:', error);
     return NextResponse.json(

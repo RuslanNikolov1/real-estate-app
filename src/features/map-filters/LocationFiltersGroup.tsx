@@ -142,9 +142,6 @@ export function LocationFiltersGroup({
 
     const handleCitySelect = useCallback((cityName: string, coordinates: [number, number]) => {
         const formattedCity = formatCityName(cityName);
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LocationFiltersGroup.tsx:142',message:'City selected from dropdown',data:{original:cityName,formatted:formattedCity},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
         setCity(formattedCity);
         setNeighborhoods([]);
         setDistance(0);
@@ -155,9 +152,6 @@ export function LocationFiltersGroup({
     const handleNeighborhoodSelectChange = useCallback(
         (value: string | string[]) => {
             const next = Array.isArray(value) ? value : value ? [value] : [];
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LocationFiltersGroup.tsx:120',message:'Neighborhood selected from dropdown',data:{value,next,city},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-            // #endregion
             setNeighborhoods(next);
             onFilterChange(searchTerm, city, next, distance);
         },
@@ -346,9 +340,6 @@ export function LocationFiltersGroup({
                                         // Format city name on blur if manually entered
                                         if (city.trim() && !isCitySelected) {
                                             const formatted = formatCityName(city);
-                                            // #region agent log
-                                            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LocationFiltersGroup.tsx:330',message:'City formatted on blur (manual input)',data:{original:city,formatted,isCitySelected},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-                                            // #endregion
                                             setCity(formatted);
                                             onFilterChange(searchTerm, formatted, neighborhoods, distance);
                                         }
@@ -491,9 +482,6 @@ export function LocationFiltersGroup({
                                             // Format neighborhood name on blur
                                             if (manualNeighborhoodInput.trim()) {
                                                 const formatted = formatNeighborhoodName(manualNeighborhoodInput);
-                                                // #region agent log
-                                                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LocationFiltersGroup.tsx:473',message:'Neighborhood formatted on blur (manual input)',data:{original:manualNeighborhoodInput,formatted,city},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-                                                // #endregion
                                                 setManualNeighborhoodInput(formatted);
                                                 const newNeighborhoods = formatted ? [formatted] : [];
                                                 setNeighborhoods(newNeighborhoods);

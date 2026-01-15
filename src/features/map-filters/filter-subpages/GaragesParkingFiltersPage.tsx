@@ -208,9 +208,6 @@ const { filters, updateFilters, resetFilters } = useFilterState<GaragesParkingFi
     }, [updateFilters]);
 
     const handlePropertyTypeChange = useCallback((selectedTypes: string[]) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'GaragesParkingFiltersPage.tsx:207',message:'Property type filter changed',data:{selectedTypes,selectedTypesLength:selectedTypes.length,isRentMode},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         updateFilters({ propertyTypes: selectedTypes });
     }, [updateFilters, isRentMode]);
 
