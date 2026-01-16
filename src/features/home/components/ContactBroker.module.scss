@@ -6,14 +6,13 @@
 }
 
 .container {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 0 $spacing-lg;
 }
 
 .title {
   font-size: 2.5rem;
-  margin-bottom: $spacing-2xl;
+  margin-bottom: $spacing-md;
   text-align: center;
   color: $black;
 
@@ -22,61 +21,27 @@
   }
 }
 
+.subtitle {
+  font-size: 1rem;
+  text-align: center;
+  color: $dark-gray;
+  margin-bottom: $spacing-2xl;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 0.9rem;
+    padding: 0 $spacing-md;
+  }
+}
+
 .content {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: $spacing-2xl;
-
-  @media (max-width: $breakpoint-lg) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.info {
   display: flex;
-  flex-direction: column;
-  gap: $spacing-xl;
-}
-
-.infoItem {
-  display: flex;
-  gap: $spacing-md;
-  align-items: flex-start;
-
-  svg {
-    color: $dark-red;
-    flex-shrink: 0;
-    margin-top: $spacing-xs;
-    padding: $spacing-sm;
-    background: rgba(225, 6, 0, 0.1);
-    border-radius: 50%; // Circular icon background
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  h3 {
-    font-size: 1.125rem;
-    margin-bottom: $spacing-xs;
-    color: $black;
-  }
-
-  a {
-    color: $dark-red;
-    text-decoration: none;
-    transition: color $transition-base;
-
-    &:hover {
-      color: $dark-red;
-      text-decoration: underline;
-    }
-  }
-
-  p {
-    color: $dark-gray;
-  }
+  justify-content: center;
+  margin: 0 auto;
+  width: 60vw;
 }
 
 .form {
@@ -86,6 +51,19 @@
   background: $light-gray;
   padding: $spacing-xl;
   border-radius: 24px; // Very rounded
+  width: 50vw;
+  border: 2px dotted $dark-red;
+  box-shadow: 0 5 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-lg;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .textareaWrapper {
@@ -134,8 +112,14 @@
   text-align: center;
 }
 
+.buttonWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: $spacing-md;
+}
+
 .submitButton {
-  width: 100%;
+  width: 8vw;
 }
 
 .selectWrapper {
@@ -187,4 +171,3 @@
   cursor: pointer;
   accent-color: $dark-red;
 }
-

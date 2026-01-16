@@ -91,6 +91,7 @@
     },
     "valuationForm": {
       "title": "Property Valuation",
+      "subtitle": "Fill out the form below and we will contact you for a free valuation",
       "squareMeters": "Square Meters (m²)",
       "yearOfConstruction": "Year of Construction",
       "hasAct16": "Does it have Act 16 (акт 16)?",

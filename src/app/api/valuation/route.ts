@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
 import { z } from 'zod';
+import { sendEmail } from '@/lib/email';
 
 // Validation schema
 const valuationSchema = z.object({
@@ -9,7 +9,9 @@ const valuationSchema = z.object({
   hasAct16: z.enum(['yes', 'no', 'not-specified'], {
     required_error: 'Act 16 selection is required',
   }),
-  hasElevator: z.boolean(),
+  hasElevator: z.enum(['yes', 'no'], {
+    required_error: 'Elevator selection is required',
+  }),
   floor: z.number().int(),
   city: z.string().min(2, 'City must be at least 2 characters'),
   neighborhood: z.string().min(2, 'Neighborhood must be at least 2 characters'),
@@ -18,17 +20,19 @@ const valuationSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if SMTP2GO is configured
-    if (!process.env.SMTP2GO_USERNAME || !process.env.SMTP2GO_PASSWORD) {
-      console.error('SMTP2GO credentials are not configured');
+    // Check if Mailtrap is configured (either API token or SMTP credentials)
+    const hasApiToken = !!process.env.MAILTRAP_API_TOKEN;
+    const hasSmtpCreds = !!(process.env.MAILTRAP_HOST && process.env.MAILTRAP_USER && process.env.MAILTRAP_PASS);
+    
+    if (!hasApiToken && !hasSmtpCreds) {
+      console.error('Mailtrap credentials are not configured');
       return NextResponse.json(
-        { error: 'Email service is not configured' },
+        { error: 'Email service is not configured. Provide MAILTRAP_API_TOKEN or SMTP credentials.' },
         { status: 500 }
       );
     }
 
     const brokerEmail = process.env.BROKER_EMAIL || 'ruslannikolov1@gmail.com';
-    const fromEmail = process.env.SMTP2GO_FROM_EMAIL || brokerEmail;
 
     // Parse request body
     const body = await request.json();
@@ -50,17 +54,17 @@ export async function POST(request: NextRequest) {
 
     const data = validationResult.data;
 
-    // Format Act 16 value for display
+    // Format Act 16 value for display (Bulgarian)
     const act16Display = data.hasAct16 === 'yes' 
-      ? 'Yes' 
+      ? 'Да' 
       : data.hasAct16 === 'no' 
-      ? 'No' 
-      : 'Not Specified';
+      ? 'Не' 
+      : 'Не е посочено';
 
-    // Format elevator value for display
-    const elevatorDisplay = data.hasElevator ? 'Yes' : 'No';
+    // Format elevator value for display (Bulgarian)
+    const elevatorDisplay = data.hasElevator === 'yes' ? 'Да' : 'Не';
 
-    // Create email content
+    // Create email content (Bulgarian)
     const emailHtml = `
       <!DOCTYPE html>
       <html>
@@ -77,37 +81,37 @@ export async function POST(request: NextRequest) {
         </head>
         <body>
           <div class="container">
-            <h2>Property Valuation Request</h2>
+            <h2>Заявка за оценка на имот</h2>
             <div class="field">
-              <div class="label">Square Meters (m²):</div>
+              <div class="label">Квадратни метри (м²):</div>
               <div class="value">${data.squareMeters}</div>
             </div>
             <div class="field">
-              <div class="label">Year of Construction:</div>
-              <div class="value">${data.yearOfConstruction || 'Not specified'}</div>
+              <div class="label">Година на строителство:</div>
+              <div class="value">${data.yearOfConstruction || 'Не е посочено'}</div>
             </div>
             <div class="field">
-              <div class="label">Has Act 16 (акт 16):</div>
+              <div class="label">Има акт 16:</div>
               <div class="value">${act16Display}</div>
             </div>
             <div class="field">
-              <div class="label">Has Elevator:</div>
+              <div class="label">Има асансьор:</div>
               <div class="value">${elevatorDisplay}</div>
             </div>
             <div class="field">
-              <div class="label">Floor:</div>
+              <div class="label">Етаж:</div>
               <div class="value">${data.floor}</div>
             </div>
             <div class="field">
-              <div class="label">City:</div>
+              <div class="label">Град:</div>
               <div class="value">${data.city}</div>
             </div>
             <div class="field">
-              <div class="label">Neighborhood:</div>
+              <div class="label">Квартал:</div>
               <div class="value">${data.neighborhood}</div>
             </div>
             <div class="field">
-              <div class="label">Phone Number:</div>
+              <div class="label">Телефонен номер:</div>
               <div class="value">${data.phone}</div>
             </div>
           </div>
@@ -116,37 +120,29 @@ export async function POST(request: NextRequest) {
     `;
 
     const emailText = `
-Property Valuation Request
+Заявка за оценка на имот
 
-Square Meters (m²): ${data.squareMeters}
-Year of Construction: ${data.yearOfConstruction || 'Not specified'}
-Has Act 16 (акт 16): ${act16Display}
-Has Elevator: ${elevatorDisplay}
-Floor: ${data.floor}
-City: ${data.city}
-Neighborhood: ${data.neighborhood}
-Phone Number: ${data.phone}
+Квадратни метри (м²): ${data.squareMeters}
+Година на строителство: ${data.yearOfConstruction || 'Не е посочено'}
+Има акт 16: ${act16Display}
+Има асансьор: ${elevatorDisplay}
+Етаж: ${data.floor}
+Град: ${data.city}
+Квартал: ${data.neighborhood}
+Телефонен номер: ${data.phone}
     `.trim();
 
-    // Create SMTP2GO transporter
-    const transporter = nodemailer.createTransport({
-      host: 'mail.smtp2go.com',
-      port: 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP2GO_USERNAME,
-        pass: process.env.SMTP2GO_PASSWORD,
-      },
-    });
-
-    // Send email via SMTP2GO
-    await transporter.sendMail({
-      from: fromEmail,
+    // Send email via Mailtrap
+    const emailResult = await sendEmail({
       to: brokerEmail,
-      subject: `Property Valuation Request - ${data.city}`,
+      subject: `Заявка за оценка на имот - ${data.city}`,
       text: emailText,
       html: emailHtml,
     });
+
+    if (!emailResult.success) {
+      throw new Error(emailResult.error || 'Failed to send email');
+    }
 
     return NextResponse.json(
       { success: true, message: 'Valuation request sent successfully' },
@@ -155,9 +151,9 @@ Phone Number: ${data.phone}
   } catch (error) {
     console.error('Error sending valuation email:', error);
     
-    // Handle nodemailer specific errors
+    // Handle email service errors
     if (error instanceof Error) {
-      console.error('SMTP2GO error:', error.message);
+      console.error('Mailtrap error:', error.message);
     }
 
     return NextResponse.json(

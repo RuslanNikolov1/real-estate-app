@@ -91,6 +91,7 @@
     },
     "valuationForm": {
       "title": "Immobilienbewertung",
+      "subtitle": "Füllen Sie das untenstehende Formular aus und wir werden uns für eine kostenlose Bewertung bei Ihnen melden",
       "squareMeters": "Quadratmeter (m²)",
       "yearOfConstruction": "Baujahr",
       "hasAct16": "Hat es Akt 16 (акт 16)?",
