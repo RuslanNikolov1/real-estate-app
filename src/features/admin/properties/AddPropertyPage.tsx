@@ -37,7 +37,8 @@ import {
   getPropertyTypeSchema,
 } from '@/lib/property-schemas';
 import { getAvailablePropertyTypesForAddPage } from '@/lib/property-type-mapper';
-import type { PropertyType } from '@/types';
+import { normalizeSubtypeToId } from '@/lib/subtype-mapper';
+import type { PropertyType, Property } from '@/types';
 import styles from './AddPropertyPage.module.scss';
 
 const PROPERTY_STATUSES = [
@@ -45,13 +46,63 @@ const PROPERTY_STATUSES = [
   { id: 'for-rent', label: 'Под наем' },
 ];
 
+interface AddPropertyPageProps {
+  propertyId?: string;
+  initialProperty?: Property;
+}
 
-export function AddPropertyPage() {
+export function AddPropertyPage({ propertyId, initialProperty }: AddPropertyPageProps = {}) {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const isPublicPage = pathname === '/post-property';
+  const isUpdateMode = !!propertyId;
+  const [isLoadingProperty, setIsLoadingProperty] = useState(!!propertyId && !initialProperty);
+  const [propertyLoadError, setPropertyLoadError] = useState<string | null>(null);
+  const [property, setProperty] = useState<Property | undefined>(initialProperty);
   const [selectedStatus, setSelectedStatus] = useState(PROPERTY_STATUSES[0].id);
+  
+  // Fetch property data when propertyId is provided
+  useEffect(() => {
+    if (!propertyId || initialProperty) {
+      setIsLoadingProperty(false);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const fetchProperty = async () => {
+      try {
+        setIsLoadingProperty(true);
+        setPropertyLoadError(null);
+
+        const response = await fetch(`/api/properties/${propertyId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch property');
+        }
+
+        const data: Property = await response.json();
+        if (!isCancelled) {
+          setProperty(data);
+        }
+      } catch (error) {
+        console.error('Error loading property:', error);
+        if (!isCancelled) {
+          setPropertyLoadError('Грешка при зареждане на имота.');
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingProperty(false);
+        }
+      }
+    };
+
+    fetchProperty();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [propertyId, initialProperty]);
   
   // Get available property types based on sale/rent status
   const availablePropertyTypes = useMemo(() => {
@@ -218,7 +269,12 @@ export function AddPropertyPage() {
   const showGarageConstruction = useMemo(() => isRentMode && selectedType === 'garage', [isRentMode, selectedType]);
   
   // Reset selected type when status changes (sale/rent)
+  // Skip reset in update mode when property is being loaded
   useEffect(() => {
+    // Don't reset fields when loading property in update mode
+    if (isUpdateMode && property) {
+      return;
+    }
     // Reset to first available property type when switching between sale/rent
     if (availablePropertyTypes.length > 0) {
       const currentTypeExists = availablePropertyTypes.some(type => type.id === selectedType);
@@ -233,10 +289,15 @@ export function AddPropertyPage() {
     setWorks('');
     setLocationType('');
     setRestaurantFurniture('');
-  }, [selectedStatus, availablePropertyTypes, selectedType]);
+  }, [selectedStatus, availablePropertyTypes, selectedType, isUpdateMode, property]);
 
   // Reset type-specific fields when property type changes
+  // Skip reset in update mode when property is being loaded
   useEffect(() => {
+    // Don't reset fields when loading property in update mode
+    if (isUpdateMode && property) {
+      return;
+    }
     // Clear subtype when switching types
     setSubtype('');
     // Clear type-specific fields
@@ -269,7 +330,7 @@ export function AddPropertyPage() {
     setWorks('');
     setLocationType('');
     setRestaurantFurniture('');
-  }, [selectedType, showConstruction, showCompletion]);
+  }, [selectedType, showConstruction, showCompletion, isUpdateMode, property]);
 
   const neighborhoodOptions = useMemo(() => getNeighborhoodsByCity(city), [city]);
 
@@ -282,6 +343,235 @@ export function AddPropertyPage() {
       setNeighborhood(neighborhoodOptions[0]);
     }
   }, [neighborhoodOptions, neighborhood]);
+
+  // Map property data to form state when property is loaded (update mode)
+  // Phase 1: Set basic fields including type (but NOT subtype or features yet)
+  useEffect(() => {
+    if (!property || !isUpdateMode) {
+      return;
+    }
+
+    // Map sale_or_rent to selectedStatus
+    const saleOrRent = (property as any).sale_or_rent || (property.status === 'for-rent' ? 'rent' : 'sale');
+    const status = saleOrRent === 'rent' ? 'for-rent' : 'for-sale';
+    setSelectedStatus(status);
+
+    // Map property type
+    if (property.type) {
+      const mappedType = property.type === 'villa' ? 'house' : property.type;
+      setSelectedType(mappedType as PropertyType);
+    }
+
+    // Map city and neighborhood
+    if (property.city) {
+      setCity(property.city);
+    }
+    if (property.neighborhood) {
+      setNeighborhood(property.neighborhood);
+    }
+
+    // Map basic fields
+    if (property.title) {
+      setTitle(property.title);
+    }
+    if (property.description) {
+      // Handle description - it might be a string or Plate JSON value
+      let descriptionText = property.description;
+      if (typeof descriptionText === 'string') {
+        try {
+          const parsed = JSON.parse(descriptionText);
+          if (Array.isArray(parsed)) {
+            // It's Plate JSON, convert to plain text
+            descriptionText = parsed.map((node: any) => {
+              if (node.children) {
+                return node.children.map((child: any) => child.text || '').join('');
+              }
+              return '';
+            }).join('\n');
+          }
+        } catch {
+          // Not JSON, use as is
+        }
+      }
+      setDescription(descriptionText);
+    }
+
+    // Map price and area
+    if (property.price !== undefined) {
+      setPrice(property.price.toString());
+    }
+    if (property.area !== undefined) {
+      setArea(property.area.toString());
+    }
+
+    // Map price_per_sqm - prefer database value, fallback to calculation
+    if ((property as any).price_per_sqm !== undefined && (property as any).price_per_sqm !== null) {
+      setPricePerSqm((property as any).price_per_sqm.toString());
+    } else if (property.price && property.area) {
+      const calculated = Math.round(property.price / property.area).toString();
+      setPricePerSqm(calculated);
+    }
+
+    // Map floor
+    if (property.floor) {
+      setFloor(property.floor);
+    }
+
+    // Map yard area
+    if ((property as any).yard_area_sqm !== undefined) {
+      setYardArea((property as any).yard_area_sqm.toString());
+    }
+
+    // Map year built
+    if (property.year_built) {
+      setYearBuilt(property.year_built.toString());
+    }
+
+    // Map construction type
+    // For garages in rent mode, construction_type maps to buildingType
+    // For other cases, it maps to selectedConstruction
+    if ((property as any).construction_type) {
+      const saleOrRent = (property as any).sale_or_rent || (property.status === 'for-rent' ? 'rent' : 'sale');
+      const isRent = saleOrRent === 'rent';
+      if (isRent && property.type === 'garage') {
+        setBuildingType((property as any).construction_type);
+      } else {
+        setSelectedConstruction((property as any).construction_type);
+      }
+    }
+
+    // Map completion status (completion_degree -> selectedCompletion)
+    if ((property as any).completion_degree) {
+      setSelectedCompletion((property as any).completion_degree);
+    }
+
+    // Map building type - for offices, shops, hotels, etc. (both sale and rent modes)
+    // For restaurants in rent mode, building_type maps to locationType (handled in rent-specific section)
+    const buildingTypeValue = (property as any).building_type;
+    if (buildingTypeValue !== undefined && buildingTypeValue !== null && buildingTypeValue !== '') {
+      // Only map to buildingType if it's not a restaurant in rent mode
+      const saleOrRent = (property as any).sale_or_rent || (property.status === 'for-rent' ? 'rent' : 'sale');
+      const isRent = saleOrRent === 'rent';
+      if (!(isRent && property.type === 'restaurant')) {
+        setBuildingType(buildingTypeValue);
+      }
+    }
+
+    // Map electricity and water
+    if ((property as any).electricity) {
+      setElectricity((property as any).electricity);
+    }
+    if ((property as any).water) {
+      setWater((property as any).water);
+    }
+
+    // Map hotel category - always map when it exists
+    if (property.hotel_category !== undefined && property.hotel_category !== null && property.hotel_category !== '') {
+      setHotelCategory(property.hotel_category);
+    }
+
+    // Map agricultural category - always map when it exists
+    if ((property as any).agricultural_category !== undefined && (property as any).agricultural_category !== null && (property as any).agricultural_category !== '') {
+      setAgriculturalCategory((property as any).agricultural_category);
+    }
+
+    // Map bed base - handle 0 and null values correctly
+    if (property.bed_base !== undefined && property.bed_base !== null) {
+      setBedBase(property.bed_base.toString());
+    }
+
+    // Map works (working mode) - for hotels and restaurants in both sale and rent modes
+    if (property.works !== undefined && property.works !== null && property.works !== '') {
+      setWorks(property.works);
+    }
+
+    // Map broker fields
+    if (property.broker_name) {
+      setBroker(prev => ({ ...prev, name: property.broker_name || '' }));
+    }
+    if (property.broker_position) {
+      setBroker(prev => ({ ...prev, title: property.broker_position || '' }));
+    }
+    if (property.broker_phone) {
+      setBroker(prev => ({ ...prev, phone: property.broker_phone || '' }));
+    }
+    if (property.broker_image) {
+      setBrokerImagePreview(property.broker_image);
+    }
+
+    // Map images
+    if (property.images && property.images.length > 0) {
+      setImages(property.images.map(img => img.url));
+    }
+
+    // Map rent-specific fields
+    if (status === 'for-rent') {
+      // Map furniture - check property type to determine if it's for apartments/houses or restaurants
+      const furnitureValue = (property as any).furniture;
+      if (furnitureValue !== undefined && furnitureValue !== null && furnitureValue !== '') {
+        // For restaurants, furniture maps to restaurantFurniture
+        if (property.type === 'restaurant') {
+          const restaurantFurnitureMap: Record<string, string> = {
+            'full': 'with-furniture',
+            'none': 'without-furniture',
+          };
+          const restaurantFurnitureValue = restaurantFurnitureMap[furnitureValue];
+          if (restaurantFurnitureValue) {
+            setRestaurantFurniture(restaurantFurnitureValue);
+          }
+        } else {
+          // For apartments and houses, furniture maps to furnishing
+          const furnitureMap: Record<string, string> = {
+            'full': 'furnished',
+            'partial': 'partially-furnished',
+            'none': 'unfurnished',
+          };
+          const furnishingValue = furnitureMap[furnitureValue];
+          if (furnishingValue) {
+            setFurnishing(furnishingValue);
+          }
+        }
+      }
+
+      // Works is already mapped above for both sale and rent modes, so skip here
+
+      // Map house types (if applicable)
+      if ((property as any).house_types && Array.isArray((property as any).house_types)) {
+        setHouseTypes((property as any).house_types);
+      }
+
+      // Map working options (if applicable)
+      if ((property as any).working_options && Array.isArray((property as any).working_options)) {
+        setWorkingOptions((property as any).working_options);
+      }
+
+      // Map location type (for restaurants) - stored in building_type for restaurants
+      if (property.type === 'restaurant') {
+        if ((property as any).building_type) {
+          setLocationType((property as any).building_type);
+        }
+      }
+    }
+  }, [property, isUpdateMode]);
+
+  // Phase 2: Set subtype and features AFTER selectedType has been set and reset useEffect has completed
+  // This fixes the race condition where subtype and features get cleared when property type changes
+  useEffect(() => {
+    if (!property || !isUpdateMode || !selectedType) {
+      return;
+    }
+
+    // Map subtype (normalize if needed) - now safe to set after type reset has happened
+    if (property.subtype) {
+      const normalizedSubtype = normalizeSubtypeToId(property.subtype) || property.subtype;
+      setSubtype(normalizedSubtype);
+    }
+
+    // Map features - now safe to set after type reset has happened
+    if (property.features && Array.isArray(property.features)) {
+      setSelectedFeatures(property.features);
+    }
+  }, [property, isUpdateMode, selectedType]);
 
   const calculatedPricePerSqm = useMemo(() => {
     if (!price || !area) {
@@ -398,7 +688,9 @@ export function AddPropertyPage() {
       return;
     }
 
-    if (!brokerImageFileRef.current && !brokerImagePreview) {
+    // Validate broker image - required for add mode, but in update mode existing image is OK
+    const hasBrokerImage = brokerImageFileRef.current || (brokerImagePreview && !brokerImagePreview.startsWith('blob:'));
+    if (!hasBrokerImage) {
       setSubmitError(t('errors.brokerImageRequired') || 'Снимката на брокера е задължителна');
       return;
     }
@@ -592,22 +884,35 @@ export function AddPropertyPage() {
       formData.append('broker_position', broker.title.trim());
       formData.append('broker_phone', trimmedBrokerPhone);
 
-      // Broker image is required - validation already checked above
+      // Broker image - append new file if provided, otherwise API will keep existing image
       if (brokerImageFileRef.current) {
         formData.append('broker_image', brokerImageFileRef.current);
-      } else {
-        // This should not happen due to validation, but handle it gracefully
-        setSubmitError(t('errors.brokerImageRequired') || 'Снимката на брокера е задължителна');
-        return;
       }
+      // If no new file in update mode, API will use existing broker_image from database
 
+      // Images - append existing image URLs and new files
+      // First, append existing images (non-blob URLs) - only in update mode
+      if (isUpdateMode) {
+        images.forEach((url) => {
+          if (url && !url.startsWith('blob:')) {
+            formData.append('existing_images', url);
+          }
+        });
+      }
+      
+      // Then append new image files
       imageFilesRef.current.forEach((file) => {
         formData.append('images', file);
       });
 
-      const apiEndpoint = isPublicPage ? '/api/properties/pending' : '/api/properties';
+      // Determine API endpoint and method
+      const apiEndpoint = isUpdateMode 
+        ? `/api/properties/${propertyId}`
+        : (isPublicPage ? '/api/properties/pending' : '/api/properties');
+      const method = isUpdateMode ? 'PUT' : 'POST';
+      
       const response = await fetch(apiEndpoint, {
-        method: 'POST',
+        method,
         body: formData,
       });
 
@@ -623,7 +928,7 @@ export function AddPropertyPage() {
         throw new Error(translatedError);
       }
 
-      const createdProperty = await response.json();
+      const savedProperty = await response.json();
       
       if (isPublicPage) {
         // For public page, show success message and reset form
@@ -665,11 +970,12 @@ export function AddPropertyPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         // For admin page, store optimistic property and redirect
-        if (createdProperty) {
-          sessionStorage.setItem('optimistic-property', JSON.stringify(createdProperty));
-          sessionStorage.setItem('optimistic-action', 'add');
+        if (savedProperty) {
+          sessionStorage.setItem('optimistic-property', JSON.stringify(savedProperty));
+          sessionStorage.setItem('optimistic-action', isUpdateMode ? 'update' : 'add');
         }
-        router.push('/admin/properties/quick-view?status=property-added');
+        const redirectStatus = isUpdateMode ? 'property-updated' : 'property-added';
+        router.push(`/admin/properties/quick-view?status=${redirectStatus}`);
       }
     } catch (error) {
       console.error('Failed to create property via configurator:', error);
@@ -705,6 +1011,55 @@ export function AddPropertyPage() {
     };
   }, []);
 
+  // Show loading state while fetching property
+  if (isLoadingProperty) {
+    return (
+      <div className={styles.page}>
+        <Header />
+        <main className={styles.main}>
+          <div className={styles.container}>
+            <div className={styles.breadcrumbs}>
+              <Link href="/admin/properties/quick-view">Имоти</Link>
+              <span>/</span>
+              <span>Редактиране</span>
+            </div>
+            <div className={styles.panel}>
+              <p>Зареждане на имот...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show error state if property failed to load
+  if (isUpdateMode && propertyLoadError) {
+    return (
+      <div className={styles.page}>
+        <Header />
+        <main className={styles.main}>
+          <div className={styles.container}>
+            <div className={styles.breadcrumbs}>
+              <Link href="/admin/properties/quick-view">Имоти</Link>
+              <span>/</span>
+              <span>Редактиране</span>
+            </div>
+            <div className={styles.panel}>
+              <div className={styles.errorBanner} role="alert">
+                {propertyLoadError}
+              </div>
+              <Link href="/admin/properties/quick-view" className={styles.linkButton}>
+                Назад към списъка
+              </Link>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
       <Header />
@@ -713,13 +1068,17 @@ export function AddPropertyPage() {
         <div className={styles.breadcrumbs}>
           <Link href="/admin/properties/quick-view">Имоти</Link>
           <span>/</span>
-          <span>Конфигуратор</span>
+          <span>{isUpdateMode ? 'Редактиране' : 'Конфигуратор'}</span>
         </div>
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
             <div>
-              <h1 className={styles.title}>Добави имот</h1>
-              <p className={styles.subtitle}>Използвайте опциите по-долу за да подготвите нов имот.</p>
+              <h1 className={styles.title}>{isUpdateMode ? 'Редактирай имот' : 'Добави имот'}</h1>
+              <p className={styles.subtitle}>
+                {isUpdateMode 
+                  ? 'Използвайте опциите по-долу за да редактирате имота.' 
+                  : 'Използвайте опциите по-долу за да подготвите нов имот.'}
+              </p>
             </div>
             <Link href="/admin/properties/quick-view" className={styles.linkButton}>
               Назад към списъка
@@ -1424,7 +1783,9 @@ export function AddPropertyPage() {
 
           <div className={styles.actions}>
             <Button variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? t('admin.addPropertySubmitting') : t('admin.addPropertyButton')}
+              {isSubmitting 
+                ? (isUpdateMode ? 'Запазване...' : t('admin.addPropertySubmitting'))
+                : (isUpdateMode ? 'Запази промените' : t('admin.addPropertyButton'))}
             </Button>
             <Link href="/admin/properties/quick-view" className={styles.linkButton}>
               Отказ

@@ -1,7 +1,7 @@
-import { PropertyFormPage } from '@/features/admin/properties/PropertyFormPage';
+import { AddPropertyPage } from '@/features/admin/properties/AddPropertyPage';
 
 export default function Page({ params }: { params: { id: string } }) {
-  return <PropertyFormPage propertyId={params.id} />;
+  return <AddPropertyPage propertyId={params.id} />;
 }
 
 
