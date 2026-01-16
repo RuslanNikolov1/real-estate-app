@@ -11,6 +11,7 @@ import { Toast } from '@/components/ui/Toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/features/auth/components/AuthModal';
 import { FeedbackModal } from '@/features/reviews/components/FeedbackModal';
+import { Review } from '@/types';
 import styles from './ClientReviews.module.scss';
 
 export function ClientReviews() {
@@ -56,8 +57,8 @@ export function ClientReviews() {
     enabled: isVisible,
   });
 
-  const reviews = reviewsData?.reviews || [];
-  const approvedReviews = reviews.filter((r) => r.is_approved).slice(0, 6);
+  const reviews: Review[] = reviewsData?.reviews || [];
+  const approvedReviews = reviews.filter((r: Review) => r.is_approved).slice(0, 6);
 
   const handleSubmitClick = () => {
     if (!user) {
