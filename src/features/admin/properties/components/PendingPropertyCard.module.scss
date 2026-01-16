@@ -1,0 +1,265 @@
+@use '@/styles/variables' as *;
+
+.card {
+  background: $white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform $transition-base, box-shadow $transition-base;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.imagesSection {
+  position: relative;
+  width: 100%;
+  background: $light-gray;
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  background: $light-gray;
+
+  @media (max-width: $breakpoint-md) {
+    height: 250px;
+  }
+}
+
+.imagesGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-sm;
+  padding: $spacing-sm;
+  background: $light-gray;
+
+  @media (max-width: $breakpoint-md) {
+    gap: $spacing-xs;
+    padding: $spacing-xs;
+  }
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 12px;
+  background: $light-gray;
+
+  @media (max-width: $breakpoint-md) {
+    border-radius: 8px;
+  }
+}
+
+.image {
+  object-fit: cover;
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: $medium-gray;
+  font-size: 1rem;
+}
+
+.badge {
+  position: absolute;
+  bottom: $spacing-md;
+  left: $spacing-md;
+  background: $dark-red;
+  color: $white;
+  padding: $spacing-xs $spacing-md;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  z-index: 2;
+
+  @media (max-width: $breakpoint-md) {
+    bottom: $spacing-sm;
+    left: $spacing-sm;
+    font-size: 0.75rem;
+    padding: $spacing-xs $spacing-sm;
+  }
+}
+
+.content {
+  padding: $spacing-xl;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  flex: 1;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-lg;
+  }
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $black;
+  margin: 0;
+  font-family: $font-headline;
+  line-height: 1.3;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.25rem;
+  }
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  color: $medium-gray;
+  font-size: 0.9rem;
+}
+
+.price {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: $dark-red;
+  font-family: $font-headline;
+
+  span {
+    font-size: 1rem;
+    color: $medium-gray;
+    font-weight: 500;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.5rem;
+  }
+}
+
+.details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  padding: $spacing-md 0;
+  border-top: 1px solid $light-gray;
+  border-bottom: 1px solid $light-gray;
+}
+
+.detail {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  color: $dark-gray;
+  font-size: 0.9rem;
+}
+
+.description {
+  color: $dark-gray;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-height: 200px;
+  overflow-y: auto;
+
+  p {
+    margin: 0;
+  }
+}
+
+.broker {
+  padding: $spacing-md;
+  background: $light-gray;
+  border-radius: 12px;
+  color: $dark-gray;
+  font-size: 0.9rem;
+  line-height: 1.5;
+
+  strong {
+    color: $black;
+  }
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  padding: $spacing-md;
+  background: $light-gray;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: $dark-gray;
+}
+
+.metaItem {
+  line-height: 1.5;
+
+  strong {
+    color: $black;
+    margin-right: $spacing-xs;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1px solid $light-gray;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+  }
+}
+
+.approveButton,
+.rejectButton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all $transition-base;
+  font-weight: 600;
+  font-size: 0.9rem;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.approveButton {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border-color: #28a745;
+
+  &:hover {
+    background: #28a745;
+    color: $white;
+  }
+}
+
+.rejectButton {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border-color: #dc3545;
+
+  &:hover {
+    background: #dc3545;
+    color: $white;
+  }
+}

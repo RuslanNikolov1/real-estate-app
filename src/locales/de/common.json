@@ -24,6 +24,7 @@
     "reviews": "Bewertungen",
     "certificates": "Zertifikate",
     "valuation": "Bewertung",
+    "postProperty": "Immobilie veröffentlichen",
     "favorites": "Favoriten",
     "login": "Anmelden",
     "register": "Registrieren",
@@ -241,7 +242,8 @@
     "unexpectedError": "Unerwarteter Fehler. Bitte versuchen Sie es erneut.",
     "propertyAddError": "Fehler beim Hinzufügen der Immobilie. Bitte versuchen Sie es erneut.",
     "propertySaveError": "Fehler beim Speichern. Bitte versuchen Sie es erneut.",
-    "feedbackSentForApproval": "Feedback zur Genehmigung gesendet."
+    "feedbackSentForApproval": "Feedback zur Genehmigung gesendet.",
+    "propertySentForApproval": "Objekt zur Genehmigung gesendet!"
   },
   "errors": {
     "fileSizeExceeded": "Datei {{fileName}} überschreitet das Limit von 8MB",

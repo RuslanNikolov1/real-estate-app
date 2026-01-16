@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, X } from '@phosphor-icons/react';
 import styles from './Toast.module.scss';
@@ -12,6 +13,19 @@ interface ToastProps {
 }
 
 export function Toast({ message, isVisible, onClose, duration = 3000 }: ToastProps) {
+  // Auto-dismiss after duration
+  useEffect(() => {
+    if (isVisible && duration > 0) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, duration);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [isVisible, duration, onClose]);
+
   return (
     <AnimatePresence>
       {isVisible && (

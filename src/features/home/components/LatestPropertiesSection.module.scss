@@ -3,6 +3,7 @@
 .latestPropertiesSection {
   padding: $spacing-3xl $spacing-xl;
   background: $white;
+  border-bottom: 3px solid $dark-red;
 
   @media (max-width: $breakpoint-md) {
     padding: $spacing-2xl $spacing-lg;

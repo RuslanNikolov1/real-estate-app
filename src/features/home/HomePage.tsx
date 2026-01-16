@@ -1,15 +1,13 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { PropertySearch } from './components/PropertySearch';
-import { BurgasSlideshow } from './components/BurgasSlideshow';
 import { FeaturedProperties } from './components/FeaturedProperties';
 import { SellYourProperty } from './components/SellYourProperty';
-import { ClientReviews } from './components/ClientReviews';
 import { PartnerServices } from './components/PartnerServices';
 import { CertificatesMemberships } from './components/CertificatesMemberships';
 import { ContactBroker } from './components/ContactBroker';
@@ -23,24 +21,30 @@ const LatestPropertiesSection = dynamic(
   { ssr: false }
 );
 
-export function HomePage() {
-  const { t } = useTranslation();
+// Lazy load ClientReviews
+const ClientReviews = dynamic(
+  () => import('./components/ClientReviews').then(mod => ({ default: mod.ClientReviews })),
+  { ssr: false }
+);
 
-  // Mock data - replace with actual API calls
-  const mockSlides = [
-    {
-      id: '1',
-      imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4',
-      title: t('home.burgasTitle'),
-      description: t('home.burgasDescription1'),
-    },
-    {
-      id: '2',
-      imageUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba',
-      title: t('home.burgasTitle2'),
-      description: t('home.burgasDescription2'),
-    },
-  ];
+export function HomePage() {
+  const { t, i18n } = useTranslation();
+  const [isClient, setIsClient] = useState(false);
+
+  // #region agent log
+  const burgasTitleValue = t('home.burgasTitle');
+  const currentLanguage = i18n.language || i18n.resolvedLanguage || 'unknown';
+  const isServer = typeof window === 'undefined';
+  fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'HomePage.tsx:28',message:'HomePage render - language check',data:{burgasTitle:burgasTitleValue,currentLanguage,isServer,hasWindow:typeof window !== 'undefined',isClient},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix-v2',hypothesisId:'A,D'})}).catch(()=>{});
+  // #endregion
+
+  // Initialize client-side flag after hydration to prevent mismatch
+  useEffect(() => {
+    setIsClient(true);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'HomePage.tsx:35',message:'useEffect - setIsClient(true)',data:{currentLanguage:i18n.language},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix-v2',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+  }, []);
 
   // Fetch featured properties (4 most viewed)
   const { data: featuredProperties = [] } = useQuery({
@@ -50,18 +54,6 @@ export function HomePage() {
       return [];
     },
   });
-
-  // Fetch reviews
-  const { data: reviewsData, refetch: refetchReviews } = useQuery({
-    queryKey: ['reviews', 'approved'],
-    queryFn: async () => {
-      const response = await fetch('/api/reviews?status=approved&limit=6');
-      if (!response.ok) throw new Error('Failed to fetch reviews');
-      const jsonData = await response.json();
-      return jsonData;
-    },
-  });
-  const reviews = reviewsData?.reviews || [];
 
   // Fetch partner services
   const { data: partnerServices = [] } = useQuery({
@@ -121,17 +113,9 @@ export function HomePage() {
               <PropertySearch />
             </div>
           </div>
-          <div className={styles.tagline}>
+          <div className={styles.tagline} suppressHydrationWarning>
             {t('home.tagline')}
           </div>
-        </section>
-
-        {/* Burgas Slideshow */}
-        <section className={styles.slideshowSection}>
-          <BurgasSlideshow
-            slides={mockSlides}
-            description={t('home.burgasAbout')}
-          />
         </section>
 
         {/* Latest Properties */}
@@ -148,7 +132,9 @@ export function HomePage() {
         <SellYourProperty />
 
         {/* Client Reviews */}
-        <ClientReviews reviews={reviews} onRefresh={refetchReviews} />
+        <Suspense fallback={<div className={styles.loadingSection}>{t('common.loading')}</div>}>
+          <ClientReviews />
+        </Suspense>
 
         {/* Partner Services */}
         {partnerServices.length > 0 && (

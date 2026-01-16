@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { GoogleLogo, FacebookLogo } from '@phosphor-icons/react';
+import { GoogleLogo } from '@phosphor-icons/react';
 import styles from './AuthModal.module.scss';
 
 interface RegisterFormProps {
@@ -10,7 +10,7 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
-  const { signUp, signInWithGoogle, signInWithFacebook } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -56,15 +56,6 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       await signInWithGoogle();
     } catch (err) {
       setError('Възникна грешка с Google регистрация.');
-    }
-  };
-
-  const handleFacebookSignIn = async () => {
-    setError(null);
-    try {
-      await signInWithFacebook();
-    } catch (err) {
-      setError('Възникна грешка с Facebook регистрация.');
     }
   };
 
@@ -152,16 +143,6 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         >
           <GoogleLogo size={24} weight="bold" />
           <span>Google</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={handleFacebookSignIn}
-          className={styles.oauthButton}
-          aria-label="Регистрирай се с Facebook"
-        >
-          <FacebookLogo size={24} weight="fill" />
-          <span>Facebook</span>
         </button>
       </div>
     </div>

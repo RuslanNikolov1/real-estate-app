@@ -51,22 +51,6 @@ export function DataDeletionPage() {
         </section>
 
         <section className={styles.section}>
-          <h2>Data Deletion for Facebook Login Users</h2>
-          <p>
-            If you signed up using Facebook Login, deleting your account on our platform will remove all data we collected from Facebook. However, to fully disconnect the app from your Facebook account:
-          </p>
-          <ol>
-            <li>Go to your Facebook Settings</li>
-            <li>Click on &quot;Apps and Websites&quot;</li>
-            <li>Find our app in the list</li>
-            <li>Click &quot;Remove&quot; to revoke our app&apos;s access</li>
-          </ol>
-          <p>
-            This will prevent our app from accessing any future Facebook data, though you&apos;ll still need to request deletion of the data we&apos;ve already collected by following Option 1 or Option 2 above.
-          </p>
-        </section>
-
-        <section className={styles.section}>
           <h2>What Data Will Be Deleted</h2>
           <p>When you request data deletion, we will permanently remove:</p>
           <ul>
@@ -75,7 +59,7 @@ export function DataDeletionPage() {
             <li>Saved property searches and preferences</li>
             <li>Favorite properties and saved listings</li>
             <li>Search history and activity logs</li>
-            <li>Any information received from Facebook or other third-party login services</li>
+            <li>Any information received from third-party login services</li>
           </ul>
         </section>
 

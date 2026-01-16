@@ -24,6 +24,7 @@
     "reviews": "Reviews",
     "certificates": "Certificates",
     "valuation": "Valuation",
+    "postProperty": "Post Property",
     "favorites": "Favorites",
     "login": "Login",
     "register": "Register",
@@ -241,7 +242,8 @@
     "unexpectedError": "Unexpected error. Please try again.",
     "propertyAddError": "Error adding property. Please try again.",
     "propertySaveError": "Error saving. Please try again.",
-    "feedbackSentForApproval": "Feedback sent for approval."
+    "feedbackSentForApproval": "Feedback sent for approval.",
+    "propertySentForApproval": "Property sent for approval!"
   },
   "errors": {
     "fileSizeExceeded": "File {{fileName}} exceeds 8MB limit",

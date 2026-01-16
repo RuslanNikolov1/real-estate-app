@@ -14,14 +14,13 @@ import {
   House,
   CurrencyDollar,
   Key,
-  Buildings,
   Star,
-  Medal,
   ChartBar
 } from '@phosphor-icons/react';
 import { AudioPlayer } from '@/components/ui/AudioPlayer';
 import { Toast } from '@/components/ui/Toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRedirectAfterLogin } from '@/hooks/useRedirectAfterLogin';
 import { AuthModal } from '@/features/auth/components/AuthModal';
 import styles from './Header.module.scss';
 
@@ -37,6 +36,7 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOut, loading } = useAuth();
+  const { setRedirectPath } = useRedirectAfterLogin();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const [showAmbienceMessage, setShowAmbienceMessage] = useState(false);
@@ -81,12 +81,10 @@ export function Header() {
 
   const navItems = [
     { href: '/', label: t('nav.home'), icon: House },
-    { href: '/properties/for-sale', label: t('nav.forSale'), icon: CurrencyDollar },
-    { href: '/properties/for-rent', label: t('nav.forRent'), icon: Key },
-    { href: '/neighborhoods', label: t('nav.neighborhoods'), icon: Buildings },
+    { href: '/sale/search', label: t('nav.forSale'), icon: CurrencyDollar },
+    { href: '/rent/search', label: t('nav.forRent'), icon: Key },
     { href: '/reviews', label: t('nav.reviews'), icon: Star },
-    { href: '/certificates', label: t('nav.certificates'), icon: Medal },
-    { href: '/valuation', label: t('nav.valuation'), icon: ChartBar },
+    { href: '/post-property', label: t('nav.postProperty'), icon: ChartBar },
   ];
 
   const openAuthModal = (tab: 'login' | 'register') => {
@@ -114,9 +112,7 @@ export function Header() {
       return response.json();
     },
     enabled: isAdmin && !!user,
-    refetchInterval: 30000, // Refetch every 30 seconds
     retry: false,
-    staleTime: 25000,
   });
 
   const pendingCount = statsData?.pending || 0;
@@ -169,19 +165,13 @@ export function Header() {
   }, [pathname]);
 
   // Show toast only when user successfully logs in through the modal
+  // Redirect is handled by useRedirectAfterLogin hook
   useEffect(() => {
     // Check if auth modal was just closed and user is now logged in
     // This means a successful login just happened
     if (prevAuthModalOpenRef.current && !authModalOpen && user) {
       setShowLoginToast(true);
       sessionStorage.setItem('loginToastShown', 'true');
-      // Auto-hide after 3 seconds
-      const timer = setTimeout(() => {
-        setShowLoginToast(false);
-      }, 3000);
-      // Update previous auth modal state
-      prevAuthModalOpenRef.current = authModalOpen;
-      return () => clearTimeout(timer);
     }
     // Update previous auth modal state
     prevAuthModalOpenRef.current = authModalOpen;
@@ -198,6 +188,31 @@ export function Header() {
         <nav className={styles.nav}>
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isPostProperty = item.href === '/post-property';
+            
+            if (isPostProperty) {
+              return (
+                <button
+                  key={item.href}
+                  onClick={() => {
+                    if (loading) return;
+                    if (user) {
+                      router.push('/post-property');
+                    } else {
+                      setRedirectPath('/post-property');
+                      openAuthModal('login');
+                    }
+                  }}
+                  className={`${styles.navLink} ${pathname === item.href ? styles.active : ''
+                    }`}
+                  type="button"
+                >
+                  <Icon size={18} />
+                  <span suppressHydrationWarning>{item.label}</span>
+                </button>
+              );
+            }
+            
             return (
               <Link
                 key={item.href}
@@ -326,6 +341,32 @@ export function Header() {
         <nav className={styles.mobileNav}>
             {navItems.map((item) => {
               const Icon = item.icon;
+              const isPostProperty = item.href === '/post-property';
+              
+              if (isPostProperty) {
+                return (
+                  <button
+                    key={item.href}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      if (loading) return;
+                      if (user) {
+                        router.push('/post-property');
+                      } else {
+                        setRedirectPath('/post-property');
+                        openAuthModal('login');
+                      }
+                    }}
+                    className={`${styles.mobileNavLink} ${pathname === item.href ? styles.active : ''
+                      }`}
+                    type="button"
+                  >
+                    <Icon size={20} />
+                    <span suppressHydrationWarning>{item.label}</span>
+                  </button>
+                );
+              }
+              
               return (
                 <Link
                   key={item.href}

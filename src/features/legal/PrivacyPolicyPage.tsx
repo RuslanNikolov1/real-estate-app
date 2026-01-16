@@ -28,7 +28,7 @@ export function PrivacyPolicyPage() {
 
           <h3>2.2 Information from Third-Party Services</h3>
           <p>
-            When you sign in using Facebook or other third-party authentication services, we may receive:
+            When you sign in using third-party authentication services, we may receive:
           </p>
           <ul>
             <li>Your name</li>
@@ -71,16 +71,6 @@ export function PrivacyPolicyPage() {
             <li><strong>Property Owners/Agents:</strong> When you inquire about a property</li>
             <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
           </ul>
-        </section>
-
-        <section className={styles.section}>
-          <h2>5. Facebook Login</h2>
-          <p>
-            When you choose to log in with Facebook, we use Facebook&apos;s authentication services. We only request access to basic profile information necessary for account creation. You can manage the information Facebook shares with us through your Facebook privacy settings.
-          </p>
-          <p>
-            We do not post to your Facebook timeline or access your friends list without your explicit permission.
-          </p>
         </section>
 
         <section className={styles.section}>

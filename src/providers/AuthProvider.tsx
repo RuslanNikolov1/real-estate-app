@@ -100,10 +100,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signInWithGoogle = useCallback(async () => {
     try {
+      // Check for redirect path in sessionStorage
+      const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
+      const redirectTo = `${window.location.origin}/auth/callback?redirect_to=${encodeURIComponent(redirectPath)}`;
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo,
         },
       });
 
@@ -115,23 +119,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  const signInWithFacebook = useCallback(async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (error) {
-        console.error('Facebook sign in error:', error);
-      }
-    } catch (err) {
-      console.error('Facebook sign in error:', err);
-    }
-  }, []);
-
   const value = {
     user,
     session,
@@ -140,7 +127,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signUp,
     signOut,
     signInWithGoogle,
-    signInWithFacebook,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

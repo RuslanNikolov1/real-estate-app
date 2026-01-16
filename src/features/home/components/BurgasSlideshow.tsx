@@ -76,6 +76,12 @@ export function BurgasSlideshow({ slides, description }: BurgasSlideshowProps) {
               className={styles.slideImage}
               priority={currentIndex === 0}
               sizes="100vw"
+              // #region agent log
+              onLoad={() => {
+                const altValue = slides[currentIndex].title || 'Burgas';
+                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BurgasSlideshow.tsx:74',message:'Image alt rendered',data:{altValue,currentIndex,slideTitle:slides[currentIndex].title,hasWindow:typeof window !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix-v2',hypothesisId:'A,D'})}).catch(()=>{});
+              }}
+              // #endregion
             />
             {(slides[currentIndex].title || slides[currentIndex].description) && (
               <div className={styles.slideOverlay}>

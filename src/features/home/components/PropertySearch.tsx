@@ -27,11 +27,11 @@ export function PropertySearch({}: PropertySearchProps) {
         <div className={styles.buttonGroup}>
           <Button variant="outline" onClick={handleSalesClick} className={styles.actionButton} size="lg">
             <CheckCircle size={28} />
-            {t('home.salesButton')}
+            <span suppressHydrationWarning>{t('home.salesButton')}</span>
           </Button>
           <Button variant="outline" onClick={handleRentClick} className={styles.actionButton} size="lg">
             <Calendar size={28} />
-            {t('home.rentButton')}
+            <span suppressHydrationWarning>{t('home.rentButton')}</span>
           </Button>
         </div>
       </div>

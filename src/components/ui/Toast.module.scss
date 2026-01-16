@@ -5,7 +5,7 @@ $breakpoint-mobile: $breakpoint-sm;
 
 .toast {
   position: fixed;
-  top: 2rem;
+  top: 5.5rem; // Position below header (header is ~68px + spacing)
   right: 2rem;
   z-index: 9999;
   background: white;
@@ -20,7 +20,7 @@ $breakpoint-mobile: $breakpoint-sm;
   max-width: 32rem;
 
   @media (max-width: $breakpoint-mobile) {
-    top: 1.6rem;
+    top: 5rem; // Slightly less on mobile
     right: 1.6rem;
     left: 1.6rem;
     min-width: auto;

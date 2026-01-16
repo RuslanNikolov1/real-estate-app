@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { CaretRight, ChatCircleDots } from '@phosphor-icons/react';
-import { Review } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Toast } from '@/components/ui/Toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,14 +13,11 @@ import { AuthModal } from '@/features/auth/components/AuthModal';
 import { FeedbackModal } from '@/features/reviews/components/FeedbackModal';
 import styles from './ClientReviews.module.scss';
 
-interface ClientReviewsProps {
-  reviews: Review[];
-  onRefresh?: () => void;
-}
-
-export function ClientReviews({ reviews, onRefresh }: ClientReviewsProps) {
+export function ClientReviews() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [showFeedbackToast, setShowFeedbackToast] = useState(false);
@@ -28,6 +25,38 @@ export function ClientReviews({ reviews, onRefresh }: ClientReviewsProps) {
   const prevAuthModalOpenRef = useRef(false);
   const prevUserRef = useRef(user);
 
+  // Set up IntersectionObserver to detect when section enters viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '100px' } // Start loading 100px before visible
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Fetch reviews only when section is visible
+  const { data: reviewsData, refetch: refetchReviews } = useQuery({
+    queryKey: ['reviews', 'approved', 'home'],
+    queryFn: async () => {
+      const response = await fetch('/api/reviews?status=approved&limit=6');
+      if (!response.ok) throw new Error('Failed to fetch reviews');
+      const jsonData = await response.json();
+      return jsonData;
+    },
+    enabled: isVisible,
+  });
+
+  const reviews = reviewsData?.reviews || [];
   const approvedReviews = reviews.filter((r) => r.is_approved).slice(0, 6);
 
   const handleSubmitClick = () => {
@@ -85,7 +114,7 @@ export function ClientReviews({ reviews, onRefresh }: ClientReviewsProps) {
   }, [authModalOpen, user, pendingFeedbackIntent]);
 
   return (
-    <section className={styles.section}>
+    <section ref={sectionRef} className={styles.section}>
       <div className={styles.container}>
         <div className={styles.header}>
           <h2 className={styles.title}>{t('home.clientReviews')}</h2>
@@ -151,9 +180,8 @@ export function ClientReviews({ reviews, onRefresh }: ClientReviewsProps) {
           setTimeout(() => {
             setShowFeedbackToast(false);
           }, 3000);
-          if (onRefresh) {
-            onRefresh();
-          }
+          // Refetch reviews after successful submission
+          refetchReviews();
         }}
       />
 

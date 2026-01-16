@@ -11,9 +11,10 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialTab?: 'login' | 'register';
+  onSuccess?: () => void;
 }
 
-export function AuthModal({ isOpen, onClose, initialTab = 'login' }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, initialTab = 'login', onSuccess }: AuthModalProps) {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialTab);
 
   // Update active tab when initialTab changes
@@ -90,9 +91,15 @@ export function AuthModal({ isOpen, onClose, initialTab = 'login' }: AuthModalPr
 
             <div className={styles.content}>
               {activeTab === 'login' ? (
-                <LoginForm onSuccess={onClose} />
+                <LoginForm onSuccess={() => {
+                  onClose();
+                  onSuccess?.();
+                }} />
               ) : (
-                <RegisterForm onSuccess={onClose} />
+                <RegisterForm onSuccess={() => {
+                  onClose();
+                  onSuccess?.();
+                }} />
               )}
             </div>
           </motion.div>

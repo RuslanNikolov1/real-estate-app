@@ -3,7 +3,7 @@ import styles from './Button.module.scss';
 import { motion } from 'framer-motion';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'white';
   size?: 'sm' | 'md' | 'lg';
   children: ReactNode;
   isLoading?: boolean;

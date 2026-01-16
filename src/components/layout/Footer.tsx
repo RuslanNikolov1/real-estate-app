@@ -67,7 +67,7 @@ export function Footer() {
             <h4 className={styles.columnTitle}><span suppressHydrationWarning>{t('footer.services')}</span></h4>
             <ul className={styles.links}>
               <li>
-                <Link href="/valuation" prefetch={false}><span suppressHydrationWarning>{t('nav.valuation')}</span></Link>
+                <Link href="/post-property" prefetch={false}><span suppressHydrationWarning>{t('nav.postProperty')}</span></Link>
               </li>
               <li>
                 <Link href="/properties/add" prefetch={false}><span suppressHydrationWarning>{t('footer.addListing')}</span></Link>
@@ -87,11 +87,11 @@ export function Footer() {
               </li>
               <li>
                 <Phone size={18} />
-                <a href="tel:+359888888888">+359 888 888 888</a>
+                <a href="tel:+359898993030">+359898993030</a>
               </li>
               <li>
                 <EnvelopeSimple size={18} />
-                <a href="mailto:info@example.com">info@example.com</a>
+                <a href="mailto:brokerbulgaria@abv.bg">brokerbulgaria@abv.bg</a>
               </li>
             </ul>
           </div>

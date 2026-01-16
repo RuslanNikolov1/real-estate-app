@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { GoogleLogo, FacebookLogo } from '@phosphor-icons/react';
+import { GoogleLogo } from '@phosphor-icons/react';
 import styles from './AuthModal.module.scss';
 
 interface LoginFormProps {
@@ -10,7 +10,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
-  const { signIn, signInWithGoogle, signInWithFacebook } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -42,15 +42,6 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       await signInWithGoogle();
     } catch (err) {
       setError('Възникна грешка с Google вход.');
-    }
-  };
-
-  const handleFacebookSignIn = async () => {
-    setError(null);
-    try {
-      await signInWithFacebook();
-    } catch (err) {
-      setError('Възникна грешка с Facebook вход.');
     }
   };
 
@@ -121,16 +112,6 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         >
           <GoogleLogo size={24} weight="bold" />
           <span>Google</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={handleFacebookSignIn}
-          className={styles.oauthButton}
-          aria-label="Влез с Facebook"
-        >
-          <FacebookLogo size={24} weight="fill" />
-          <span>Facebook</span>
         </button>
       </div>
     </div>

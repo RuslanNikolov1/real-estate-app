@@ -24,6 +24,7 @@
     "reviews": "Отзиви",
     "certificates": "Сертификати",
     "valuation": "Оценка",
+    "postProperty": "Публикувай имот",
     "favorites": "Любими",
     "login": "Вход",
     "register": "Регистрация",
@@ -241,7 +242,8 @@
     "unexpectedError": "Неочаквана грешка. Моля, опитайте отново.",
     "propertyAddError": "Грешка при добавянето на имота. Моля, опитайте отново.",
     "propertySaveError": "Грешка при запазването. Моля, опитайте отново.",
-    "feedbackSentForApproval": "Мнението е изпратено за одобрение."
+    "feedbackSentForApproval": "Мнението е изпратено за одобрение.",
+    "propertySentForApproval": "Имотът е изпратен за одобрение!"
   },
   "errors": {
     "fileSizeExceeded": "Файлът {{fileName}} надхвърля лимита от 8MB",

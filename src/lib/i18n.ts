@@ -22,6 +22,10 @@ const resources = {
   },
 };
 
+// #region agent log
+const initIsServer = typeof window === 'undefined';
+// #endregion
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -37,6 +41,18 @@ i18n
       caches: ['localStorage'],
     },
   });
+
+// #region agent log
+const initLanguage = i18n.language || i18n.resolvedLanguage || 'unknown';
+const initResolvedLanguage = i18n.resolvedLanguage || 'unknown';
+const hasNavigator = typeof navigator !== 'undefined';
+const navigatorLang = hasNavigator ? (navigator.language || 'none') : 'N/A';
+const hasLocalStorage = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+const localStorageLang = hasLocalStorage ? (localStorage.getItem('i18nextLng') || 'none') : 'N/A';
+if (typeof globalThis !== 'undefined' && typeof globalThis.fetch !== 'undefined') {
+  globalThis.fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'i18n.ts:39',message:'i18n.init complete',data:{initLanguage,initResolvedLanguage,initIsServer,fallbackLng:'bg',navigatorLang,localStorageLang},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A,C,E'})}).catch(()=>{});
+}
+// #endregion
 
 export default i18n;
 

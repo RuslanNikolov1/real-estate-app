@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState, DragEvent, useId } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { Toast } from '@/components/ui/Toast';
 import {
   APARTMENT_FEATURE_FILTERS,
   CONSTRUCTION_FILTERS,
@@ -48,6 +49,8 @@ const PROPERTY_STATUSES = [
 export function AddPropertyPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const pathname = usePathname();
+  const isPublicPage = pathname === '/post-property';
   const [selectedStatus, setSelectedStatus] = useState(PROPERTY_STATUSES[0].id);
   
   // Get available property types based on sale/rent status
@@ -107,6 +110,7 @@ export function AddPropertyPage() {
   const descriptionFieldId = useId();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   
   // Furnishing options for rent
   const FURNISHING_OPTIONS = [
@@ -601,7 +605,8 @@ export function AddPropertyPage() {
         formData.append('images', file);
       });
 
-      const response = await fetch('/api/properties', {
+      const apiEndpoint = isPublicPage ? '/api/properties/pending' : '/api/properties';
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         body: formData,
       });
@@ -620,13 +625,52 @@ export function AddPropertyPage() {
 
       const createdProperty = await response.json();
       
-      // Store optimistic property in sessionStorage for immediate UI update
-      if (createdProperty) {
-        sessionStorage.setItem('optimistic-property', JSON.stringify(createdProperty));
-        sessionStorage.setItem('optimistic-action', 'add');
+      if (isPublicPage) {
+        // For public page, show success message and reset form
+        setSubmitSuccess(true);
+        setSubmitError(null);
+        
+        // Reset form fields
+        setTitle('');
+        setDescription('');
+        setPrice('');
+        setArea('');
+        setPricePerSqm('');
+        setImages([]);
+        imageFilesRef.current = [];
+        createdObjectUrls.current.forEach(url => URL.revokeObjectURL(url));
+        createdObjectUrls.current = [];
+        setBrokerImagePreview(null);
+        brokerImageFileRef.current = null;
+        setBroker({ name: '', title: '', phone: '' });
+        setYearBuilt('');
+        setSubtype('');
+        setYardArea('');
+        setFloor('');
+        setBuildingType('');
+        setElectricity('');
+        setWater('');
+        setHotelCategory('');
+        setAgriculturalCategory('');
+        setBedBase('');
+        setSelectedFeatures([]);
+        setFurnishing('');
+        setHouseTypes([]);
+        setWorkingOptions([]);
+        setWorks('');
+        setLocationType('');
+        setRestaurantFurniture('');
+        
+        // Scroll to top to show success message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        // For admin page, store optimistic property and redirect
+        if (createdProperty) {
+          sessionStorage.setItem('optimistic-property', JSON.stringify(createdProperty));
+          sessionStorage.setItem('optimistic-action', 'add');
+        }
+        router.push('/admin/properties/quick-view?status=property-added');
       }
-
-      router.push('/admin/properties/quick-view?status=property-added');
     } catch (error) {
       console.error('Failed to create property via configurator:', error);
       setSubmitError(
@@ -1371,6 +1415,7 @@ export function AddPropertyPage() {
             </div>
           </section>
 
+
           {submitError && (
             <div className={styles.errorBanner} role="alert">
               {submitError}
@@ -1389,6 +1434,16 @@ export function AddPropertyPage() {
         </div>
       </main>
       <Footer />
+
+      {/* Toast for property submission success (public page only) */}
+      {isPublicPage && (
+        <Toast
+          message={t('flashMessages.propertySentForApproval')}
+          isVisible={submitSuccess}
+          onClose={() => setSubmitSuccess(false)}
+          duration={5000}
+        />
+      )}
     </div>
   );
 }
