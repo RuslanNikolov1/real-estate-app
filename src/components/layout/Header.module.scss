@@ -16,6 +16,10 @@
   align-items: center;
   justify-content: space-between;
   gap: $spacing-xl;
+
+  @media (max-width: 500px) {
+    padding: 0;
+  }
 }
 
 .logo {
@@ -39,6 +43,10 @@
 .logoImage {
   height: 60px;
   width: auto;
+
+  @media (max-width: 426px) {
+    height: 40px;
+  }
 }
 
 .nav {
@@ -107,6 +115,10 @@
   @media (max-width: $breakpoint-md) {
     margin-left: $spacing-md;
   }
+
+  @media (max-width: 426px) {
+    width: 10vw;
+  }
 }
 
 .ambienceMessage {
@@ -137,7 +149,7 @@
 .languageSelector {
   position: relative;
 
-  @media (max-width: $breakpoint-md) {
+  @media (max-width: 769px) {
     display: none;
   }
 }
@@ -342,6 +354,110 @@
 
   @media (min-width: $breakpoint-lg) {
     display: none;
+  }
+
+  @media (max-width: 426px) {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: $z-dropdown;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: calc(100vh - 100%);
+    overflow-y: auto;
+  }
+}
+
+.mobileLanguageSelector {
+  position: relative;
+  border-bottom: 1px solid $light-gray;
+
+  @media (min-width: 769px) {
+    display: none;
+  }
+}
+
+.mobileFavoritesLink {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-lg;
+  font-size: 1rem;
+  font-weight: 500;
+  color: $dark-gray;
+  background: none;
+  border: none;
+  border-bottom: 1px solid $light-gray;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  transition: all $transition-base;
+
+  &:hover {
+    background: $light-gray;
+    color: $dark-red;
+  }
+
+  @media (min-width: 769px) {
+    display: none;
+  }
+}
+
+.mobileLanguageButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-lg;
+  font-size: 1rem;
+  font-weight: 500;
+  color: $dark-gray;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  transition: all $transition-base;
+
+  &:hover {
+    background: $light-gray;
+    color: $dark-red;
+  }
+}
+
+.mobileLanguageMenu {
+  display: flex;
+  flex-direction: column;
+  background: $white;
+  border-top: 1px solid $light-gray;
+  overflow: hidden;
+}
+
+.mobileLanguageOption {
+  display: flex;
+  align-items: center;
+  padding: $spacing-sm $spacing-lg;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: $dark-gray;
+  background: none;
+  border: none;
+  border-bottom: 1px solid $light-gray;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  transition: all $transition-base;
+
+  &:hover {
+    background: $light-gray;
+    color: $dark-red;
+  }
+
+  &.active {
+    background: $dark-red;
+    color: $white;
   }
 }
 

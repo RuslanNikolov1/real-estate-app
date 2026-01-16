@@ -102,6 +102,10 @@
   margin: 0;
   font-family: $font-headline;
 
+  @media (max-width: 426px) {
+    justify-content: center;
+  }
+
   svg {
     color: $dark-red;
   }

@@ -121,6 +121,10 @@
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+
+  @media (max-width: 426px) {
+    text-align: center;
+  }
 }
 
 .tags {

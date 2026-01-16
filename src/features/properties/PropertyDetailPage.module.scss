@@ -70,8 +70,8 @@
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(128, 46, 46, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
 
-  @media (max-width: $breakpoint-md) {
-    height: 250px;
+  @media (max-width: 769px) {
+    height: 70vh;
   }
 }
 
@@ -82,8 +82,8 @@
   gap: $spacing-lg;
   height: 400px;
 
-  @media (max-width: $breakpoint-md) {
-    height: 250px;
+  @media (max-width: 769px) {
+    height: 80vh;
   }
 }
 
@@ -140,9 +140,9 @@
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(128, 46, 46, 0.15);
 
-  @media (max-width: $breakpoint-md) {
-    min-height: 115px;
-    height: calc((250px - $spacing-md) / 2);
+  @media (max-width: 769px) {
+    min-height: 38vh;
+    height: calc((80vh - $spacing-md) / 2);
   }
 }
 
@@ -292,6 +292,10 @@
   letter-spacing: -0.5px;
   position: relative;
   padding-bottom: $spacing-md;
+
+  @media (max-width: 426px) {
+    text-align: center;
+  }
 
   &::after {
     content: '';

@@ -339,6 +339,48 @@ export function Header() {
 
       {isMobileMenuOpen && (
         <nav className={styles.mobileNav}>
+          <div className={styles.mobileLanguageSelector}>
+            <button
+              onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}
+              className={styles.mobileLanguageButton}
+              aria-label="Change language"
+            >
+              <Globe size={20} />
+              <span suppressHydrationWarning>{currentLanguageLabel}</span>
+            </button>
+            {isLanguageMenuOpen && (
+              <div className={styles.mobileLanguageMenu}>
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      changeLanguage(lang.code);
+                      setIsLanguageMenuOpen(false);
+                    }}
+                    className={`${styles.mobileLanguageOption} ${i18n.language === lang.code ? styles.active : ''
+                      }`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              if (user) {
+                router.push('/favorites');
+              } else {
+                openAuthModal('login');
+              }
+            }}
+            className={styles.mobileFavoritesLink}
+            type="button"
+          >
+            <Heart size={20} />
+            <span suppressHydrationWarning>{t('nav.favorites')}</span>
+          </button>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isPostProperty = item.href === '/post-property';

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import { CheckCircle, Calendar } from '@phosphor-icons/react';
@@ -13,6 +14,17 @@ interface PropertySearchProps {
 export function PropertySearch({}: PropertySearchProps) {
   const { t } = useTranslation();
   const router = useRouter();
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth <= 426);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   const handleSalesClick = () => {
     router.push('/sale/search');
@@ -22,16 +34,18 @@ export function PropertySearch({}: PropertySearchProps) {
     router.push('/rent/search');
   };
 
+  const buttonSize = isSmallScreen ? 'sm' : 'lg';
+
   return (
       <div className={styles.searchContainer}>
         <div className={styles.buttonGroup}>
-          <Button variant="outline" onClick={handleSalesClick} className={styles.actionButton} size="lg">
+          <Button variant="outline" onClick={handleSalesClick} className={styles.actionButton} size={buttonSize}>
             <CheckCircle size={28} />
-            <span suppressHydrationWarning>{t('home.salesButton')}</span>
+            {t('home.salesButton')}
           </Button>
-          <Button variant="outline" onClick={handleRentClick} className={styles.actionButton} size="lg">
+          <Button variant="outline" onClick={handleRentClick} className={styles.actionButton} size={buttonSize}>
             <Calendar size={28} />
-            <span suppressHydrationWarning>{t('home.rentButton')}</span>
+            {t('home.rentButton')}
           </Button>
         </div>
       </div>

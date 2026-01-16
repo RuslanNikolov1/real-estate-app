@@ -15,6 +15,11 @@
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
+
+  @media (max-width: 769px) {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .link {
@@ -39,7 +44,7 @@
 .horizontalLayout .imageContainer {
   position: relative;
   width: 40%;
-  min-height: 220px;
+  min-height: 240px;
   flex-shrink: 0;
   align-self: stretch;
   overflow: hidden;
@@ -49,10 +54,14 @@
   border: 3px solid $dark-red;
   box-sizing: border-box;
 
+  @media (max-width: 769px) {
+    width: auto !important;
+  }
+
   @media (max-width: $breakpoint-md) {
     width: 100%;
-    height: 220px;
-    min-height: 220px;
+    height: 240px;
+    min-height: 240px;
     align-self: auto;
     margin: $spacing-xl $spacing-md;
   }
@@ -72,9 +81,13 @@
   border-bottom: 3px solid $dark-red;
   box-sizing: border-box;
 
+  @media (max-width: 769px) {
+    width: auto !important;
+  }
+
   @media (max-width: $breakpoint-md) {
-    height: 220px;
-    min-height: 220px;
+    height: 240px;
+    min-height: 240px;
   }
 }
 
@@ -269,6 +282,16 @@
 .deleteButton {
   top: $spacing-lg;
   right: $spacing-lg;
+
+  @media (max-width: 769px) {
+    position: relative;
+    top: auto;
+    right: auto;
+    order: -1;
+    align-self: flex-start;
+    margin: $spacing-md $spacing-md $spacing-sm $spacing-md;
+    z-index: 10;
+  }
 }
 
 .editButton {
