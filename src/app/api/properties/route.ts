@@ -607,92 +607,32 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Parse multipart/form-data
-    const formData = await request.formData();
+    // Parse JSON payload (images already uploaded to Cloudinary from client)
+    const body = await request.json();
 
-    // Extract text fields
-    const textFields: Record<string, string | string[]> = {};
-    const featuresArray: string[] = [];
-    
-    for (const [key, value] of formData.entries()) {
-      if (key === 'images' || key === 'broker_image') continue; // Handle images separately
-      
-      if (key === 'features') {
-        // Handle features array - collect all feature values
-        featuresArray.push(value.toString());
-      } else {
-        textFields[key] = value.toString();
-      }
-    }
-    
-    // Add features array if it exists
-    if (featuresArray.length > 0) {
-      textFields.features = featuresArray;
-    }
-
-    // Extract images
-    const imageFiles = formData.getAll('images') as File[];
-    const brokerImageFile = formData.get('broker_image') as File | null;
-    
-    // Validate images exist
-    if (!imageFiles || imageFiles.length === 0) {
+    // Validate that image URLs are provided
+    if (!body.image_urls || !Array.isArray(body.image_urls) || body.image_urls.length === 0) {
       return NextResponse.json(
         { error: 'At least one image is required' },
         { status: 400 }
       );
     }
 
-    // Validate each image
-    for (const file of imageFiles) {
-      if (!(file instanceof File)) {
-        return NextResponse.json(
-          { error: 'All image fields must be valid files' },
-          { status: 400 }
-        );
-      }
-      if (!file.type.startsWith('image/')) {
-        return NextResponse.json(
-          { error: `File ${file.name} is not an image` },
-          { status: 400 }
-        );
-      }
-      if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json(
-          { error: `errors.fileSizeExceeded:${file.name}` },
-          { status: 400 }
-        );
-      }
+    // Validate that public_ids match URLs
+    if (body.image_public_ids && body.image_public_ids.length !== body.image_urls.length) {
+      return NextResponse.json(
+        { error: 'Image URLs and public IDs must match' },
+        { status: 400 }
+      );
     }
 
-    // Validate broker image if provided
-    if (brokerImageFile) {
-      if (!(brokerImageFile instanceof File)) {
-        return NextResponse.json(
-          { error: 'Broker image must be a valid file' },
-          { status: 400 }
-        );
-      }
-      if (!brokerImageFile.type.startsWith('image/')) {
-        return NextResponse.json(
-          { error: `Broker image must be an image file` },
-          { status: 400 }
-        );
-      }
-      if (brokerImageFile.size > MAX_FILE_SIZE) {
-        return NextResponse.json(
-          { error: 'errors.brokerImageSizeExceeded' },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Prepare data for Zod validation
+    // Prepare data for Zod validation (exclude image URLs from validation schema)
     const validationData: any = {
-      ...textFields,
-      features: featuresArray.length > 0 ? featuresArray : undefined,
-      images: imageFiles,
+      ...body,
+      // Create dummy File objects for Zod validation if needed
+      // But since images are already uploaded, we just need URLs
+      images: body.image_urls, // Pass URLs for validation
     };
-
 
     // Validate with Zod
     const validationResult = createPropertySchema.safeParse(validationData);
@@ -709,65 +649,11 @@ export async function POST(request: NextRequest) {
 
     const validatedData = validationResult.data;
 
-    // Upload images with concurrency limit
-    const semaphore = { count: 0, queue: [] as Array<() => void> };
-    const uploadPromises = imageFiles.map((file) =>
-      uploadImageWithLimit(file, 'properties', semaphore)
-    );
-
-    const uploadResults = await Promise.allSettled(uploadPromises);
-
-    // Check for upload failures
-    const successfulUploads: UploadResult[] = [];
-    const failedUploads: UploadResult[] = [];
-
-    uploadResults.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
-        if (result.value.success) {
-          successfulUploads.push(result.value);
-        } else {
-          failedUploads.push(result.value);
-        }
-      } else {
-        failedUploads.push({
-          secure_url: '',
-          public_id: '',
-          success: false,
-          error: result.reason?.message || 'Upload failed',
-        });
-      }
-    });
-
-
-    // If all uploads failed, return error
-    if (successfulUploads.length === 0) {
-      return NextResponse.json(
-        {
-          error: 'All image uploads failed',
-          details: failedUploads.map((f) => f.error).filter(Boolean),
-        },
-        { status: 500 }
-      );
-    }
-
-    // Collect public_ids for potential cleanup
-    const uploadedPublicIds = successfulUploads.map((u) => u.public_id);
-    const imageUrls = successfulUploads.map((u) => u.secure_url);
-
-    // Upload broker image if provided
-    let brokerImageUrl: string | null = null;
-    let brokerImagePublicId: string | null = null;
-    if (brokerImageFile) {
-      const brokerArrayBuffer = await brokerImageFile.arrayBuffer();
-      const brokerBuffer = Buffer.from(brokerArrayBuffer);
-      try {
-        const brokerUpload = await uploadBufferToCloudinary(brokerBuffer, 'brokers');
-        brokerImageUrl = brokerUpload.secure_url;
-        brokerImagePublicId = brokerUpload.public_id;
-      } catch (error) {
-        console.error('Error uploading broker image:', error);
-      }
-    }
+    // Images are already uploaded to Cloudinary, use provided URLs and public_ids
+    const imageUrls = body.image_urls as string[];
+    const uploadedPublicIds = (body.image_public_ids as string[]) || imageUrls.map(() => '');
+    const brokerImageUrl = body.broker_image || null;
+    const brokerImagePublicId = body.broker_image_public_id || null;
 
     // Calculate price_per_sqm if not provided
     // For rent hotels, area_sqm may be undefined, so we can't calculate price_per_sqm

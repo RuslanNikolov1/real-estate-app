@@ -38,7 +38,7 @@ import {
 } from '@/lib/property-schemas';
 import { getAvailablePropertyTypesForAddPage } from '@/lib/property-type-mapper';
 import { normalizeSubtypeToId } from '@/lib/subtype-mapper';
-import { compressImages, compressImage } from '@/lib/image-compression';
+import { uploadToCloudinary } from '@/lib/cloudinary';
 import type { PropertyType, Property } from '@/types';
 import styles from './AddPropertyPage.module.scss';
 
@@ -738,105 +738,141 @@ export function AddPropertyPage({ propertyId, initialProperty }: AddPropertyPage
     }
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
+      // Upload images directly to Cloudinary first (bypasses 4.5MB API limit)
+      const uploadedImages: Array<{ url: string; public_id: string }> = [];
+      let brokerImageUrl: string | null = null;
+      let brokerImagePublicId: string | null = null;
+
+      // Upload broker image if provided (or skip if in update mode without new file)
+      if (brokerImageFileRef.current) {
+        try {
+          const brokerUpload = await uploadToCloudinary(brokerImageFileRef.current, 'brokers');
+          brokerImageUrl = brokerUpload.url;
+          brokerImagePublicId = brokerUpload.public_id;
+        } catch (error) {
+          console.error('Error uploading broker image:', error);
+          throw new Error(t('errors.brokerImageUploadFailed') || 'Failed to upload broker image');
+        }
+      }
+
+      // Upload property images to Cloudinary
+      if (imageFilesRef.current.length > 0) {
+        try {
+          const uploadPromises = imageFilesRef.current.map((file) =>
+            uploadToCloudinary(file, 'properties')
+          );
+          const results = await Promise.all(uploadPromises);
+          uploadedImages.push(...results.map(r => ({ url: r.url, public_id: r.public_id })));
+        } catch (error) {
+          console.error('Error uploading property images:', error);
+          throw new Error(t('errors.imageUploadFailed') || 'Failed to upload images');
+        }
+      }
+
+      // In update mode, preserve existing images that weren't replaced
+      if (isUpdateMode) {
+        images.forEach((url) => {
+          if (url && !url.startsWith('blob:')) {
+            // Extract public_id from existing URL if possible
+            const publicIdMatch = url.match(/\/upload\/.*\/([^/]+)\./);
+            uploadedImages.push({
+              url,
+              public_id: publicIdMatch ? publicIdMatch[1] : url,
+            });
+          }
+        });
+      }
+
+      // Validate that we have at least one image
+      if (uploadedImages.length === 0) {
+        throw new Error(t('errors.addAtLeastOneImage'));
+      }
+
       const saleOrRentValue = selectedStatus === 'for-rent' ? 'rent' : 'sale';
-      const formData = new FormData();
-      // Note: status column removed from database, using sale_or_rent instead
-      formData.append('sale_or_rent', saleOrRentValue);
-      formData.append('type', selectedType);
+      
+      // Prepare JSON payload instead of FormData (images already uploaded)
+      const payload: Record<string, any> = {
+        sale_or_rent: saleOrRentValue,
+        type: selectedType,
+        price: numericPrice,
+      };
 
       if (subtypeOptions.length > 0 && subtype) {
-        formData.append('subtype', subtype);
+        payload.subtype = subtype;
       }
 
       // Area - skip for rent hotels (don't send area_sqm at all)
       if (!(isRentMode && selectedType === 'hotel')) {
-        formData.append('area_sqm', numericArea.toString());
+        payload.area_sqm = numericArea;
       }
-      // For rent hotels, we don't send area_sqm since it's not applicable
-      formData.append('price', numericPrice.toString());
 
       const resolvedPricePerSqm = pricePerSqm || calculatedPricePerSqm;
       if (resolvedPricePerSqm) {
-        formData.append('price_per_sqm', resolvedPricePerSqm);
+        payload.price_per_sqm = resolvedPricePerSqm;
       } else if (isRentMode && selectedType === 'hotel') {
-        // For rent hotels, we need to provide a default value since field is required
-        formData.append('price_per_sqm', '0');
+        payload.price_per_sqm = 0;
       }
 
-      // Floor is required for apartments, offices, shops
       if (showFloor) {
-        formData.append('floor', floor);
+        payload.floor = floor;
       }
 
-      formData.append('city', city);
-      formData.append('neighborhood', neighborhood);
+      payload.city = city;
+      payload.neighborhood = neighborhood;
+      payload.title = trimmedTitle;
+      payload.description = trimmedDescription;
 
-      formData.append('title', trimmedTitle);
-      formData.append('description', trimmedDescription);
-
-      // Year built is required (but not for rent mode)
       if (!isRentMode) {
-        formData.append('build_year', yearBuilt);
+        payload.build_year = yearBuilt;
       }
 
-      // Construction type is required when shown (but not for rent mode)
       if (showConstruction && !isRentMode && selectedConstruction) {
-        formData.append('construction_type', selectedConstruction);
+        payload.construction_type = selectedConstruction;
       }
 
-      // Completion status is required when shown (but not for rent mode)
       if (showCompletion && !isRentMode && selectedCompletion) {
-        formData.append('completion_degree', selectedCompletion);
+        payload.completion_degree = selectedCompletion;
       }
 
-      // Building type - for offices in rent mode
       if (showBuildingTypeForRent && buildingType) {
-        formData.append('building_type', buildingType);
+        payload.building_type = buildingType;
       }
 
-      // Hotel category - always include for hotels, optional for others
       if (selectedType === 'hotel') {
-        formData.append('hotel_category', hotelCategory || '');
+        payload.hotel_category = hotelCategory || '';
       } else if (hotelCategory) {
-        formData.append('hotel_category', hotelCategory);
+        payload.hotel_category = hotelCategory;
       }
 
       if (agriculturalCategory) {
-        formData.append('agricultural_category', agriculturalCategory);
+        payload.agricultural_category = agriculturalCategory;
       }
 
-      // Bed base - only include if it has a value (not empty string)
       if (bedBase && bedBase.trim() !== '') {
-        formData.append('bed_base', bedBase);
+        payload.bed_base = bedBase;
       }
 
-      // Electricity - only include if field exists in schema and not in rent mode
       const hasElectricityField = typeSchema.fields.find(f => f.key === 'electricity');
       if (hasElectricityField && !isRentMode && electricity) {
-        formData.append('electricity', electricity);
+        payload.electricity = electricity;
       }
 
-      // Water - only include if field exists in schema and not in rent mode
       const hasWaterField = typeSchema.fields.find(f => f.key === 'water');
       if (hasWaterField && !isRentMode && water) {
-        formData.append('water', water);
+        payload.water = water;
       }
 
       if (yardArea) {
-        formData.append('yard_area', yardArea);
+        payload.yard_area = yardArea;
       }
 
-      selectedFeatures.forEach((feature) => {
-        formData.append('features', feature);
-      });
+      payload.features = selectedFeatures;
 
-      // Rent-specific fields
       if (isRentMode) {
-        // Furnishing for apartments - map to furniture field
         if (showFurnishing && furnishing && selectedType === 'apartment') {
-          // Map UI values to database values
           const furnitureMap: Record<string, string> = {
             'furnished': 'full',
             'partially-furnished': 'partial',
@@ -844,105 +880,49 @@ export function AddPropertyPage({ propertyId, initialProperty }: AddPropertyPage
           };
           const furnitureValue = furnitureMap[furnishing];
           if (furnitureValue) {
-            formData.append('furniture', furnitureValue);
+            payload.furniture = furnitureValue;
           }
         }
         
-        // Works field for hotels (saves to works column)
         if (showWorkingOptions) {
-          formData.append('works', works || '');
+          payload.works = works || '';
         }
         
-        // Location type for restaurants
         if (showLocationType && locationType) {
-          formData.append('building_type', locationType);
+          payload.building_type = locationType;
         }
         
-        // Furniture for restaurants - map to furniture field
         if (showRestaurantFurniture && restaurantFurniture && selectedType === 'restaurant') {
-          // Map UI values to database values
           const furnitureMap: Record<string, string> = {
             'with-furniture': 'full',
             'without-furniture': 'none',
           };
           const furnitureValue = furnitureMap[restaurantFurniture];
           if (furnitureValue) {
-            formData.append('furniture', furnitureValue);
+            payload.furniture = furnitureValue;
           }
         }
         
-        // Garage construction type
         if (showGarageConstruction && buildingType) {
-          formData.append('construction_type', buildingType);
+          payload.construction_type = buildingType;
         }
         
-        // Hotel construction type for rent hotels
         if (isRentMode && selectedType === 'hotel' && selectedConstruction) {
-          formData.append('construction_type', selectedConstruction);
+          payload.construction_type = selectedConstruction;
         }
       }
 
-      formData.append('broker_name', trimmedBrokerName);
-      formData.append('broker_position', broker.title.trim());
-      formData.append('broker_phone', trimmedBrokerPhone);
+      payload.broker_name = trimmedBrokerName;
+      payload.broker_position = broker.title.trim();
+      payload.broker_phone = trimmedBrokerPhone;
 
-      // Compress images before submission to avoid 413 errors (Vercel 4.5MB limit)
-      let compressedBrokerImage: File | null = null;
-      let compressedImages: File[] = [];
-
-      try {
-        // Compress broker image if provided
-        if (brokerImageFileRef.current) {
-          setSubmitError(null);
-          compressedBrokerImage = await compressImage(
-            brokerImageFileRef.current,
-            1920, // maxWidth
-            1920, // maxHeight
-            0.85, // quality
-            2 // maxSizeMB - keep broker image under 2MB
-          );
-        }
-
-        // Compress property images
-        if (imageFilesRef.current.length > 0) {
-          setSubmitError(null);
-          compressedImages = await compressImages(
-            imageFilesRef.current,
-            {
-              maxWidth: 1920,
-              maxHeight: 1920,
-              quality: 0.85,
-              maxSizeMB: 2, // Keep each image under 2MB to allow multiple images
-            }
-          );
-        }
-      } catch (compressionError) {
-        console.error('Image compression error:', compressionError);
-        // Continue with original images if compression fails
-        compressedImages = imageFilesRef.current;
-        compressedBrokerImage = brokerImageFileRef.current;
+      // Add uploaded image URLs and public_ids
+      payload.image_urls = uploadedImages.map(img => img.url);
+      payload.image_public_ids = uploadedImages.map(img => img.public_id);
+      if (brokerImageUrl) {
+        payload.broker_image = brokerImageUrl;
+        payload.broker_image_public_id = brokerImagePublicId;
       }
-
-      // Broker image - append compressed file if provided, otherwise API will keep existing image
-      if (compressedBrokerImage) {
-        formData.append('broker_image', compressedBrokerImage);
-      }
-      // If no new file in update mode, API will use existing broker_image from database
-
-      // Images - append existing image URLs and new compressed files
-      // First, append existing images (non-blob URLs) - only in update mode
-      if (isUpdateMode) {
-        images.forEach((url) => {
-          if (url && !url.startsWith('blob:')) {
-            formData.append('existing_images', url);
-          }
-        });
-      }
-      
-      // Then append compressed image files
-      compressedImages.forEach((file) => {
-        formData.append('images', file);
-      });
 
       // Determine API endpoint and method
       const apiEndpoint = isUpdateMode 
@@ -952,7 +932,10 @@ export function AddPropertyPage({ propertyId, initialProperty }: AddPropertyPage
       
       const response = await fetch(apiEndpoint, {
         method,
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
