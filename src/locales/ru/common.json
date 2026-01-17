@@ -298,10 +298,13 @@
     "modalSuccessText": "Ваш отзыв отправлен на модерацию.",
     "modalClose": "Закрыть",
     "adminPendingTitle": "Ожидающие отзывы",
+    "adminApprovedTitle": "Одобренные отзывы",
     "adminLoading": "Загрузка...",
     "adminNoReviews": "Отзывы не найдены.",
     "adminApprove": "Одобрить отзыв",
     "adminDelete": "Удалить отзыв",
+    "adminApproved": "Отзыв одобрен",
+    "adminDeleted": "Отзыв удален",
     "adminPendingCount": "{{count}} ожидающих"
   },
   "favorites": {

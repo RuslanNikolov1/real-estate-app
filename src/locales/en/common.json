@@ -298,10 +298,13 @@
     "modalSuccessText": "Your feedback has been sent for approval.",
     "modalClose": "Close",
     "adminPendingTitle": "Pending Reviews",
+    "adminApprovedTitle": "Approved Reviews",
     "adminLoading": "Loading...",
     "adminNoReviews": "No reviews found.",
     "adminApprove": "Approve review",
     "adminDelete": "Delete review",
+    "adminApproved": "Review approved",
+    "adminDeleted": "Review deleted",
     "adminPendingCount": "{{count}} pending"
   },
   "favorites": {

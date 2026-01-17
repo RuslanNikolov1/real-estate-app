@@ -31,14 +31,15 @@ export function AdminReviewsPage() {
   });
 
   const reviews = data?.reviews || [];
-  const pendingCount = data?.pending || 0;
   const totalPages = Math.ceil((data?.total || 0) / limit);
 
   const handleApprove = async (id: string) => {
     try {
       const response = await fetch(`/api/reviews/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ is_approved: true }),
       });
       
@@ -46,14 +47,14 @@ export function AdminReviewsPage() {
         throw new Error('Failed to approve review');
       }
       
-      // Invalidate all pending review queries to refetch
+      // Invalidate pending review queries to refetch
       await queryClient.invalidateQueries({ queryKey: ['admin-reviews', 'pending'] });
       // Also invalidate reviews stats to update the header badge
       await queryClient.invalidateQueries({ queryKey: ['reviews-stats'] });
-      // Invalidate homepage reviews so new approved reviews appear
-      await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved', 'home'] });
-      // Invalidate all approved review queries
+      // Invalidate approved review queries since a review was approved
       await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved'] });
+      // Invalidate homepage reviews in case a review was approved
+      await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved', 'home'] });
       
       // Explicitly refetch the current page to update UI immediately
       await refetch();
@@ -63,7 +64,7 @@ export function AdminReviewsPage() {
         setPage(1);
       }
       
-      setToastMessage(t('reviews.adminApproved') || 'Review approved successfully');
+      setToastMessage(t('reviews.adminApproved'));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
@@ -84,13 +85,11 @@ export function AdminReviewsPage() {
         throw new Error('Failed to delete review');
       }
       
-      // Invalidate all pending review queries to refetch
+      // Invalidate pending review queries to refetch
       await queryClient.invalidateQueries({ queryKey: ['admin-reviews', 'pending'] });
       // Also invalidate reviews stats to update the header badge
       await queryClient.invalidateQueries({ queryKey: ['reviews-stats'] });
-      // Invalidate homepage reviews in case a review was deleted
-      await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved', 'home'] });
-      // Invalidate all approved review queries
+      // Invalidate approved review queries in case a review was deleted
       await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved'] });
       
       // Explicitly refetch the current page to update UI immediately
@@ -101,7 +100,7 @@ export function AdminReviewsPage() {
         setPage(1);
       }
       
-      setToastMessage(t('reviews.adminDeleted') || 'Review deleted successfully');
+      setToastMessage(t('reviews.adminDeleted'));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
@@ -119,9 +118,6 @@ export function AdminReviewsPage() {
         <div className={styles.container}>
           <div className={styles.header}>
             <h1 className={styles.title}>{t('reviews.adminPendingTitle')}</h1>
-            {pendingCount > 0 && (
-              <span className={styles.badge}>{t('reviews.adminPendingCount', { count: pendingCount })}</span>
-            )}
           </div>
 
           {isLoading ? (

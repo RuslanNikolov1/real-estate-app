@@ -306,10 +306,13 @@
     "modalSuccessText": "Вашето мнение беше изпратено за одобрение.",
     "modalClose": "Затвори",
     "adminPendingTitle": "Чакащи отзиви",
+    "adminApprovedTitle": "Одобрени отзиви",
     "adminLoading": "Зареждане...",
     "adminNoReviews": "Няма намерени отзиви.",
     "adminApprove": "Одобри отзив",
     "adminDelete": "Изтрий отзив",
+    "adminApproved": "Отзивът беше одобрен",
+    "adminDeleted": "Отзивът беше изтрит",
     "adminPendingCount": "{{count}} чакащи"
   },
   "favorites": {

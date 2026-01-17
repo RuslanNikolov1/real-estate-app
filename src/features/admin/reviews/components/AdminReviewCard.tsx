@@ -8,7 +8,7 @@ import styles from './AdminReviewCard.module.scss';
 
 interface AdminReviewCardProps {
   review: Review;
-  onApprove: () => void;
+  onApprove?: () => void;
   onDelete: () => void;
 }
 
@@ -63,15 +63,17 @@ export function AdminReviewCard({
       <p className={styles.comment}>{review.comment}</p>
 
       <div className={styles.actions}>
-        <button
-          type="button"
-          className={styles.approveButton}
-          onClick={onApprove}
-          aria-label={t('reviews.adminApprove')}
-          title={t('reviews.adminApprove')}
-        >
-          <CheckCircle size={48} weight="fill" />
-        </button>
+        {onApprove && !review.is_approved && (
+          <button
+            type="button"
+            className={styles.approveButton}
+            onClick={onApprove}
+            aria-label={t('reviews.adminApprove')}
+            title={t('reviews.adminApprove')}
+          >
+            <CheckCircle size={48} weight="fill" />
+          </button>
+        )}
         <button
           type="button"
           className={styles.deleteButton}

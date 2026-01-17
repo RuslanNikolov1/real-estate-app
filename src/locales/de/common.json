@@ -298,10 +298,13 @@
     "modalSuccessText": "Ihre Bewertung wurde zur Genehmigung gesendet.",
     "modalClose": "Schließen",
     "adminPendingTitle": "Ausstehende Bewertungen",
+    "adminApprovedTitle": "Genehmigte Bewertungen",
     "adminLoading": "Lädt...",
     "adminNoReviews": "Keine Bewertungen gefunden.",
     "adminApprove": "Bewertung genehmigen",
     "adminDelete": "Bewertung löschen",
+    "adminApproved": "Bewertung genehmigt",
+    "adminDeleted": "Bewertung gelöscht",
     "adminPendingCount": "{{count}} ausstehend"
   },
   "favorites": {
