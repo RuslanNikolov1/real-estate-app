@@ -196,7 +196,6 @@ export function BuyRealEstatesFiltersPage({
             <div className={styles.leftFilters}>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
-                    initialSearchTerm={locationState.searchTerm}
                     initialCity={locationState.city}
                     initialNeighborhoods={locationState.neighborhoods}
                     initialDistance={locationState.distance}

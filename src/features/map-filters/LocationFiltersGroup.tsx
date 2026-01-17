@@ -11,7 +11,6 @@ import styles from './LocationFiltersGroup.module.scss';
 
 interface LocationFiltersGroupProps {
     onFilterChange: (searchTerm: string, city: string, neighborhoods: string[], distance: number) => void;
-    initialSearchTerm?: string;
     initialCity?: string;
     initialNeighborhoods?: string[];
     initialDistance?: number;
@@ -20,7 +19,6 @@ interface LocationFiltersGroupProps {
 
 export function LocationFiltersGroup({
     onFilterChange,
-    initialSearchTerm = '',
     initialCity = '',
     initialNeighborhoods = [],
     initialDistance = 0,
@@ -35,7 +33,6 @@ export function LocationFiltersGroup({
         );
     }, []);
 
-    const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
     const [city, setCity] = useState(initialCity);
     const [neighborhoods, setNeighborhoods] = useState<string[]>(initialNeighborhoods);
     const [distance, setDistance] = useState(initialDistance);
@@ -66,12 +63,10 @@ export function LocationFiltersGroup({
         
         if (shouldPreserveCity) {
             // Don't update city - preserve it
-            setSearchTerm(initialSearchTerm);
             setDistance(initialDistance);
             return; // Exit early to prevent clearing
         }
         
-        setSearchTerm(initialSearchTerm);
         setCity(initialCity);
         setDistance(initialDistance);
 
@@ -93,7 +88,28 @@ export function LocationFiltersGroup({
                 setManualNeighborhoodInput('');
             }
         }
-    }, [initialSearchTerm, initialCity, initialDistance, isValidCity, city, manualNeighborhoodInput]);
+    }, [initialCity, initialDistance, isValidCity, city, manualNeighborhoodInput]);
+
+    // Sync neighborhoods when they come from external sources (map clicks, URL restore)
+    // Only sync for valid cities (where NeighborhoodSelect is used, not manual input)
+    useEffect(() => {
+        // Only sync if:
+        // 1. City is valid (we're using NeighborhoodSelect, not manual input)
+        // 2. City matches initialCity (city didn't just change - that's handled above)
+        // 3. Neighborhoods are actually different (avoid unnecessary updates)
+        const cityMatches = initialCity === city && initialCity.trim() !== '';
+        const isCityValid = isValidCity(initialCity);
+        
+        // Compare arrays without mutating (create sorted copies)
+        const sortedCurrent = [...neighborhoods].sort();
+        const sortedInitial = [...initialNeighborhoods].sort();
+        const neighborhoodsDifferent = JSON.stringify(sortedCurrent) !== JSON.stringify(sortedInitial);
+        
+        if (cityMatches && isCityValid && neighborhoodsDifferent) {
+            // Sync neighborhoods from external source (map click, URL restore, etc.)
+            setNeighborhoods(initialNeighborhoods);
+        }
+    }, [initialNeighborhoods, initialCity, city, neighborhoods, isValidCity]);
     
     // Cleanup debounce timeout on unmount
     useEffect(() => {
@@ -146,25 +162,25 @@ export function LocationFiltersGroup({
         setNeighborhoods([]);
         setDistance(0);
         setShowCityDropdown(false);
-        onFilterChange(searchTerm, formattedCity, [], 0);
-    }, [searchTerm, onFilterChange, formatCityName]);
+        onFilterChange('', formattedCity, [], 0);
+    }, [onFilterChange, formatCityName]);
 
     const handleNeighborhoodSelectChange = useCallback(
         (value: string | string[]) => {
             const next = Array.isArray(value) ? value : value ? [value] : [];
             setNeighborhoods(next);
-            onFilterChange(searchTerm, city, next, distance);
+            onFilterChange('', city, next, distance);
         },
-        [searchTerm, city, distance, onFilterChange],
+        [city, distance, onFilterChange],
     );
 
     const handleRemoveNeighborhood = useCallback(
         (neighborhoodName: string) => {
             const updated = neighborhoods.filter((n) => n !== neighborhoodName);
             setNeighborhoods(updated);
-            onFilterChange(searchTerm, city, updated, distance);
+            onFilterChange('', city, updated, distance);
         },
-        [neighborhoods, searchTerm, city, distance, onFilterChange],
+        [neighborhoods, city, distance, onFilterChange],
     );
 
     // Handle neighborhood changes when city changes
@@ -175,7 +191,7 @@ export function LocationFiltersGroup({
             if (neighborhoods.length > 0) {
                 setNeighborhoods([]);
                 setManualNeighborhoodInput('');
-                onFilterChange(searchTerm, city, [], 0);
+                onFilterChange('', city, [], 0);
             }
             if (distance !== 0) {
                 setDistance(0);
@@ -190,7 +206,7 @@ export function LocationFiltersGroup({
             );
             if (validNeighborhoods.length !== neighborhoods.length) {
                 setNeighborhoods(validNeighborhoods);
-                onFilterChange(searchTerm, city, validNeighborhoods, distance);
+                onFilterChange('', city, validNeighborhoods, distance);
             }
             // Clear manual input when switching to a city from the list
             if (manualNeighborhoodInput) {
@@ -198,25 +214,20 @@ export function LocationFiltersGroup({
             }
         }
         // If city is not in the list, allow manual neighborhoods (no validation needed)
-    }, [isCitySelected, neighborhoods, city, distance, onFilterChange, searchTerm, trimmedCity, manualNeighborhoodInput]);
+    }, [isCitySelected, neighborhoods, city, distance, onFilterChange, trimmedCity, manualNeighborhoodInput]);
 
     // Reset distance when showAdditionalFilters becomes false
     useEffect(() => {
         if (!showAdditionalFilters && distance !== 0) {
             setDistance(0);
-            onFilterChange(searchTerm, city, neighborhoods, 0);
+            onFilterChange('', city, neighborhoods, 0);
         }
-    }, [showAdditionalFilters, distance, searchTerm, city, neighborhoods, onFilterChange]);
-
-    const handleSearchTermChange = useCallback((value: string) => {
-        setSearchTerm(value);
-        onFilterChange(value, city, neighborhoods, distance);
-    }, [city, neighborhoods, distance, onFilterChange]);
+    }, [showAdditionalFilters, distance, city, neighborhoods, onFilterChange]);
 
     const handleDistanceChange = useCallback((value: number) => {
         setDistance(value);
-        onFilterChange(searchTerm, city, neighborhoods, value);
-    }, [searchTerm, city, neighborhoods, onFilterChange]);
+        onFilterChange('', city, neighborhoods, value);
+    }, [city, neighborhoods, onFilterChange]);
 
     // Helper function to calculate distance between two coordinates (Haversine formula)
     const calculateDistanceKm = useCallback((lat1: number, lng1: number, lat2: number, lng2: number) => {
@@ -299,14 +310,6 @@ export function LocationFiltersGroup({
 
     return (
         <div className={styles.inputsGrid}>
-            <Input
-                id="filters-search"
-                label={t('filters.common.searchLabel')}
-                placeholder={t('filters.common.searchPlaceholder')}
-                value={searchTerm}
-                onChange={(event) => handleSearchTermChange(event.target.value)}
-                className={styles.filterInput}
-            />
             <div className={styles.cityInputWrapper} ref={cityInputRef}>
                 <div className={styles.cityInputRow}>
                     <div className={styles.autocompleteWrapper}>
@@ -324,7 +327,7 @@ export function LocationFiltersGroup({
                                 } else {
                                     setShowCityDropdown(false);
                                 }
-                                onFilterChange(searchTerm, value, neighborhoods, distance);
+                                onFilterChange('', value, neighborhoods, distance);
                             }}
                             onFocus={() => {
                                 // Show dropdown if there are matching options
@@ -341,7 +344,7 @@ export function LocationFiltersGroup({
                                         if (city.trim() && !isCitySelected) {
                                             const formatted = formatCityName(city);
                                             setCity(formatted);
-                                            onFilterChange(searchTerm, formatted, neighborhoods, distance);
+                                            onFilterChange('', formatted, neighborhoods, distance);
                                         }
                                     }
                                 }, 200);
@@ -466,7 +469,6 @@ export function LocationFiltersGroup({
                                             }
                                             
                                             // Capture current values at the time of typing to avoid stale closures
-                                            const capturedSearchTerm = searchTerm;
                                             const capturedCity = city;
                                             const capturedDistance = distance;
                                             
@@ -474,7 +476,7 @@ export function LocationFiltersGroup({
                                                 // Use captured values to prevent stale closure issues
                                                 // Only call parent if city is still valid (not cleared)
                                                 if (capturedCity && capturedCity.trim()) {
-                                                    onFilterChange(capturedSearchTerm, capturedCity, newNeighborhoods, capturedDistance);
+                                                    onFilterChange('', capturedCity, newNeighborhoods, capturedDistance);
                                                 }
                                             }, 300);
                                         }}
@@ -485,7 +487,7 @@ export function LocationFiltersGroup({
                                                 setManualNeighborhoodInput(formatted);
                                                 const newNeighborhoods = formatted ? [formatted] : [];
                                                 setNeighborhoods(newNeighborhoods);
-                                                onFilterChange(searchTerm, city, newNeighborhoods, distance);
+                                                onFilterChange('', city, newNeighborhoods, distance);
                                             }
                                         }}
                                         className={styles.manualNeighborhoodInputField}

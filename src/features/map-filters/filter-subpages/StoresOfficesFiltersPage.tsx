@@ -562,7 +562,6 @@ export function StoresOfficesFiltersPage({
                 </div>
                 <LocationFiltersGroup
                     onFilterChange={handleLocationChange}
-                    initialSearchTerm={locationState.searchTerm}
                     initialCity={locationState.city}
                     initialNeighborhoods={locationState.neighborhoods}
                     initialDistance={locationState.distance}
