@@ -47,28 +47,38 @@ export function AdminReviewsPage() {
         throw new Error('Failed to approve review');
       }
       
-      // Invalidate pending review queries to refetch
-      await queryClient.invalidateQueries({ queryKey: ['admin-reviews', 'pending'] });
-      // Also invalidate reviews stats to update the header badge
-      await queryClient.invalidateQueries({ queryKey: ['reviews-stats'] });
-      // Invalidate approved review queries since a review was approved
-      await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved'] });
-      // Invalidate homepage reviews in case a review was approved
-      await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved', 'home'] });
+      // Optimistically remove the approved review from the current page
+      queryClient.setQueryData(['admin-reviews', 'pending', page], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          reviews: oldData.reviews?.filter((review: Review) => review.id !== id) || [],
+          total: (oldData.total || 0) - 1,
+        };
+      });
       
-      // Explicitly refetch the current page to update UI immediately
-      await refetch();
+      // Refetch to ensure data consistency
+      const { data: newData } = await refetch();
       
       // If current page becomes empty, go back to page 1
-      if (reviews.length === 1 && page > 1) {
+      if (newData && newData.reviews.length === 0 && page > 1) {
         setPage(1);
       }
+      
+      // Invalidate reviews stats to update the header badge
+      queryClient.invalidateQueries({ queryKey: ['reviews-stats'] });
+      // Invalidate approved review queries since a review was approved
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'approved'] });
+      // Invalidate homepage reviews in case a review was approved
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'approved', 'home'] });
       
       setToastMessage(t('reviews.adminApproved'));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
       console.error('Error approving review:', error);
+      // Refetch on error to restore correct state
+      refetch();
       setToastMessage(t('flashMessages.unexpectedError'));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -85,26 +95,36 @@ export function AdminReviewsPage() {
         throw new Error('Failed to delete review');
       }
       
-      // Invalidate pending review queries to refetch
-      await queryClient.invalidateQueries({ queryKey: ['admin-reviews', 'pending'] });
-      // Also invalidate reviews stats to update the header badge
-      await queryClient.invalidateQueries({ queryKey: ['reviews-stats'] });
-      // Invalidate approved review queries in case a review was deleted
-      await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved'] });
+      // Optimistically remove the deleted review from the current page
+      queryClient.setQueryData(['admin-reviews', 'pending', page], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          reviews: oldData.reviews?.filter((review: Review) => review.id !== id) || [],
+          total: (oldData.total || 0) - 1,
+        };
+      });
       
-      // Explicitly refetch the current page to update UI immediately
-      await refetch();
+      // Refetch to ensure data consistency
+      const { data: newData } = await refetch();
       
       // If current page becomes empty, go back to page 1
-      if (reviews.length === 1 && page > 1) {
+      if (newData && newData.reviews.length === 0 && page > 1) {
         setPage(1);
       }
+      
+      // Invalidate reviews stats to update the header badge
+      queryClient.invalidateQueries({ queryKey: ['reviews-stats'] });
+      // Invalidate approved review queries in case a review was deleted
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'approved'] });
       
       setToastMessage(t('reviews.adminDeleted'));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
       console.error('Error deleting review:', error);
+      // Refetch on error to restore correct state
+      refetch();
       setToastMessage(t('flashMessages.unexpectedError'));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
