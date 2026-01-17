@@ -46,6 +46,7 @@ export function ClientReviews() {
   }, []);
 
   // Fetch reviews only when section is visible
+  // API already orders by created_at descending and filters for approved reviews
   const { data: reviewsData, refetch: refetchReviews } = useQuery({
     queryKey: ['reviews', 'approved', 'home'],
     queryFn: async () => {
@@ -57,8 +58,8 @@ export function ClientReviews() {
     enabled: isVisible,
   });
 
+  // API already returns the 6 most recent approved reviews, ordered by created_at descending
   const reviews: Review[] = reviewsData?.reviews || [];
-  const approvedReviews = reviews.filter((r: Review) => r.is_approved).slice(0, 6);
 
   const handleSubmitClick = () => {
     if (!user) {
@@ -133,7 +134,7 @@ export function ClientReviews() {
           </div>
         </div>
 
-        {approvedReviews.length === 0 ? (
+        {reviews.length === 0 ? (
           <>
             <div className={styles.emptyState}>
               <p>{t('reviews.firstToShare')}</p>
@@ -154,7 +155,7 @@ export function ClientReviews() {
         ) : (
           <>
             <div className={styles.grid}>
-              {approvedReviews.map((review, index) => (
+              {reviews.map((review, index) => (
                 <motion.div
                   key={review.id}
                   initial={{ opacity: 0, y: 20 }}

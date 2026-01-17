@@ -137,6 +137,8 @@ export function ReviewsPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const limit = 16;
 
+  // Fetch all approved reviews (is_approved = true), ordered by created_at descending
+  // API automatically filters for is_approved = true when status=approved
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['reviews', 'approved', page],
     queryFn: async () => {
@@ -146,7 +148,8 @@ export function ReviewsPage() {
     },
   });
 
-  const reviews = data?.reviews || [];
+  // API returns only reviews where is_approved = true, no additional filtering needed
+  const reviews: Review[] = data?.reviews || [];
   const totalPages = Math.ceil((data?.total || 0) / limit);
 
   const handleSubmitClick = () => {

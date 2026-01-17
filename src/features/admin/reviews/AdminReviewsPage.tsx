@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { AdminReviewCard } from './components/AdminReviewCard';
@@ -14,12 +14,13 @@ import styles from './AdminReviewsPage.module.scss';
 
 export function AdminReviewsPage() {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const limit = 20;
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['admin-reviews', 'pending', page],
     queryFn: async () => {
       const response = await fetch(`/api/reviews?status=pending&page=${page}&limit=${limit}`);
@@ -45,7 +46,23 @@ export function AdminReviewsPage() {
         throw new Error('Failed to approve review');
       }
       
-      refetch();
+      // Invalidate all pending review queries to refetch
+      await queryClient.invalidateQueries({ queryKey: ['admin-reviews', 'pending'] });
+      // Also invalidate reviews stats to update the header badge
+      await queryClient.invalidateQueries({ queryKey: ['reviews-stats'] });
+      // Invalidate homepage reviews so new approved reviews appear
+      await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved', 'home'] });
+      // Invalidate all approved review queries
+      await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved'] });
+      
+      // If current page becomes empty, go back to page 1
+      if (reviews.length === 1 && page > 1) {
+        setPage(1);
+      }
+      
+      setToastMessage(t('reviews.adminApproved') || 'Review approved successfully');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
       console.error('Error approving review:', error);
       setToastMessage(t('flashMessages.unexpectedError'));
@@ -64,7 +81,23 @@ export function AdminReviewsPage() {
         throw new Error('Failed to delete review');
       }
       
-      refetch();
+      // Invalidate all pending review queries to refetch
+      await queryClient.invalidateQueries({ queryKey: ['admin-reviews', 'pending'] });
+      // Also invalidate reviews stats to update the header badge
+      await queryClient.invalidateQueries({ queryKey: ['reviews-stats'] });
+      // Invalidate homepage reviews in case a review was deleted
+      await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved', 'home'] });
+      // Invalidate all approved review queries
+      await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved'] });
+      
+      // If current page becomes empty, go back to page 1
+      if (reviews.length === 1 && page > 1) {
+        setPage(1);
+      }
+      
+      setToastMessage(t('reviews.adminDeleted') || 'Review deleted successfully');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
       console.error('Error deleting review:', error);
       setToastMessage(t('flashMessages.unexpectedError'));
