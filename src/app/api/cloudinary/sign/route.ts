@@ -18,13 +18,20 @@ export async function POST(request: NextRequest) {
     }
 
     const timestamp = Math.round(new Date().getTime() / 1000);
+    
+    // Only include parameters that will be sent to Cloudinary in the signature
+    // The signature must include ALL parameters that are sent (except file, signature, api_key, timestamp itself)
+    // But for folder-based uploads, we need to include folder in signature
     const params: Record<string, string> = {
       timestamp: timestamp.toString(),
-      folder,
-      resource_type,
     };
+    
+    // Only add folder if provided (required for signature if sent in upload)
+    if (folder) {
+      params.folder = folder;
+    }
 
-    // Generate signature
+    // Generate signature - sort keys alphabetically
     const sortedParams = Object.keys(params)
       .sort()
       .map((key) => `${key}=${params[key]}`)
@@ -32,6 +39,12 @@ export async function POST(request: NextRequest) {
 
     const stringToSign = `${sortedParams}${apiSecret}`;
     const signature = crypto.createHash('sha1').update(stringToSign).digest('hex');
+    
+    console.log('Generated Cloudinary signature:', {
+      params,
+      stringToSign: sortedParams,
+      signatureLength: signature.length,
+    });
 
     return NextResponse.json({
       signature,

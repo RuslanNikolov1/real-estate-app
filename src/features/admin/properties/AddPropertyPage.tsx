@@ -749,13 +749,27 @@ export function AddPropertyPage({ propertyId, initialProperty }: AddPropertyPage
       // Upload broker image if provided (or skip if in update mode without new file)
       if (brokerImageFileRef.current) {
         try {
+          // Validate file before upload
+          if (!brokerImageFileRef.current.type.startsWith('image/')) {
+            throw new Error('Broker image must be an image file');
+          }
+          
           const brokerUpload = await uploadToCloudinary(brokerImageFileRef.current, 'brokers');
           brokerImageUrl = brokerUpload.url;
           brokerImagePublicId = brokerUpload.public_id;
         } catch (error) {
           console.error('Error uploading broker image:', error);
-          throw new Error(t('errors.brokerImageUploadFailed') || 'Failed to upload broker image');
+          const errorMessage = error instanceof Error 
+            ? error.message 
+            : 'Failed to upload broker image to Cloudinary';
+          throw new Error(t('errors.brokerImageUploadFailed') || errorMessage);
         }
+      } else if (!isUpdateMode && !brokerImagePreview) {
+        // In add mode, broker image should be required
+        throw new Error(t('errors.brokerImageRequired') || 'Broker image is required');
+      } else if (isUpdateMode && brokerImagePreview && !brokerImagePreview.startsWith('blob:')) {
+        // In update mode, if we have existing broker image, use it
+        brokerImageUrl = brokerImagePreview;
       }
 
       // Upload property images to Cloudinary
