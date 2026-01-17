@@ -73,10 +73,10 @@ export function AdminReviewsPage() {
       // Clear cache and refetch to get fresh data from server
       queryClient.removeQueries({ queryKey: ['admin-reviews', 'pending', page] });
       await queryClient.refetchQueries({ queryKey: ['admin-reviews', 'pending', page] });
-      const newData = queryClient.getQueryData(['admin-reviews', 'pending', page]);
+      const newData = queryClient.getQueryData<{ reviews?: Review[]; total?: number; page?: number }>(['admin-reviews', 'pending', page]);
       
       // If current page becomes empty, go back to page 1
-      if (newData && newData.reviews.length === 0 && page > 1) {
+      if (newData && newData.reviews && newData.reviews.length === 0 && page > 1) {
         setPage(1);
       }
       
@@ -118,10 +118,10 @@ export function AdminReviewsPage() {
       // Clear cache and refetch to get fresh data from server
       queryClient.removeQueries({ queryKey: ['admin-reviews', 'pending', page] });
       await queryClient.refetchQueries({ queryKey: ['admin-reviews', 'pending', page] });
-      const newData = queryClient.getQueryData(['admin-reviews', 'pending', page]);
+      const newData = queryClient.getQueryData<{ reviews?: Review[]; total?: number; page?: number }>(['admin-reviews', 'pending', page]);
       
       // If current page becomes empty, go back to page 1
-      if (newData && newData.reviews.length === 0 && page > 1) {
+      if (newData && newData.reviews && newData.reviews.length === 0 && page > 1) {
         setPage(1);
       }
       
