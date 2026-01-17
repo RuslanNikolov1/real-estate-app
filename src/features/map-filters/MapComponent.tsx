@@ -372,11 +372,6 @@ export function MapComponent({
     }
 
     if (!isLoaded) {
-        // #region agent log
-        if (typeof window !== 'undefined') {
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'MapComponent.tsx:374', message: 'Google Maps API not loaded yet', data: { isLoaded: false, hasLoadError: !!loadError, city, timestamp: Date.now() }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'map-loading-investigation', hypothesisId: 'C' }) }).catch((err: any) => { const errMsg = (err?.message || 'unknown').toString(); console.warn('[DEBUG] MapComponent loading log fetch blocked:', errMsg); });
-        }
-        // #endregion
         return (
             <div className={styles.mapWrapper}>
                 <div className={styles.mapLoading}>Зареждане на картата...</div>

@@ -20,11 +20,6 @@ export function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackModalProps
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:24',message:'isOpen prop changed',data:{isOpen,success},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-  }, [isOpen, success]);
-  // #endregion
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -40,13 +35,7 @@ export function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackModalProps
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:36',message:'Escape key pressed',data:{key:e.key,isOpen,success},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
       if (e.key === 'Escape' && isOpen && !success) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:38',message:'onClose called from escape handler',data:{isOpen,success},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
         onClose();
       }
     };
@@ -78,23 +67,13 @@ export function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackModalProps
 
       setSuccess(true);
       
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:67',message:'Success state set, calling onSuccess',data:{hasOnSuccess:!!onSuccess},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-      // #endregion
-      
       // Call onSuccess callback
       if (onSuccess) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:71',message:'onSuccess callback called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-        // #endregion
         onSuccess();
       }
 
       // Auto-close after 2 seconds
       setTimeout(() => {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:76',message:'onClose called from auto-close timeout',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-        // #endregion
         onClose();
       }, 2000);
     } catch (err) {
@@ -108,13 +87,7 @@ export function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackModalProps
     <AnimatePresence>
       {isOpen && (
         <div className={styles.overlay} onClick={(e) => {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:88',message:'Overlay clicked',data:{success,targetTagName:e.target instanceof HTMLElement?e.target.tagName:'unknown'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-          // #endregion
           if (!success) {
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:91',message:'onClose called from overlay click',data:{success},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
             onClose();
           }
         }}>
@@ -132,9 +105,6 @@ export function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackModalProps
                   type="button"
                   className={styles.closeButton}
                   onClick={() => {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:102',message:'onClose called from close button',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                    // #endregion
                     onClose();
                   }}
                   aria-label={t('reviews.modalClose')}
@@ -171,9 +141,6 @@ export function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackModalProps
                   <Button
                     variant="outline"
                     onClick={() => {
-                      // #region agent log
-                      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FeedbackModal.tsx:136',message:'onClose called from cancel button',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                      // #endregion
                       onClose();
                     }}
                     disabled={isSubmitting}

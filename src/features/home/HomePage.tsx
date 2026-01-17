@@ -30,32 +30,9 @@ export function HomePage() {
   const { t, i18n } = useTranslation();
   const [isClient, setIsClient] = useState(false);
 
-  // #region agent log
-  const burgasTitleValue = t('home.burgasTitle');
-  const currentLanguage = i18n.language || i18n.resolvedLanguage || 'unknown';
-  const isServer = typeof window === 'undefined';
-  const hasWindow = typeof window !== 'undefined';
-  if (hasWindow) {
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'HomePage.tsx:37', message: 'HomePage render - language check', data: { burgasTitle: burgasTitleValue, currentLanguage, isServer, hasWindow, isClient }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'blocking-investigation', hypothesisId: 'A,B,E' }) }).catch((err: any) => { const errMsg = (err?.message || 'unknown').toString(); console.warn('[DEBUG] Fetch blocked:', errMsg); fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'HomePage.tsx:37-error', message: 'Fetch error caught', data: { error: errMsg, errorType: (err?.name || 'unknown').toString(), isBlockedByClient: errMsg.includes('BLOCKED_BY_CLIENT') || errMsg.includes('blocked') }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'blocking-investigation', hypothesisId: 'C' }) }).catch(() => {}); });
-  }
-  // #endregion
-
   // Initialize client-side flag after hydration to prevent mismatch
   useEffect(() => {
     setIsClient(true);
-    // #region agent log
-    const testFetch = async () => {
-      try {
-        const res = await fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'HomePage.tsx:44', message: 'useEffect - setIsClient(true)', data: { currentLanguage: i18n.language, isClient: true }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'blocking-investigation', hypothesisId: 'B,D' }) });
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'HomePage.tsx:44-success', message: 'Fetch succeeded in useEffect', data: { status: res.status, ok: res.ok }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'blocking-investigation', hypothesisId: 'D' }) }).catch(() => {});
-      } catch (err: any) {
-        const errMsg = (err?.message || 'unknown').toString();
-        console.warn('[DEBUG] useEffect fetch blocked:', errMsg);
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'HomePage.tsx:44-error', message: 'useEffect fetch error', data: { error: errMsg, errorType: (err?.name || 'unknown').toString(), isBlockedByClient: errMsg.includes('BLOCKED_BY_CLIENT') || errMsg.includes('blocked') || err?.name === 'TypeError' }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'blocking-investigation', hypothesisId: 'C,D' }) }).catch(() => {});
-      }
-    };
-    testFetch();
-    // #endregion
   }, []);
 
   // Fetch featured properties (4 most viewed)

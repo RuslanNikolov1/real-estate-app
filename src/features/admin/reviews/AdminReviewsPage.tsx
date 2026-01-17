@@ -23,15 +23,9 @@ export function AdminReviewsPage() {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['admin-reviews', 'pending', page],
     queryFn: async () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:25',message:'queryFn called',data:{page,limit},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
-      // #endregion
       const response = await fetch(`/api/reviews?status=pending&page=${page}&limit=${limit}`);
       if (!response.ok) throw new Error('Failed to fetch reviews');
       const jsonData = await response.json();
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:29',message:'queryFn response',data:{reviewsCount:jsonData?.reviews?.length||0,reviewsIds:jsonData?.reviews?.map((r:Review)=>r.id)||[],total:jsonData?.total||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
-      // #endregion
       return jsonData;
     },
   });
@@ -41,15 +35,9 @@ export function AdminReviewsPage() {
   
   // Track data changes
   useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:36',message:'useEffect - data changed',data:{reviewsCount:reviews.length,reviewsIds:reviews.map(r=>r.id),dataReviewsCount:data?.reviews?.length||0,isLoading,page},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
-    // #endregion
   }, [data, reviews.length, isLoading, page]);
 
   const handleApprove = async (id: string) => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:36',message:'handleApprove called',data:{reviewId:id,currentPage:page,reviewsBefore:reviews.length,reviewsBeforeIds:reviews.map(r=>r.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     try {
       const response = await fetch(`/api/reviews/${id}`, {
         method: 'PATCH',
@@ -59,17 +47,11 @@ export function AdminReviewsPage() {
         body: JSON.stringify({ is_approved: true }),
       });
       
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:45',message:'PATCH response received',data:{ok:response.ok,status:response.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
       
       if (!response.ok) {
         throw new Error('Failed to approve review');
       }
       
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:51',message:'Before invalidateQueries',data:{queryKey:['admin-reviews','pending']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
       
       // Invalidate pending review queries to mark as stale
       await queryClient.invalidateQueries({ queryKey: ['admin-reviews', 'pending'] });
@@ -80,16 +62,10 @@ export function AdminReviewsPage() {
       // Invalidate homepage reviews in case a review was approved
       queryClient.invalidateQueries({ queryKey: ['reviews', 'approved', 'home'] });
       
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:60',message:'Before refetch',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       
       // Refetch to get fresh data from server
       const { data: newData } = await refetch();
       
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:63',message:'After refetch',data:{newDataReviewsCount:newData?.reviews?.length||0,newDataReviewsIds:newData?.reviews?.map((r:Review)=>r.id)||[],newDataTotal:newData?.total||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
       
       // If current page becomes empty, go back to page 1
       if (newData && newData.reviews.length === 0 && page > 1) {
@@ -100,9 +76,6 @@ export function AdminReviewsPage() {
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:70',message:'Error in handleApprove',data:{error:error instanceof Error?error.message:String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-      // #endregion
       console.error('Error approving review:', error);
       // Refetch on error to restore correct state
       await refetch();
@@ -113,25 +86,16 @@ export function AdminReviewsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:80',message:'handleDelete called',data:{reviewId:id,currentPage:page,reviewsBefore:reviews.length,reviewsBeforeIds:reviews.map(r=>r.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     try {
       const response = await fetch(`/api/reviews/${id}`, {
         method: 'DELETE',
       });
       
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:85',message:'DELETE response received',data:{ok:response.ok,status:response.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
       
       if (!response.ok) {
         throw new Error('Failed to delete review');
       }
       
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:91',message:'Before invalidateQueries',data:{queryKey:['admin-reviews','pending']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
       
       // Invalidate pending review queries to mark as stale
       await queryClient.invalidateQueries({ queryKey: ['admin-reviews', 'pending'] });
@@ -140,16 +104,10 @@ export function AdminReviewsPage() {
       // Invalidate approved review queries in case a review was deleted
       queryClient.invalidateQueries({ queryKey: ['reviews', 'approved'] });
       
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:98',message:'Before refetch',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       
       // Refetch to get fresh data from server
       const { data: newData } = await refetch();
       
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:101',message:'After refetch',data:{newDataReviewsCount:newData?.reviews?.length||0,newDataReviewsIds:newData?.reviews?.map((r:Review)=>r.id)||[],newDataTotal:newData?.total||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
       
       // If current page becomes empty, go back to page 1
       if (newData && newData.reviews.length === 0 && page > 1) {
@@ -160,9 +118,6 @@ export function AdminReviewsPage() {
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminReviewsPage.tsx:109',message:'Error in handleDelete',data:{error:error instanceof Error?error.message:String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-      // #endregion
       console.error('Error deleting review:', error);
       // Refetch on error to restore correct state
       await refetch();

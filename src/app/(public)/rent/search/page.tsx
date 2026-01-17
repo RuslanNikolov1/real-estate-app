@@ -7,11 +7,6 @@ const MapFiltersPage = dynamic(
     {
         ssr: false,
         loading: () => {
-            // #region agent log
-            if (typeof window !== 'undefined') {
-                fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'rent/search/page.tsx:loading', message: 'Dynamic import loading component rendered', data: { pathname: window.location.pathname, timestamp: Date.now() }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'map-loading-investigation', hypothesisId: 'A,B' }) }).catch((err: any) => { const errMsg = (err?.message || 'unknown').toString(); console.warn('[DEBUG] Loading log fetch blocked:', errMsg); });
-            }
-            // #endregion
             return (
                 <div
                     style={{
