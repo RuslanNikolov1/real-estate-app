@@ -4,7 +4,6 @@
   background: $light-gray;
   color: $black;
   padding: $spacing-3xl 0 $spacing-xl;
-  margin-top: $spacing-3xl;
   border-top: 3px solid $dark-red;
 }
 
@@ -88,6 +87,17 @@
         color: $dark-red;
       }
     }
+  }
+}
+
+.linkWithIcon {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  
+  svg {
+    flex-shrink: 0;
+    color: $dark-red;
   }
 }
 

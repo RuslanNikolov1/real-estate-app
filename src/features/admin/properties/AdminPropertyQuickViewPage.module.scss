@@ -95,6 +95,19 @@
     box-shadow: 0 16px 28px rgba(0, 0, 0, 0.2);
     outline: none;
   }
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-xs $spacing-md;
+    font-size: 0.75rem;
+    letter-spacing: 0.3px;
+
+    span:first-child {
+      width: 20px;
+      height: 20px;
+      font-size: 0.875rem;
+      border-width: 1.5px;
+    }
+  }
 }
 
 .title {
@@ -142,6 +155,10 @@
 
   span {
     font-size: 0.9rem;
+
+    @media (max-width: $breakpoint-md) {
+      font-size: 0.75rem;
+    }
   }
 }
 

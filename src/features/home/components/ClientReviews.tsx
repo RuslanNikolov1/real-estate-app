@@ -119,7 +119,7 @@ export function ClientReviews() {
       <div className={styles.container}>
         <div className={styles.header}>
           <h2 className={styles.title}>{t('home.clientReviews')}</h2>
-          <div className={styles.actions}>
+          <div className={styles.actionsDesktop}>
             <Button variant="primary" onClick={handleSubmitClick}>
               <ChatCircleDots size={18} />
               {t('reviews.writeFeedback')}
@@ -134,33 +134,61 @@ export function ClientReviews() {
         </div>
 
         {approvedReviews.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>{t('reviews.firstToShare')}</p>
-          </div>
+          <>
+            <div className={styles.emptyState}>
+              <p>{t('reviews.firstToShare')}</p>
+            </div>
+            <div className={styles.actionsMobile}>
+              <Button variant="primary" onClick={handleSubmitClick}>
+                <ChatCircleDots size={18} />
+                {t('reviews.writeFeedback')}
+              </Button>
+              <Link href="/reviews" prefetch={false}>
+                <Button variant="outline">
+                  {t('home.viewAllReviews')}
+                  <CaretRight size={16} />
+                </Button>
+              </Link>
+            </div>
+          </>
         ) : (
-          <div className={styles.grid}>
-            {approvedReviews.map((review, index) => (
-              <motion.div
-                key={review.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className={styles.card}
-              >
-                <div className={styles.author}>
-                  <div 
-                    className={styles.avatar}
-                    style={{ backgroundColor: getAvatarColor(review.user_name) }}
-                  >
-                    {review.user_name.charAt(0).toUpperCase()}
+          <>
+            <div className={styles.grid}>
+              {approvedReviews.map((review, index) => (
+                <motion.div
+                  key={review.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className={styles.card}
+                >
+                  <div className={styles.author}>
+                    <div 
+                      className={styles.avatar}
+                      style={{ backgroundColor: getAvatarColor(review.user_name) }}
+                    >
+                      {review.user_name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className={styles.name}>{review.user_name}</span>
                   </div>
-                  <span className={styles.name}>{review.user_name}</span>
-                </div>
-                <p className={styles.comment}>{review.comment}</p>
-              </motion.div>
-            ))}
-          </div>
+                  <p className={styles.comment}>{review.comment}</p>
+                </motion.div>
+              ))}
+            </div>
+            <div className={styles.actionsMobile}>
+              <Button variant="primary" onClick={handleSubmitClick}>
+                <ChatCircleDots size={18} />
+                {t('reviews.writeFeedback')}
+              </Button>
+              <Link href="/reviews" prefetch={false}>
+                <Button variant="outline">
+                  {t('home.viewAllReviews')}
+                  <CaretRight size={16} />
+                </Button>
+              </Link>
+            </div>
+          </>
         )}
       </div>
 

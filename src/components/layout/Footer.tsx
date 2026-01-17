@@ -2,7 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
-import { EnvelopeSimple, Phone, MapPin, FacebookLogo, InstagramLogo, LinkedinLogo, UserCircleDashed, Heart } from '@phosphor-icons/react';
+import { EnvelopeSimple, Phone, MapPin, FacebookLogo, InstagramLogo, LinkedinLogo, Heart, House, CurrencyDollar, Key, Star, ChartBar } from '@phosphor-icons/react';
 import styles from './Footer.module.scss';
 
 export function Footer() {
@@ -46,34 +46,34 @@ export function Footer() {
             <h4 className={styles.columnTitle}><span suppressHydrationWarning>{t('footer.quickLinks')}</span></h4>
             <ul className={styles.links}>
               <li>
-                <Link href="/properties/for-sale" prefetch={false}><span suppressHydrationWarning>{t('nav.forSale')}</span></Link>
+                <Link href="/" prefetch={false} className={styles.linkWithIcon}>
+                  <House size={18} />
+                  <span suppressHydrationWarning>{t('nav.home')}</span>
+                </Link>
               </li>
               <li>
-                <Link href="/properties/for-rent" prefetch={false}><span suppressHydrationWarning>{t('nav.forRent')}</span></Link>
+                <Link href="/sale/search" prefetch={false} className={styles.linkWithIcon}>
+                  <CurrencyDollar size={18} />
+                  <span suppressHydrationWarning>{t('nav.forSale')}</span>
+                </Link>
               </li>
               <li>
-                <Link href="/neighborhoods" prefetch={false}><span suppressHydrationWarning>{t('nav.neighborhoods')}</span></Link>
+                <Link href="/rent/search" prefetch={false} className={styles.linkWithIcon}>
+                  <Key size={18} />
+                  <span suppressHydrationWarning>{t('nav.forRent')}</span>
+                </Link>
               </li>
               <li>
-                <Link href="/reviews" prefetch={false}><span suppressHydrationWarning>{t('nav.reviews')}</span></Link>
+                <Link href="/reviews" prefetch={false} className={styles.linkWithIcon}>
+                  <Star size={18} />
+                  <span suppressHydrationWarning>{t('nav.reviews')}</span>
+                </Link>
               </li>
               <li>
-                <Link href="/certificates" prefetch={false}><span suppressHydrationWarning>{t('nav.certificates')}</span></Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className={styles.column}>
-            <h4 className={styles.columnTitle}><span suppressHydrationWarning>{t('footer.services')}</span></h4>
-            <ul className={styles.links}>
-              <li>
-                <Link href="/post-property" prefetch={false}><span suppressHydrationWarning>{t('nav.postProperty')}</span></Link>
-              </li>
-              <li>
-                <Link href="/properties/add" prefetch={false}><span suppressHydrationWarning>{t('footer.addListing')}</span></Link>
-              </li>
-              <li>
-                <Link href="/favorites" prefetch={false}><span suppressHydrationWarning>{t('nav.favorites')}</span></Link>
+                <Link href="/post-property" prefetch={false} className={styles.linkWithIcon}>
+                  <ChartBar size={18} />
+                  <span suppressHydrationWarning>{t('nav.postProperty')}</span>
+                </Link>
               </li>
             </ul>
           </div>

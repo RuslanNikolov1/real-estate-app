@@ -167,6 +167,7 @@
     "errorLoading": "Error loading property.",
     "notSpecified": "Not specified",
     "morePhotos": "{{count}} more photos",
+    "clickForMore": "Click for more",
     "sections": {
       "description": "Description",
       "features": "Features",

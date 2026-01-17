@@ -11,6 +11,10 @@
   flex: 1;
   padding: $spacing-2xl 0;
   background: linear-gradient(to bottom, #f5f5f5, #e8e8e8);
+
+  @media (max-width: $breakpoint-md) {
+    padding: 15vh 0 !important;
+  }
 }
 
 .container {
@@ -70,8 +74,9 @@
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(128, 46, 46, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
 
-  @media (max-width: 769px) {
-    height: 70vh;
+  @media (max-width: $breakpoint-md) {
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 }
 
@@ -82,8 +87,14 @@
   gap: $spacing-lg;
   height: 400px;
 
-  @media (max-width: 769px) {
-    height: 80vh;
+  @media (max-width: $breakpoint-md) {
+    height: auto;
+  }
+}
+
+.rightImagesContainer {
+  @media (max-width: $breakpoint-md) {
+    display: none;
   }
 }
 
@@ -140,9 +151,11 @@
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(128, 46, 46, 0.15);
 
-  @media (max-width: 769px) {
-    min-height: 38vh;
-    height: calc((80vh - $spacing-md) / 2);
+  @media (max-width: $breakpoint-md) {
+    min-height: auto;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    flex: none;
   }
 }
 
@@ -162,6 +175,29 @@
   letter-spacing: 0.3px;
 }
 
+.clickForMoreLabel {
+  display: none;
+
+  @media (max-width: $breakpoint-md) {
+    display: flex;
+    position: absolute;
+    bottom: $spacing-md;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: $spacing-sm $spacing-md;
+    background: linear-gradient(135deg, rgba(128, 46, 46, 0.95), rgba(128, 46, 46, 0.85));
+    color: $white;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    z-index: 2;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    letter-spacing: 0.3px;
+    pointer-events: none;
+  }
+}
+
 // Two Column Layout
 .contentLayout {
   display: grid;
@@ -169,9 +205,14 @@
   gap: $spacing-xl;
   margin-bottom: $spacing-3xl;
 
-  @media (max-width: $breakpoint-md) {
+  @media (max-width: $breakpoint-lg) {
     grid-template-columns: 1fr;
     gap: $spacing-2xl;
+    display: initial;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    gap: $spacing-xl;
   }
 }
 
@@ -180,6 +221,10 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-2xl;
+
+  @media (max-width: $breakpoint-lg) {
+    order: 1;
+  }
 }
 
 // Price and Details Section
@@ -195,6 +240,7 @@
 
   @media (max-width: $breakpoint-md) {
     grid-template-columns: 1fr;
+    padding: $spacing-xl
   }
 }
 
@@ -276,7 +322,7 @@
 
 // Description Section
 .descriptionSection {
-  padding: $spacing-2xl;
+  padding: $spacing-xl;
   background: $white;
   border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -293,7 +339,7 @@
   position: relative;
   padding-bottom: $spacing-md;
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     text-align: center;
   }
 
@@ -306,6 +352,11 @@
     height: 4px;
     background: linear-gradient(90deg, $dark-red, color.adjust($dark-red, $lightness: 10%));
     border-radius: 2px;
+
+    @media (max-width: $breakpoint-md) {
+      left: 50%;
+      transform: translateX(-50%);
+    }
   }
 }
 
@@ -319,7 +370,7 @@
 
 // Features Section
 .featuresSection {
-  padding: $spacing-2xl;
+  padding: $spacing-xl;
   background: $white;
   border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -359,7 +410,7 @@
 
 // Construction Section
 .constructionSection {
-  padding: $spacing-2xl;
+  padding: $spacing-xl;
   background: $white;
   border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -398,7 +449,7 @@
 
 // Contact Buttons
 .contactSection {
-  padding: $spacing-2xl;
+  padding: $spacing-xl;
   background: $white;
   border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -446,7 +497,7 @@
     color: $dark-red;
   }
 
-  > span:first-of-type {
+  >span:first-of-type {
     position: relative;
     z-index: 1;
     font-size: 1.125rem;
@@ -467,7 +518,7 @@
       color: $white;
     }
 
-    > span:first-of-type {
+    >span:first-of-type {
       color: $white;
     }
   }
@@ -477,21 +528,6 @@
   }
 }
 
-.phoneButton {
-  // All buttons use dark red background
-}
-
-.viberButton {
-  // All buttons use dark red background
-}
-
-.whatsappButton {
-  // All buttons use dark red background
-}
-
-.emailButton {
-  // All buttons use dark red background
-}
 
 // Price History
 .priceHistorySection {
@@ -523,6 +559,11 @@
 .rightColumn {
   height: fit-content;
   align-self: start;
+
+  @media (max-width: $breakpoint-lg) {
+    order: 2;
+    margin-top: 5vh;
+  }
 }
 
 .rightCard {
@@ -534,6 +575,10 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-xl;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-xl;
+  }
 }
 
 .locationSection {
@@ -650,19 +695,19 @@
   stroke: $dark-red !important;
   stroke-width: 2.5 !important;
   fill: none !important;
-  
+
   :global(.button.outline) & {
     color: $dark-red !important;
     stroke: $dark-red !important;
     fill: none !important;
   }
-  
+
   :global(.button.outline:hover) & {
     color: $dark-red !important;
     stroke: $dark-red !important;
     fill: none !important;
   }
-  
+
   path {
     stroke: $dark-red !important;
     fill: none !important;

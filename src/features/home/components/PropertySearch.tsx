@@ -34,7 +34,7 @@ export function PropertySearch({}: PropertySearchProps) {
     router.push('/rent/search');
   };
 
-  const buttonSize = isSmallScreen ? 'sm' : 'lg';
+  const buttonSize = isSmallScreen ? 'md' : 'lg';
 
   return (
       <div className={styles.searchContainer}>

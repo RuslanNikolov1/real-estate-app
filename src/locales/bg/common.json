@@ -167,6 +167,7 @@
     "errorLoading": "Грешка при зареждането на имота.",
     "notSpecified": "Не е посочено",
     "morePhotos": "Още {{count}} снимки",
+    "clickForMore": "Натиснете за още",
     "sections": {
       "description": "Описание",
       "features": "Особености",

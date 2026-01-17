@@ -12,7 +12,7 @@
   align-items: center;
   justify-content: flex-start;
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     flex-direction: column;
     gap: $spacing-sm;
     justify-content: center;
@@ -32,7 +32,7 @@
   gap: $spacing-sm;
   justify-content: center;
   
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     width: auto;
     padding: $spacing-xs $spacing-sm;
   }

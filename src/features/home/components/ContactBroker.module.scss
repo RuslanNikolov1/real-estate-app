@@ -49,12 +49,12 @@
   width: 60vw;
   max-width: 100%;
 
-  @media (max-width: 769px) {
+  @media (max-width: $breakpoint-md) {
     width: 90vw;
     max-width: calc(100% - 2rem);
   }
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     width: 90vw;
     max-width: calc(100% - 1rem);
   }
@@ -73,7 +73,7 @@
   border: 2px dotted $dark-red;
   box-shadow: 0 5 10px 0 rgba(0, 0, 0, 0.1);
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     width: auto;
     max-width: 100%;
   }

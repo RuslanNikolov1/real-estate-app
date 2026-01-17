@@ -16,14 +16,14 @@ $text-light: $color-text-tertiary;
 
 .main {
   flex: 1;
-  padding: 4rem 0;
+  padding-bottom: 4rem;
 
   @media (max-width: $breakpoint-tablet) {
-    padding: 3rem 0;
+    padding-bottom: 3rem;
   }
 
   @media (max-width: $breakpoint-mobile) {
-    padding: 2rem 0;
+    padding-bottom: 2rem;
   }
 }
 

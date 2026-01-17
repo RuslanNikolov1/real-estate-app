@@ -167,6 +167,7 @@
     "errorLoading": "Ошибка загрузки объекта.",
     "notSpecified": "Не указано",
     "morePhotos": "Еще {{count}} фото",
+    "clickForMore": "Нажмите, чтобы увидеть больше",
     "sections": {
       "description": "Описание",
       "features": "Особенности",

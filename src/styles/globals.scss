@@ -55,6 +55,11 @@ main {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
+  padding-top: 40vw !important; // Account for fixed header height
+
+  @media (min-width: $breakpoint-md) {
+    padding-top: 13vh !important; // Desktop spacing
+  }
 }
 
 // Accessibility

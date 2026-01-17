@@ -163,6 +163,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
@@ -255,6 +256,17 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
       window.removeEventListener('focus', handleFocus);
     };
   }, [user, propertyId]);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   // Handle favorite after login (auto-favorite if pending)
   useEffect(() => {
@@ -840,6 +852,9 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                       onError={() => handleImageError(img.id)}
                     />
                   )}
+                  <div className={styles.clickForMoreLabel}>
+                    <span suppressHydrationWarning>{t('propertyDetail.clickForMore')}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -869,6 +884,9 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                     onError={() => handleImageError(middleSlot.id)}
                   />
                 )}
+                <div className={styles.clickForMoreLabel}>
+                  <span suppressHydrationWarning>{t('propertyDetail.clickForMore')}</span>
+                </div>
               </div>
             </div>
             
@@ -1337,7 +1355,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                 <div className={styles.actionButtons}>
                   <Button
                     variant={isFavorite ? 'primary' : 'outline'}
-                    size="md"
+                    size={isMobile ? 'sm' : 'md'}
                     onClick={async () => {
                       if (isTogglingFavorite) return;
                       
@@ -1370,7 +1388,7 @@ export function PropertyDetailPage({ propertyId }: PropertyDetailPageProps) {
                   </Button>
                   <Button 
                     variant="outline" 
-                    size="md" 
+                    size={isMobile ? 'sm' : 'md'} 
                     onClick={handleShare}
                     className={styles.actionButton}
                   >

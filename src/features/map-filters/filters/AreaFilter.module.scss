@@ -108,7 +108,7 @@
 }
 
 .areaSliderFrom {
-    z-index: 2;
+    z-index: 1;
 
     &::-webkit-slider-runnable-track {
         width: 100%;
@@ -139,7 +139,7 @@
 }
 
 .areaSliderTo {
-    z-index: 1;
+    z-index: 2;
 
     &::-webkit-slider-runnable-track {
         width: 100%;
@@ -234,6 +234,10 @@
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
+
+    @media (max-width: $breakpoint-md) {
+        transform: translate(-50%, -15%) scale(0.7);
+    }
 }
 
 .bedTopViewSquareYellow {

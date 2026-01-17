@@ -2,11 +2,13 @@
 
 .page {
   min-height: 100vh;
-  padding-top: $spacing-xl;
+  padding-top: 13vh;
   background: $light-gray;
 
   @media (max-width: $breakpoint-md) {
-    padding: $spacing-xl $spacing-md;
+    padding-top: 42vw;
+    padding-left: $spacing-md;
+    padding-right: $spacing-md;
   }
 }
 

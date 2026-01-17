@@ -162,6 +162,7 @@ export function AddPropertyPage({ propertyId, initialProperty }: AddPropertyPage
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   // Furnishing options for rent
   const FURNISHING_OPTIONS = [
@@ -1000,6 +1001,17 @@ export function AddPropertyPage({ propertyId, initialProperty }: AddPropertyPage
     });
   };
 
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   useEffect(() => {
     return () => {
       createdObjectUrls.current.forEach((url) => URL.revokeObjectURL(url));
@@ -1782,7 +1794,7 @@ export function AddPropertyPage({ propertyId, initialProperty }: AddPropertyPage
           )}
 
           <div className={styles.actions}>
-            <Button variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+            <Button variant="primary" size={isMobile ? 'sm' : 'md'} onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting 
                 ? (isUpdateMode ? 'Запазване...' : t('admin.addPropertySubmitting'))
                 : (isUpdateMode ? 'Запази промените' : t('admin.addPropertyButton'))}

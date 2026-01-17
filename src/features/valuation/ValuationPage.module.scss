@@ -107,7 +107,7 @@
     padding: $spacing-xl;
   }
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     width: 90vw;
     margin: 0 auto;
   }
@@ -180,7 +180,7 @@
   padding-bottom: $spacing-md;
   border-bottom: 2px solid $light-gray;
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     text-align: center;
   }
 }
@@ -194,7 +194,7 @@
     grid-template-columns: 1fr;
   }
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     // Make all direct children (input wrappers, select wrappers) 90% width
     > * {
       width: 90% !important;
@@ -207,7 +207,7 @@
   flex-direction: column;
   gap: $spacing-xs;
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     width: 90%;
   }
 }
@@ -233,7 +233,7 @@
     border-color: $dark-red;
   }
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     width: 90%;
   }
 }
@@ -243,7 +243,7 @@
   flex-direction: column;
   gap: $spacing-xs;
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     width: 90%;
   }
 }
@@ -265,7 +265,7 @@
     border-color: $dark-red;
   }
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     width: 90%;
   }
 }

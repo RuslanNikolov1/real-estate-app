@@ -167,6 +167,7 @@
     "errorLoading": "Fehler beim Laden der Immobilie.",
     "notSpecified": "Nicht angegeben",
     "morePhotos": "{{count}} weitere Fotos",
+    "clickForMore": "Klicken Sie für mehr",
     "sections": {
       "description": "Beschreibung",
       "features": "Merkmale",

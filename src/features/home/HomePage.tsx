@@ -9,7 +9,6 @@ import { PropertySearch } from './components/PropertySearch';
 import { FeaturedProperties } from './components/FeaturedProperties';
 import { SellYourProperty } from './components/SellYourProperty';
 import { PartnerServices } from './components/PartnerServices';
-import { CertificatesMemberships } from './components/CertificatesMemberships';
 import { ContactBroker } from './components/ContactBroker';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -63,16 +62,6 @@ export function HomePage() {
       return [];
     },
   });
-
-  // Fetch certificates
-  const { data: certificates = [] } = useQuery({
-    queryKey: ['certificates'],
-    queryFn: async () => {
-      // TODO: Replace with actual API call
-      return [];
-    },
-  });
-
 
   return (
     <div className={styles.homePage}>
@@ -139,11 +128,6 @@ export function HomePage() {
         {/* Partner Services */}
         {partnerServices.length > 0 && (
           <PartnerServices services={partnerServices} />
-        )}
-
-        {/* Certificates & Memberships */}
-        {certificates.length > 0 && (
-          <CertificatesMemberships certificates={certificates} />
         )}
 
         {/* Contact Broker */}

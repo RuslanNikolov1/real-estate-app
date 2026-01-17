@@ -37,6 +37,7 @@
 
         @media (max-width: $breakpoint-md) {
             padding: 0 $spacing-md;
+            width: 90vw;
         }
     }
 
@@ -58,31 +59,6 @@
 
         .headerText {
             flex: 1;
-        }
-
-        .headerIcon {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            color: $dark-red;
-            flex-shrink: 0;
-            align-self: flex-end;
-
-            @media (max-width: $breakpoint-md) {
-                margin-bottom: 0;
-
-                svg {
-                    width: 80px;
-                    height: 80px;
-                }
-            }
-
-            @media (max-width: $breakpoint-sm) {
-                svg {
-                    width: 60px;
-                    height: 60px;
-                }
-            }
         }
 
         .backButton {
@@ -136,6 +112,10 @@
             font-weight: 600;
             color: $black;
             margin-bottom: $spacing-md;
+        }
+
+        @media (max-width: $breakpoint-md) {
+            padding: $spacing-md;
         }
     }
 
@@ -250,11 +230,23 @@
                 flex: 0 0 66%;
                 max-width: 66%;
                 animation: slideUpIn 0.65s ease-out forwards;
+
+                @media (max-width: $breakpoint-lg) {
+                    flex: 1 1 100%;
+                    max-width: 100%;
+                    order: 1;
+                }
             }
 
             .rightFiltersColumn {
                 flex: 0 0 34%;
                 max-width: 34%;
+
+                @media (max-width: $breakpoint-lg) {
+                    flex: 1 1 100%;
+                    max-width: 100%;
+                    order: 2;
+                }
             }
         }
     }
@@ -274,6 +266,7 @@
         @media (max-width: $breakpoint-lg) {
             flex: 1 1 100%;
             max-width: 100%;
+            order: 2;
         }
     }
 
@@ -298,6 +291,7 @@
         @media (max-width: $breakpoint-lg) {
             flex: 1 1 100%;
             max-width: 100%;
+            order: 1;
         }
     }
 
@@ -483,6 +477,7 @@
             bottom: 16px;
             right: 3%;
             gap: 8px;
+            transform: translateX(0%);
         }
     }
 
@@ -492,7 +487,6 @@
         align-items: center;
 
         @media (max-width: $breakpoint-md) {
-            flex-direction: column;
             width: auto;
         }
     }

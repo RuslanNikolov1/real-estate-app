@@ -46,6 +46,8 @@ export function Header() {
   const [showLoginToast, setShowLoginToast] = useState(false);
   const [mounted, setMounted] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const prevAuthModalOpenRef = useRef(false);
   
   useEffect(() => {
@@ -143,11 +145,23 @@ export function Header() {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setIsUserMenuOpen(false);
       }
+      
+      // Close mobile menu if click is outside both the menu button and the menu itself
+      if (
+        isMobileMenuOpen &&
+        mobileMenuRef.current &&
+        mobileMenuButtonRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        !mobileMenuButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
     };
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsUserMenuOpen(false);
+        setIsMobileMenuOpen(false);
       }
     };
 
@@ -158,7 +172,7 @@ export function Header() {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, []);
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     setIsUserMenuOpen(false);
@@ -328,6 +342,7 @@ export function Header() {
           </div>
 
           <button
+            ref={mobileMenuButtonRef}
             className={styles.mobileMenuButton}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={mounted ? t('header.toggleMenuAriaLabel') : 'Toggle menu'}
@@ -338,7 +353,7 @@ export function Header() {
       </div>
 
       {isMobileMenuOpen && (
-        <nav className={styles.mobileNav}>
+        <nav ref={mobileMenuRef} className={styles.mobileNav}>
           <div className={styles.mobileLanguageSelector}>
             <button
               onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}

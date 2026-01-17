@@ -10,6 +10,11 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 $spacing-lg;
+
+  @media (max-width: $breakpoint-md) {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .header {
@@ -49,15 +54,26 @@
   gap: $spacing-xs;
 }
 
-.actions {
+.actionsDesktop {
   display: flex;
   gap: $spacing-md;
   align-items: center;
 
   @media (max-width: $breakpoint-md) {
-    flex-direction: column;
-    width: 100%;
-    gap: $spacing-sm;
+    display: none;
+  }
+}
+
+.actionsMobile {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  gap: $spacing-sm;
+  margin-top: $spacing-xl;
+  align-items: center;
+
+  @media (max-width: $breakpoint-md) {
+    display: flex;
   }
 }
 

@@ -1,8 +1,11 @@
 @use '@/styles/variables' as *;
 
 .header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: $z-sticky;
   background: $dark-red;
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
@@ -18,7 +21,7 @@
   gap: $spacing-xl;
 
   @media (max-width: 500px) {
-    padding: 0;
+    padding-right: 10px;
   }
 }
 
@@ -38,14 +41,18 @@
   &:hover {
     background: rgba(255, 255, 255, 0.1);
   }
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.2rem;
+  }
 }
 
 .logoImage {
   height: 60px;
   width: auto;
 
-  @media (max-width: 426px) {
-    height: 40px;
+  @media (max-width: $breakpoint-md) {
+    height: 13vw;
   }
 }
 
@@ -76,6 +83,10 @@
   background: none;
   cursor: pointer;
   font-family: inherit;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 0.9rem;
+  }
 
   &:hover {
     color: $light-gray;
@@ -116,7 +127,7 @@
     margin-left: $spacing-md;
   }
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     width: 10vw;
   }
 }
@@ -149,7 +160,7 @@
 .languageSelector {
   position: relative;
 
-  @media (max-width: 769px) {
+  @media (max-width: $breakpoint-md) {
     display: none;
   }
 }
@@ -356,7 +367,7 @@
     display: none;
   }
 
-  @media (max-width: 426px) {
+  @media (max-width: 769) {
     position: absolute;
     top: 100%;
     left: 0;
@@ -372,7 +383,7 @@
   position: relative;
   border-bottom: 1px solid $light-gray;
 
-  @media (min-width: 769px) {
+  @media (min-width: $breakpoint-md) {
     display: none;
   }
 }
@@ -399,7 +410,7 @@
     color: $dark-red;
   }
 
-  @media (min-width: 769px) {
+  @media (min-width: $breakpoint-md) {
     display: none;
   }
 }

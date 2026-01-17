@@ -676,18 +676,7 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
                             Изберете тип имот за да филтрирате резултатите
                         </p>
                             </div>
-                            {selectedPropertyType && (() => {
-                                const selectedType = propertyTypes.find(type => type.id === selectedPropertyType);
-                                if (selectedType) {
-                                    const Icon = selectedType.icon;
-                                    return (
-                                        <div className={styles.headerIcon}>
-                                            <Icon size={120} />
-                                        </div>
-                                    );
-                                }
-                                return null;
-                            })()}
+                           
                         </div>
                     </motion.div>
 

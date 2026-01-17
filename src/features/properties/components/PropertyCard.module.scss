@@ -16,7 +16,7 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
 
-  @media (max-width: 769px) {
+  @media (max-width: $breakpoint-md) {
     display: flex;
     flex-direction: column;
   }
@@ -54,7 +54,7 @@
   border: 3px solid $dark-red;
   box-sizing: border-box;
 
-  @media (max-width: 769px) {
+  @media (max-width: $breakpoint-md) {
     width: auto !important;
   }
 
@@ -81,7 +81,7 @@
   border-bottom: 3px solid $dark-red;
   box-sizing: border-box;
 
-  @media (max-width: 769px) {
+  @media (max-width: $breakpoint-md) {
     width: auto !important;
   }
 
@@ -283,7 +283,7 @@
   top: $spacing-lg;
   right: $spacing-lg;
 
-  @media (max-width: 769px) {
+  @media (max-width: $breakpoint-md) {
     position: relative;
     top: auto;
     right: auto;
