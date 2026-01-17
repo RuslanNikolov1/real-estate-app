@@ -35,11 +35,6 @@ interface MapFiltersPageProps {
 }
 
 export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPageProps) {
-    // #region agent log
-    if (typeof window !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:37',message:'MapFiltersPage render start',data:{initialPropertyType,pathname:typeof window!=='undefined'?window.location.pathname:'N/A',timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'whitescreen-investigation',hypothesisId:'B,D'})}).catch(()=>{});
-    }
-    // #endregion
     const { t } = useTranslation();
     const router = useRouter();
     const pathname = usePathname();
@@ -652,14 +647,6 @@ export function MapFiltersPage({ initialPropertyType = null }: MapFiltersPagePro
             label: t(`propertyTypes.${type.id}`) || type.label
         }));
     }, [baseRoute, t]);
-
-    // #region agent log
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MapFiltersPage.tsx:654',message:'MapFiltersPage mounted and ready to render',data:{selectedPropertyType,hasPathname:!!pathname,baseRoute,timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'whitescreen-investigation',hypothesisId:'D,E'})}).catch(()=>{});
-        }
-    }, [selectedPropertyType, pathname]);
-    // #endregion
 
     return (
         <div className={styles.mapFiltersPage}>

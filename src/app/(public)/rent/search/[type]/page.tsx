@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useParams } from 'next/navigation';
 import { propertyTypes } from '@/data/propertyTypes';
@@ -32,6 +32,7 @@ const MapFiltersPage = dynamic(
 export default function RentPropertyTypePage() {
     const router = useRouter();
     const params = useParams<{ type?: string | string[] }>();
+    const [isReady, setIsReady] = useState(false);
     const propertyTypeParam = params?.type;
     const propertyTypeId = useMemo(() => {
         if (!propertyTypeParam) {
@@ -50,11 +51,38 @@ export default function RentPropertyTypePage() {
     useEffect(() => {
         if (propertyTypeId && !isValidPropertyType) {
             router.replace('/rent/search');
+            return;
         }
+
+        // Delay content display by 1 second to prevent white screen
+        const timer = setTimeout(() => {
+            setIsReady(true);
+        }, 1000);
+
+        return () => clearTimeout(timer);
     }, [isValidPropertyType, propertyTypeId, router]);
 
     if (!propertyTypeId || !isValidPropertyType) {
         return null;
+    }
+
+    // Show loading screen during delay
+    if (!isReady) {
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '100vh',
+                    fontSize: '1.2rem',
+                    color: '#666',
+                    backgroundColor: '#e0e0e0'
+                }}
+            >
+                Loading map...
+            </div>
+        );
     }
 
     return <MapFiltersPage initialPropertyType={propertyTypeId} />;

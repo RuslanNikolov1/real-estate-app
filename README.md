@@ -79,7 +79,6 @@ npm run dev
 │   ├── ui/               # UI components (Button, Input, etc.)
 │   └── layout/           # Layout components (Header, Footer)
 ├── lib/                  # Core utilities
-│   ├── axios.ts          # Axios instance
 │   ├── supabase.ts       # Supabase client
 │   ├── cloudinary.ts     # Cloudinary helpers
 │   ├── fonts.ts          # Font configuration
