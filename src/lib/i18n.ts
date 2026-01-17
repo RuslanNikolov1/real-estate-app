@@ -49,8 +49,14 @@ const hasNavigator = typeof navigator !== 'undefined';
 const navigatorLang = hasNavigator ? (navigator.language || 'none') : 'N/A';
 const hasLocalStorage = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 const localStorageLang = hasLocalStorage ? (localStorage.getItem('i18nextLng') || 'none') : 'N/A';
-if (typeof globalThis !== 'undefined' && typeof globalThis.fetch !== 'undefined') {
-  globalThis.fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'i18n.ts:39',message:'i18n.init complete',data:{initLanguage,initResolvedLanguage,initIsServer,fallbackLng:'bg',navigatorLang,localStorageLang},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A,C,E'})}).catch(()=>{});
+if (!initIsServer && typeof globalThis !== 'undefined' && typeof globalThis.fetch !== 'undefined') {
+  const logData = {location:'i18n.ts:52',message:'i18n.init complete',data:{initLanguage,initResolvedLanguage,initIsServer,fallbackLng:'bg',navigatorLang,localStorageLang},timestamp:Date.now(),sessionId:'debug-session',runId:'blocking-investigation',hypothesisId:'A,B,E'};
+  globalThis.fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData)}).catch((err)=>{
+    const errMsg=err?.message||'unknown';
+    console.warn('[DEBUG] i18n fetch blocked:',errMsg);
+    const errorLogData = {location:'i18n.ts:52-error',message:'i18n fetch error',data:{error:errMsg,errorType:err?.name||'unknown',isBlockedByClient:errMsg.includes('BLOCKED_BY_CLIENT')||errMsg.includes('blocked'),timestamp:Date.now(),sessionId:'debug-session',runId:'blocking-investigation',hypothesisId:'C'}};
+    globalThis.fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(errorLogData)}).catch(()=>{});
+  });
 }
 // #endregion
 

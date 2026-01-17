@@ -23,7 +23,9 @@ export function SellYourProperty() {
   const isServer = typeof window === 'undefined';
   const hasWindow = typeof window !== 'undefined';
   const localStorageLang = hasWindow ? (localStorage.getItem('i18nextLng') || 'none') : 'N/A';
-  fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SellYourProperty.tsx:12',message:'SellYourProperty render - translation check',data:{sellYourPropertyTranslation,currentLanguage,isServer,hasWindow,localStorageLang},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A,C,D'})}).catch(()=>{});
+  if (hasWindow) {
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'SellYourProperty.tsx:26', message: 'SellYourProperty render - translation check', data: { sellYourPropertyTranslation, currentLanguage, isServer, hasWindow, localStorageLang }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'blocking-investigation', hypothesisId: 'A,B,E' }) }).catch((err: any) => { const errMsg = (err?.message || 'unknown').toString(); console.warn('[DEBUG] SellYourProperty fetch blocked:', errMsg); });
+  }
   // #endregion
 
   // Close modal when user becomes authenticated

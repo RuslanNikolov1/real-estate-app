@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+// Force dynamic rendering for this route to prevent caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Helper to create Supabase client
 async function createClient() {
   const cookieStore = await cookies();
@@ -74,6 +78,10 @@ export async function PATCH(
       .select()
       .single();
 
+    // #region agent log
+    console.log('[DEBUG] PATCH /api/reviews/[id] - Update result:', JSON.stringify({id,is_approved,updateError:updateError?.message||null,reviewId:review?.id||null,reviewIsApproved:review?.is_approved||null}));
+    // #endregion
+
     if (updateError) {
       console.error('Error updating review:', updateError);
       return NextResponse.json(
@@ -131,6 +139,10 @@ export async function DELETE(
       .from('reviews')
       .delete()
       .eq('id', id);
+
+    // #region agent log
+    console.log('[DEBUG] DELETE /api/reviews/[id] - Delete result:', JSON.stringify({id,deleteError:deleteError?.message||null,success:!deleteError}));
+    // #endregion
 
     if (deleteError) {
       console.error('Error deleting review:', deleteError);

@@ -3,6 +3,10 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
+// Force dynamic rendering for this route to prevent caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Helper to create Supabase server client
 async function createServerSupabaseClient() {
   const cookieStore = await cookies();
@@ -75,6 +79,11 @@ export async function GET(request: NextRequest) {
 
     const { data: reviews, error, count } = await query;
 
+    // #region agent log
+    const logData = {status,page,limit,isAdmin,reviewsCount:reviews?.length||0,reviewsIds:reviews?.map((r:any)=>r.id)||[],count:count||0};
+    console.log('[DEBUG] GET /api/reviews response:', JSON.stringify(logData));
+    // #endregion
+
     if (error) {
       console.error('Error fetching reviews:', error);
       return NextResponse.json(
@@ -100,14 +109,19 @@ export async function GET(request: NextRequest) {
       page,
       limit,
     };
+    // For pending reviews (admin), disable caching to ensure fresh data after approve/delete
     // Cache approved reviews for longer (they don't change often)
-    // Cache pending/all reviews for shorter (admin needs fresh data)
-    const cacheTime = status === 'approved' ? 300 : 60;
-    return NextResponse.json(responsePayload, {
-      headers: {
-        'Cache-Control': `public, s-maxage=${cacheTime}, stale-while-revalidate=${cacheTime * 2}`,
-      },
-    });
+    const headers: HeadersInit = {};
+    if (status === 'pending') {
+      // No caching for pending reviews - admin needs immediate updates
+      headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, proxy-revalidate';
+      headers['Pragma'] = 'no-cache';
+      headers['Expires'] = '0';
+    } else {
+      // Cache approved reviews for longer
+      headers['Cache-Control'] = 'public, s-maxage=300, stale-while-revalidate=600';
+    }
+    return NextResponse.json(responsePayload, { headers });
   } catch (error) {
     console.error('Error in GET /api/reviews:', error);
     return NextResponse.json(

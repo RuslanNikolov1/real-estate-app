@@ -143,6 +143,12 @@ export function ReviewsPage() {
   const prevUserRef = useRef(user);
   const limit = 16;
 
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReviewsPage.tsx:144',message:'feedbackModalOpen state changed',data:{feedbackModalOpen,user:!!user,authModalOpen,pendingFeedbackIntent},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+  }, [feedbackModalOpen, user, authModalOpen, pendingFeedbackIntent]);
+  // #endregion
+
   // Fetch all approved reviews (is_approved = true), ordered by created_at descending
   // API automatically filters for is_approved = true when status=approved
   const { data, isLoading, refetch } = useQuery({
@@ -172,6 +178,9 @@ export function ReviewsPage() {
 
   // Open feedback modal after successful login if user was trying to submit feedback
   useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReviewsPage.tsx:174',message:'Auth useEffect triggered',data:{prevAuthModalOpen:prevAuthModalOpenRef.current,authModalOpen,prevUser:!!prevUserRef.current,user:!!user,pendingFeedbackIntent},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
     // Only trigger if:
     // 1. Auth modal from this component was open (prevAuthModalOpenRef.current)
     // 2. Auth modal is now closed (!authModalOpen)
@@ -184,14 +193,23 @@ export function ReviewsPage() {
       user && 
       pendingFeedbackIntent
     ) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReviewsPage.tsx:188',message:'Setting feedbackModalOpen to true after login',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
       // Small delay to ensure auth state is fully updated
       setTimeout(() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReviewsPage.tsx:192',message:'Executing setTimeout to open feedback modal',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+        // #endregion
         setFeedbackModalOpen(true);
         setPendingFeedbackIntent(false);
       }, 100);
     }
     // If modal closed without user being logged in, clear pending intent
     if (prevAuthModalOpenRef.current && !authModalOpen && !user && pendingFeedbackIntent) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReviewsPage.tsx:198',message:'Clearing pending feedback intent',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
       setPendingFeedbackIntent(false);
     }
     // Update previous states
@@ -272,8 +290,16 @@ export function ReviewsPage() {
 
       <FeedbackModal
         isOpen={feedbackModalOpen}
-        onClose={() => setFeedbackModalOpen(false)}
+        onClose={() => {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReviewsPage.tsx:275',message:'onClose called, setting feedbackModalOpen to false',data:{currentState:feedbackModalOpen},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+          // #endregion
+          setFeedbackModalOpen(false);
+        }}
         onSuccess={() => {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/23d33c4b-a0ad-4538-aeac-a1971bd88e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReviewsPage.tsx:280',message:'onSuccess called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+          // #endregion
           setFeedbackModalOpen(false);
           // Show toast message
           setShowFeedbackToast(true);
