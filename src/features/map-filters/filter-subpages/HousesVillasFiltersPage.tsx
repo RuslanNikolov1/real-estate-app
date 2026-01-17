@@ -185,9 +185,9 @@ export function HousesVillasFiltersPage({
                 .split(/\s+/)
                 .map(word => {
                     if (word.length === 0) return word;
-                    // Keep abbreviations like "ж.к", "ж.к.", "ул.", etc. lowercase
+                    // Keep abbreviations like "ж.к", "ж.к.", "ул.", "кв.", etc. lowercase
                     const lowerWord = word.toLowerCase();
-                    if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.')) {
+                    if (lowerWord.startsWith('ж.к') || lowerWord.startsWith('ул.') || lowerWord.startsWith('бул.') || lowerWord.startsWith('кв.') || lowerWord.endsWith('кв.')) {
                         return lowerWord;
                     }
                     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();

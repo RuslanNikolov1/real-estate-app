@@ -66,33 +66,33 @@ export function YardAreaFilter({
                             type="range"
                             id="yard-area-slider-from"
                             min="0"
-                            max={YARD_AREA_SLIDER_MAX}
+                            max={yardAreaTo}
                             step="1"
-                            value={Math.min(yardAreaFrom, YARD_AREA_SLIDER_MAX)}
+                            value={yardAreaFrom}
                             onChange={(e) => {
                                 const val = Number(e.target.value);
                                 handleYardAreaFromChange(val);
                             }}
                             className={`${styles.areaSlider} ${styles.areaSliderFrom}`}
                             style={{
-                                '--slider-value': `${(Math.min(yardAreaFrom, YARD_AREA_SLIDER_MAX) / YARD_AREA_SLIDER_MAX) * 100}%`,
-                                '--slider-to-value': `${(Math.min(yardAreaTo, YARD_AREA_SLIDER_MAX) / YARD_AREA_SLIDER_MAX) * 100}%`
+                                '--slider-value': `${(yardAreaFrom / YARD_AREA_SLIDER_MAX) * 100}%`,
+                                '--slider-to-value': `${(yardAreaTo / YARD_AREA_SLIDER_MAX) * 100}%`
                             } as React.CSSProperties}
                         />
                         <input
                             type="range"
                             id="yard-area-slider-to"
-                            min="0"
+                            min={yardAreaFrom}
                             max={YARD_AREA_SLIDER_MAX}
                             step="1"
-                            value={Math.min(yardAreaTo, YARD_AREA_SLIDER_MAX)}
+                            value={yardAreaTo}
                             onChange={(e) => {
                                 const val = Number(e.target.value);
                                 handleYardAreaToChange(val);
                             }}
                             className={`${styles.areaSlider} ${styles.areaSliderTo}`}
                             style={{
-                                '--slider-value': `${(Math.min(yardAreaTo, YARD_AREA_SLIDER_MAX) / YARD_AREA_SLIDER_MAX) * 100}%`
+                                '--slider-value': `${(yardAreaTo / YARD_AREA_SLIDER_MAX) * 100}%`
                             } as React.CSSProperties}
                         />
                     </div>
@@ -105,11 +105,36 @@ export function YardAreaFilter({
                                 type="number"
                                 id="yard-area-from"
                                 min="0"
+                                max={yardAreaTo}
                                 value={yardAreaFrom}
                                 onChange={(e) => {
+                                    const inputValue = e.target.value;
+                                    if (inputValue === '') {
+                                        // Allow clearing the input temporarily
+                                        setYardAreaFrom(0);
+                                        return;
+                                    }
+                                    const val = Number(inputValue);
+                                    if (!isNaN(val) && val >= 0) {
+                                        if (val <= yardAreaTo) {
+                                            handleYardAreaFromChange(val);
+                                        } else {
+                                            // Allow typing but don't call handler if exceeds yardAreaTo
+                                            // Will be validated on blur
+                                            setYardAreaFrom(val);
+                                        }
+                                    }
+                                    // If val is NaN or negative, don't update (input shows what they typed)
+                                }}
+                                onBlur={(e) => {
                                     const val = Number(e.target.value);
-                                    if (!isNaN(val) && val >= 0 && val <= yardAreaTo) {
-                                        handleYardAreaFromChange(val);
+                                    if (isNaN(val) || val < 0) {
+                                        setYardAreaFrom(0);
+                                        handleYardAreaFromChange(0);
+                                    } else if (val > yardAreaTo) {
+                                        // Reset to yardAreaTo if exceeds
+                                        setYardAreaFrom(yardAreaTo);
+                                        handleYardAreaFromChange(yardAreaTo);
                                     }
                                 }}
                                 className={styles.areaInput}
@@ -126,9 +151,33 @@ export function YardAreaFilter({
                                 min={yardAreaFrom}
                                 value={yardAreaTo}
                                 onChange={(e) => {
+                                    const inputValue = e.target.value;
+                                    if (inputValue === '') {
+                                        // Allow clearing the input temporarily
+                                        setYardAreaTo(yardAreaFrom);
+                                        return;
+                                    }
+                                    const val = Number(inputValue);
+                                    if (!isNaN(val) && val >= 0) {
+                                        if (val >= yardAreaFrom) {
+                                            handleYardAreaToChange(val);
+                                        } else {
+                                            // Allow typing but don't call handler if less than yardAreaFrom
+                                            // Will be validated on blur
+                                            setYardAreaTo(val);
+                                        }
+                                    }
+                                    // If val is NaN or negative, don't update (input shows what they typed)
+                                }}
+                                onBlur={(e) => {
                                     const val = Number(e.target.value);
-                                    if (!isNaN(val) && val >= yardAreaFrom) {
-                                        handleYardAreaToChange(val);
+                                    if (isNaN(val) || val < 0) {
+                                        setYardAreaTo(yardAreaFrom);
+                                        handleYardAreaToChange(yardAreaFrom);
+                                    } else if (val < yardAreaFrom) {
+                                        // Reset to yardAreaFrom if less than yardAreaFrom
+                                        setYardAreaTo(yardAreaFrom);
+                                        handleYardAreaToChange(yardAreaFrom);
                                     }
                                 }}
                                 className={styles.areaInput}

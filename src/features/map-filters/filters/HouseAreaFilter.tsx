@@ -66,33 +66,33 @@ export function HouseAreaFilter({
                             type="range"
                             id="house-area-slider-from"
                             min="0"
-                            max={HOUSE_AREA_SLIDER_MAX}
+                            max={areaTo}
                             step="1"
-                            value={Math.min(areaFrom, HOUSE_AREA_SLIDER_MAX)}
+                            value={areaFrom}
                             onChange={(e) => {
                                 const val = Number(e.target.value);
                                 handleAreaFromChange(val);
                             }}
                             className={`${styles.areaSlider} ${styles.areaSliderFrom}`}
                             style={{
-                                '--slider-value': `${(Math.min(areaFrom, HOUSE_AREA_SLIDER_MAX) / HOUSE_AREA_SLIDER_MAX) * 100}%`,
-                                '--slider-to-value': `${(Math.min(areaTo, HOUSE_AREA_SLIDER_MAX) / HOUSE_AREA_SLIDER_MAX) * 100}%`
+                                '--slider-value': `${(areaFrom / HOUSE_AREA_SLIDER_MAX) * 100}%`,
+                                '--slider-to-value': `${(areaTo / HOUSE_AREA_SLIDER_MAX) * 100}%`
                             } as React.CSSProperties}
                         />
                         <input
                             type="range"
                             id="house-area-slider-to"
-                            min="0"
+                            min={areaFrom}
                             max={HOUSE_AREA_SLIDER_MAX}
                             step="1"
-                            value={Math.min(areaTo, HOUSE_AREA_SLIDER_MAX)}
+                            value={areaTo}
                             onChange={(e) => {
                                 const val = Number(e.target.value);
                                 handleAreaToChange(val);
                             }}
                             className={`${styles.areaSlider} ${styles.areaSliderTo}`}
                             style={{
-                                '--slider-value': `${(Math.min(areaTo, HOUSE_AREA_SLIDER_MAX) / HOUSE_AREA_SLIDER_MAX) * 100}%`
+                                '--slider-value': `${(areaTo / HOUSE_AREA_SLIDER_MAX) * 100}%`
                             } as React.CSSProperties}
                         />
                     </div>
@@ -105,11 +105,36 @@ export function HouseAreaFilter({
                                 type="number"
                                 id="house-area-from"
                                 min="0"
+                                max={areaTo}
                                 value={areaFrom}
                                 onChange={(e) => {
+                                    const inputValue = e.target.value;
+                                    if (inputValue === '') {
+                                        // Allow clearing the input temporarily
+                                        setAreaFrom(0);
+                                        return;
+                                    }
+                                    const val = Number(inputValue);
+                                    if (!isNaN(val) && val >= 0) {
+                                        if (val <= areaTo) {
+                                            handleAreaFromChange(val);
+                                        } else {
+                                            // Allow typing but don't call handler if exceeds areaTo
+                                            // Will be validated on blur
+                                            setAreaFrom(val);
+                                        }
+                                    }
+                                    // If val is NaN or negative, don't update (input shows what they typed)
+                                }}
+                                onBlur={(e) => {
                                     const val = Number(e.target.value);
-                                    if (!isNaN(val) && val >= 0 && val <= areaTo) {
-                                        handleAreaFromChange(val);
+                                    if (isNaN(val) || val < 0) {
+                                        setAreaFrom(0);
+                                        handleAreaFromChange(0);
+                                    } else if (val > areaTo) {
+                                        // Reset to areaTo if exceeds
+                                        setAreaFrom(areaTo);
+                                        handleAreaFromChange(areaTo);
                                     }
                                 }}
                                 className={styles.areaInput}
@@ -126,9 +151,33 @@ export function HouseAreaFilter({
                                 min={areaFrom}
                                 value={areaTo}
                                 onChange={(e) => {
+                                    const inputValue = e.target.value;
+                                    if (inputValue === '') {
+                                        // Allow clearing the input temporarily
+                                        setAreaTo(areaFrom);
+                                        return;
+                                    }
+                                    const val = Number(inputValue);
+                                    if (!isNaN(val) && val >= 0) {
+                                        if (val >= areaFrom) {
+                                            handleAreaToChange(val);
+                                        } else {
+                                            // Allow typing but don't call handler if less than areaFrom
+                                            // Will be validated on blur
+                                            setAreaTo(val);
+                                        }
+                                    }
+                                    // If val is NaN or negative, don't update (input shows what they typed)
+                                }}
+                                onBlur={(e) => {
                                     const val = Number(e.target.value);
-                                    if (!isNaN(val) && val >= areaFrom) {
-                                        handleAreaToChange(val);
+                                    if (isNaN(val) || val < 0) {
+                                        setAreaTo(areaFrom);
+                                        handleAreaToChange(areaFrom);
+                                    } else if (val < areaFrom) {
+                                        // Reset to areaFrom if less than areaFrom
+                                        setAreaTo(areaFrom);
+                                        handleAreaToChange(areaFrom);
                                     }
                                 }}
                                 className={styles.areaInput}
