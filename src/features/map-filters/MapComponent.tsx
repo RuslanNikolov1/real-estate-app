@@ -86,22 +86,41 @@ export function MapComponent({
 
     const trimmedCity = city.trim();
 
+    // Calculate initial center and zoom based on props
+    const mapCenter = useMemo(() => {
+        if (cityCoordinates && trimmedCity) {
+            return {
+                lat: cityCoordinates[0],
+                lng: cityCoordinates[1]
+            };
+        }
+        return defaultCenter;
+    }, [cityCoordinates, trimmedCity]);
+
+    const mapZoom = useMemo(() => {
+        if (cityCoordinates && trimmedCity) {
+            return neighborhoods.length > 0 ? 14 : 13;
+        }
+        return 10;
+    }, [cityCoordinates, trimmedCity, neighborhoods.length]);
+
     const handleMapLoad = useCallback((mapInstance: google.maps.Map) => {
         setMap(mapInstance);
         mapRef.current = mapInstance;
-        // Trigger resize after a short delay to ensure container is fully rendered
-        setTimeout(() => {
+
+        // Use requestAnimationFrame for smoother resize without flash
+        requestAnimationFrame(() => {
             if (mapInstance && typeof window !== 'undefined' && window.google) {
                 window.google.maps.event.trigger(mapInstance, 'resize');
             }
-        }, 100);
+        });
 
         if (onMapLoad) {
             onMapLoad(mapInstance);
         }
     }, [onMapLoad]);
 
-    // Update map center and zoom when city or neighborhoods change
+    // Update map center and zoom when city or neighborhoods change (only if map already exists)
     useEffect(() => {
         if (!map) return;
 
@@ -121,16 +140,9 @@ export function MapComponent({
             map.setCenter(defaultCenter);
             map.setZoom(10);
         }
-
-        // Trigger resize to ensure map renders correctly
-        setTimeout(() => {
-            if (typeof window !== 'undefined' && window.google) {
-                window.google.maps.event.trigger(map, 'resize');
-            }
-        }, 50);
     }, [map, cityCoordinates, trimmedCity, neighborhoods.length]);
 
-    // Resize map when window resizes or layout changes
+    // Resize map only on actual window resize events
     useEffect(() => {
         if (!map) return;
 
@@ -142,16 +154,12 @@ export function MapComponent({
 
         window.addEventListener('resize', handleResize);
 
-        // Also trigger resize after a short delay to handle layout changes
-        const timeoutId = setTimeout(handleResize, 200);
-
         return () => {
             window.removeEventListener('resize', handleResize);
-            clearTimeout(timeoutId);
         };
     }, [map]);
 
-    const mapOptions = useMemo(() => ({
+    const mapOptions = {
         disableDefaultUI: false,
         zoomControl: true,
         streetViewControl: false,
@@ -177,7 +185,7 @@ export function MapComponent({
                 stylers: [{ visibility: "off" }],
               },
         ]
-    }), []);
+    };
 
     // Detect zoom changes and return to city selection mode if zoomed out too far
     useEffect(() => {
@@ -397,11 +405,8 @@ export function MapComponent({
                     <div ref={mapContainerRef} className={styles.mapContainer}>
                         <GoogleMap
                             mapContainerStyle={mapContainerStyle}
-                            center={cityCoordinates ? {
-                                lat: cityCoordinates[0],
-                                lng: cityCoordinates[1]
-                            } : defaultCenter}
-                            zoom={cityCoordinates ? 13 : 10}
+                            center={mapCenter}
+                            zoom={mapZoom}
                             onLoad={handleMapLoad}
                             options={mapOptions}
                         >
