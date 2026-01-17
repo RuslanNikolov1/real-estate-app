@@ -38,6 +38,7 @@ import {
 } from '@/lib/property-schemas';
 import { getAvailablePropertyTypesForAddPage } from '@/lib/property-type-mapper';
 import { normalizeSubtypeToId } from '@/lib/subtype-mapper';
+import { compressImages, compressImage } from '@/lib/image-compression';
 import type { PropertyType, Property } from '@/types';
 import styles from './AddPropertyPage.module.scss';
 
@@ -885,13 +886,50 @@ export function AddPropertyPage({ propertyId, initialProperty }: AddPropertyPage
       formData.append('broker_position', broker.title.trim());
       formData.append('broker_phone', trimmedBrokerPhone);
 
-      // Broker image - append new file if provided, otherwise API will keep existing image
-      if (brokerImageFileRef.current) {
-        formData.append('broker_image', brokerImageFileRef.current);
+      // Compress images before submission to avoid 413 errors (Vercel 4.5MB limit)
+      let compressedBrokerImage: File | null = null;
+      let compressedImages: File[] = [];
+
+      try {
+        // Compress broker image if provided
+        if (brokerImageFileRef.current) {
+          setSubmitError(null);
+          compressedBrokerImage = await compressImage(
+            brokerImageFileRef.current,
+            1920, // maxWidth
+            1920, // maxHeight
+            0.85, // quality
+            2 // maxSizeMB - keep broker image under 2MB
+          );
+        }
+
+        // Compress property images
+        if (imageFilesRef.current.length > 0) {
+          setSubmitError(null);
+          compressedImages = await compressImages(
+            imageFilesRef.current,
+            {
+              maxWidth: 1920,
+              maxHeight: 1920,
+              quality: 0.85,
+              maxSizeMB: 2, // Keep each image under 2MB to allow multiple images
+            }
+          );
+        }
+      } catch (compressionError) {
+        console.error('Image compression error:', compressionError);
+        // Continue with original images if compression fails
+        compressedImages = imageFilesRef.current;
+        compressedBrokerImage = brokerImageFileRef.current;
+      }
+
+      // Broker image - append compressed file if provided, otherwise API will keep existing image
+      if (compressedBrokerImage) {
+        formData.append('broker_image', compressedBrokerImage);
       }
       // If no new file in update mode, API will use existing broker_image from database
 
-      // Images - append existing image URLs and new files
+      // Images - append existing image URLs and new compressed files
       // First, append existing images (non-blob URLs) - only in update mode
       if (isUpdateMode) {
         images.forEach((url) => {
@@ -901,8 +939,8 @@ export function AddPropertyPage({ propertyId, initialProperty }: AddPropertyPage
         });
       }
       
-      // Then append new image files
-      imageFilesRef.current.forEach((file) => {
+      // Then append compressed image files
+      compressedImages.forEach((file) => {
         formData.append('images', file);
       });
 
