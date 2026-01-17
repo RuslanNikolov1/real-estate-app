@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { CaretRight, ChatCircleDots } from '@phosphor-icons/react';
@@ -17,6 +17,7 @@ import styles from './ClientReviews.module.scss';
 export function ClientReviews() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -210,6 +211,8 @@ export function ClientReviews() {
           setTimeout(() => {
             setShowFeedbackToast(false);
           }, 3000);
+          // Invalidate reviews stats to update the header badge
+          queryClient.invalidateQueries({ queryKey: ['reviews-stats'] });
           // Refetch reviews after successful submission
           refetchReviews();
         }}

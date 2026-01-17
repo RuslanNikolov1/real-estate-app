@@ -11,11 +11,11 @@ import {
   Globe,
   Heart,
   User,
-  House,
   CurrencyDollar,
   Key,
   Star,
-  ChartBar
+  ChartBar,
+  Calculator
 } from '@phosphor-icons/react';
 import { AudioPlayer } from '@/components/ui/AudioPlayer';
 import { Toast } from '@/components/ui/Toast';
@@ -82,10 +82,10 @@ export function Header() {
   }, []);
 
   const navItems = [
-    { href: '/', label: t('nav.home'), icon: House },
     { href: '/sale/search', label: t('nav.forSale'), icon: CurrencyDollar },
     { href: '/rent/search', label: t('nav.forRent'), icon: Key },
     { href: '/reviews', label: t('nav.reviews'), icon: Star },
+    { href: '/valuation', label: t('nav.valuation'), icon: Calculator },
     { href: '/post-property', label: t('nav.postProperty'), icon: ChartBar },
   ];
 

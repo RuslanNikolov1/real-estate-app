@@ -49,11 +49,10 @@ export async function GET(request: NextRequest) {
     // Check if user is admin
     const isAdmin = user?.email === 'ruslannikolov1@gmail.com';
 
+    // Build query - apply filters first, then order
     let query = supabase
       .from('reviews')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+      .select('*', { count: 'exact' });
 
     // Apply filters based on status and user role
     if (!isAdmin) {
@@ -68,6 +67,11 @@ export async function GET(request: NextRequest) {
       }
       // 'all' means no filter
     }
+
+    // Order by created_at descending (most recent first), then apply pagination
+    query = query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     const { data: reviews, error, count } = await query;
 

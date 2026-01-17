@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ReviewCard } from './components/ReviewCard';
 import { Button } from '@/components/ui/Button';
+import { Toast } from '@/components/ui/Toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/features/auth/components/AuthModal';
 import { FeedbackModal } from './components/FeedbackModal';
@@ -132,9 +133,14 @@ const oldMockReviews = [
 export function ReviewsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [showFeedbackToast, setShowFeedbackToast] = useState(false);
+  const [pendingFeedbackIntent, setPendingFeedbackIntent] = useState(false);
+  const prevAuthModalOpenRef = useRef(false);
+  const prevUserRef = useRef(user);
   const limit = 16;
 
   // Fetch all approved reviews (is_approved = true), ordered by created_at descending
@@ -154,11 +160,44 @@ export function ReviewsPage() {
 
   const handleSubmitClick = () => {
     if (!user) {
+      // Mark that user wants to submit feedback
+      setPendingFeedbackIntent(true);
+      // Prompt user to login
       setAuthModalOpen(true);
       return;
     }
+    // Open feedback modal
     setFeedbackModalOpen(true);
   };
+
+  // Open feedback modal after successful login if user was trying to submit feedback
+  useEffect(() => {
+    // Only trigger if:
+    // 1. Auth modal from this component was open (prevAuthModalOpenRef.current)
+    // 2. Auth modal is now closed (!authModalOpen)
+    // 3. User transitioned from not logged in to logged in (prevUserRef.current was null, now user exists)
+    // 4. User had pending feedback intent
+    if (
+      prevAuthModalOpenRef.current && 
+      !authModalOpen && 
+      !prevUserRef.current && 
+      user && 
+      pendingFeedbackIntent
+    ) {
+      // Small delay to ensure auth state is fully updated
+      setTimeout(() => {
+        setFeedbackModalOpen(true);
+        setPendingFeedbackIntent(false);
+      }, 100);
+    }
+    // If modal closed without user being logged in, clear pending intent
+    if (prevAuthModalOpenRef.current && !authModalOpen && !user && pendingFeedbackIntent) {
+      setPendingFeedbackIntent(false);
+    }
+    // Update previous states
+    prevAuthModalOpenRef.current = authModalOpen;
+    prevUserRef.current = user;
+  }, [authModalOpen, user, pendingFeedbackIntent]);
 
   return (
     <div className={styles.reviewsPage}>
@@ -236,8 +275,24 @@ export function ReviewsPage() {
         onClose={() => setFeedbackModalOpen(false)}
         onSuccess={() => {
           setFeedbackModalOpen(false);
+          // Show toast message
+          setShowFeedbackToast(true);
+          // Auto-hide after 3 seconds
+          setTimeout(() => {
+            setShowFeedbackToast(false);
+          }, 3000);
+          // Invalidate reviews stats to update the header badge
+          queryClient.invalidateQueries({ queryKey: ['reviews-stats'] });
+          // Refetch reviews after successful submission
           refetch();
         }}
+      />
+
+      <Toast
+        message={t('flashMessages.feedbackSentForApproval')}
+        isVisible={showFeedbackToast}
+        onClose={() => setShowFeedbackToast(false)}
+        duration={3000}
       />
     </div>
   );

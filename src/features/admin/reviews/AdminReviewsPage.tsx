@@ -20,7 +20,7 @@ export function AdminReviewsPage() {
   const [toastMessage, setToastMessage] = useState('');
   const limit = 20;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['admin-reviews', 'pending', page],
     queryFn: async () => {
       const response = await fetch(`/api/reviews?status=pending&page=${page}&limit=${limit}`);
@@ -54,6 +54,9 @@ export function AdminReviewsPage() {
       await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved', 'home'] });
       // Invalidate all approved review queries
       await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved'] });
+      
+      // Explicitly refetch the current page to update UI immediately
+      await refetch();
       
       // If current page becomes empty, go back to page 1
       if (reviews.length === 1 && page > 1) {
@@ -89,6 +92,9 @@ export function AdminReviewsPage() {
       await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved', 'home'] });
       // Invalidate all approved review queries
       await queryClient.invalidateQueries({ queryKey: ['reviews', 'approved'] });
+      
+      // Explicitly refetch the current page to update UI immediately
+      await refetch();
       
       // If current page becomes empty, go back to page 1
       if (reviews.length === 1 && page > 1) {
