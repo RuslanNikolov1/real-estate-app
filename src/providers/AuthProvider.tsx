@@ -100,22 +100,53 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signInWithGoogle = useCallback(async () => {
     try {
+      // Ensure we're using the current origin (works in both dev and production)
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      
+      if (!origin) {
+        console.error('Unable to determine origin for OAuth redirect');
+        return;
+      }
+
       // Check for redirect path in sessionStorage
       const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
-      const redirectTo = `${window.location.origin}/auth/callback?redirect_to=${encodeURIComponent(redirectPath)}`;
+      const redirectTo = `${origin}/auth/callback?redirect_to=${encodeURIComponent(redirectPath)}`;
       
-      const { error } = await supabase.auth.signInWithOAuth({
+      // Debug logging
+      console.log('=== Google OAuth Debug ===');
+      console.log('Current origin:', origin);
+      console.log('Redirect path:', redirectPath);
+      console.log('Full redirect URL:', redirectTo);
+      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+      
+      const { error, data } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
 
       if (error) {
         console.error('Google sign in error:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
+        throw error;
+      }
+
+      // Debug: Log the OAuth URL that Supabase generated
+      if (data?.url) {
+        console.log('Supabase OAuth URL:', data.url);
+        // Redirect happens automatically via Supabase
+        window.location.href = data.url;
+      } else {
+        console.warn('No OAuth URL returned from Supabase');
       }
     } catch (err) {
       console.error('Google sign in error:', err);
+      // You might want to show a user-friendly error message here
     }
   }, []);
 
